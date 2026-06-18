@@ -13,6 +13,23 @@ import {
 
 const legacyFieldPattern = (parts: string[]) => new RegExp(parts.join('_'));
 
+const truthyFeedBool = (value: unknown) => value === true
+  || ['true', '1', 'yes', 'on'].includes(String(value || '').trim().toLowerCase());
+
+const expectedStatePatternForRow = (row: Record<string, unknown>) => {
+  const offerCount = Number(row.offer_count_num) || 1;
+  const tcScope = row.tc_type_enum === 'tcs_units' ? 'tc-prices' : 'tc-solo';
+  const includeRoundel = truthyFeedBool(row.include_roundel_frame_bool);
+  const ctaScope = includeRoundel || ['rectangle', 'rect'].includes(String(row.cta_type_enum || ''))
+    ? 'cta-rect'
+    : 'cta-roundel';
+  const frameScope = includeRoundel ? 'frames-4 roundel-frame-on' : 'frames-3 roundel-frame-off';
+  const roundelCopyScope = includeRoundel && String(row.roundel_value_text || '').trim()
+    ? 'roundel-split'
+    : 'roundel-copy-only';
+  return new RegExp(`offers-${offerCount} ${tcScope} ${ctaScope} ${frameScope} ${roundelCopyScope}`);
+};
+
 test('exports custom Studio-ready HTML without GWD custom elements', async () => {
   const document = await readCreativeDocument();
   const html = renderStudioReadyHtml(document, '970x250');
@@ -74,7 +91,7 @@ test('exports WIP HTML with baked preview row and state classes', async () => {
   const wip = renderWipHtml(html, row);
 
   assert.match(wip, /window\.__SSE_DCO_PREVIEW__/);
-  assert.match(wip, /offers-1 tc-solo cta-rect frames-4 roundel-frame-on roundel-split/);
+  assert.match(wip, expectedStatePatternForRow(row));
   assert.match(wip, /single_elec15_solo_roundel/);
 });
 

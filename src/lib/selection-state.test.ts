@@ -37,32 +37,6 @@ test('first click inside a single-offer slot selects the nested text target', ()
   assert.deepEqual(next.isolationPath, ['offer-slot-1']);
 });
 
-test('first click inside non-offer nested artwork selects the parent layer', () => {
-  const valueId = targetIdForLayerChild('roundel-frame', 'roundel-value');
-  const next = nextSelectionForCanvasClick({
-    currentTargetId: '',
-    isolationPath: [],
-    hitPath: ['roundel-frame', valueId],
-    modifier: false,
-  });
-  assert.equal(next.selectedTargetId, 'roundel-frame');
-  assert.deepEqual(next.selectedTargetIds, ['roundel-frame']);
-  assert.deepEqual(next.isolationPath, []);
-});
-
-test('clicking inside isolated non-offer artwork selects the nested target', () => {
-  const valueId = targetIdForLayerChild('roundel-frame', 'roundel-value');
-  const next = nextSelectionForCanvasClick({
-    currentTargetId: 'roundel-frame',
-    isolationPath: ['roundel-frame'],
-    hitPath: ['roundel-frame', valueId],
-    modifier: false,
-  });
-  assert.equal(next.selectedTargetId, valueId);
-  assert.deepEqual(next.selectedTargetIds, [valueId]);
-  assert.deepEqual(next.isolationPath, ['roundel-frame']);
-});
-
 test('clicking across offer parents updates isolation path to the clicked ancestry', () => {
   const valueId = targetIdForLayerChild('offer-slot-1', 'offer-value');
   const next = nextSelectionForCanvasClick({

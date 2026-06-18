@@ -1817,6 +1817,11 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         }
 
         function rowFromControls() {
+          var includeRoundelFrame = field('include_roundel_frame_bool') === 'true';
+          var ctaType = includeRoundelFrame ? 'rectangle' : field('cta_type_enum');
+          if (includeRoundelFrame && controls.elements.cta_type_enum) {
+            controls.elements.cta_type_enum.value = 'rectangle';
+          }
           return {
             heading1_text: field('heading1_text'),
             heading2_text: field('heading2_text'),
@@ -1828,9 +1833,9 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
             offer2_sub_text: field('offer2_sub_text'),
             offer3_value_text: field('offer3_value_text'),
             offer3_sub_text: field('offer3_sub_text'),
-            cta_type_enum: field('cta_type_enum'),
+            cta_type_enum: ctaType,
             cta_text: field('cta_text'),
-            include_roundel_frame_bool: field('include_roundel_frame_bool'),
+            include_roundel_frame_bool: includeRoundelFrame ? 'true' : 'false',
             roundel_text_text: field('roundel_text_text'),
             roundel_value_text: field('roundel_value_text'),
             tc_type_enum: field('tc_type_enum'),

@@ -468,6 +468,113 @@
           ]
         },
         {
+          "id": "roundel-frame",
+          "label": "Roundel Frame",
+          "kind": "shape",
+          "group": "Roundel frame",
+          "zIndex": 4,
+          "base": {
+            "left": 133,
+            "top": 3,
+            "width": 44,
+            "height": 44,
+            "cssClass": "roundel-frame",
+            "backgroundColor": "rgb(0, 45, 114)",
+            "borderRadius": "50%",
+            "overflow": "hidden"
+          },
+          "clips": [
+            {
+              "id": "roundel-frame-popPulse",
+              "label": "Roundel Frame popPulse",
+              "preset": "popPulse",
+              "start": "roundel_in",
+              "end": "cta_in",
+              "params": {
+                "start_scale": 0.297,
+                "anchor_y": 0,
+                "fade_pct": 2
+              }
+            }
+          ]
+        },
+        {
+          "id": "roundel-copy",
+          "label": "Roundel Text",
+          "kind": "text",
+          "group": "Roundel frame",
+          "zIndex": 5,
+          "base": {
+            "left": 136,
+            "top": 14,
+            "width": 38,
+            "height": 10,
+            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 8,
+            "lineHeight": 1.05,
+            "color": "rgb(255, 255, 255)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "cssClass": "roundel-copy"
+          },
+          "binding": {
+            "field": "roundel_text_text"
+          },
+          "clips": [
+            {
+              "id": "roundel-copy-popPulse",
+              "label": "Roundel Text popPulse",
+              "preset": "popPulse",
+              "start": "roundel_in",
+              "end": "cta_in",
+              "params": {
+                "start_scale": 0.297,
+                "anchor_y": 0,
+                "fade_pct": 2
+              }
+            }
+          ]
+        },
+        {
+          "id": "roundel-value",
+          "label": "Roundel Value",
+          "kind": "text",
+          "group": "Roundel frame",
+          "zIndex": 6,
+          "base": {
+            "left": 130,
+            "top": 25,
+            "width": 50,
+            "height": 18,
+            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 15,
+            "lineHeight": 1,
+            "color": "rgb(255, 255, 255)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "cssClass": "roundel-value"
+          },
+          "binding": {
+            "field": "roundel_value_text"
+          },
+          "clips": [
+            {
+              "id": "roundel-value-popPulse",
+              "label": "Roundel Value popPulse",
+              "preset": "popPulse",
+              "start": "roundel_in",
+              "end": "cta_in",
+              "params": {
+                "start_scale": 0.297,
+                "anchor_y": 0,
+                "fade_pct": 2
+              }
+            }
+          ]
+        },
+        {
           "id": "headline-act2",
           "label": "Headline Act2",
           "group": "Headlines",
@@ -1241,6 +1348,115 @@
             "visibility": "hidden"
           },
           "editable": true
+        },
+        {
+          "id": "roundel-frame-off|roundel-frame|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "roundel-frame",
+          "cssClass": "roundel-frame",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-frame-off|roundel-copy|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-frame-off|roundel-value|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-copy-only|roundel-value|visibility",
+          "scope": "roundel-copy-only",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "roundel_value_text": ""
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-copy-only|roundel-copy",
+          "scope": "roundel-copy-only",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "roundel_value_text": ""
+          },
+          "props": {
+            "left": 139,
+            "top": 14,
+            "width": 32,
+            "height": 24,
+            "fontSize": 9,
+            "lineHeight": 1.05,
+            "whiteSpace": "normal"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-split|roundel-copy",
+          "scope": "roundel-split",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "left": 136,
+            "top": 14,
+            "width": 38,
+            "height": 10,
+            "fontSize": 8,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-split|roundel-value",
+          "scope": "roundel-split",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "left": 130,
+            "top": 25,
+            "width": 50,
+            "height": 18,
+            "fontSize": 15,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap"
+          },
+          "editable": true
         }
       ],
       "classRules": [
@@ -1413,6 +1629,113 @@
                 "exit_dy": 10,
                 "enter_distance_px": 160,
                 "enter_duration_pct": 5
+              }
+            }
+          ]
+        },
+        {
+          "id": "roundel-frame",
+          "label": "Roundel Frame",
+          "kind": "shape",
+          "group": "Roundel frame",
+          "zIndex": 4,
+          "base": {
+            "left": 300,
+            "top": 3,
+            "width": 84,
+            "height": 84,
+            "cssClass": "roundel-frame",
+            "backgroundColor": "rgb(0, 45, 114)",
+            "borderRadius": "50%",
+            "overflow": "hidden"
+          },
+          "clips": [
+            {
+              "id": "roundel-frame-popPulse",
+              "label": "Roundel Frame popPulse",
+              "preset": "popPulse",
+              "start": "roundel_in",
+              "end": "cta_in",
+              "params": {
+                "start_scale": 0.297,
+                "anchor_y": 0,
+                "fade_pct": 2
+              }
+            }
+          ]
+        },
+        {
+          "id": "roundel-copy",
+          "label": "Roundel Text",
+          "kind": "text",
+          "group": "Roundel frame",
+          "zIndex": 5,
+          "base": {
+            "left": 312,
+            "top": 22,
+            "width": 60,
+            "height": 16,
+            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 15,
+            "lineHeight": 1.05,
+            "color": "rgb(255, 255, 255)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "cssClass": "roundel-copy"
+          },
+          "binding": {
+            "field": "roundel_text_text"
+          },
+          "clips": [
+            {
+              "id": "roundel-copy-popPulse",
+              "label": "Roundel Text popPulse",
+              "preset": "popPulse",
+              "start": "roundel_in",
+              "end": "cta_in",
+              "params": {
+                "start_scale": 0.297,
+                "anchor_y": 0,
+                "fade_pct": 2
+              }
+            }
+          ]
+        },
+        {
+          "id": "roundel-value",
+          "label": "Roundel Value",
+          "kind": "text",
+          "group": "Roundel frame",
+          "zIndex": 6,
+          "base": {
+            "left": 298,
+            "top": 40,
+            "width": 90,
+            "height": 34,
+            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 28,
+            "lineHeight": 1,
+            "color": "rgb(255, 255, 255)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "cssClass": "roundel-value"
+          },
+          "binding": {
+            "field": "roundel_value_text"
+          },
+          "clips": [
+            {
+              "id": "roundel-value-popPulse",
+              "label": "Roundel Value popPulse",
+              "preset": "popPulse",
+              "start": "roundel_in",
+              "end": "cta_in",
+              "params": {
+                "start_scale": 0.297,
+                "anchor_y": 0,
+                "fade_pct": 2
               }
             }
           ]
@@ -2183,6 +2506,115 @@
             "borderRadius": 6
           },
           "editable": true
+        },
+        {
+          "id": "roundel-frame-off|roundel-frame|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "roundel-frame",
+          "cssClass": "roundel-frame",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-frame-off|roundel-copy|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-frame-off|roundel-value|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-copy-only|roundel-value|visibility",
+          "scope": "roundel-copy-only",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "roundel_value_text": ""
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-copy-only|roundel-copy",
+          "scope": "roundel-copy-only",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "roundel_value_text": ""
+          },
+          "props": {
+            "left": 312,
+            "top": 23,
+            "width": 60,
+            "height": 45,
+            "fontSize": 17,
+            "lineHeight": 1.05,
+            "whiteSpace": "normal"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-split|roundel-copy",
+          "scope": "roundel-split",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "left": 312,
+            "top": 22,
+            "width": 60,
+            "height": 16,
+            "fontSize": 15,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-split|roundel-value",
+          "scope": "roundel-split",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "left": 298,
+            "top": 40,
+            "width": 90,
+            "height": 34,
+            "fontSize": 28,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap"
+          },
+          "editable": true
         }
       ],
       "classRules": [
@@ -2420,6 +2852,7 @@
             "lineHeight": 1.05,
             "color": "rgb(255, 255, 255)",
             "textAlign": "center",
+            "whiteSpace": "nowrap",
             "cssClass": "roundel-copy"
           },
           "binding": {
@@ -3359,12 +3792,13 @@
             "roundel_value_text": ""
           },
           "props": {
-            "left": 48,
+            "left": 49,
             "top": 110,
-            "width": 86,
-            "height": 66,
+            "width": 85,
+            "height": 64,
             "fontSize": 24,
-            "lineHeight": 1.05
+            "lineHeight": 1.05,
+            "whiteSpace": "normal"
           },
           "editable": true
         },
@@ -3378,7 +3812,7 @@
           },
           "props": {
             "left": 42,
-            "top": 110,
+            "top": 116,
             "width": 98,
             "height": 24,
             "fontSize": 20,
@@ -3396,17 +3830,13 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 38,
-            "top": 132,
-            "width": 104,
+            "left": 25,
+            "top": 139,
+            "width": 131,
             "height": 63,
-            "fontSize": 53,
+            "fontSize": 42,
             "lineHeight": 1,
-            "whiteSpace": "nowrap",
-            "display": "flex",
-            "alignItems": "flex-start",
-            "textAlign": "center",
-            "justifyContent": "center"
+            "whiteSpace": "nowrap"
           },
           "editable": true
         },
@@ -3606,6 +4036,113 @@
           "fit": {
             "maxLines": 4
           }
+        },
+        {
+          "id": "roundel-frame",
+          "label": "Roundel Frame",
+          "kind": "shape",
+          "group": "Roundel frame",
+          "zIndex": 4,
+          "base": {
+            "left": 20,
+            "top": 224,
+            "width": 120,
+            "height": 120,
+            "cssClass": "roundel-frame",
+            "backgroundColor": "rgb(0, 45, 114)",
+            "borderRadius": "50%",
+            "overflow": "hidden"
+          },
+          "clips": [
+            {
+              "id": "roundel-frame-popPulse",
+              "label": "Roundel Frame popPulse",
+              "preset": "popPulse",
+              "start": "roundel_in",
+              "end": "cta_in",
+              "params": {
+                "start_scale": 0.297,
+                "anchor_y": 0,
+                "fade_pct": 2
+              }
+            }
+          ]
+        },
+        {
+          "id": "roundel-copy",
+          "label": "Roundel Text",
+          "kind": "text",
+          "group": "Roundel frame",
+          "zIndex": 5,
+          "base": {
+            "left": 30,
+            "top": 258,
+            "width": 100,
+            "height": 24,
+            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 20,
+            "lineHeight": 1.05,
+            "color": "rgb(255, 255, 255)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "cssClass": "roundel-copy"
+          },
+          "binding": {
+            "field": "roundel_text_text"
+          },
+          "clips": [
+            {
+              "id": "roundel-copy-popPulse",
+              "label": "Roundel Text popPulse",
+              "preset": "popPulse",
+              "start": "roundel_in",
+              "end": "cta_in",
+              "params": {
+                "start_scale": 0.297,
+                "anchor_y": 0,
+                "fade_pct": 2
+              }
+            }
+          ]
+        },
+        {
+          "id": "roundel-value",
+          "label": "Roundel Value",
+          "kind": "text",
+          "group": "Roundel frame",
+          "zIndex": 6,
+          "base": {
+            "left": 12,
+            "top": 282,
+            "width": 136,
+            "height": 60,
+            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 38,
+            "lineHeight": 1,
+            "color": "rgb(255, 255, 255)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "cssClass": "roundel-value"
+          },
+          "binding": {
+            "field": "roundel_value_text"
+          },
+          "clips": [
+            {
+              "id": "roundel-value-popPulse",
+              "label": "Roundel Value popPulse",
+              "preset": "popPulse",
+              "start": "roundel_in",
+              "end": "cta_in",
+              "params": {
+                "start_scale": 0.297,
+                "anchor_y": 0,
+                "fade_pct": 2
+              }
+            }
+          ]
         },
         {
           "id": "headline-act2",
@@ -4385,6 +4922,115 @@
             "visibility": "hidden"
           },
           "editable": true
+        },
+        {
+          "id": "roundel-frame-off|roundel-frame|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "roundel-frame",
+          "cssClass": "roundel-frame",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-frame-off|roundel-copy|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-frame-off|roundel-value|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-copy-only|roundel-value|visibility",
+          "scope": "roundel-copy-only",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "roundel_value_text": ""
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-copy-only|roundel-copy",
+          "scope": "roundel-copy-only",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "roundel_value_text": ""
+          },
+          "props": {
+            "left": 37,
+            "top": 253,
+            "width": 86,
+            "height": 65,
+            "fontSize": 24,
+            "lineHeight": 1.05,
+            "whiteSpace": "normal"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-split|roundel-copy",
+          "scope": "roundel-split",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "left": 30,
+            "top": 258,
+            "width": 100,
+            "height": 24,
+            "fontSize": 20,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-split|roundel-value",
+          "scope": "roundel-split",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "left": 12,
+            "top": 282,
+            "width": 136,
+            "height": 60,
+            "fontSize": 38,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap"
+          },
+          "editable": true
         }
       ],
       "classRules": [
@@ -4568,6 +5214,116 @@
               }
             }
           ]
+        },
+        {
+          "id": "roundel-frame",
+          "label": "Roundel Frame",
+          "kind": "shape",
+          "group": "Roundel frame",
+          "zIndex": 5,
+          "base": {
+            "left": 75,
+            "top": 180,
+            "width": 150,
+            "height": 150,
+            "cssClass": "roundel-frame",
+            "backgroundColor": "rgb(0, 45, 114)",
+            "borderRadius": "50%",
+            "overflow": "hidden"
+          },
+          "clips": [
+            {
+              "id": "roundel-frame-popPulse",
+              "label": "Roundel Frame popPulse",
+              "preset": "popPulse",
+              "start": "roundel_in",
+              "end": "cta_in",
+              "params": {
+                "start_scale": 0.297,
+                "anchor_y": 0,
+                "fade_pct": 2
+              }
+            }
+          ]
+        },
+        {
+          "id": "roundel-copy",
+          "label": "Roundel Text",
+          "kind": "text",
+          "group": "Roundel frame",
+          "zIndex": 6,
+          "base": {
+            "left": 90,
+            "top": 224,
+            "width": 120,
+            "height": 28,
+            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 24,
+            "lineHeight": 1.05,
+            "color": "rgb(255, 255, 255)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "cssClass": "roundel-copy"
+          },
+          "binding": {
+            "field": "roundel_text_text"
+          },
+          "clips": [
+            {
+              "id": "roundel-copy-popPulse",
+              "label": "Roundel Text popPulse",
+              "preset": "popPulse",
+              "start": "roundel_in",
+              "end": "cta_in",
+              "params": {
+                "start_scale": 0.297,
+                "anchor_y": 0,
+                "fade_pct": 2
+              }
+            }
+          ]
+        },
+        {
+          "id": "roundel-value",
+          "label": "Roundel Value",
+          "kind": "text",
+          "group": "Roundel frame",
+          "zIndex": 7,
+          "base": {
+            "left": 58,
+            "top": 254,
+            "width": 184,
+            "height": 68,
+            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 52,
+            "lineHeight": 1,
+            "color": "rgb(255, 255, 255)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "cssClass": "roundel-value"
+          },
+          "binding": {
+            "field": "roundel_value_text"
+          },
+          "clips": [
+            {
+              "id": "roundel-value-popPulse",
+              "label": "Roundel Value popPulse",
+              "preset": "popPulse",
+              "start": "roundel_in",
+              "end": "cta_in",
+              "params": {
+                "start_scale": 0.297,
+                "anchor_y": 0,
+                "fade_pct": 2
+              }
+            }
+          ],
+          "fit": {
+            "minFontSize": 44
+          }
         },
         {
           "id": "headline-act2",
@@ -5328,6 +6084,115 @@
             "visibility": "hidden"
           },
           "editable": true
+        },
+        {
+          "id": "roundel-frame-off|roundel-frame|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "roundel-frame",
+          "cssClass": "roundel-frame",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-frame-off|roundel-copy|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-frame-off|roundel-value|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-copy-only|roundel-value|visibility",
+          "scope": "roundel-copy-only",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "roundel_value_text": ""
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-copy-only|roundel-copy",
+          "scope": "roundel-copy-only",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "roundel_value_text": ""
+          },
+          "props": {
+            "left": 96,
+            "top": 216,
+            "width": 108,
+            "height": 81,
+            "fontSize": 30,
+            "lineHeight": 1.05,
+            "whiteSpace": "normal"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-split|roundel-copy",
+          "scope": "roundel-split",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "left": 90,
+            "top": 224,
+            "width": 120,
+            "height": 28,
+            "fontSize": 24,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-split|roundel-value",
+          "scope": "roundel-split",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "left": 80,
+            "top": 247,
+            "width": 137,
+            "height": 70,
+            "fontSize": 52,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap"
+          },
+          "editable": true
         }
       ],
       "classRules": [
@@ -5503,6 +6368,113 @@
                 "exit_dy": 10,
                 "enter_distance_px": 150,
                 "enter_duration_pct": 5
+              }
+            }
+          ]
+        },
+        {
+          "id": "roundel-frame",
+          "label": "Roundel Frame",
+          "kind": "shape",
+          "group": "Roundel frame",
+          "zIndex": 4,
+          "base": {
+            "left": 375,
+            "top": 40,
+            "width": 170,
+            "height": 170,
+            "cssClass": "roundel-frame",
+            "backgroundColor": "rgb(0, 45, 114)",
+            "borderRadius": "50%",
+            "overflow": "hidden"
+          },
+          "clips": [
+            {
+              "id": "roundel-frame-popPulse",
+              "label": "Roundel Frame popPulse",
+              "preset": "popPulse",
+              "start": "roundel_in",
+              "end": "cta_in",
+              "params": {
+                "start_scale": 0.297,
+                "anchor_y": 0,
+                "fade_pct": 2
+              }
+            }
+          ]
+        },
+        {
+          "id": "roundel-copy",
+          "label": "Roundel Text",
+          "kind": "text",
+          "group": "Roundel frame",
+          "zIndex": 5,
+          "base": {
+            "left": 400,
+            "top": 86,
+            "width": 120,
+            "height": 30,
+            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 26,
+            "lineHeight": 1.05,
+            "color": "rgb(255, 255, 255)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "cssClass": "roundel-copy"
+          },
+          "binding": {
+            "field": "roundel_text_text"
+          },
+          "clips": [
+            {
+              "id": "roundel-copy-popPulse",
+              "label": "Roundel Text popPulse",
+              "preset": "popPulse",
+              "start": "roundel_in",
+              "end": "cta_in",
+              "params": {
+                "start_scale": 0.297,
+                "anchor_y": 0,
+                "fade_pct": 2
+              }
+            }
+          ]
+        },
+        {
+          "id": "roundel-value",
+          "label": "Roundel Value",
+          "kind": "text",
+          "group": "Roundel frame",
+          "zIndex": 6,
+          "base": {
+            "left": 352,
+            "top": 119,
+            "width": 216,
+            "height": 76,
+            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 62,
+            "lineHeight": 1,
+            "color": "rgb(255, 255, 255)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "cssClass": "roundel-value"
+          },
+          "binding": {
+            "field": "roundel_value_text"
+          },
+          "clips": [
+            {
+              "id": "roundel-value-popPulse",
+              "label": "Roundel Value popPulse",
+              "preset": "popPulse",
+              "start": "roundel_in",
+              "end": "cta_in",
+              "params": {
+                "start_scale": 0.297,
+                "anchor_y": 0,
+                "fade_pct": 2
               }
             }
           ]
@@ -6281,6 +7253,115 @@
           },
           "props": {
             "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-frame-off|roundel-frame|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "roundel-frame",
+          "cssClass": "roundel-frame",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-frame-off|roundel-copy|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-frame-off|roundel-value|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-copy-only|roundel-value|visibility",
+          "scope": "roundel-copy-only",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "roundel_value_text": ""
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-copy-only|roundel-copy",
+          "scope": "roundel-copy-only",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "roundel_value_text": ""
+          },
+          "props": {
+            "left": 399,
+            "top": 81,
+            "width": 122,
+            "height": 92,
+            "fontSize": 34,
+            "lineHeight": 1.05,
+            "whiteSpace": "normal"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-split|roundel-copy",
+          "scope": "roundel-split",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "left": 400,
+            "top": 86,
+            "width": 120,
+            "height": 30,
+            "fontSize": 26,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-split|roundel-value",
+          "scope": "roundel-split",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "left": 352,
+            "top": 119,
+            "width": 216,
+            "height": 76,
+            "fontSize": 62,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap"
           },
           "editable": true
         }

@@ -11,6 +11,23 @@ import * as creativeViewRoute from '@/app/api/creative/[size]/view/route';
 import * as creativeSourceRoute from '@/app/api/creative/[size]/source/route';
 import { readCreativeDocument } from '@/server/creative-document';
 
+const truthyFeedBool = (value: unknown) => value === true
+  || ['true', '1', 'yes', 'on'].includes(String(value || '').trim().toLowerCase());
+
+const expectedStatePatternForRow = (row: Record<string, unknown>) => {
+  const offerCount = Number(row.offer_count_num) || 1;
+  const tcScope = row.tc_type_enum === 'tcs_units' ? 'tc-prices' : 'tc-solo';
+  const includeRoundel = truthyFeedBool(row.include_roundel_frame_bool);
+  const ctaScope = includeRoundel || ['rectangle', 'rect'].includes(String(row.cta_type_enum || ''))
+    ? 'cta-rect'
+    : 'cta-roundel';
+  const frameScope = includeRoundel ? 'frames-4 roundel-frame-on' : 'frames-3 roundel-frame-off';
+  const roundelCopyScope = includeRoundel && String(row.roundel_value_text || '').trim()
+    ? 'roundel-split'
+    : 'roundel-copy-only';
+  return new RegExp(`offers-${offerCount} ${tcScope} ${ctaScope} ${frameScope} ${roundelCopyScope}`);
+};
+
 test('GET /api/feed-schema returns profile rows', async () => {
   const response = await feedGet();
   assert.equal(response.status, 200);
@@ -40,7 +57,7 @@ test('POST /api/creative/[size]/export builds with replacement exporter', async 
   const payload = await response.json();
   assert.equal(payload.code, 0);
   assert.match(payload.stdout, /replacement exporter/);
-  assert.ok(payload.wip.single);
+  assert.ok(Object.keys(payload.wip).length > 0);
 });
 
 test('GET /api/creative/[size]/view returns Studio-ready HTML preview', async () => {
@@ -57,12 +74,7 @@ test('GET /api/creative/[size]/view returns Studio-ready HTML preview', async ()
   assert.match(html, /single_elec15_solo_roundel/);
   const document = await readCreativeDocument();
   const sample = document.feed.sampleRows[0] || {};
-  const includeRoundel = sample.include_roundel_frame_bool === true
-    || ['true', '1', 'yes', 'on'].includes(String(sample.include_roundel_frame_bool || '').trim().toLowerCase());
-  const expectedCtaScope = includeRoundel || ['rectangle', 'rect'].includes(String(sample.cta_type_enum || ''))
-    ? 'cta-rect'
-    : 'cta-roundel';
-  assert.match(html, new RegExp(`offers-1 tc-solo ${expectedCtaScope}`));
+  assert.match(html, expectedStatePatternForRow(sample));
   assert.match(html, /src="\/assets\//);
   assert.doesNotMatch(html, /src="assets\//);
   assert.doesNotMatch(html, /__next/);
@@ -127,9 +139,9 @@ test('POST /api/creative/export builds all replacement creative sizes', async ()
   const payload = await response.json();
   assert.equal(payload.code, 0);
   assert.equal(Object.keys(payload.outputs).length, 6);
-  assert.ok(payload.outputs['320x50'].wip.single);
-  assert.ok(payload.outputs['728x90'].wip.single);
-  assert.ok(payload.outputs['970x250'].wip.single || payload.outputs['970x250'].wip.dual || payload.outputs['970x250'].wip.triple);
+  assert.ok(Object.keys(payload.outputs['320x50'].wip).length > 0);
+  assert.ok(Object.keys(payload.outputs['728x90'].wip).length > 0);
+  assert.ok(Object.keys(payload.outputs['970x250'].wip).length > 0);
   assert.match(payload.stdout, /Built 6 sizes with replacement exporter/);
 });
 

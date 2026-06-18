@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import { compileAnimationClips } from '@/lib/creative-compiler';
 import { structuredRuleCss } from '@/lib/creative-css';
-import { outputRoot, projectRoot } from './paths';
+import { appRoot, outputRoot, projectRoot } from './paths';
 
 const DEFAULT_STATE = 'offers-1 tc-solo cta-roundel';
 
@@ -50,6 +50,11 @@ const resolveClientFontSourcePath = async (filename: string) => {
     return path.resolve(/*turbopackIgnore: true*/ process.env.HOME || '', 'Library/Fonts', filename);
   }
 };
+
+const CLIENT_PREVIEW_BRAND_FILES = [
+  { path: 'brand/BGlogo_SVG.svg', sourcePath: () => path.resolve(appRoot, 'public/BGlogo_SVG.svg') },
+  { path: 'brand/SSELogoWhite.svg', sourcePath: () => path.resolve(appRoot, 'public/SSELogoWhite.svg') },
+];
 
 const CLIENT_FONT_FILES = [
   {
@@ -1313,22 +1318,45 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         border-bottom: 1px solid var(--line);
         background: #10161d;
       }
-      .brand {
-        display: grid;
-        gap: 6px;
+      @font-face {
+        font-family: "Museo";
+        src: url("ads/assets/fonts/MuseoSans_700.otf") format("opentype");
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
       }
-      .logo {
-        font-weight: 780;
-        font-size: 24px;
+      .brand-lockup {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+      }
+      .brand-logo {
+        display: block;
+        width: auto;
+        flex: 0 0 auto;
+      }
+      .brand-logo-bg {
+        height: 22px;
+      }
+      .brand-logo-sse {
+        height: 26px;
+      }
+      .brand-divider {
+        color: var(--muted);
+        font-size: 20px;
+        font-weight: 300;
         line-height: 1;
-        letter-spacing: 0;
+        flex: 0 0 auto;
       }
-      .kicker {
-        color: var(--teal);
-        font-size: 11px;
-        font-weight: 650;
-        letter-spacing: 0;
-        text-transform: uppercase;
+      .header-title {
+        margin: 0;
+        color: var(--ink);
+        font-family: "Museo", "Museo Sans", Georgia, serif;
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1;
+        white-space: nowrap;
       }
       .layout {
         display: grid;
@@ -1560,11 +1588,12 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
   </head>
   <body>
     <header>
-      <div class="brand" aria-label="Boys and Girls">
-        <div class="logo">BOYS+GIRLS</div>
-        <span class="kicker">Client preview package</span>
+      <div class="brand-lockup" aria-label="Boys and Girls and SSE">
+        <img class="brand-logo brand-logo-bg" src="brand/BGlogo_SVG.svg" alt="Boys and Girls">
+        <span class="brand-divider" aria-hidden="true">|</span>
+        <img class="brand-logo brand-logo-sse" src="brand/SSELogoWhite.svg" alt="SSE">
       </div>
-      <h1>SSE DCO preview</h1>
+      <p class="header-title">DCO Preview</p>
     </header>
     <main class="layout">
       <form class="controls" id="controls">
@@ -1815,6 +1844,13 @@ export const buildClientPreviewPackageEntries = async (document: Record<string, 
     entries.push({
       path: `ads/assets/fonts/${font.filename}`,
       data: await fs.readFile(await font.resolveSourcePath()),
+    });
+  }
+
+  for (const brandFile of CLIENT_PREVIEW_BRAND_FILES) {
+    entries.push({
+      path: brandFile.path,
+      data: await fs.readFile(brandFile.sourcePath()),
     });
   }
 

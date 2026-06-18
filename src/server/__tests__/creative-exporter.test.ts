@@ -81,12 +81,16 @@ test('builds a client preview package with html variants, assets, and self-conta
   assert.ok(names.includes('ads/assets/bg_728x90.jpg'));
   assert.ok(names.includes('ads/assets/SVG/SSELogoBlue.svg'));
   assert.ok(names.includes('ads/assets/fonts/MuseoSans_700.otf'));
+  assert.ok(names.includes('brand/BGlogo_SVG.svg'));
+  assert.ok(names.includes('brand/SSELogoWhite.svg'));
   assert.ok(names.includes('preview-validator.js'));
   assert.ok(!names.includes('mapping.txt'));
 
   const preview = String(entries.find((entry) => entry.path === 'preview-page.html')?.data || '');
   const validator = String(entries.find((entry) => entry.path === 'preview-validator.js')?.data || '');
-  assert.match(preview, /BOYS\+GIRLS/);
+  assert.match(preview, /brand\/BGlogo_SVG\.svg/);
+  assert.match(preview, /brand\/SSELogoWhite\.svg/);
+  assert.match(preview, /DCO Preview/);
   assert.match(preview, /Heading 1/);
   assert.match(preview, /Number/);
   assert.match(preview, /Unit price text/);
@@ -214,7 +218,9 @@ test('renders the client preview page as one self-contained document shell', asy
   assert.match(html, /overflow: auto/);
   assert.match(html, /linear-gradient/);
   assert.match(html, /grid-template-columns: 82px minmax\(0, 1fr\)/);
-  assert.match(html, /font-weight: 500/);
+  assert.match(html, /DCO Preview/);
+  assert.match(html, /brand\/BGlogo_SVG\.svg/);
+  assert.match(html, /font-family: "Museo"/);
   assert.doesNotMatch(html, /<link /);
   assert.doesNotMatch(html, /SSE_DCO_VALIDATE/);
 });

@@ -37,11 +37,9 @@ type ClientPreviewPackageOptions = {
   includeValidator?: boolean;
 };
 
-const clientFontSourcePath = (filename: string) => {
-  const repoPath = path.resolve(projectRoot, 'assets/fonts', filename);
-  const homePath = path.resolve(/*turbopackIgnore: true*/ process.env.HOME || '', 'Library/Fonts', filename);
-  return repoPath;
-};
+const clientFontSourcePath = (filename: string) => (
+  path.resolve(projectRoot, 'assets/fonts', filename)
+);
 
 const resolveClientFontSourcePath = async (filename: string) => {
   const repoPath = path.resolve(projectRoot, 'assets/fonts', filename);

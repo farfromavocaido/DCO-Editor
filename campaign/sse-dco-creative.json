@@ -3830,10 +3830,10 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 25,
-            "top": 139,
-            "width": 131,
-            "height": 63,
+            "left": 38,
+            "top": 136,
+            "width": 102,
+            "height": 64,
             "fontSize": 42,
             "lineHeight": 1,
             "whiteSpace": "nowrap"

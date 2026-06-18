@@ -1,0 +1,109 @@
+import { test } from 'vitest';
+import assert from 'node:assert/strict';
+
+import {
+  controlsFromFeedRow,
+  createFeedDraft,
+  fieldInputValue,
+  selectFeedDraftVariant,
+  updateFeedDraftField,
+} from './feed-model';
+
+const fields = [
+  { name: 'heading1_text', type: 'string' },
+  { name: 'offer_count_num', type: 'integer', min: 1, max: 3 },
+  { name: 'tc_type_enum', type: 'enum', options: ['tcs_only', 'tcs_units'] },
+  { name: 'cta_type_enum', type: 'enum', options: ['roundel', 'rectangle'] },
+  { name: 'Active', type: 'boolean' },
+  { name: 'background_image_url', type: 'image' },
+];
+
+const rows = [
+  {
+    Unique_ID: 'single',
+    offer_count_num: 1,
+    tc_type_enum: 'tcs_only',
+    cta_type_enum: 'roundel',
+    heading1_text: 'A different kind of energy',
+    Active: true,
+    background_image_url: 'https://example.com/bg.jpg',
+  },
+  {
+    Unique_ID: 'triple',
+    offer_count_num: 3,
+    tc_type_enum: 'tcs_units',
+    cta_type_enum: 'rectangle',
+    heading1_text: 'Triple headline',
+    Active: true,
+    background_image_url: 'https://example.com/triple-bg.jpg',
+  },
+];
+
+test('updates a draft row field without mutating the original rows', () => {
+  const draft = createFeedDraft(rows, { selectedIndex: 0 });
+
+  const next = updateFeedDraftField(draft, fields, 'heading1_text', 'Fresh headline');
+
+  assert.equal(next.rows[0].heading1_text, 'Fresh headline');
+  assert.equal(rows[0].heading1_text, 'A different kind of energy');
+  assert.equal(next.dirty, true);
+  assert.equal(draft.dirty, false);
+});
+
+test('derives layout controls from the selected sample row', () => {
+  assert.deepEqual(controlsFromFeedRow(rows[1]), {
+    offerCount: 3,
+    tcMode: 'tcs_units',
+    ctaShape: 'rectangle',
+  });
+});
+
+test('coerces sample field input values for preview state', () => {
+  let draft = createFeedDraft(rows, { selectedIndex: 0 });
+  draft = updateFeedDraftField(draft, fields, 'offer_count_num', '9');
+  draft = updateFeedDraftField(draft, fields, 'Active', false);
+  draft = updateFeedDraftField(draft, fields, 'background_image_url', 'https://example.com/fresh-bg.jpg');
+
+  assert.equal(draft.rows[0].offer_count_num, 3);
+  assert.equal(draft.rows[0].Active, false);
+  assert.equal(draft.rows[0].background_image_url, 'https://example.com/fresh-bg.jpg');
+  assert.equal(fieldInputValue(draft.rows[0], fields.find((field) => field.name === 'background_image_url')), 'https://example.com/fresh-bg.jpg');
+});
+
+test('rejects invalid enum input before it reaches the preview', () => {
+  const draft = createFeedDraft(rows, { selectedIndex: 0 });
+
+  assert.throws(
+    () => updateFeedDraftField(draft, fields, 'cta_type_enum', 'pill'),
+    /cta_type_enum must be one of roundel, rectangle/,
+  );
+});
+
+test('tracks feed dirtiness independently from layout dirtiness', () => {
+  const draft = createFeedDraft(rows, { selectedIndex: 0, layoutDirty: true });
+  const next = updateFeedDraftField(draft, fields, 'tc_type_enum', 'tcs_units');
+
+  assert.equal(next.dirty, true);
+  assert.equal(next.layoutDirty, true);
+});
+
+test('selects an existing populated sample row for topbar variant changes', () => {
+  const draft = createFeedDraft(rows, { selectedIndex: 0 });
+
+  const next = selectFeedDraftVariant(draft, fields, 'offer_count_num', '3');
+
+  assert.equal(next.selectedIndex, 1);
+  assert.equal(next.rows[1].Unique_ID, 'triple');
+  assert.equal(next.dirty, false);
+  assert.equal(next.rows, draft.rows);
+});
+
+test('falls back to editing the selected sample row when no variant row matches', () => {
+  const draft = createFeedDraft(rows, { selectedIndex: 0 });
+
+  const edited = selectFeedDraftVariant(draft, fields, 'offer_count_num', '2');
+
+  assert.equal(edited.selectedIndex, 0);
+  assert.equal(edited.rows[0].offer_count_num, 2);
+  assert.equal(edited.dirty, true);
+});

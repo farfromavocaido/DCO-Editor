@@ -82,4 +82,4 @@ See [docs/WORKFLOW.md](docs/WORKFLOW.md) for detail.
 
 Preview serves files from `campaign/assets/` via `/assets/...` URLs (e.g. `/assets/SVG/greenwave.svg`).
 
-ZIP export bundles assets referenced in the creative document. MuseoSans for packaged fonts is read from `campaign/assets/fonts/` when present, with a fallback to `~/Library/Fonts/MuseoSans_700.otf` for local dev.
+ZIP export bundles assets referenced in the creative document. Packaged fonts: `Museo700-Regular.otf` for **Museo** and `MuseoSans_700.otf` for **Museo Sans** in `campaign/assets/fonts/` (with a fallback to `~/Library/Fonts/` for local dev). Ad HTML blocks external/local font matching so preview-page Typekit does not override packaged ad typography.

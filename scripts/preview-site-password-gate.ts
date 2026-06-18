@@ -32,7 +32,7 @@ export const wrapPreviewSiteWithPasswordGate = (html: string, password = PREVIEW
         place-items: center;
         background: #0b0f13;
         color: #edf7f7;
-        font-family: "museo-sans", "Museo Sans", sans-serif;
+        font-family: "museo-sans", sans-serif;
       }
       #preview-password-gate[hidden] {
         display: none !important;

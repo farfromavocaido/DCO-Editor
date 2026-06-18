@@ -80,6 +80,7 @@ test('builds a client preview package with html variants, assets, and self-conta
   assert.ok(names.includes('ads/html/SSE_DCO_728x90_offers-3_tcs-units_rectangle.html'));
   assert.ok(names.includes('ads/assets/bg_728x90.jpg'));
   assert.ok(names.includes('ads/assets/SVG/SSELogoBlue.svg'));
+  assert.ok(names.includes('ads/assets/fonts/Museo700-Regular.otf'));
   assert.ok(names.includes('ads/assets/fonts/MuseoSans_700.otf'));
   assert.ok(names.includes('brand/BGlogo_SVG.svg'));
   assert.ok(names.includes('brand/SSELogoWhite.svg'));
@@ -133,7 +134,10 @@ test('builds a client preview package with html variants, assets, and self-conta
   assert.match(variant, /@font-face/);
   assert.match(variant, /font-family: "Museo"/);
   assert.match(variant, /font-family: "Museo Sans"/);
+  assert.match(variant, /local\("☺"\)/);
+  assert.match(variant, /url\("\.\.\/assets\/fonts\/Museo700-Regular\.otf"\) format\("opentype"\)/);
   assert.match(variant, /url\("\.\.\/assets\/fonts\/MuseoSans_700\.otf"\) format\("opentype"\)/);
+  assert.match(variant, /font-synthesis: none/);
 });
 
 test('builds a base agency package with one production html file per size', async () => {
@@ -152,6 +156,7 @@ test('builds a base agency package with one production html file per size', asyn
   ]);
   assert.ok(names.includes('mapping.txt'));
   assert.ok(names.includes('ads/assets/SVG/SSELogoBlue.svg'));
+  assert.ok(names.includes('ads/assets/fonts/Museo700-Regular.otf'));
   assert.ok(names.includes('ads/assets/fonts/MuseoSans_700.otf'));
   assert.ok(!names.some((name) => /^ads\/assets\/bg_.*\.jpe?g$/i.test(name)));
   assert.ok(!names.includes('preview-page.html'));
@@ -188,6 +193,7 @@ test('builds a client preview package without copy validation when requested', a
 
   assert.ok(names.includes('preview-page.html'));
   assert.ok(names.includes('ads/html/SSE_DCO_728x90.html'));
+  assert.ok(names.includes('ads/assets/fonts/Museo700-Regular.otf'));
   assert.ok(names.includes('ads/assets/fonts/MuseoSans_700.otf'));
   assert.ok(!names.includes('mapping.txt'));
   assert.ok(!names.includes('preview-validator.js'));

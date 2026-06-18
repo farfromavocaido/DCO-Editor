@@ -56,14 +56,19 @@ const CLIENT_PREVIEW_BRAND_FILES = [
   { path: 'brand/SSELogoWhite.svg', sourcePath: () => path.resolve(appRoot, 'public/SSELogoWhite.svg') },
 ];
 
+const PACKAGED_FONT_LOCAL_BLOCK = 'local("☺")';
+
+const createClientFontEntry = (filename: string, families: string[], weight: number) => ({
+  filename,
+  families,
+  weight,
+  sourcePath: () => clientFontSourcePath(filename),
+  resolveSourcePath: () => resolveClientFontSourcePath(filename),
+});
+
 const CLIENT_FONT_FILES = [
-  {
-    filename: 'MuseoSans_700.otf',
-    sourcePath: () => clientFontSourcePath('MuseoSans_700.otf'),
-    resolveSourcePath: () => resolveClientFontSourcePath('MuseoSans_700.otf'),
-    families: ['Museo', 'Museo Sans'],
-    weight: 700,
-  },
+  createClientFontEntry('Museo700-Regular.otf', ['Museo'], 700),
+  createClientFontEntry('MuseoSans_700.otf', ['Museo Sans'], 700),
 ];
 
 const clientVariantMatrix = () => {
@@ -145,12 +150,27 @@ const localFontFaceCss = (options: RenderOptions = {}) => {
   if (!options.fontBasePath) return '';
   return CLIENT_FONT_FILES.flatMap((font) => font.families.map((family) => `    @font-face {
       font-family: "${family}";
-      src: url("${localFontUrl(font.filename, options)}") format("opentype");
+      src: ${PACKAGED_FONT_LOCAL_BLOCK}, url("${localFontUrl(font.filename, options)}") format("opentype");
       font-weight: ${font.weight};
       font-style: normal;
       font-display: block;
     }`)).join('\n');
 };
+
+const packagedFontPreloadTags = (options: RenderOptions = {}) => {
+  if (!options.fontBasePath) return '';
+  return CLIENT_FONT_FILES.map((font) => (
+    `    <link rel="preload" href="${escapeAttr(localFontUrl(font.filename, options))}" as="font" type="font/otf" crossorigin>`
+  )).join('\n');
+};
+
+const packagedFontIsolationCss = () => `
+    html,
+    body,
+    .stage,
+    .stage * {
+      font-synthesis: none;
+    }`;
 
 const previewValidatorTag = (options: RenderOptions = {}) => (
   options.previewValidatorScriptPath
@@ -642,6 +662,7 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
     .join('\n\n');
   return `
 ${localFontFaceCss(options)}
+${packagedFontIsolationCss()}
     html, body {
       width: 100%;
       height: 100%;
@@ -703,6 +724,7 @@ export const renderStudioReadyHtml = (document: Record<string, unknown>, size: s
     <meta name="environment" content="dv360">
     <meta name="viewport" content="width=${sizeCreative.canvas.width}, initial-scale=1.0">
     <title>SSE DCO ${escapeHtml(size)}</title>
+${packagedFontPreloadTags(options)}
     <script src="https://s0.2mdn.net/ads/studio/Enabler.js"></script>
     <style>
 ${cssForSize(document, size, options)}
@@ -1307,7 +1329,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         overflow: hidden;
         background: var(--bg);
         color: var(--ink);
-        font-family: "museo-sans", "Museo Sans", sans-serif;
+        font-family: "museo-sans", sans-serif;
         font-weight: 300;
       }
       header {
@@ -1322,7 +1344,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
       .header-title {
         margin: 0;
         color: var(--ink);
-        font-family: "museo-sans", "Museo Sans", sans-serif;
+        font-family: "museo-sans", sans-serif;
         font-size: 24px;
         font-weight: 500;
         line-height: 1;

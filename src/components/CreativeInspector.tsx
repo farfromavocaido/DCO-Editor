@@ -6,7 +6,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { animationFamilyForLayer, animationIntentDefinitions, timelineSpanForClip } from '@/lib/animation-intents';
 import { compileAnimationClips } from '@/lib/creative-compiler';
 import { currentSizeCreative } from '@/lib/creative-model';
-import { fieldInputValue, rowLabel } from '@/lib/feed-model';
+import { activeScopesFromControls, fieldInputValue, rowLabel } from '@/lib/feed-model';
+import { beatsForScopes } from '@/lib/timing-profiles';
 import { deriveSelectedTarget, OFFERS_BLOCK_ID } from '@/lib/selection-groups';
 import { fitSizeStatus } from '@/lib/selection-chrome';
 import { useEditorStore } from '@/store/editor-store';
@@ -126,6 +127,9 @@ export function CreativeInspector() {
   const offerCount = useEditorStore((s) => s.offerCount);
   const tcMode = useEditorStore((s) => s.tcMode);
   const ctaShape = useEditorStore((s) => s.ctaShape);
+  const includeRoundelFrame = useEditorStore((s) => s.includeRoundelFrame);
+  const frameCount = useEditorStore((s) => s.frameCount);
+  const roundelMode = useEditorStore((s) => s.roundelMode);
   const selectedLayer = useEditorStore((s) => s.selectedLayer());
   const selectedClip = useEditorStore((s) => s.selectedClip());
   const selectedFeedRow = useEditorStore((s) => s.selectedFeedRow);
@@ -146,11 +150,14 @@ export function CreativeInspector() {
   const setStatus = useEditorStore((s) => s.setStatus);
 
   const sizeCreative = currentSizeCreative(document, size);
-  const activeScopes = useMemo(() => [
-    `offers-${offerCount}`,
-    tcMode === 'tcs_units' ? 'tc-prices' : 'tc-solo',
-    ctaShape === 'rectangle' ? 'cta-rect' : 'cta-roundel',
-  ], [offerCount, tcMode, ctaShape]);
+  const activeScopes = useMemo(() => activeScopesFromControls({
+    offerCount,
+    tcMode,
+    ctaShape,
+    includeRoundelFrame,
+    frameCount,
+    roundelMode,
+  }), [ctaShape, frameCount, includeRoundelFrame, offerCount, roundelMode, tcMode]);
   const selectedTarget = useMemo(
     () => deriveSelectedTarget(
       document,
@@ -178,12 +185,13 @@ export function CreativeInspector() {
         || rule.cssClass === activeCssClass
       ))
     : [];
+  const activeBeats = useMemo(() => beatsForScopes(document, activeScopes), [activeScopes, document]);
   const keyframes = selectedClip
-    ? compileAnimationClips([selectedClip], document?.clock?.beats || {})
+    ? compileAnimationClips([selectedClip], activeBeats)
     : [];
   const family = animationFamilyForLayer(selectedLayer || {});
   const familyMembers = (sizeCreative?.layers || []).filter((layer) => animationFamilyForLayer(layer).id === family.id);
-  const selectedClipSpan = selectedClip ? timelineSpanForClip(selectedClip, document?.clock?.beats || {}) : null;
+  const selectedClipSpan = selectedClip ? timelineSpanForClip(selectedClip, activeBeats) : null;
   const durationS = document?.clock?.durationS || 15;
   const playheadSeconds = ((percent / 100) * durationS).toFixed(2);
   const playheadLabel = `${playheadSeconds}s / ${Number.isInteger(percent) ? percent : percent.toFixed(1)}%`;
@@ -613,6 +621,12 @@ export function CreativeInspector() {
                   >
                     {field.options?.map((option) => <option key={option} value={option}>{option}</option>)}
                   </select>
+                ) : field.type === 'boolean' ? (
+                  <input
+                    type="checkbox"
+                    checked={Boolean(row[field.name])}
+                    onChange={(event) => updateSelectedFeedField(field.name, event.target.checked)}
+                  />
                 ) : (
                   <input
                     value={fieldInputValue(row, field)}

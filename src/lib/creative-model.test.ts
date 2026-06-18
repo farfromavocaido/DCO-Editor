@@ -476,3 +476,74 @@ test('resolves and writes 300x250 headline offer-count variants', () => {
   assert.equal(variant.props.left, 42);
   assert.equal(layer.base.left, 17);
 });
+
+test('merges active variant rules in active scope order and writes to the highest priority rule', () => {
+  const doc = {
+    version: 1,
+    sizes: {
+      '300x250': {
+        layers: [
+          {
+            id: 'headline-act3',
+            label: 'Headline',
+            kind: 'text',
+            base: { left: 17, top: 26, width: 200, cssClass: 'headline-act3' },
+            clips: [],
+          },
+        ],
+        variantRules: [
+          {
+            id: 'offers-2|headline-act3',
+            scope: 'offers-2',
+            layerId: 'headline-act3',
+            cssClass: 'headline-act3',
+            props: { left: 10, width: 280 },
+            editable: true,
+          },
+          {
+            id: 'frames-4|headline-act3',
+            scope: 'frames-4',
+            layerId: 'headline-act3',
+            cssClass: 'headline-act3',
+            props: { top: 18, width: 190 },
+            editable: true,
+          },
+        ],
+      },
+    },
+  };
+
+  const target = findCreativeTarget(doc, '300x250', 'headline-act3', ['offers-2', 'frames-4']);
+
+  assert.equal(target.values.left, 10);
+  assert.equal(target.values.top, 18);
+  assert.equal(target.values.width, 190);
+  assert.equal(target.writeSource.ruleId, 'frames-4|headline-act3');
+
+  const next = updateCreativeTargetValue(doc, '300x250', 'headline-act3', ['offers-2', 'frames-4'], 'top', 22);
+  assert.equal(next.sizes['300x250'].variantRules[0].props.top, undefined);
+  assert.equal(next.sizes['300x250'].variantRules[1].props.top, 22);
+});
+
+test('keeps the optional roundel frame as a simple editable circle layer', () => {
+  const layer = {
+    id: 'roundel-frame',
+    kind: 'shape',
+    base: { left: 40, top: 70, width: 118, height: 118, cssClass: 'roundel-frame' },
+    clips: [],
+  };
+
+  const targets = editableTargetsForLayer(layer);
+
+  assert.deepEqual(targets, []);
+});
+
+test('places the MPU optional roundel frame above the waves and below the CTA', () => {
+  const doc = loadPersistedCreative();
+  const layers = doc.sizes['300x250'].layers;
+  const byId = Object.fromEntries(layers.map((layer) => [layer.id, layer]));
+
+  assert.ok(byId['roundel-frame'].zIndex > byId.greenwave.zIndex);
+  assert.ok(byId['roundel-frame'].zIndex > byId.bluewave.zIndex);
+  assert.ok(byId['roundel-frame'].zIndex < byId.cta.zIndex);
+});

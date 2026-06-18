@@ -59,3 +59,50 @@ test('setResizeMode exposes explicit frame and scale handle modes', () => {
   useEditorStore.getState().setResizeMode('unexpected');
   assert.equal(useEditorStore.getState().resizeMode, 'frame');
 });
+
+test('timeline edits to named clip boundaries update the active frame timing profile', () => {
+  const doc = {
+    version: 1,
+    clock: {
+      durationS: 15,
+      beats: { swap: 65, end: 100 },
+      profiles: {
+        'frames-3': { swap: 65, end: 100 },
+        'frames-4': { swap: 56.7, roundel_in: 56.7, end: 100 },
+      },
+    },
+    sizes: {
+      '300x250': {
+        canvas: { width: 300, height: 250 },
+        layers: [
+          {
+            id: 'headline-act3',
+            kind: 'text',
+            base: { cssClass: 'headline-act3' },
+            clips: [{ id: 'headline-act3-slideInRight', preset: 'slideInRight', start: 'swap', end: 'end' }],
+          },
+        ],
+      },
+    },
+  };
+
+  useEditorStore.setState({
+    creativeDocument: doc,
+    size: '300x250',
+    offerCount: 1,
+    tcMode: 'tcs_only',
+    ctaShape: 'roundel',
+    includeRoundelFrame: true,
+    frameCount: 4,
+    roundelMode: 'split',
+    history: [],
+    historyIndex: -1,
+  });
+
+  useEditorStore.getState().updateCreativeLayerClipValue('headline-act3', 'headline-act3-slideInRight', 'start', 60);
+
+  const next = useEditorStore.getState().creativeDocument;
+  assert.equal(next.sizes['300x250'].layers[0].clips[0].start, 'swap');
+  assert.equal(next.clock.profiles['frames-4'].swap, 60);
+  assert.equal(next.clock.profiles['frames-3'].swap, 65);
+});

@@ -29,6 +29,13 @@ const offerChildDefinitions = [
   },
 ];
 
+const childDefinitionsForLayer = (layer: Record<string, unknown> | null) => {
+  if (!layer) return [];
+  const id = String(layer.id || '');
+  if (id.startsWith('offer-slot-')) return offerChildDefinitions;
+  return [];
+};
+
 export const targetIdForLayerChild = (layerId: string, childId: string) => `${layerId}::${childId}`;
 
 export const parseCreativeTargetId = (targetId: string) => {
@@ -41,8 +48,8 @@ export const parseCreativeTargetId = (targetId: string) => {
 };
 
 export const editableTargetsForLayer = (layer: Record<string, unknown> | null) => {
-  if (!layer || !String(layer.id || '').startsWith('offer-slot-')) return [];
-  return offerChildDefinitions.map((child) => ({
+  if (!layer) return [];
+  return childDefinitionsForLayer(layer).map((child) => ({
     ...child,
     id: targetIdForLayerChild(String(layer.id), child.id),
     childId: child.id,
@@ -64,14 +71,40 @@ const findActiveVariantRule = (
   identity: { layerId?: string; cssClass?: string },
   activeScopes: string[] = [],
 ) => (
-  (sizeCreative?.variantRules || []).find((rule: Record<string, unknown>) => (
-    activeScopes.includes(String(rule.scope || ''))
+  activeVariantRulesForIdentity(sizeCreative, identity, activeScopes).at(-1) || null
+);
+
+const ruleMatchesIdentity = (
+  rule: Record<string, unknown>,
+  identity: { layerId?: string; cssClass?: string },
+) => (
+  (
+    (identity.layerId && rule.layerId === identity.layerId)
+    || (identity.cssClass && rule.cssClass === identity.cssClass)
+  )
+);
+
+const activeVariantRulesForIdentity = (
+  sizeCreative: Record<string, unknown>,
+  identity: { layerId?: string; cssClass?: string },
+  activeScopes: string[] = [],
+) => (
+  activeScopes.flatMap((scope) => (
+    (sizeCreative?.variantRules || []).filter((rule: Record<string, unknown>) => (
+      String(rule.scope || '') === String(scope)
     && !propsOnlyHideVisibility(rule.props)
-    && (
-      (identity.layerId && rule.layerId === identity.layerId)
-      || (identity.cssClass && rule.cssClass === identity.cssClass)
-    )
+      && ruleMatchesIdentity(rule, identity)
+    ))
   ))
+);
+
+const mergedActiveVariantProps = (
+  sizeCreative: Record<string, unknown>,
+  identity: { layerId?: string; cssClass?: string },
+  activeScopes: string[] = [],
+) => (
+  activeVariantRulesForIdentity(sizeCreative, identity, activeScopes)
+    .reduce((props, rule) => ({ ...props, ...(rule.props || {}) }), {})
 );
 
 const childDefinitionForTarget = (childId: string) => (
@@ -95,9 +128,10 @@ export const findCreativeTarget = (
     if (!child) return null;
     const classRule = findClassRule(sizeCreative, child.cssClass);
     const variantRule = findActiveVariantRule(sizeCreative, { cssClass: child.cssClass }, activeScopes);
+    const variantProps = mergedActiveVariantProps(sizeCreative, { cssClass: child.cssClass }, activeScopes);
     const values = {
       ...(classRule?.properties || {}),
-      ...(variantRule?.props || {}),
+      ...variantProps,
     };
     return {
       id: targetId,
@@ -120,9 +154,10 @@ export const findCreativeTarget = (
 
   const cssClass = layer.base?.cssClass || layer.id;
   const variantRule = findActiveVariantRule(sizeCreative, { layerId: layer.id, cssClass }, activeScopes);
+  const variantProps = mergedActiveVariantProps(sizeCreative, { layerId: layer.id, cssClass }, activeScopes);
   const values = {
     ...(layer.base || {}),
-    ...(variantRule?.props || {}),
+    ...variantProps,
   };
   return {
     id: layer.id,

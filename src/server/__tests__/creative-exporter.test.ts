@@ -37,13 +37,16 @@ test('exports click handling without the legacy dynamic URL field', async () => 
 
 test('exports production HTML with referenced dynamic fields, not baked feed rows', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '970x250');
+  const html = renderStudioReadyHtml(document, '300x250');
 
   assert.match(html, /data-dco-field="heading1_text"/);
   assert.match(html, /data-dco-field="offer1_value_text"/);
   assert.match(html, /data-dco-field="tc_terms_text"/);
+  assert.match(html, /data-dco-field="roundel_text_text"/);
+  assert.match(html, /data-dco-field="roundel_value_text"/);
   assert.match(html, /data-dco-field="background_image_url"/);
-  assert.match(html, /data-dco-state="offer_count_num,tc_type_enum,cta_type_enum"/);
+  assert.match(html, /data-dco-state="offer_count_num,tc_type_enum,cta_type_enum,include_roundel_frame_bool,roundel_value_text"/);
+  assert.match(html, /\.frames-4 \.headline-act3/);
   assert.doesNotMatch(html, /window\.__SSE_DCO_PREVIEW__\s*=/);
   assert.doesNotMatch(html, /single_elec15_solo_roundel/);
 });
@@ -60,13 +63,18 @@ test('exports ad html that accepts client preview post messages', async () => {
 
 test('exports WIP HTML with baked preview row and state classes', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '970x250');
-  const row = document.feed.sampleRows[0];
+  const html = renderStudioReadyHtml(document, '300x250');
+  const row = {
+    ...document.feed.sampleRows[0],
+    include_roundel_frame_bool: true,
+    roundel_text_text: 'Save up to',
+    roundel_value_text: '€1,080',
+  };
   assert.ok(row);
   const wip = renderWipHtml(html, row);
 
   assert.match(wip, /window\.__SSE_DCO_PREVIEW__/);
-  assert.match(wip, /offers-1 tc-solo cta-roundel/);
+  assert.match(wip, /offers-1 tc-solo cta-rect frames-4 roundel-frame-on roundel-split/);
   assert.match(wip, /single_elec15_solo_roundel/);
 });
 
@@ -261,15 +269,17 @@ test('exports legacy static first-frame state and GWD skeleton text reset', asyn
   assert.doesNotMatch(html, /font-size:\s*43pxpx/);
 });
 
-test('exports runtime value fitting before percent symbol alignment', async () => {
+test('exports runtime value fitting before offer value symbol alignment', async () => {
   const document = await readCreativeDocument();
   const html = renderStudioReadyHtml(document, '160x600');
 
   assert.match(html, /var OFFER_VALUE_MIN_PX = 32;/);
   assert.match(html, /function fitOfferValues\(\)/);
+  assert.match(html, /function wrapOfferValueSymbol\(element\)/);
+  assert.match(html, /first === '\\u00A3' \|\| first === '\\u20AC'/);
   assert.match(
     html,
-    /bindOfferTexts\(data\);\s+fitOfferValues\(\);\s+equalizeSublines\(\);\s+alignPercentSymbols\(\);/,
+    /bindOfferTexts\(data\);\s+fitOfferValues\(\);\s+equalizeSublines\(\);\s+alignOfferValueSymbols\(\);/,
   );
 });
 

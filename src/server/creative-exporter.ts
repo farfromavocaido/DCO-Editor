@@ -4,9 +4,14 @@ import path from 'node:path';
 
 import { compileAnimationClips } from '@/lib/creative-compiler';
 import { structuredRuleCss } from '@/lib/creative-css';
+import {
+  alignOfferValueSymbolsRuntime,
+  wrapOfferValueSymbolRuntime,
+} from '@/lib/offer-value-symbols';
+import { beatsForFrameScope } from '@/lib/timing-profiles';
 import { appRoot, outputRoot, projectRoot } from './paths';
 
-const DEFAULT_STATE = 'offers-1 tc-solo cta-roundel';
+const DEFAULT_STATE = 'offers-1 tc-solo cta-roundel frames-3 roundel-frame-off roundel-copy-only';
 
 const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
   '&': '&amp;',
@@ -107,6 +112,9 @@ const rowForClientVariant = (
     tc_type_enum: variant.tcMode,
     cta_type_enum: variant.ctaShape,
     cta_text: matching?.cta_text || offerMatch?.cta_text || fallback.cta_text || 'Switch today',
+    include_roundel_frame_bool: matching?.include_roundel_frame_bool ?? offerMatch?.include_roundel_frame_bool ?? fallback.include_roundel_frame_bool ?? false,
+    roundel_text_text: matching?.roundel_text_text || offerMatch?.roundel_text_text || fallback.roundel_text_text || 'Save up to',
+    roundel_value_text: matching?.roundel_value_text || offerMatch?.roundel_value_text || fallback.roundel_value_text || '',
     tc_terms_text: matching?.tc_terms_text || offerMatch?.tc_terms_text || fallback.tc_terms_text || '*T&Cs apply',
     tc_units_text: matching?.tc_units_text || offerMatch?.tc_units_text || fallback.tc_units_text || '',
     background_image_url: matching?.background_image_url || offerMatch?.background_image_url || fallback.background_image_url || '',
@@ -128,6 +136,9 @@ const clientInitialRow = (document: Record<string, unknown>) => {
     offer3_sub_text: 'OFF BILL*',
     cta_type_enum: 'roundel',
     cta_text: 'Switch today',
+    include_roundel_frame_bool: false,
+    roundel_text_text: 'Save up to',
+    roundel_value_text: '€1,080',
     tc_type_enum: 'tcs_only',
     tc_terms_text: '*T&Cs apply',
     tc_units_text: 'Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat',
@@ -189,6 +200,8 @@ const clientValidationFields = () => [
   { name: 'offer3_value_text', label: 'Offer 3 value' },
   { name: 'offer3_sub_text', label: 'Offer 3 subline' },
   { name: 'cta_text', label: 'CTA text' },
+  { name: 'roundel_text_text', label: 'Roundel text' },
+  { name: 'roundel_value_text', label: 'Roundel value' },
   { name: 'tc_terms_text', label: 'T&C text' },
   { name: 'tc_units_text', label: 'Unit price text' },
 ];
@@ -209,6 +222,9 @@ const dynamicFieldMapping = () => [
   ['tc_units_text', 'text', '', 'Unit price copy'],
   ['cta_type_enum', 'enum', 'roundel | rectangle', 'CTA visual type; default roundel'],
   ['cta_text', 'text', '', 'CTA label'],
+  ['include_roundel_frame_bool', 'boolean', 'true | false', 'Show optional roundel frame; false keeps the three-act timing'],
+  ['roundel_text_text', 'text', '', 'Optional roundel frame copy'],
+  ['roundel_value_text', 'text', '', 'Optional large roundel value'],
   ['background_image_url', 'image', '', 'Background image URL; leave blank to use packaged size background'],
 ];
 
@@ -283,15 +299,21 @@ ${declarations.filter(Boolean).join('\n')}
     }`;
 };
 
-const animationNameForLayer = (layer: Record<string, unknown>) => `${layer.id}-${layer.clips[0].id}`;
+const animationNameForLayer = (layer: Record<string, unknown>, suffix = '') => `${layer.id}-${layer.clips[0].id}${suffix ? `-${suffix}` : ''}`;
 
-const animationCssForLayer = (layer: Record<string, unknown>, beats: Record<string, number>, durationS: number) => {
+const animationCssForLayer = (
+  layer: Record<string, unknown>,
+  beats: Record<string, number>,
+  durationS: number,
+  options: { suffix?: string; selectorPrefix?: string } = {},
+) => {
   if (!layer.clips?.length) return '';
-  const name = animationNameForLayer(layer);
+  const name = animationNameForLayer(layer, options.suffix || '');
   const keyframes = compileAnimationClips(layer.clips, beats);
   const cssClass = layer.base?.cssClass || layer.id;
+  const selector = `${options.selectorPrefix || ''}.${cssClass}`;
   return `${renderKeyframes(name, keyframes)}
-    .${cssClass} {
+    ${selector} {
       animation: ${durationS}s linear 0s 1 normal forwards running ${name};
     }`;
 };
@@ -319,6 +341,7 @@ const textFitRulesForSize = (sizeCreative: Record<string, unknown>) => (
 );
 
 const dcoFieldForLayer = (layer: Record<string, unknown>) => {
+  if (layer.binding?.field) return String(layer.binding.field);
   const id = String(layer.id || '');
   if (id === 'headline-act1') return 'heading1_text';
   if (id === 'headline-act2') return 'heading2_text';
@@ -377,8 +400,13 @@ const renderTermsWrappers = (sizeCreative: Record<string, unknown>) => {
 const stateClasses = (row: Record<string, unknown>) => {
   const count = Math.min(3, Math.max(1, Number.parseInt(row.offer_count_num, 10) || 1));
   const tc = row.tc_type_enum === 'tcs_units' ? 'tc-prices' : 'tc-solo';
-  const cta = row.cta_type_enum === 'rectangle' ? 'cta-rect' : 'cta-roundel';
-  return `offers-${count} ${tc} ${cta}`;
+  const includeRoundel = row.include_roundel_frame_bool === true
+    || ['true', '1', 'yes', 'on'].includes(String(row.include_roundel_frame_bool || '').trim().toLowerCase());
+  const cta = includeRoundel || ['rectangle', 'rect'].includes(String(row.cta_type_enum || '')) ? 'cta-rect' : 'cta-roundel';
+  const frame = includeRoundel ? 'frames-4' : 'frames-3';
+  const roundelFrame = includeRoundel ? 'roundel-frame-on' : 'roundel-frame-off';
+  const roundelMode = includeRoundel && String(row.roundel_value_text || '').trim() ? 'roundel-split' : 'roundel-copy-only';
+  return `offers-${count} ${tc} ${cta} ${frame} ${roundelFrame} ${roundelMode}`;
 };
 
 const runtimeScript = (fitRules: Array<Record<string, unknown>> = [], options: RenderOptions = {}) => {
@@ -418,6 +446,7 @@ const runtimeScript = (fitRules: Array<Record<string, unknown>> = [], options: R
             'offer3_value_text', 'offer3_sub_text',
             'tc_type_enum', 'tc_terms_text', 'tc_units_text',
             'cta_type_enum', 'cta_text',
+            'include_roundel_frame_bool', 'roundel_text_text', 'roundel_value_text',
             'background_image_url'
           ].forEach(function(key) {
             out[key] = fieldValue(row[key]);
@@ -433,19 +462,19 @@ const runtimeScript = (fitRules: Array<Record<string, unknown>> = [], options: R
           }).length || 1;
         }
 
+        function booleanValue(value) {
+          var normalized = fieldValue(value).trim().toLowerCase();
+          return normalized === 'true' || normalized === '1' || normalized === 'yes' || normalized === 'on';
+        }
+
         function setText(selector, value) {
-          if (!value) return;
+          var text = fieldValue(value);
           document.querySelectorAll(selector).forEach(function(element) {
-            element.textContent = value;
+            element.textContent = text;
           });
         }
 
-        function wrapPercentSymbol(element) {
-          if (!element) return;
-          var text = (element.textContent || '').trim();
-          if (!text.endsWith('%')) return;
-          element.innerHTML = text.slice(0, -1) + '<span class="sym-pct">%</span>';
-        }
+        ${wrapOfferValueSymbolRuntime}
 
         function bindOfferTexts(data) {
           for (var index = 1; index <= 3; index += 1) {
@@ -455,7 +484,7 @@ const runtimeScript = (fitRules: Array<Record<string, unknown>> = [], options: R
             var subline = slot.querySelector('.offer-subline');
             if (value) {
               value.textContent = data['offer' + index + '_value_text'] || '';
-              wrapPercentSymbol(value);
+              wrapOfferValueSymbol(value);
             }
             if (subline) subline.textContent = data['offer' + index + '_sub_text'] || '';
           }
@@ -577,19 +606,7 @@ const runtimeScript = (fitRules: Array<Record<string, unknown>> = [], options: R
           sublines.forEach(function(element) { element.style.fontSize = shared + 'px'; });
         }
 
-        function alignPercentSymbols() {
-          var ctx = document.createElement('canvas').getContext('2d');
-          document.querySelectorAll('.offer-value .sym-pct').forEach(function(symbol) {
-            var valueStyle = window.getComputedStyle(symbol.parentElement);
-            var symbolStyle = window.getComputedStyle(symbol);
-            ctx.font = valueStyle.fontWeight + ' ' + valueStyle.fontSize + ' ' + valueStyle.fontFamily;
-            var digit = ctx.measureText('5');
-            ctx.font = symbolStyle.fontWeight + ' ' + symbolStyle.fontSize + ' ' + symbolStyle.fontFamily;
-            var percent = ctx.measureText('%');
-            if (digit.actualBoundingBoxDescent === undefined) return;
-            symbol.style.top = (digit.actualBoundingBoxDescent - percent.actualBoundingBoxDescent) + 'px';
-          });
-        }
+        ${alignOfferValueSymbolsRuntime}
 
         function wireExit() {
           root.addEventListener('click', function() {
@@ -609,14 +626,27 @@ const runtimeScript = (fitRules: Array<Record<string, unknown>> = [], options: R
           root = root || document.getElementById('page-content');
           if (!root) return;
           var data = normalizeProfileRow(row);
-          root.classList.remove('offers-1', 'offers-2', 'offers-3', 'tc-solo', 'tc-prices', 'cta-roundel', 'cta-rect');
+          var includeRoundel = booleanValue(data.include_roundel_frame_bool);
+          root.classList.remove(
+            'offers-1', 'offers-2', 'offers-3',
+            'tc-solo', 'tc-prices',
+            'cta-roundel', 'cta-rect',
+            'frames-3', 'frames-4',
+            'roundel-frame-off', 'roundel-frame-on',
+            'roundel-copy-only', 'roundel-split'
+          );
           root.classList.add('offers-' + deriveOfferCount(data));
           root.classList.add(data.tc_type_enum === 'tcs_units' ? 'tc-prices' : 'tc-solo');
-          root.classList.add(data.cta_type_enum === 'rectangle' ? 'cta-rect' : 'cta-roundel');
+          root.classList.add(includeRoundel || data.cta_type_enum === 'rectangle' || data.cta_type_enum === 'rect' ? 'cta-rect' : 'cta-roundel');
+          root.classList.add(includeRoundel ? 'frames-4' : 'frames-3');
+          root.classList.add(includeRoundel ? 'roundel-frame-on' : 'roundel-frame-off');
+          root.classList.add(includeRoundel && data.roundel_value_text.trim() ? 'roundel-split' : 'roundel-copy-only');
           setText('#headline-act1', data.heading1_text);
           setText('#headline-act2', data.heading2_text);
           setText('#headline-act3', data.heading3_text);
           setText('#cta', data.cta_text);
+          setText('.roundel-copy', data.roundel_text_text);
+          setText('.roundel-value', data.roundel_value_text);
           setText('.terms-prices, .terms-solo', data.tc_terms_text);
           setText('.unit-rate-prices', data.tc_units_text);
           applyBackgroundImage(data);
@@ -624,7 +654,7 @@ const runtimeScript = (fitRules: Array<Record<string, unknown>> = [], options: R
           bindOfferTexts(data);
           fitOfferValues();
           equalizeSublines();
-          alignPercentSymbols();
+          alignOfferValueSymbols();
           wireExit();
           window.__SSE_DCO_READY__ = true;
         }
@@ -655,10 +685,23 @@ ${previewMessageBridge}
 const cssForSize = (document: Record<string, unknown>, size: string, options: RenderOptions = {}) => {
   const sizeCreative = document.sizes[size];
   const duration = document.clock.durationS;
-  const layerCss = sizeCreative.layers.map((layer) => staticRuleForLayer(layer, document.clock.beats)).join('\n\n');
-  const animationCss = sizeCreative.layers
-    .map((layer) => animationCssForLayer(layer, document.clock.beats, duration))
+  const defaultBeats = beatsForFrameScope(document, 'frames-3');
+  const layerCss = sizeCreative.layers.map((layer) => staticRuleForLayer(layer, defaultBeats)).join('\n\n');
+  const defaultAnimationCss = sizeCreative.layers
+    .map((layer) => animationCssForLayer(layer, defaultBeats, duration))
     .filter(Boolean)
+    .join('\n\n');
+  const profileAnimationCss = ['frames-4']
+    .filter((scope) => document.clock?.profiles?.[scope])
+    .flatMap((scope) => {
+      const beats = beatsForFrameScope(document, scope);
+      return sizeCreative.layers
+        .map((layer) => animationCssForLayer(layer, beats, duration, {
+          suffix: scope,
+          selectorPrefix: `.${scope} `,
+        }))
+        .filter(Boolean);
+    })
     .join('\n\n');
   return `
 ${localFontFaceCss(options)}
@@ -695,7 +738,9 @@ ${layerCss}
 
 ${structuredRuleCss(sizeCreative)}
 
-${animationCss}
+${defaultAnimationCss}
+
+${profileAnimationCss}
 `;
 };
 
@@ -707,7 +752,7 @@ const renderBody = (document: Record<string, unknown>, size: string, options: Re
     .map((layer: Record<string, unknown>) => renderLayer(layer, options))
     .filter(Boolean)
     .join('\n');
-  return `      <main id="page-content" class="stage page-content ${DEFAULT_STATE}" data-size="${escapeAttr(size)}" data-dco-state="offer_count_num,tc_type_enum,cta_type_enum">
+  return `      <main id="page-content" class="stage page-content ${DEFAULT_STATE}" data-size="${escapeAttr(size)}" data-dco-state="offer_count_num,tc_type_enum,cta_type_enum,include_roundel_frame_bool,roundel_value_text">
           <img alt="" draggable="false" class="stage-element bg-image" id="bg-image" src="${escapeAttr(background)}" data-dco-field="background_image_url">
 ${layers}
 ${renderTermsWrappers(sizeCreative)}
@@ -827,6 +872,8 @@ export const renderClientPreviewValidatorScript = () => `(function() {
     offer3_value_text: ['#offer3 .offer-value'],
     offer3_sub_text: ['#offer3 .offer-subline'],
     cta_text: ['#cta'],
+    roundel_text_text: ['.roundel-copy'],
+    roundel_value_text: ['.roundel-value'],
     tc_terms_text: ['.terms-prices', '.terms-solo'],
     tc_units_text: ['.unit-rate-prices']
   };
@@ -842,6 +889,8 @@ export const renderClientPreviewValidatorScript = () => `(function() {
     { name: 'offer3_value_text', label: 'Offer 3 value' },
     { name: 'offer3_sub_text', label: 'Offer 3 subline' },
     { name: 'cta_text', label: 'CTA text' },
+    { name: 'roundel_text_text', label: 'Roundel text' },
+    { name: 'roundel_value_text', label: 'Roundel value' },
     { name: 'tc_terms_text', label: 'T&C text' },
     { name: 'tc_units_text', label: 'Unit price text' }
   ];
@@ -881,6 +930,7 @@ export const renderClientPreviewValidatorScript = () => `(function() {
 
   function fieldValue(controls, name) {
     var control = controls.elements[name];
+    if (control && control.type === 'checkbox') return control.checked ? 'true' : 'false';
     return control ? control.value : '';
   }
 
@@ -898,6 +948,9 @@ export const renderClientPreviewValidatorScript = () => `(function() {
       offer3_sub_text: fieldValue(controls, 'offer3_sub_text'),
       cta_type_enum: fieldValue(controls, 'cta_type_enum'),
       cta_text: fieldValue(controls, 'cta_text'),
+      include_roundel_frame_bool: fieldValue(controls, 'include_roundel_frame_bool'),
+      roundel_text_text: fieldValue(controls, 'roundel_text_text'),
+      roundel_value_text: fieldValue(controls, 'roundel_value_text'),
       tc_type_enum: fieldValue(controls, 'tc_type_enum'),
       tc_terms_text: fieldValue(controls, 'tc_terms_text'),
       tc_units_text: fieldValue(controls, 'tc_units_text'),
@@ -1691,6 +1744,11 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         </label>
         <label><span>Text</span><input name="cta_text" value="${escapeAttr(initialRow.cta_text)}"></label>
 
+        <h2>Roundel Frame</h2>
+        <label><span>Include</span><input type="checkbox" name="include_roundel_frame_bool" value="true" ${initialRow.include_roundel_frame_bool ? 'checked' : ''}></label>
+        <label><span>Text</span><input name="roundel_text_text" value="${escapeAttr(initialRow.roundel_text_text)}"></label>
+        <label><span>Value</span><input name="roundel_value_text" value="${escapeAttr(initialRow.roundel_value_text)}"></label>
+
         <h2>T&Cs</h2>
         <label><span>Format</span>
           <select name="tc_type_enum">
@@ -1747,6 +1805,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
 
         function field(name) {
           var control = controls.elements[name] || document.querySelector('[name="' + name + '"]');
+          if (control && control.type === 'checkbox') return control.checked ? 'true' : 'false';
           return control ? control.value : defaults[name] || '';
         }
 
@@ -1771,6 +1830,9 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
             offer3_sub_text: field('offer3_sub_text'),
             cta_type_enum: field('cta_type_enum'),
             cta_text: field('cta_text'),
+            include_roundel_frame_bool: field('include_roundel_frame_bool'),
+            roundel_text_text: field('roundel_text_text'),
+            roundel_value_text: field('roundel_value_text'),
             tc_type_enum: field('tc_type_enum'),
             tc_terms_text: field('tc_terms_text'),
             tc_units_text: field('tc_units_text'),

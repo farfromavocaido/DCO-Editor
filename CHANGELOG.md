@@ -3,6 +3,10 @@
 ## [Unreleased]
 
 ### Added
+- **Offer value currency symbols:** £ and € in offer blocks are auto-wrapped with the same smaller `sym-pct` styling and runtime alignment used for `%` (editor preview and Studio export). Roundel, headings, and other text are unchanged.
+
+### Fixed
+- **T&C Prices control:** selecting “Prices” in the top bar no longer throws when the embedded feed schema listed legacy `solo`/`prices` enum options instead of `tcs_only`/`tcs_units`.
 - **GitHub Pages password gate:** hosted client preview at `/` requires password `ssedco` (session-based, client-side only; not applied to editor ZIP exports).
 - Vendored `campaign/assets/fonts/MuseoSans_700.otf` for reproducible CI and ZIP exports.
 

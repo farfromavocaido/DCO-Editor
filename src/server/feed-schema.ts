@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { readCreativeDocument, writeCreativeDocument } from './creative-document';
+import { normalizeTcTypeEnum } from '@/lib/feed-model';
 
 export const FEED_SCHEMA_FIELDS = [
   { name: '_id', label: 'Row ID', type: 'integer', group: 'Meta', description: 'Studio row index.' },
@@ -22,6 +23,9 @@ export const FEED_SCHEMA_FIELDS = [
   { name: 'tc_units_text', label: 'Unit-rate text', type: 'multiline', group: 'Copy', description: 'Unit-rate text; line breaks are preserved.' },
   { name: 'cta_type_enum', label: 'CTA type', type: 'enum', group: 'Creative State', description: 'CTA visual variant.', options: ['roundel', 'rectangle'] as const },
   { name: 'cta_text', label: 'CTA text', type: 'string', group: 'Copy', description: 'CTA label.' },
+  { name: 'include_roundel_frame_bool', label: 'Roundel frame', type: 'boolean', group: 'Creative State', description: 'Whether the optional offer roundel frame is shown.' },
+  { name: 'roundel_text_text', label: 'Roundel text', type: 'string', group: 'Copy', description: 'Text shown inside the optional roundel frame.' },
+  { name: 'roundel_value_text', label: 'Roundel value', type: 'string', group: 'Copy', description: 'Optional large value shown inside the roundel frame.' },
   { name: 'background_image_url', label: 'Background image', type: 'image', group: 'Assets', description: 'Optional image URL for the ad background.' },
 ] as const;
 
@@ -58,6 +62,13 @@ const coerceField = (field: FeedField, value: unknown) => {
   if (field.type === 'integer') return coerceInteger(value, field);
   if (field.type === 'url') return coerceUrl(value);
   if (field.type === 'enum') {
+    if (field.name === 'tc_type_enum') {
+      const canonical = normalizeTcTypeEnum(value);
+      if (canonical !== 'tcs_only' && canonical !== 'tcs_units') {
+        throw new Error(`${field.name} must be one of tcs_only, tcs_units`);
+      }
+      return canonical;
+    }
     const normalized = String(value ?? '');
     const options = field.options as readonly string[];
     if (!options.includes(normalized)) {
@@ -77,14 +88,21 @@ export const validateFeedRows = (rows: Record<string, unknown>[]) => rows.map((r
   return out;
 });
 
+const normalizeFeedFields = (fields) => fields.map((field) => (
+  field.name === 'tc_type_enum'
+    ? { ...field, options: ['tcs_only', 'tcs_units'] }
+    : field
+));
+
 export const readFeedSchema = async (documentPath?: string) => {
   const document = await readCreativeDocument(documentPath);
   const feed = document.feed || {};
+  const rawFields = Array.isArray(feed.fields) && feed.fields.length
+    ? feed.fields
+    : FEED_SCHEMA_FIELDS.map((field) => ({ ...field }));
   return {
     profileName: feed.profileName,
-    fields: Array.isArray(feed.fields) && feed.fields.length
-      ? feed.fields
-      : FEED_SCHEMA_FIELDS.map((field) => ({ ...field })),
+    fields: normalizeFeedFields(rawFields),
     rows: feed.sampleRows || [],
   };
 };

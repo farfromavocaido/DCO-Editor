@@ -55,7 +55,14 @@ test('GET /api/creative/[size]/view returns Studio-ready HTML preview', async ()
   assert.match(html, /window\.applySseDcoRuntimeState/);
   assert.match(html, /id="sse-dco-preview-feed"/);
   assert.match(html, /single_elec15_solo_roundel/);
-  assert.match(html, /offers-1 tc-solo cta-roundel/);
+  const document = await readCreativeDocument();
+  const sample = document.feed.sampleRows[0] || {};
+  const includeRoundel = sample.include_roundel_frame_bool === true
+    || ['true', '1', 'yes', 'on'].includes(String(sample.include_roundel_frame_bool || '').trim().toLowerCase());
+  const expectedCtaScope = includeRoundel || ['rectangle', 'rect'].includes(String(sample.cta_type_enum || ''))
+    ? 'cta-rect'
+    : 'cta-roundel';
+  assert.match(html, new RegExp(`offers-1 tc-solo ${expectedCtaScope}`));
   assert.match(html, /src="\/assets\//);
   assert.doesNotMatch(html, /src="assets\//);
   assert.doesNotMatch(html, /__next/);

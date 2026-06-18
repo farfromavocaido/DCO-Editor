@@ -88,7 +88,9 @@ export const selectionPathForTarget = (
   }
 
   const parsed = parseCreativeTargetId(targetId);
-  if (!isOfferLayerId(parsed.layerId)) return [targetId].filter(Boolean);
+  if (!isOfferLayerId(parsed.layerId)) {
+    return parsed.isNested ? [parsed.layerId, targetId].filter(Boolean) : [targetId].filter(Boolean);
+  }
   if (!activeMembers.includes(parsed.layerId)) return [];
   const path = effectiveOfferCount >= 2 && visibleSlotCount >= 2
     ? [OFFERS_BLOCK_ID, parsed.layerId]

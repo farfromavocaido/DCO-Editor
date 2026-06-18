@@ -19,6 +19,12 @@ test('expandScaleTargetIds includes nested offer text targets', () => {
   ]);
 });
 
+test('expandScaleTargetIds keeps optional roundel frame as a single shape target', () => {
+  assert.deepEqual(expandScaleTargetIds(['roundel-frame']), [
+    'roundel-frame',
+  ]);
+});
+
 test('groupResizeAnchor uses opposite corner for se handle', () => {
   const anchor = groupResizeAnchor({ left: 10, top: 20, width: 100, height: 50 }, 'se');
   assert.deepEqual(anchor, { x: 10, y: 20 });

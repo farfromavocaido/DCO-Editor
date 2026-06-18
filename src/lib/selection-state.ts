@@ -87,6 +87,14 @@ export const defaultHitPathForDrillIn = ({ currentTargetId, isolationPath, defau
 export const nextSelectionForCanvasClick = ({ isolationPath, hitPath, modifier }: CanvasClickInput): SelectionTransition | null => {
   if (!hitPath?.length) return null;
   if (modifier) return null;
+  if (!isolationPath.length && hitPath.length > 1 && !/^offer-slot-\d/.test(hitPath[0]) && hitPath[0] !== 'group:offers-block') {
+    const selectedTargetId = hitPath[0];
+    return {
+      selectedTargetId,
+      selectedTargetIds: [selectedTargetId],
+      isolationPath: [],
+    };
+  }
   if (!isolationPath.length && hitPath.length > 1 && hitPath[0] !== 'group:offers-block') {
     const selectedTargetId = hitPath[hitPath.length - 1];
     return {

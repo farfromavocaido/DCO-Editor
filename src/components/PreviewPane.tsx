@@ -31,8 +31,10 @@ import {
   targetMatchesSelection,
 } from '@/lib/selection-groups';
 import { zoomLabel, zoomScale } from '@/lib/canvas-zoom';
-import { assetUrl, fieldValue, previewBackgroundSrc, wrapPercent } from '@/lib/preview-utils';
+import { assetUrl, fieldValue, previewBackgroundSrc, wrapOfferValueSymbols } from '@/lib/preview-utils';
 import { resizeHandlesForSelection, selectionChromeKind } from '@/lib/selection-chrome';
+import { beatsForScopes } from '@/lib/timing-profiles';
+import { activeScopesFromControls } from '@/lib/feed-model';
 import {
   offerTargetAtPoint as resolveOfferTargetAtPoint,
   shouldBypassOfferCapture,
@@ -103,6 +105,9 @@ export function PreviewPane() {
   const offerCount = useEditorStore((s) => s.offerCount);
   const tcMode = useEditorStore((s) => s.tcMode);
   const ctaShape = useEditorStore((s) => s.ctaShape);
+  const includeRoundelFrame = useEditorStore((s) => s.includeRoundelFrame);
+  const frameCount = useEditorStore((s) => s.frameCount);
+  const roundelMode = useEditorStore((s) => s.roundelMode);
   const selectedFeedRow = useEditorStore((s) => s.selectedFeedRow);
   const canvasZoom = useEditorStore((s) => s.canvasZoom);
   const resizeMode = useEditorStore((s) => s.resizeMode);
@@ -140,7 +145,14 @@ export function PreviewPane() {
     width: sizeCreative.canvas.width * scale,
     height: sizeCreative.canvas.height * scale,
   } : autoShellStyle;
-  const activeScopes = useMemo(() => [`offers-${offerCount}`, `tc-${tcMode}`, `cta-${ctaShape}`], [offerCount, tcMode, ctaShape]);
+  const activeScopes = useMemo(() => activeScopesFromControls({
+    offerCount,
+    tcMode,
+    ctaShape,
+    includeRoundelFrame,
+    frameCount,
+    roundelMode,
+  }), [ctaShape, frameCount, includeRoundelFrame, offerCount, roundelMode, tcMode]);
   const activeOfferBlockIds = useMemo(() => new Set(offerBlockLayerIds(offerCount)), [offerCount]);
   const selectedTarget = useMemo(
     () => deriveSelectedTarget(
@@ -156,6 +168,7 @@ export function PreviewPane() {
   );
 
   const row = selectedFeedRow();
+  const activeBeats = useMemo(() => beatsForScopes(document, activeScopes), [activeScopes, document]);
   const seconds = document?.clock?.durationS ? (percent / 100) * document.clock.durationS : 0;
 
   useEffect(() => {
@@ -190,7 +203,7 @@ export function PreviewPane() {
       applyPreviewTextFitting(stage);
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [applyPreviewTextFitting, ctaShape, document, offerCount, row, size, tcMode]);
+  }, [activeScopes, applyPreviewTextFitting, document, offerCount, row, size]);
 
   const startSelectionDrag = useCallback((event: React.PointerEvent, deepestTargetId: string) => {
     if (event.button !== 0) return;
@@ -427,25 +440,46 @@ export function PreviewPane() {
       height: target.values?.height,
       fontSize: target.values?.fontSize,
     };
-    const scaleSnapshot = resizeMode === 'scale'
+    const scaleSnapshots = resizeMode === 'scale'
       ? buildGroupScaleSnapshots(document, size, [targetId], activeScopes)
-        .find((snapshot) => snapshot.targetId === targetId)
-      : null;
+      : [];
+    const scaleSnapshot = scaleSnapshots.find((snapshot) => snapshot.targetId === targetId) || null;
+    const rawStarts = new Map(scaleSnapshots.map((snapshot) => [snapshot.targetId, snapshot.raw]));
+    rawStarts.set(targetId, rawStart);
     const startX = event.clientX;
     const startY = event.clientY;
     let last: Record<string, unknown> = { ...start, fontSize: numberValue(target.values?.fontSize, 0) };
-    const touchedFields = new Set<string>();
+    const lastByTarget = new Map([[targetId, last]]);
+    const touchedFieldsByTarget = new Map();
+    const rememberWrite = (writeTargetId: string, field: string, value: unknown) => {
+      const targetLast = lastByTarget.get(writeTargetId) || {};
+      targetLast[field] = value;
+      lastByTarget.set(writeTargetId, targetLast);
+      const touched = touchedFieldsByTarget.get(writeTargetId) || new Set<string>();
+      touched.add(field);
+      touchedFieldsByTarget.set(writeTargetId, touched);
+    };
 
     const onMove = (moveEvent: PointerEvent) => {
       const dx = (moveEvent.clientX - startX) / scale;
       const dy = (moveEvent.clientY - startY) / scale;
-      const result = resizeMode === 'scale' && scaleSnapshot
-        ? scaledResizeWritesFromHandle(scaleSnapshot, handle, dx, dy)
-        : frameResizeWritesFromHandle(start, handle, dx, dy, { keepRatio: moveEvent.shiftKey });
+      if (resizeMode === 'scale' && scaleSnapshot) {
+        const result = scaledResizeWritesFromHandle(scaleSnapshot, handle, dx, dy);
+        const anchor = groupResizeAnchor(scaleSnapshot.bounds, handle);
+        for (const snapshot of scaleSnapshots) {
+          for (const write of scaledFieldWritesForSnapshot(snapshot, result.scale, anchor)) {
+            rememberWrite(snapshot.targetId, write.field, write.value);
+            updateTargetValue(snapshot.targetId, write.field, write.value, { record: false });
+          }
+        }
+        return;
+      }
+
+      const result = frameResizeWritesFromHandle(start, handle, dx, dy, { keepRatio: moveEvent.shiftKey });
       for (const write of result.writes) {
         const field = write.field;
         last[field] = write.value;
-        touchedFields.add(field);
+        rememberWrite(targetId, field, write.value);
         updateTargetValue(targetId, field, write.value, { record: false });
       }
     };
@@ -453,15 +487,23 @@ export function PreviewPane() {
     const onUp = () => {
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
-      pushHistory([...touchedFields].map((field) => ({
-        kind: 'creativeTarget',
-        size,
-        targetId,
-        activeScopes,
-        field,
-        before: rawStart[field],
-        after: last[field],
-      })));
+      const history = [];
+      for (const [historyTargetId, touchedFields] of touchedFieldsByTarget) {
+        const beforeValues = rawStarts.get(historyTargetId) || {};
+        const afterValues = lastByTarget.get(historyTargetId) || {};
+        for (const field of touchedFields) {
+          history.push({
+            kind: 'creativeTarget',
+            size,
+            targetId: historyTargetId,
+            activeScopes,
+            field,
+            before: beforeValues[field],
+            after: afterValues[field],
+          });
+        }
+      }
+      pushHistory(history);
     };
 
     window.addEventListener('pointermove', onMove);
@@ -543,7 +585,7 @@ export function PreviewPane() {
   ].filter(Boolean).join(' ');
 
   const frameStyle = (layer: Record<string, unknown>, targetId = layer.id) => {
-    const keyframes = compileAnimationClips(layer.clips || [], document?.clock?.beats || {});
+    const keyframes = compileAnimationClips(layer.clips || [], activeBeats);
     const frame = frameAtPercent(keyframes, percent);
     const transform = [
       `translate3d(${frame.translate[0]}px, ${frame.translate[1]}px, 0px)`,
@@ -664,7 +706,7 @@ export function PreviewPane() {
         <p
           className={`gwd-grp-offer offer-value ${selectionClassForTarget(valueId)} ${targetOutsideIsolation(valueId) ? 'is-outside-isolation' : ''}`}
           style={{ opacity: slotOutsideIsolation ? 1 : isolationOpacityForTarget(valueId) }}
-          dangerouslySetInnerHTML={{ __html: wrapPercent(row[`offer${index}_value_text`]) }}
+          dangerouslySetInnerHTML={{ __html: wrapOfferValueSymbols(row[`offer${index}_value_text`]) }}
           onPointerDown={(event) => startSelectionDrag(event, valueId)}
           onDoubleClick={(event) => {
             event.stopPropagation();
@@ -727,12 +769,14 @@ export function PreviewPane() {
       isHeadline ? 'sse-text sse-text-bold sse-headline' : '',
       /terms|unit-rate/.test(layer.id) ? 'sse-text sse-bottom-line' : '',
     ].filter(Boolean).join(' ');
-    const text = layer.id === 'headline-act1' ? fieldValue(row.heading1_text)
-      : layer.id === 'headline-act2' ? fieldValue(row.heading2_text)
-        : layer.id === 'headline-act3' ? fieldValue(row.heading3_text)
-          : layer.id === 'cta' ? fieldValue(row.cta_text)
-            : layer.id.startsWith('plus-') ? '+'
-              : '';
+    const boundField = layer.binding?.field;
+    const text = boundField ? fieldValue(row[boundField])
+      : layer.id === 'headline-act1' ? fieldValue(row.heading1_text)
+        : layer.id === 'headline-act2' ? fieldValue(row.heading2_text)
+          : layer.id === 'headline-act3' ? fieldValue(row.heading3_text)
+            : layer.id === 'cta' ? fieldValue(row.cta_text)
+              : layer.id.startsWith('plus-') ? '+'
+                : '';
     return (
       <Tag
         key={layer.id}
@@ -834,9 +878,7 @@ export function PreviewPane() {
   const stageClassName = [
     'stage',
     'page-content',
-    `offers-${offerCount}`,
-    tcMode === 'tcs_units' ? 'tc-prices' : 'tc-solo',
-    ctaShape === 'rectangle' ? 'cta-rect' : 'cta-roundel',
+    ...activeScopes,
     isolationDepth ? 'is-editing-inside' : '',
     isolationDepth ? `is-editing-depth-${isolationDepth}` : '',
   ].filter(Boolean).join(' ');

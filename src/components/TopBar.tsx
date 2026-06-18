@@ -51,6 +51,7 @@ export function TopBar() {
   const offerCount = useEditorStore((s) => s.offerCount);
   const tcMode = useEditorStore((s) => s.tcMode);
   const ctaShape = useEditorStore((s) => s.ctaShape);
+  const includeRoundelFrame = useEditorStore((s) => s.includeRoundelFrame);
   const historyIndex = useEditorStore((s) => s.historyIndex);
   const history = useEditorStore((s) => s.history);
   const creativeDirty = useEditorStore((s) => s.creativeDirty);
@@ -141,6 +142,16 @@ export function TopBar() {
             { value: 'rectangle', label: 'Rect', tip: 'Rectangular CTA button' },
           ]}
           onChange={(value) => setVariantControl('cta_type_enum', value)}
+        />
+        <SegmentedControl
+          label="Frame"
+          tip="Optional roundel frame"
+          value={includeRoundelFrame ? 'roundel' : 'standard'}
+          options={[
+            { value: 'standard', label: '3 Acts', tip: 'Standard three-act ad' },
+            { value: 'roundel', label: 'Roundel', tip: 'Four-act ad with offer roundel frame' },
+          ]}
+          onChange={(value) => setVariantControl('include_roundel_frame_bool', value === 'roundel' ? 'true' : 'false')}
         />
       </div>
 

@@ -1,10 +1,11 @@
 // @ts-nocheck
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { EditorIcon } from '@/components/EditorIcon';
 import { editableTargetsForLayer, groupedCreativeLayers, currentSizeCreative, findCreativeTarget, targetIdForLayerChild } from '@/lib/creative-model';
+import { activeScopesFromControls } from '@/lib/feed-model';
 import { isOfferLayerId, offerInteractionTree } from '@/lib/offer-interaction-model';
 import { OFFERS_BLOCK_ID, selectionHierarchy } from '@/lib/selection-groups';
 import { useEditorStore } from '@/store/editor-store';
@@ -39,6 +40,9 @@ export function LayerTree() {
   const offerCount = useEditorStore((s) => s.offerCount);
   const tcMode = useEditorStore((s) => s.tcMode);
   const ctaShape = useEditorStore((s) => s.ctaShape);
+  const includeRoundelFrame = useEditorStore((s) => s.includeRoundelFrame);
+  const frameCount = useEditorStore((s) => s.frameCount);
+  const roundelMode = useEditorStore((s) => s.roundelMode);
   const selectLayer = useEditorStore((s) => s.selectLayer);
   const selectTarget = useEditorStore((s) => s.selectTarget);
   const selectOffersBlock = useEditorStore((s) => s.selectOffersBlock);
@@ -59,11 +63,14 @@ export function LayerTree() {
   const zOrderedLayerIds = zOrderedLayers.map((layer) => layer.id);
   const groups = groupedCreativeLayers(zOrderedLayers);
   const activeTargetId = selectedTargetId || selectedLayerId;
-  const activeScopes = [
-    `offers-${offerCount}`,
-    tcMode === 'tcs_units' ? 'tc-prices' : 'tc-solo',
-    ctaShape === 'rectangle' ? 'cta-rect' : 'cta-roundel',
-  ];
+  const activeScopes = useMemo(() => activeScopesFromControls({
+    offerCount,
+    tcMode,
+    ctaShape,
+    includeRoundelFrame,
+    frameCount,
+    roundelMode,
+  }), [ctaShape, frameCount, includeRoundelFrame, offerCount, roundelMode, tcMode]);
   const layerById = new Map((sizeCreative?.layers || []).map((layer) => [layer.id, layer]));
   const offerTree = offerInteractionTree(document, size, activeScopes);
   const activeOfferIds = new Set(offerTree.children.map((child) => child.id));
@@ -309,7 +316,7 @@ export function LayerTree() {
                   <span className="layer-copy">
                     <span className="layer-name">{target.label}</span>
                     <span className="layer-meta">
-                      <LayerBadge icon="group" label="Position is relative to the parent offer slot" />
+                      <LayerBadge icon="group" label="Position is relative to the parent layer" />
                       <LayerBadge icon="style" label="Shared class rule unless this variant overrides it" tone="style" />
                     </span>
                   </span>

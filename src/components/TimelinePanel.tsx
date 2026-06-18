@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { EditorIcon } from '@/components/EditorIcon';
 import { animationFamilyForLayer, timelineSpanForClip } from '@/lib/animation-intents';
@@ -17,6 +17,8 @@ import {
   offerLayerVariantState,
   timelineLayerLabel,
 } from '@/lib/timeline-rows';
+import { beatsForScopes } from '@/lib/timing-profiles';
+import { activeScopesFromControls } from '@/lib/feed-model';
 import { PlayheadReadout } from '@/components/PlayheadReadout';
 import { useEditorStore } from '@/store/editor-store';
 
@@ -316,6 +318,9 @@ export function TimelinePanel() {
   const offerCount = useEditorStore((s) => s.offerCount);
   const tcMode = useEditorStore((s) => s.tcMode);
   const ctaShape = useEditorStore((s) => s.ctaShape);
+  const includeRoundelFrame = useEditorStore((s) => s.includeRoundelFrame);
+  const frameCount = useEditorStore((s) => s.frameCount);
+  const roundelMode = useEditorStore((s) => s.roundelMode);
   const selectedLayerId = useEditorStore((s) => s.selectedLayerId);
   const selectedTargetId = useEditorStore((s) => s.selectedTargetId);
   const selectedTargetIds = useEditorStore((s) => s.selectedTargetIds);
@@ -332,9 +337,17 @@ export function TimelinePanel() {
   const [dropTargetLayerId, setDropTargetLayerId] = useState('');
 
   const sizeCreative = currentSizeCreative(document, size);
-  const beats = document?.clock?.beats || {};
+  const activeScopes = useMemo(() => activeScopesFromControls({
+    offerCount,
+    tcMode,
+    ctaShape,
+    includeRoundelFrame,
+    frameCount,
+    roundelMode,
+  }), [ctaShape, frameCount, includeRoundelFrame, offerCount, roundelMode, tcMode]);
+  const beats = beatsForScopes(document, activeScopes);
   const seconds = document?.clock?.durationS ? (percent / 100) * document.clock.durationS : 0;
-  const activeOfferIds = activeOfferMemberIds(document, size, [`offers-${offerCount}`, `tc-${tcMode}`, `cta-${ctaShape}`]);
+  const activeOfferIds = activeOfferMemberIds(document, size, activeScopes);
   const timelineActiveOfferIds = activeOfferIds.length ? activeOfferIds : null;
   const zOrderedLayers = [...(sizeCreative?.layers || [])].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
   const zOrderedLayerIds = zOrderedLayers.map((layer) => layer.id);

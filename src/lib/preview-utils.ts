@@ -1,15 +1,17 @@
 // @ts-nocheck
+import { wrapOfferValueSymbolsHtml } from '@/lib/offer-value-symbols';
+
 export const fieldValue = (value: unknown) => {
   if (value && typeof value === 'object' && 'Url' in value) return (value as { Url?: string }).Url || '';
   if (value === undefined || value === null) return '';
   return String(value);
 };
 
-export const wrapPercent = (value: unknown) => {
-  const text = fieldValue(value).trim();
-  if (!text.endsWith('%')) return text;
-  return `${text.slice(0, -1)}<span class="sym-pct">%</span>`;
-};
+/** Wrap trailing % or leading £/€ in offer values for smaller symbol styling. */
+export const wrapOfferValueSymbols = (value: unknown) => wrapOfferValueSymbolsHtml(fieldValue(value));
+
+/** @deprecated Use wrapOfferValueSymbols */
+export const wrapPercent = wrapOfferValueSymbols;
 
 /** Map a campaign asset path to the editor asset proxy URL. */
 export const assetUrl = (src: string) => {

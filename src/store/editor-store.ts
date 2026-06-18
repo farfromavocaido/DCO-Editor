@@ -4,6 +4,7 @@
 import { create } from 'zustand';
 
 import {
+  activeScopesFromControls,
   controlsFromFeedRow,
   createFeedDraft,
   selectFeedDraftVariant,
@@ -43,6 +44,7 @@ import {
 } from '@/lib/selection-state';
 import { activeOfferMemberIds, offerInteractionTree } from '@/lib/offer-interaction-model';
 import { isOfferTimelineLayer } from '@/lib/timeline-rows';
+import { activeFrameScope, beatsForFrameScope } from '@/lib/timing-profiles';
 import {
   addAnimationIntentToLayer,
   copyClipToAnimationFamily,
@@ -53,6 +55,7 @@ import {
   clearCreativeTargetActiveOverride,
   currentSizeCreative,
   deleteCreativeLayer,
+  deepClone,
   duplicateCreativeLayer,
   findCreativeLayer,
   findCreativeTarget,
@@ -118,6 +121,10 @@ const creativeFitRules = (state) => {
     .filter(Boolean);
 };
 
+const editableBeatName = (value) => (
+  typeof value === 'string' && /^[a-z0-9_]+$/i.test(value) ? value : ''
+);
+
 const defaultDrillChildId = (state, targetId) => {
   const tree = offerInteractionTree(
     state.creativeDocument,
@@ -135,6 +142,9 @@ export const useEditorStore = create<any>((set, get) => ({
   offerCount: 1,
   tcMode: 'tcs_only',
   ctaShape: 'roundel',
+  includeRoundelFrame: false,
+  frameCount: 3,
+  roundelMode: 'copy-only',
   percent: 19,
   feedProfileName: '',
   feedFields: [],
@@ -167,10 +177,15 @@ export const useEditorStore = create<any>((set, get) => ({
   setPercent: (percent) => set({ percent }),
 
   activeScopes: () => {
-    const { offerCount, tcMode, ctaShape } = get();
-    const tcScope = tcMode === 'tcs_units' ? 'tc-prices' : 'tc-solo';
-    const ctaScope = ctaShape === 'rectangle' ? 'cta-rect' : 'cta-roundel';
-    return [`offers-${offerCount}`, tcScope, ctaScope];
+    const { offerCount, tcMode, ctaShape, includeRoundelFrame, frameCount, roundelMode } = get();
+    return activeScopesFromControls({
+      offerCount,
+      tcMode,
+      ctaShape,
+      includeRoundelFrame,
+      frameCount,
+      roundelMode,
+    });
   },
 
   selectedFeedRow: () => selectedFeedRowFromState(get()),
@@ -181,6 +196,9 @@ export const useEditorStore = create<any>((set, get) => ({
       offerCount: controls.offerCount,
       tcMode: controls.tcMode,
       ctaShape: controls.ctaShape,
+      includeRoundelFrame: controls.includeRoundelFrame,
+      frameCount: controls.frameCount,
+      roundelMode: controls.roundelMode,
     });
     get().reconcileOfferSelection();
   },
@@ -342,6 +360,10 @@ export const useEditorStore = create<any>((set, get) => ({
     }
     if (change.kind === 'creativeClip') {
       get().applyCreativeLayerClipValue(change.size, change.layerId, change.clipId, change.field, value, change.target);
+      return;
+    }
+    if (change.kind === 'creativeBeat') {
+      get().applyCreativeBeatValue(change.frameScope, change.beatName, value);
       return;
     }
     if (change.kind === 'creativeFit') {
@@ -1002,6 +1024,20 @@ export const useEditorStore = create<any>((set, get) => ({
     get().setStatus('Unsaved creative changes', 'warn');
   },
 
+  applyCreativeBeatValue: (frameScope, beatName, value) => {
+    const state = get();
+    if (!state.creativeDocument || !beatName) return;
+    const next = deepClone(state.creativeDocument);
+    next.clock = next.clock || {};
+    next.clock.profiles = next.clock.profiles || {};
+    next.clock.profiles[frameScope] = {
+      ...beatsForFrameScope(next, frameScope),
+      [beatName]: Number(value),
+    };
+    set({ creativeDocument: next, creativeDirty: true });
+    get().setStatus(`Updated ${frameScope} timing`, 'warn');
+  },
+
   updateCreativeLayerClipValue: (layerId, clipId, field, value, target = 'clip') => {
     const state = get();
     const size = state.size;
@@ -1010,6 +1046,20 @@ export const useEditorStore = create<any>((set, get) => ({
     if (!clip) return;
     const previous = target === 'params' ? clip.params?.[field] : clip[field];
     const nextValue = value === '' ? '' : typeof value === 'boolean' ? value : Number.isFinite(Number(value)) ? Number(value) : value;
+    const beatName = target === 'clip' && ['start', 'end'].includes(field) ? editableBeatName(previous) : '';
+    if (beatName && Number.isFinite(Number(nextValue))) {
+      const frameScope = activeFrameScope(state.activeScopes());
+      const previousBeatValue = beatsForFrameScope(state.creativeDocument, frameScope)[beatName];
+      get().applyCreativeBeatValue(frameScope, beatName, Number(nextValue));
+      get().pushHistory([{
+        kind: 'creativeBeat',
+        frameScope,
+        beatName,
+        before: previousBeatValue,
+        after: Number(nextValue),
+      }]);
+      return;
+    }
     get().applyCreativeLayerClipValue(size, layerId, clipId, field, nextValue, target);
     get().pushHistory([{ kind: 'creativeClip', size, layerId, clipId, field, target, before: previous, after: nextValue }]);
   },

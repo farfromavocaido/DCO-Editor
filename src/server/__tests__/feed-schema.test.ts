@@ -33,6 +33,9 @@ const sampleRow = {
   tc_units_text: 'Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat',
   cta_type_enum: 'roundel',
   cta_text: 'Switch today',
+  include_roundel_frame_bool: false,
+  roundel_text_text: '',
+  roundel_value_text: '',
   background_image_url: 'https://example.com/bg.jpg',
 };
 
@@ -72,6 +75,9 @@ test('defines metadata for every existing Studio profile field', () => {
     'tc_units_text',
     'cta_type_enum',
     'cta_text',
+    'include_roundel_frame_bool',
+    'roundel_text_text',
+    'roundel_value_text',
     'background_image_url',
   ]);
   assert.deepEqual(FEED_SCHEMA_FIELDS.find((field) => field.name === 'tc_type_enum').options, ['tcs_only', 'tcs_units']);
@@ -91,12 +97,41 @@ test('reads profile name, rows, and exposes the background image field', async (
 
 test('validates enums and coerces offer count into the supported range', () => {
   const rows = validateFeedRows([
-    { ...sampleRow, offer_count_num: '9', tc_type_enum: 'tcs_units', cta_type_enum: 'rectangle' },
+    { ...sampleRow, offer_count_num: '9', tc_type_enum: 'tcs_units', cta_type_enum: 'rectangle', include_roundel_frame_bool: 'true' },
   ]);
 
   assert.equal(rows[0].offer_count_num, 3);
   assert.equal(rows[0].tc_type_enum, 'tcs_units');
   assert.equal(rows[0].cta_type_enum, 'rectangle');
+  assert.equal(rows[0].include_roundel_frame_bool, true);
+});
+
+test('normalizes legacy solo/prices tc enum values to canonical feed values', () => {
+  const rows = validateFeedRows([
+    { ...sampleRow, tc_type_enum: 'solo' },
+    { ...sampleRow, tc_type_enum: 'prices' },
+  ]);
+
+  assert.equal(rows[0].tc_type_enum, 'tcs_only');
+  assert.equal(rows[1].tc_type_enum, 'tcs_units');
+});
+
+test('readFeedSchema upgrades legacy tc enum options from the creative document', async () => {
+  const file = await writeTempCreativeDocument();
+  const raw = JSON.parse(await fs.readFile(file, 'utf8'));
+  raw.feed.fields = raw.feed.fields.map((field) => (
+    field.name === 'tc_type_enum'
+      ? { ...field, options: ['solo', 'prices'] }
+      : field
+  ));
+  await fs.writeFile(file, `${JSON.stringify(raw, null, 2)}\n`);
+
+  const payload = await readFeedSchema(file);
+
+  assert.deepEqual(
+    payload.fields.find((field) => field.name === 'tc_type_enum').options,
+    ['tcs_only', 'tcs_units'],
+  );
 });
 
 test('rejects invalid sample row enum values', () => {

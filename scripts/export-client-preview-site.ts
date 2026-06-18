@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 import { readCreativeDocument } from '../src/server/creative-document';
 import { buildClientPreviewPackageEntries } from '../src/server/creative-exporter';
+import { wrapPreviewSiteWithPasswordGate } from './preview-site-password-gate';
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const siteRoot = path.resolve(appRoot, 'site');
@@ -26,19 +27,22 @@ const main = async () => {
   let previewHtml: string | null = null;
 
   for (const entry of entries) {
+    if (entry.path === 'preview-page.html') {
+      previewHtml = String(entry.data);
+      continue;
+    }
     const data = Buffer.isBuffer(entry.data) ? entry.data : Buffer.from(String(entry.data));
     totalBytes += data.length;
     await writeEntry(entry.path, data);
-    if (entry.path === 'preview-page.html') {
-      previewHtml = String(entry.data);
-    }
   }
 
   if (!previewHtml) {
     throw new Error('Client preview export did not produce preview-page.html');
   }
 
-  await writeEntry('index.html', previewHtml);
+  const gatedIndex = wrapPreviewSiteWithPasswordGate(previewHtml);
+  totalBytes += Buffer.byteLength(gatedIndex);
+  await writeEntry('index.html', gatedIndex);
   await writeEntry('.nojekyll', '');
 
   console.log(`Exported ${entries.length + 2} files (${totalBytes} bytes) to ${siteRoot}`);

@@ -3,7 +3,7 @@
 ## [Unreleased]
 
 ### Added
-- **GitHub Pages client preview:** `npm run export:preview-site` writes the static client preview (from `buildClientPreviewPackageEntries`) to `site/`; GitHub Actions deploys it to [farfromavocaido.github.io/DCO-Editor/](https://farfromavocaido.github.io/DCO-Editor/) on push to `main` (no copy validator on the hosted preview).
+- **GitHub Pages password gate:** hosted client preview at `/` requires password `ssedco` (session-based, client-side only; not applied to editor ZIP exports).
 - Vendored `campaign/assets/fonts/MuseoSans_700.otf` for reproducible CI and ZIP exports.
 
 ### Changed

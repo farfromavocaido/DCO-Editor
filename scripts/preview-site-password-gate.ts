@@ -32,7 +32,7 @@ export const wrapPreviewSiteWithPasswordGate = (html: string, password = PREVIEW
         place-items: center;
         background: #0b0f13;
         color: #edf7f7;
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-family: "museo-sans", "Museo Sans", sans-serif;
       }
       #preview-password-gate[hidden] {
         display: none !important;

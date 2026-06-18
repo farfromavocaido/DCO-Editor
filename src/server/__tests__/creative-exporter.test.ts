@@ -98,11 +98,17 @@ test('builds a client preview package with html variants, assets, and self-conta
   assert.match(preview, /SSE_DCO_PREVIEW_STATE/);
   assert.match(preview, /data-ad-frame-shell/);
   assert.match(preview, /name="Ad_Size"/);
-  assert.match(preview, /name="Preview_Scale"/);
-  assert.match(preview, /name="background_image_url"/);
+  assert.match(preview, /zoom-controls/);
+  assert.match(preview, /data-zoom-mode="fit"/);
   assert.match(preview, />Fit</);
   assert.match(preview, />1x</);
   assert.match(preview, />2x</);
+  assert.match(preview, /data-zoom-step="-1"/);
+  assert.match(preview, /data-zoom-step="1"/);
+  assert.doesNotMatch(preview, /name="Preview_Scale"/);
+  assert.match(preview, /name="background_image_url"/);
+  assert.match(preview, /use\.typekit\.net\/grv2rfu\.css/);
+  assert.match(preview, /museo-sans/);
   assert.match(preview, /Replay ad/);
   assert.match(preview, /function fitAdFrames/);
   assert.match(preview, /window\.__SSE_DCO_CLIENT_PREVIEW__/);
@@ -220,8 +226,9 @@ test('renders the client preview page as one self-contained document shell', asy
   assert.match(html, /grid-template-columns: 82px minmax\(0, 1fr\)/);
   assert.match(html, /DCO Preview/);
   assert.match(html, /brand\/BGlogo_SVG\.svg/);
-  assert.match(html, /font-family: "Museo"/);
-  assert.doesNotMatch(html, /<link /);
+  assert.match(html, /use\.typekit\.net\/grv2rfu\.css/);
+  assert.match(html, /font-family: "museo-sans"/);
+  assert.match(html, /<link rel="stylesheet" href="https:\/\/use\.typekit\.net\/grv2rfu\.css">/);
   assert.doesNotMatch(html, /SSE_DCO_VALIDATE/);
 });
 

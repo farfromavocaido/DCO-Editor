@@ -1285,6 +1285,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SSE DCO client preview</title>
+    <link rel="stylesheet" href="https://use.typekit.net/grv2rfu.css">
     <style>
       :root {
         color-scheme: dark;
@@ -1306,8 +1307,8 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         overflow: hidden;
         background: var(--bg);
         color: var(--ink);
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        font-weight: 400;
+        font-family: "museo-sans", "Museo Sans", sans-serif;
+        font-weight: 300;
       }
       header {
         display: flex;
@@ -1318,12 +1319,14 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         border-bottom: 1px solid var(--line);
         background: #10161d;
       }
-      @font-face {
-        font-family: "Museo";
-        src: url("ads/assets/fonts/MuseoSans_700.otf") format("opentype");
-        font-weight: 700;
-        font-style: normal;
-        font-display: swap;
+      .header-title {
+        margin: 0;
+        color: var(--ink);
+        font-family: "museo-sans", "Museo Sans", sans-serif;
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 1;
+        white-space: nowrap;
       }
       .brand-lockup {
         display: flex;
@@ -1349,15 +1352,6 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         line-height: 1;
         flex: 0 0 auto;
       }
-      .header-title {
-        margin: 0;
-        color: var(--ink);
-        font-family: "Museo", "Museo Sans", Georgia, serif;
-        font-size: 24px;
-        font-weight: 700;
-        line-height: 1;
-        white-space: nowrap;
-      }
       .layout {
         display: grid;
         grid-template-columns: minmax(400px, 460px) minmax(0, 1fr);
@@ -1381,22 +1375,22 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
       h1 {
         margin: 0;
         font-size: 24px;
-        font-weight: 650;
+        font-weight: 500;
         line-height: 1;
       }
       h2 {
         margin: 16px 0 8px;
         color: var(--teal);
         font-size: 11px;
-        font-weight: 650;
-        letter-spacing: 0;
+        font-weight: 500;
+        letter-spacing: 0.04em;
         text-transform: uppercase;
       }
       h3 {
         margin: 4px 0 8px;
         color: var(--ink);
         font-size: 13px;
-        font-weight: 600;
+        font-weight: 400;
       }
       label {
         display: grid;
@@ -1406,8 +1400,8 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         margin-bottom: 7px;
         color: var(--muted);
         font-size: 11px;
-        font-weight: 500;
-        letter-spacing: 0;
+        font-weight: 300;
+        letter-spacing: 0.04em;
         text-transform: uppercase;
       }
       label span {
@@ -1423,7 +1417,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         color: var(--ink);
         font: inherit;
         font-size: 14px;
-        font-weight: 400;
+        font-weight: 300;
         min-height: 34px;
         padding: 7px 9px;
         text-transform: none;
@@ -1467,6 +1461,15 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         gap: 16px;
         margin-bottom: 16px;
       }
+      .kicker {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--teal);
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
       .preview-head p {
         margin: 6px 0 0;
         max-width: 620px;
@@ -1477,10 +1480,40 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         align-items: center;
         gap: 10px;
       }
-      .scale-control {
-        grid-template-columns: auto 92px;
-        gap: 8px;
-        margin: 0;
+      .zoom-controls {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        flex: 0 0 auto;
+      }
+      .zoom-controls button {
+        display: grid;
+        min-width: 24px;
+        height: 24px;
+        place-items: center;
+        padding: 0 7px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        background: #101821;
+        color: var(--ink);
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 10px;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+      .zoom-controls button:hover,
+      .zoom-controls button[aria-pressed="true"] {
+        border-color: var(--teal);
+        background: rgba(22, 199, 183, 0.12);
+        color: var(--teal);
+      }
+      .zoom-readout {
+        min-width: 36px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 500;
+        text-align: right;
       }
       .ad-card {
         display: flex;
@@ -1504,6 +1537,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
       }
       .ad-card-head strong {
         color: var(--ink);
+        font-weight: 500;
       }
       .replay-button {
         border: 1px solid var(--line);
@@ -1513,7 +1547,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         cursor: pointer;
         font: inherit;
         font-size: 13px;
-        font-weight: 500;
+        font-weight: 400;
         min-height: 34px;
         padding: 7px 12px;
       }
@@ -1652,13 +1686,14 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
             <h1 data-active-size-label>${escapeHtml(initialSize.size)}</h1>
           </div>
           <div class="preview-actions">
-            <label class="scale-control"><span>Scale</span>
-              <select name="Preview_Scale" form="controls">
-                <option value="fit">Fit</option>
-                <option value="1">1x</option>
-                <option value="2">2x</option>
-              </select>
-            </label>
+            <div class="zoom-controls" aria-label="Preview zoom">
+              <button type="button" class="zoom-button" data-zoom-step="-1" aria-label="Zoom out">−</button>
+              <button type="button" class="zoom-button" data-zoom-mode="fit" aria-label="Fit to viewport" aria-pressed="true">Fit</button>
+              <button type="button" class="zoom-button" data-zoom-mode="1" aria-label="100% zoom">1x</button>
+              <button type="button" class="zoom-button" data-zoom-mode="2" aria-label="200% zoom">2x</button>
+              <button type="button" class="zoom-button" data-zoom-step="1" aria-label="Zoom in">+</button>
+              <span class="zoom-readout" data-zoom-readout>Fit</span>
+            </div>
             <button class="replay-button" id="replay-ad" type="button">Replay ad</button>
           </div>
         </div>
@@ -1685,7 +1720,8 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         var activeSizeLabel = document.querySelector('[data-active-size-label]');
         var activeDimensions = document.querySelector('[data-active-dimensions]');
         var replayButton = document.getElementById('replay-ad');
-        var scaleControl = document.querySelector('[name="Preview_Scale"]');
+        var previewZoom = 'fit';
+        var ZOOM_LEVELS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
 
         function field(name) {
           var control = controls.elements[name] || document.querySelector('[name="' + name + '"]');
@@ -1747,13 +1783,47 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           fitAdFrames();
         }
 
+        function zoomLabel(zoom) {
+          if (zoom === 'fit') return 'Fit';
+          if (zoom === 1) return '1x';
+          if (zoom === 2) return '2x';
+          return Math.round(Number(zoom) * 100) + '%';
+        }
+
+        function updateZoomButtons() {
+          Array.prototype.forEach.call(document.querySelectorAll('[data-zoom-mode]'), function(button) {
+            var mode = button.getAttribute('data-zoom-mode');
+            var pressed = mode === 'fit'
+              ? previewZoom === 'fit'
+              : Number(mode) === Number(previewZoom);
+            button.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+          });
+          var readout = document.querySelector('[data-zoom-readout]');
+          if (readout) readout.textContent = zoomLabel(previewZoom);
+        }
+
+        function setPreviewZoom(next) {
+          previewZoom = next;
+          updateZoomButtons();
+          fitAdFrames();
+        }
+
+        function nextZoomLevel(current, direction) {
+          var index = ZOOM_LEVELS.findIndex(function(level) { return level >= current; });
+          if (index < 0) index = ZOOM_LEVELS.length - 1;
+          if (direction > 0) {
+            return ZOOM_LEVELS[Math.min(ZOOM_LEVELS.length - 1, current >= ZOOM_LEVELS[index] ? index + 1 : index)];
+          }
+          return ZOOM_LEVELS[Math.max(0, current <= ZOOM_LEVELS[index] ? index - 1 : index)];
+        }
+
         function previewScale(frameWidth, frameHeight, viewport) {
-          var mode = field('Preview_Scale') || 'fit';
-          if (mode === '1') return 1;
-          if (mode === '2') return 2;
-          var availableWidth = Math.max(1, viewport.clientWidth - 2);
-          var availableHeight = Math.max(1, viewport.clientHeight - 2);
-          return Math.min(1, availableWidth / frameWidth, availableHeight / frameHeight);
+          if (previewZoom === 'fit') {
+            var availableWidth = Math.max(1, viewport.clientWidth - 2);
+            var availableHeight = Math.max(1, viewport.clientHeight - 2);
+            return Math.min(1, availableWidth / frameWidth, availableHeight / frameHeight);
+          }
+          return Number(previewZoom);
         }
 
         function fitAdFrames() {
@@ -1792,8 +1862,21 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           frame.addEventListener('load', updateAds);
         });
         if (replayButton) replayButton.addEventListener('click', replayAd);
-        if (scaleControl) scaleControl.addEventListener('change', updateAds);
+        Array.prototype.forEach.call(document.querySelectorAll('[data-zoom-mode]'), function(button) {
+          button.addEventListener('click', function() {
+            var mode = button.getAttribute('data-zoom-mode');
+            setPreviewZoom(mode === 'fit' ? 'fit' : Number(mode));
+          });
+        });
+        Array.prototype.forEach.call(document.querySelectorAll('[data-zoom-step]'), function(button) {
+          button.addEventListener('click', function() {
+            var direction = Number(button.getAttribute('data-zoom-step'));
+            var current = previewZoom === 'fit' ? 1 : Number(previewZoom);
+            setPreviewZoom(nextZoomLevel(current, direction));
+          });
+        });
         window.addEventListener('resize', fitAdFrames);
+        updateZoomButtons();
         fitAdFrames();
         updateAds();
       })();

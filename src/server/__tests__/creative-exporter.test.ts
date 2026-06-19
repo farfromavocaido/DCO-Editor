@@ -63,7 +63,7 @@ test('exports production HTML with referenced dynamic fields, not baked feed row
   assert.match(html, /data-dco-field="roundel_value_text"/);
   assert.match(html, /data-dco-field="background_image_url"/);
   assert.match(html, /data-dco-state="offer_count_num,tc_type_enum,cta_type_enum,include_roundel_frame_bool,roundel_value_text"/);
-  assert.match(html, /\.frames-4 \.headline-act3/);
+  assert.match(html, /\.frames-4 #headline-act4/);
   assert.doesNotMatch(html, /window\.__SSE_DCO_PREVIEW__\s*=/);
   assert.doesNotMatch(html, /single_elec15_solo_roundel/);
 });
@@ -280,8 +280,8 @@ test('exports legacy static first-frame state and GWD skeleton text reset', asyn
   const html = renderStudioReadyHtml(document, '300x600');
 
   assert.match(html, /p,\s*h1,\s*h2,\s*h3\s*\{\s*margin:\s*0px;/);
-  assert.match(html, /\.headline-act1\s*\{[\s\S]*?transform:\s*translate3d\(320px, 0px, 0px\);[\s\S]*?opacity:\s*0;/);
-  assert.match(html, /\.offer-slot-1\s*\{[\s\S]*?transform:\s*translate3d\(340px, 0px, 0px\);[\s\S]*?opacity:\s*0;/);
+  assert.match(html, /#headline-act1\s*\{[\s\S]*?transform:\s*translate3d\(320px, 0px, 0px\);[\s\S]*?opacity:\s*0;/);
+  assert.match(html, /\.offer-slot-1\s*\{[\s\S]*?transform:\s*translate3d\(60px, 0px, 0px\);[\s\S]*?opacity:\s*0;/);
   assert.match(html, /\.plus-1\s*\{[\s\S]*?font-size:\s*43px;[\s\S]*?transform:\s*translate3d\(0px, -10px, 0px\);/);
   assert.doesNotMatch(html, /font-size:\s*43pxpx/);
 });
@@ -310,7 +310,7 @@ test('exports creative text fit rules for dynamic headline binding', async () =>
 
   const html = renderStudioReadyHtml(document, '300x250');
 
-  assert.match(html, /var textFitRules = .*"cssClass":"headline-act2"/);
+  assert.match(html, /var textFitRules = .*"cssClass":"sse-headline"/);
   assert.match(html, /"minFontSize":22/);
   assert.match(html, /"maxLines":2/);
   assert.match(html, /fitBoundText\(\);\s+bindOfferTexts\(data\);/);
@@ -337,5 +337,5 @@ test('uses sensible default text-fit minimums based on designed font size', asyn
   const document = await readCreativeDocument();
   const html = renderStudioReadyHtml(document, '300x250');
 
-  assert.match(html, /"cssClass":"headline-act2","mode":"shrink","minFontSize":14,"maxLines":2/);
+  assert.match(html, /"cssClass":"sse-headline","mode":"sharedEqualizedFit","maxLines":4/);
 });

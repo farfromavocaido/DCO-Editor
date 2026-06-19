@@ -6,12 +6,16 @@ import path from 'node:path';
 import {
   addCreativeShapeLayer,
   clearCreativeTargetActiveOverride,
+  copyCreativeHeadlineOfferLayout,
   deleteCreativeLayer,
   duplicateCreativeLayer,
   editableTargetsForLayer,
   findCreativeTarget,
   groupedCreativeLayers,
   promoteCreativeTargetToSharedStyle,
+  resetCreativeHeadlineOfferLayout,
+  resolveHeadlineLayoutValues,
+  headlineOfferLayoutStatus,
   moveCreativeLayerToZIndex,
   reorderCreativeLayerZ,
   updateCreativeLayerBase,
@@ -200,7 +204,7 @@ test('adds a named rectangle shape layer', () => {
   assert.equal(shape.label, 'Rectangle 1');
   assert.equal(shape.kind, 'shape');
   assert.equal(shape.base.width, 120);
-  assert.equal(shape.base.backgroundColor, 'rgba(0, 169, 130, 0.2)');
+  assert.equal(shape.base.backgroundColor, 'rgba(0, 229, 165, 0.2)');
 });
 
 test('reorders layer z-index values', () => {
@@ -460,7 +464,7 @@ test('resolves and writes 300x250 headline offer-count variants', () => {
   assert.equal(target.values.left, 10);
   assert.equal(target.values.width, 280);
   assert.equal(target.writeSource.kind, 'variantRule');
-  assert.equal(target.writeSource.ruleId, 'offers-2|headline-act1');
+  assert.equal(target.writeSource.ruleId, 'offers-2|sse-headline');
 
   const next = updateCreativeTargetValue(
     doc,
@@ -470,11 +474,53 @@ test('resolves and writes 300x250 headline offer-count variants', () => {
     'left',
     42,
   );
-  const variant = next.sizes['300x250'].variantRules.find((rule) => rule.id === 'offers-2|headline-act1');
-  const layer = next.sizes['300x250'].layers.find((item) => item.id === 'headline-act1');
+  const variant = next.sizes['300x250'].variantRules.find((rule) => rule.id === 'offers-2|sse-headline');
+  const shared = next.sizes['300x250'].classRules.find((rule) => rule.cssClass === 'sse-headline');
 
   assert.equal(variant.props.left, 42);
-  assert.equal(layer.base.left, 17);
+  assert.equal(shared.properties.left, 17);
+});
+
+test('every size exposes offers-2 and offers-3 headline variant rules', () => {
+  const doc = loadPersistedCreative();
+
+  for (const [size, sizeCreative] of Object.entries(doc.sizes)) {
+    const headlines = (sizeCreative.layers || []).filter((layer) => String(layer.id || '').startsWith('headline-act'));
+    if (!headlines.length) continue;
+
+    for (const scope of ['offers-2', 'offers-3']) {
+      const rule = (sizeCreative.variantRules || []).find((item) => item.id === `${scope}|sse-headline`);
+      assert.ok(rule, `${size} missing ${scope}|sse-headline`);
+      assert.equal(rule.cssClass, 'sse-headline');
+      assert.ok(rule.props?.width, `${size} ${scope} headline variant missing width`);
+    }
+
+    const single = findCreativeTarget(doc, size, 'headline-act1', ['offers-1']);
+    const dual = findCreativeTarget(doc, size, 'headline-act1', ['offers-2']);
+    const triple = findCreativeTarget(doc, size, 'headline-act1', ['offers-3']);
+    assert.equal(single.writeSource.kind, 'classRule');
+    assert.equal(dual.writeSource.kind, 'variantRule');
+    assert.equal(triple.writeSource.kind, 'variantRule');
+  }
+});
+
+test('copies headline layout between offer counts and can reset to baseline', () => {
+  const doc = loadPersistedCreative();
+  const copied = copyCreativeHeadlineOfferLayout(doc, '300x250', 2, 3);
+  const triple = resolveHeadlineLayoutValues(copied, '300x250', 3);
+  const dual = resolveHeadlineLayoutValues(copied, '300x250', 2);
+
+  assert.deepEqual(triple, dual);
+  assert.equal(
+    headlineOfferLayoutStatus(copied, '300x250').find((item) => item.offerCount === 3)?.tone,
+    'linked',
+  );
+
+  const reset = resetCreativeHeadlineOfferLayout(copied, '300x250', 3);
+  assert.deepEqual(
+    resolveHeadlineLayoutValues(reset, '300x250', 3),
+    resolveHeadlineLayoutValues(reset, '300x250', 1),
+  );
 });
 
 test('merges active variant rules in active scope order and writes to the highest priority rule', () => {
@@ -487,24 +533,28 @@ test('merges active variant rules in active scope order and writes to the highes
             id: 'headline-act3',
             label: 'Headline',
             kind: 'text',
-            base: { left: 17, top: 26, width: 200, cssClass: 'headline-act3' },
+            base: { cssClass: 'sse-headline' },
             clips: [],
+          },
+        ],
+        classRules: [
+          {
+            cssClass: 'sse-headline',
+            properties: { left: 17, top: 26, width: 200, fontSize: 16, height: 30 },
           },
         ],
         variantRules: [
           {
-            id: 'offers-2|headline-act3',
+            id: 'offers-2|sse-headline',
             scope: 'offers-2',
-            layerId: 'headline-act3',
-            cssClass: 'headline-act3',
+            cssClass: 'sse-headline',
             props: { left: 10, width: 280 },
             editable: true,
           },
           {
-            id: 'frames-4|headline-act3',
+            id: 'frames-4|sse-headline',
             scope: 'frames-4',
-            layerId: 'headline-act3',
-            cssClass: 'headline-act3',
+            cssClass: 'sse-headline',
             props: { top: 18, width: 190 },
             editable: true,
           },
@@ -518,7 +568,7 @@ test('merges active variant rules in active scope order and writes to the highes
   assert.equal(target.values.left, 10);
   assert.equal(target.values.top, 18);
   assert.equal(target.values.width, 190);
-  assert.equal(target.writeSource.ruleId, 'frames-4|headline-act3');
+  assert.equal(target.writeSource.ruleId, 'frames-4|sse-headline');
 
   const next = updateCreativeTargetValue(doc, '300x250', 'headline-act3', ['offers-2', 'frames-4'], 'top', 22);
   assert.equal(next.sizes['300x250'].variantRules[0].props.top, undefined);

@@ -12,6 +12,43 @@ export const findCreativeLayer = (
   layerId: string,
 ) => currentSizeCreative(document, size)?.layers?.find((layer: Record<string, unknown>) => layer.id === layerId);
 
+export const HEADLINE_CSS_CLASS = 'sse-headline';
+
+export const HEADLINE_STYLE_FIELDS = new Set([
+  'left',
+  'top',
+  'right',
+  'bottom',
+  'width',
+  'height',
+  'fontSize',
+  'textAlign',
+  'lineHeight',
+  'justifyContent',
+  'minFontSize',
+  'whiteSpace',
+  'letterSpacing',
+]);
+
+export const HEADLINE_LAYOUT_FIELDS = [
+  'left',
+  'top',
+  'width',
+  'height',
+  'fontSize',
+  'lineHeight',
+  'letterSpacing',
+  'textAlign',
+  'justifyContent',
+  'display',
+  'alignItems',
+  'whiteSpace',
+];
+
+export const isHeadlineLayer = (layer: Record<string, unknown> | null | undefined) => (
+  String(layer?.id || '').startsWith('headline-act')
+);
+
 const offerChildDefinitions = [
   {
     id: 'offer-value',
@@ -145,10 +182,40 @@ export const findCreativeTarget = (
       description: child.description,
       values,
       base: values,
+      fit: classRule?.fit || {},
       clips: layer.clips || [],
       writeSource: variantRule
         ? { kind: 'variantRule', ruleId: variantRule.id, scope: variantRule.scope }
         : { kind: 'classRule', cssClass: child.cssClass },
+    };
+  }
+
+  if (isHeadlineLayer(layer)) {
+    const classRule = findClassRule(sizeCreative, HEADLINE_CSS_CLASS);
+    const identity = { cssClass: HEADLINE_CSS_CLASS };
+    const variantRule = findActiveVariantRule(sizeCreative, identity, activeScopes);
+    const variantProps = mergedActiveVariantProps(sizeCreative, identity, activeScopes);
+    const values = {
+      ...(classRule?.properties || {}),
+      ...variantProps,
+    };
+    return {
+      id: layer.id,
+      label: layer.label || layer.id,
+      kind: layer.kind || 'layer',
+      layer,
+      parentLayerId: '',
+      cssClass: HEADLINE_CSS_CLASS,
+      coordinateScope: 'canvas',
+      description: variantRule
+        ? `Editing ${variantRule.scope} headline overrides (shared by all acts).`
+        : 'Shared headline placement for acts 1–3.',
+      values,
+      base: values,
+      clips: layer.clips || [],
+      writeSource: variantRule
+        ? { kind: 'variantRule', ruleId: variantRule.id, scope: variantRule.scope }
+        : { kind: 'classRule', cssClass: HEADLINE_CSS_CLASS },
     };
   }
 
@@ -202,8 +269,15 @@ export const updateCreativeLayerBase = (
   value: unknown,
 ) => {
   const next = deepClone(document);
+  const sizeCreative = currentSizeCreative(next, size);
+  if (!sizeCreative) throw new Error(`Unknown size: ${size}`);
   const layer = findCreativeLayer(next, size, layerId);
   if (!layer) throw new Error(`Unknown layer: ${layerId}`);
+  if (isHeadlineLayer(layer) && HEADLINE_STYLE_FIELDS.has(field)) {
+    const classRule = ensureClassRule(sizeCreative, HEADLINE_CSS_CLASS);
+    classRule.properties[field] = value;
+    return next;
+  }
   layer.base = {
     ...(layer.base || {}),
     [field]: value,
@@ -219,10 +293,37 @@ export const updateCreativeLayerFit = (
   value: unknown,
 ) => {
   const next = deepClone(document);
+  const sizeCreative = currentSizeCreative(next, size);
+  if (!sizeCreative) throw new Error(`Unknown size: ${size}`);
   const layer = findCreativeLayer(next, size, layerId);
   if (!layer) throw new Error(`Unknown layer: ${layerId}`);
-  layer.fit = {
+  const fit = {
     ...(layer.fit || {}),
+    [field]: value,
+  };
+  if (isHeadlineLayer(layer)) {
+    for (const headline of (sizeCreative.layers || []).filter(isHeadlineLayer)) {
+      headline.fit = { ...fit };
+    }
+    return next;
+  }
+  layer.fit = fit;
+  return next;
+};
+
+export const updateCreativeClassFit = (
+  document: Record<string, unknown>,
+  size: string,
+  cssClass: string,
+  field: string,
+  value: unknown,
+) => {
+  const next = deepClone(document);
+  const sizeCreative = currentSizeCreative(next, size);
+  if (!sizeCreative) throw new Error(`Unknown size: ${size}`);
+  const rule = ensureClassRule(sizeCreative, cssClass);
+  rule.fit = {
+    ...(rule.fit || {}),
     [field]: value,
   };
   return next;
@@ -360,8 +461,8 @@ export const addCreativeShapeLayer = (
       width: 120,
       height: 64,
       cssClass: id,
-      backgroundColor: 'rgba(0, 169, 130, 0.2)',
-      border: '1px solid rgba(0, 169, 130, 0.65)',
+      backgroundColor: 'rgba(0, 229, 165, 0.2)',
+      border: '1px solid rgba(0, 229, 165, 0.65)',
       borderRadius: 0,
     },
     clips: [],
@@ -455,6 +556,11 @@ const writeSharedTargetValue = (
     const child = childDefinitionForTarget(String(parsed.childId || ''));
     if (!child) throw new Error(`Unknown nested target: ${parsed.childId}`);
     const classRule = ensureClassRule(sizeCreative, child.cssClass);
+    classRule.properties[field] = value;
+    return;
+  }
+  if (isHeadlineLayer(layer) && HEADLINE_STYLE_FIELDS.has(field)) {
+    const classRule = ensureClassRule(sizeCreative, HEADLINE_CSS_CLASS);
     classRule.properties[field] = value;
     return;
   }
@@ -567,10 +673,23 @@ export const updateCreativeTargetValue = (
     return next;
   }
 
-  const cssClass = layer.base?.cssClass || layer.id;
-  const variantRule = findActiveVariantRule(sizeCreative, { layerId: layer.id, cssClass }, activeScopes);
+  const headlineIdentity = isHeadlineLayer(layer)
+    ? { cssClass: HEADLINE_CSS_CLASS }
+    : null;
+  const cssClass = headlineIdentity?.cssClass || layer.base?.cssClass || layer.id;
+  const variantRule = findActiveVariantRule(
+    sizeCreative,
+    headlineIdentity || { layerId: layer.id, cssClass },
+    activeScopes,
+  );
   if (variantRule) {
     variantRule.props = { ...(variantRule.props || {}), [field]: value };
+    return next;
+  }
+
+  if (headlineIdentity && HEADLINE_STYLE_FIELDS.has(field)) {
+    const classRule = ensureClassRule(sizeCreative, HEADLINE_CSS_CLASS);
+    classRule.properties[field] = value;
     return next;
   }
 
@@ -641,5 +760,153 @@ export const addCreativeLayerClip = (
   const layer = findCreativeLayer(next, size, layerId);
   if (!layer) throw new Error(`Unknown layer: ${layerId}`);
   layer.clips = [...(layer.clips || []), clip];
+  return next;
+};
+
+export const headlineOfferScope = (offerCount: number) => `offers-${offerCount}`;
+
+export const headlineOfferVariantRule = (
+  sizeCreative: Record<string, unknown> | null,
+  offerCount: number,
+) => {
+  if (!sizeCreative || offerCount < 1 || offerCount > 3) return null;
+  return (sizeCreative.variantRules || []).find(
+    (rule: Record<string, unknown>) => rule.id === `${headlineOfferScope(offerCount)}|${HEADLINE_CSS_CLASS}`,
+  ) || null;
+};
+
+const pickLayoutProps = (
+  values: Record<string, unknown> = {},
+  fields: string[] = HEADLINE_LAYOUT_FIELDS,
+) => (
+  Object.fromEntries(
+    fields
+      .filter((field) => values[field] !== undefined && values[field] !== null && values[field] !== '')
+      .map((field) => [field, values[field]]),
+  )
+);
+
+const layoutValuesEqual = (
+  left: Record<string, unknown> = {},
+  right: Record<string, unknown> = {},
+  fields: string[] = HEADLINE_LAYOUT_FIELDS,
+) => {
+  const keys = [...new Set([...Object.keys(left), ...Object.keys(right)])].filter((field) => fields.includes(field));
+  return keys.every((field) => left[field] === right[field]);
+};
+
+export const resolveHeadlineLayoutValues = (
+  document: Record<string, unknown> | null,
+  size: string,
+  offerCount: number,
+  fields: string[] = HEADLINE_LAYOUT_FIELDS,
+) => {
+  const sizeCreative = currentSizeCreative(document, size);
+  if (!sizeCreative) return {};
+  const classRule = findClassRule(sizeCreative, HEADLINE_CSS_CLASS);
+  const variantProps = mergedActiveVariantProps(
+    sizeCreative,
+    { cssClass: HEADLINE_CSS_CLASS },
+    [headlineOfferScope(offerCount)],
+  );
+  return pickLayoutProps({ ...(classRule?.properties || {}), ...variantProps }, fields);
+};
+
+export const headlineOfferLayoutStatus = (
+  document: Record<string, unknown> | null,
+  size: string,
+) => {
+  const sizeCreative = currentSizeCreative(document, size);
+  const baseline = resolveHeadlineLayoutValues(document, size, 1);
+  const dual = resolveHeadlineLayoutValues(document, size, 2);
+
+  return [1, 2, 3].map((offerCount) => {
+    const resolved = resolveHeadlineLayoutValues(document, size, offerCount);
+    const rule = headlineOfferVariantRule(sizeCreative, offerCount);
+    const hasRule = Boolean(rule && Object.keys(rule.props || {}).length);
+
+    if (offerCount === 1) {
+      return {
+        offerCount,
+        label: '1-offer',
+        tone: 'baseline',
+        detail: 'Shared baseline for single-offer ads',
+      };
+    }
+
+    if (!hasRule || layoutValuesEqual(resolved, baseline)) {
+      return {
+        offerCount,
+        label: `${offerCount}-offer`,
+        tone: 'baseline',
+        detail: 'Uses the 1-offer baseline',
+      };
+    }
+
+    if (offerCount === 3 && layoutValuesEqual(resolved, dual)) {
+      return {
+        offerCount,
+        label: '3-offer',
+        tone: 'linked',
+        detail: 'Matches the 2-offer layout',
+      };
+    }
+
+    return {
+      offerCount,
+      label: `${offerCount}-offer`,
+      tone: 'custom',
+      detail: 'Custom layout for this offer count',
+    };
+  });
+};
+
+export const copyCreativeHeadlineOfferLayout = (
+  document: Record<string, unknown>,
+  size: string,
+  sourceOfferCount: number,
+  targetOfferCount: number,
+) => {
+  if (sourceOfferCount < 1 || sourceOfferCount > 3) throw new Error(`Unknown source offer count: ${sourceOfferCount}`);
+  if (targetOfferCount < 2 || targetOfferCount > 3) throw new Error('Can only copy headline layout onto 2- or 3-offer variants');
+  if (sourceOfferCount === targetOfferCount) return deepClone(document);
+
+  const next = deepClone(document);
+  const sizeCreative = currentSizeCreative(next, size);
+  if (!sizeCreative) throw new Error(`Unknown size: ${size}`);
+
+  const props = pickLayoutProps(resolveHeadlineLayoutValues(next, size, sourceOfferCount));
+  const scope = headlineOfferScope(targetOfferCount);
+  const id = `${scope}|${HEADLINE_CSS_CLASS}`;
+  sizeCreative.variantRules = sizeCreative.variantRules || [];
+  let rule = sizeCreative.variantRules.find((item: Record<string, unknown>) => item.id === id);
+  if (!rule) {
+    rule = {
+      id,
+      scope,
+      cssClass: HEADLINE_CSS_CLASS,
+      when: { offer_count_num: targetOfferCount },
+      props: {},
+      editable: true,
+    };
+    sizeCreative.variantRules.push(rule);
+  }
+  rule.props = { ...props };
+  return next;
+};
+
+export const resetCreativeHeadlineOfferLayout = (
+  document: Record<string, unknown>,
+  size: string,
+  offerCount: number,
+) => {
+  if (offerCount < 2 || offerCount > 3) throw new Error('Can only reset 2- or 3-offer headline variants');
+  const next = deepClone(document);
+  const sizeCreative = currentSizeCreative(next, size);
+  if (!sizeCreative) throw new Error(`Unknown size: ${size}`);
+  const id = `${headlineOfferScope(offerCount)}|${HEADLINE_CSS_CLASS}`;
+  sizeCreative.variantRules = (sizeCreative.variantRules || []).filter(
+    (rule: Record<string, unknown>) => rule.id !== id,
+  );
   return next;
 };

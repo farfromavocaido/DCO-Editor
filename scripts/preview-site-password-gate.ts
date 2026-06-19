@@ -91,7 +91,7 @@ export const wrapPreviewSiteWithPasswordGate = (html: string, password = PREVIEW
         border: 0;
         border-radius: 10px;
         background: #16c7b7;
-        color: #073674;
+        color: rgb(0, 41, 117);
         font: inherit;
         font-weight: 650;
         cursor: pointer;

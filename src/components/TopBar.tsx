@@ -145,11 +145,11 @@ export function TopBar() {
         />
         <SegmentedControl
           label="Frame"
-          tip="Optional roundel frame"
+          tip="Optional Act 3 offer roundel frame"
           value={includeRoundelFrame ? 'roundel' : 'standard'}
           options={[
-            { value: 'standard', label: '3 Acts', tip: 'Standard three-act ad' },
-            { value: 'roundel', label: 'Roundel', tip: 'Four-act ad with offer roundel frame' },
+            { value: 'standard', label: '3 Acts', tip: 'No offer roundel (headlines 1, 2, and 4)' },
+            { value: 'roundel', label: 'Offer roundel', tip: 'Four headline acts with offer roundel frame' },
           ]}
           onChange={(value) => setVariantControl('include_roundel_frame_bool', value === 'roundel' ? 'true' : 'false')}
         />

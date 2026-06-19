@@ -30,7 +30,9 @@
       "bn_offers_in": 47,
       "bn_blue_in": 71,
       "bn_white_in": 74,
-      "bn_cta_in": 78
+      "bn_cta_in": 78,
+      "tc_exit": 69,
+      "act4_in": 69
     },
     "profiles": {
       "frames-3": {
@@ -57,7 +59,10 @@
         "bn_offers_in": 47,
         "bn_blue_in": 71,
         "bn_white_in": 74,
-        "bn_cta_in": 78
+        "bn_cta_in": 78,
+        "tc_exit": 66.5,
+        "act4_in": 65.1,
+        "roundel_in": 65
       },
       "frames-4": {
         "start": 0,
@@ -69,12 +74,11 @@
         "plus2_in": 19,
         "terms_in": 16,
         "act2_in": 33.3,
-        "act1_out": 34.3,
+        "act1_out": 33.3,
         "offers_exit": 57.7,
         "wave2_in": 54.7,
         "swap": 56.7,
-        "roundel_in": 56.7,
-        "cta_in": 80,
+        "cta_in": 78.2,
         "cta_pulse_start": 91,
         "cta_pulse_peak": 93,
         "cta_pulse_end": 94,
@@ -84,7 +88,13 @@
         "bn_offers_in": 47,
         "bn_blue_in": 71,
         "bn_white_in": 74,
-        "bn_cta_in": 78
+        "bn_cta_in": 78,
+        "tc_exit": 80,
+        "act4_in": 77.7,
+        "act2_out": 45,
+        "act3_in": 45,
+        "act3_out": 55,
+        "roundel_in": 56.7
       }
     }
   },
@@ -218,7 +228,14 @@
         "label": "Headline act 3",
         "type": "string",
         "group": "Copy",
-        "description": "Act 3 headline copy."
+        "description": "Act 3 headline copy over the offer roundel (when enabled)."
+      },
+      {
+        "name": "heading4_text",
+        "label": "Headline act 4",
+        "type": "string",
+        "group": "Copy",
+        "description": "Act 4 headline copy over the CTA/endframe."
       },
       {
         "name": "cta_text",
@@ -229,10 +246,10 @@
       },
       {
         "name": "include_roundel_frame_bool",
-        "label": "Roundel frame",
+        "label": "Offer roundel frame",
         "type": "boolean",
         "group": "Creative State",
-        "description": "Whether the optional offer roundel frame is shown."
+        "description": "Whether the optional Act 3 offer roundel frame is shown."
       },
       {
         "name": "roundel_text_text",
@@ -280,7 +297,7 @@
         "heading1_text": "A different kind of energy",
         "heading2_text": "Our very best electricity plan",
         "heading3_text": "A different kind of energy",
-        "offer_count_num": 3,
+        "offer_count_num": 1,
         "offer1_value_text": "15%",
         "offer1_sub_text": "OFF ELECTRICITY*",
         "offer2_value_text": "30%",
@@ -295,7 +312,8 @@
         "background_image_url": "",
         "include_roundel_frame_bool": true,
         "roundel_text_text": "Save up to",
-        "roundel_value_text": "€1,080"
+        "roundel_value_text": "€1,080",
+        "heading4_text": "Switch and save today"
       }
     ]
   },
@@ -441,31 +459,31 @@
           "kind": "text",
           "zIndex": 3,
           "base": {
-            "left": 12,
-            "top": 18,
-            "width": 180,
-            "fontSize": 12,
-            "color": "rgb(255, 255, 255)",
-            "cssClass": "headline-act3",
-            "height": 24
+            "cssClass": "sse-headline"
           },
           "binding": {
             "field": "heading3_text"
           },
           "clips": [
             {
-              "id": "headline-act3-slideInRight",
+              "id": "headline-act3-slideInRight-frames-4",
               "label": "Headline Act3 slideInRight",
               "preset": "slideInRight",
-              "start": "bn_white_in",
-              "end": "act3_exit-1",
+              "start": "roundel_in",
+              "end": "act4_in",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 120,
+                "enter_distance_px": 60,
                 "enter_duration_pct": 4
-              }
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
-          ]
+          ],
+          "fit": {
+            "mode": "wrap"
+          }
         },
         {
           "id": "roundel-frame",
@@ -474,12 +492,12 @@
           "group": "Roundel frame",
           "zIndex": 4,
           "base": {
-            "left": 133,
-            "top": 3,
-            "width": 44,
-            "height": 44,
+            "left": 179,
+            "top": -5,
+            "width": 61,
+            "height": 61,
             "cssClass": "roundel-frame",
-            "backgroundColor": "rgb(0, 45, 114)",
+            "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
             "overflow": "hidden"
           },
@@ -572,7 +590,10 @@
                 "fade_pct": 2
               }
             }
-          ]
+          ],
+          "fit": {
+            "minFontSize": 8
+          }
         },
         {
           "id": "headline-act2",
@@ -581,30 +602,46 @@
           "kind": "text",
           "zIndex": 4,
           "base": {
-            "left": 12,
-            "top": 14,
-            "width": 240,
-            "fontSize": 16,
-            "cssClass": "headline-act2",
-            "height": 24
+            "cssClass": "sse-headline"
           },
           "binding": {
             "field": "heading2_text"
           },
           "clips": [
             {
-              "id": "headline-act2-slideInRight",
+              "id": "headline-act2-slideInRight-frames-3",
               "label": "Headline Act2 slideInRight",
               "preset": "slideInRight",
               "start": "bn_h2_in",
-              "end": "bn_offers_in",
+              "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_distance_px": 120,
+                "enter_distance_px": 60,
                 "enter_duration_pct": 4
-              }
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "headline-act2-slideInRight-frames-4",
+              "label": "Headline Act2 slideInRight",
+              "preset": "slideInRight",
+              "start": "act2_in",
+              "end": "offers_exit",
+              "params": {
+                "exit_dy": 20,
+                "enter_distance_px": 60,
+                "enter_duration_pct": 4
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
-          ]
+          ],
+          "fit": {
+            "mode": "wrap"
+          }
         },
         {
           "id": "headline-act1",
@@ -613,12 +650,7 @@
           "kind": "text",
           "zIndex": 5,
           "base": {
-            "left": 12,
-            "top": 14,
-            "width": 240,
-            "fontSize": 16,
-            "cssClass": "headline-act1",
-            "height": 24
+            "cssClass": "sse-headline"
           },
           "binding": {
             "field": "heading1_text"
@@ -631,11 +663,14 @@
               "start": "act1_in",
               "end": "bn_h2_in",
               "params": {
-                "enter_distance_px": 120,
+                "enter_distance_px": 60,
                 "enter_duration_pct": 4
               }
             }
-          ]
+          ],
+          "fit": {
+            "mode": "wrap"
+          }
         },
         {
           "id": "cta",
@@ -657,7 +692,7 @@
             "textAlign": "center",
             "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
             "fontWeight": 700,
-            "color": "rgb(0, 45, 114)",
+            "color": "rgb(0, 41, 117)",
             "lineHeight": 1.1,
             "cssClass": "cta"
           },
@@ -688,9 +723,9 @@
           "kind": "image",
           "zIndex": 7,
           "base": {
-            "left": 258,
-            "top": 14,
-            "width": 52,
+            "left": 275,
+            "top": 15,
+            "width": 40,
             "height": 20,
             "cssClass": "logo-act1"
           },
@@ -715,9 +750,9 @@
           "kind": "image",
           "zIndex": 8,
           "base": {
-            "left": 258,
-            "top": 14,
-            "width": 52,
+            "left": 275,
+            "top": 15,
+            "width": 40,
             "height": 20,
             "cssClass": "logo-act3"
           },
@@ -742,10 +777,10 @@
           "kind": "group",
           "zIndex": 9,
           "base": {
-            "left": 129,
-            "top": 10,
-            "width": 106,
-            "height": 34,
+            "left": 144,
+            "top": 4,
+            "width": 148,
+            "height": 47,
             "cssClass": "offer-slot-1"
           },
           "clips": [
@@ -753,10 +788,10 @@
               "id": "offer-slot-1-slideInRight",
               "label": "Offer Slot 1 slideInRight",
               "preset": "slideInRight",
-              "start": "bn_offers_in",
-              "end": "bn_blue_in+2",
+              "start": "act1_in",
+              "end": "offers_exit",
               "params": {
-                "enter_distance_px": 120,
+                "enter_distance_px": 60,
                 "exit_dy": 20,
                 "enter_duration_pct": 4
               }
@@ -787,8 +822,8 @@
               "id": "plus-1-fadeUp",
               "label": "Plus 1 fadeUp",
               "preset": "fadeUp",
-              "start": "bn_offers_in+5",
-              "end": "bn_blue_in+2",
+              "start": "plus1_in",
+              "end": "offers_exit",
               "params": {
                 "enter_dy": -8
               }
@@ -813,10 +848,10 @@
               "id": "offer-slot-2-slideInRight",
               "label": "Offer Slot 2 slideInRight",
               "preset": "slideInRight",
-              "start": "bn_offers_in+2",
-              "end": "bn_blue_in+2",
+              "start": "offer2_in",
+              "end": "offers_exit",
               "params": {
-                "enter_distance_px": 120,
+                "enter_distance_px": 60,
                 "exit_dy": 20,
                 "enter_duration_pct": 4
               }
@@ -847,8 +882,8 @@
               "id": "plus-2-fadeUp",
               "label": "Plus 2 fadeUp",
               "preset": "fadeUp",
-              "start": "bn_offers_in+7",
-              "end": "bn_blue_in+2",
+              "start": "plus2_in",
+              "end": "offers_exit",
               "params": {
                 "enter_dy": -8
               }
@@ -873,10 +908,10 @@
               "id": "offer-slot-3-slideInRight",
               "label": "Offer Slot 3 slideInRight",
               "preset": "slideInRight",
-              "start": "bn_offers_in+4",
-              "end": "bn_blue_in+2",
+              "start": "offer3_in",
+              "end": "offers_exit",
               "params": {
-                "enter_distance_px": 120,
+                "enter_distance_px": 60,
                 "exit_dy": 20,
                 "enter_duration_pct": 4
               }
@@ -890,11 +925,15 @@
           "kind": "text",
           "zIndex": 14,
           "base": {
-            "left": 0,
-            "top": 30,
-            "width": 62,
-            "height": 16,
-            "fontSize": 9,
+            "left": 4,
+            "top": 51,
+            "width": 190,
+            "height": 9,
+            "fontSize": 6,
+            "textAlign": "left",
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
             "cssClass": "terms-prices"
           },
           "binding": {
@@ -905,11 +944,11 @@
               "id": "terms-prices-fadeUp",
               "label": "Terms Prices fadeUp",
               "preset": "fadeUp",
-              "start": "bn_offers_in",
-              "end": "bn_blue_in+1",
+              "start": "terms_in",
+              "end": "act1_out",
               "params": {
-                "enter_dy": -7,
-                "settled_dy": 2,
+                "enter_dy": -17,
+                "settled_dy": -11,
                 "exit_dy": 7
               }
             }
@@ -922,11 +961,14 @@
           "kind": "text",
           "zIndex": 15,
           "base": {
-            "left": 0,
-            "top": 40,
-            "width": 62,
-            "fontSize": 8,
-            "cssClass": "unit-rate-prices"
+            "left": -51,
+            "top": 51,
+            "width": 190,
+            "fontSize": 6,
+            "cssClass": "unit-rate-prices",
+            "height": 9,
+            "textAlign": "right",
+            "justifyContent": "flex-end"
           },
           "binding": {
             "field": "tc_units_text"
@@ -936,8 +978,8 @@
               "id": "unit-rate-prices-fadeUp",
               "label": "Unit Rate Prices fadeUp",
               "preset": "fadeUp",
-              "start": "bn_offers_in",
-              "end": "bn_blue_in+2",
+              "start": "act1_out",
+              "end": "tc_exit",
               "params": {
                 "enter_dy": -17,
                 "settled_dy": -11,
@@ -953,11 +995,15 @@
           "kind": "text",
           "zIndex": 16,
           "base": {
-            "left": -4,
-            "top": 35,
-            "width": 61,
-            "height": 16,
-            "fontSize": 8,
+            "left": 6,
+            "top": 51,
+            "width": 190,
+            "height": 9,
+            "fontSize": 6,
+            "textAlign": "left",
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
             "cssClass": "terms-solo"
           },
           "binding": {
@@ -968,16 +1014,66 @@
               "id": "terms-solo-fadeUp",
               "label": "Terms Solo fadeUp",
               "preset": "fadeUp",
-              "start": "bn_offers_in",
-              "end": "bn_blue_in+1",
+              "start": "terms_in",
+              "end": "tc_exit",
               "params": {
-                "enter_dy": -7,
-                "settled_dy": 2,
+                "enter_dy": -17,
+                "settled_dy": -11,
                 "exit_dy": 0,
                 "fade_pct": 4
               }
             }
           ]
+        },
+        {
+          "id": "headline-act4",
+          "label": "Headline Act4",
+          "group": "Headlines",
+          "kind": "text",
+          "zIndex": 2,
+          "base": {
+            "cssClass": "sse-headline",
+            "display": "flex",
+            "alignItems": "flex-end"
+          },
+          "binding": {
+            "field": "heading4_text"
+          },
+          "clips": [
+            {
+              "id": "headline-act4-slideInRight-frames-3",
+              "label": "Headline Act4 slideInRight",
+              "preset": "slideInRight",
+              "start": "bn_cta_in",
+              "end": "act3_exit-1",
+              "params": {
+                "exit_dy": 10,
+                "enter_distance_px": 60,
+                "enter_duration_pct": 4
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "headline-act4-slideInRight",
+              "label": "Headline Act4 slideInRight",
+              "preset": "slideInRight",
+              "start": "act4_in",
+              "end": "act3_exit-1",
+              "params": {
+                "exit_dy": 10,
+                "enter_distance_px": 60,
+                "enter_duration_pct": 4
+              },
+              "profiles": [
+                "frames-4"
+              ]
+            }
+          ],
+          "fit": {
+            "mode": "wrap"
+          }
         }
       ],
       "variantRules": [
@@ -1061,7 +1157,7 @@
             "left": 0,
             "top": 27,
             "width": 74,
-            "height": 8,
+            "height": 16,
             "fontSize": 7
           },
           "editable": true
@@ -1075,9 +1171,10 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 52,
-            "top": 5,
-            "width": 92
+            "left": 97,
+            "top": 8,
+            "width": 74,
+            "height": 27
           },
           "editable": true
         },
@@ -1090,9 +1187,10 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 135,
-            "top": 6,
-            "width": 92
+            "left": 164,
+            "top": 9,
+            "width": 74,
+            "height": 29
           },
           "editable": true
         },
@@ -1105,9 +1203,10 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 218,
-            "top": 6,
-            "width": 92
+            "left": 231,
+            "top": 9,
+            "width": 74,
+            "height": 32
           },
           "editable": true
         },
@@ -1120,8 +1219,10 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 138,
-            "top": 12
+            "left": 166,
+            "top": 14,
+            "width": 13,
+            "height": 21
           },
           "editable": true
         },
@@ -1134,11 +1235,11 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 213,
-            "top": 13,
-            "fontSize": 22,
-            "height": 26,
-            "width": 16
+            "left": 227,
+            "top": 14,
+            "fontSize": 18,
+            "height": 21,
+            "width": 13
           },
           "editable": true
         },
@@ -1151,11 +1252,11 @@
             "offer_count_num": 3
           },
           "props": {
-            "height": 31,
-            "fontSize": 28,
+            "height": 25,
+            "fontSize": 23,
             "lineHeight": 2,
-            "top": -11,
-            "width": 99,
+            "top": -9,
+            "width": 80,
             "left": 0
           },
           "editable": true
@@ -1170,8 +1271,10 @@
           },
           "props": {
             "left": 0,
-            "top": 28,
-            "fontSize": 8
+            "top": 23,
+            "fontSize": 6,
+            "width": 74,
+            "height": 14
           },
           "editable": true
         },
@@ -1184,8 +1287,8 @@
             "cta_type_enum": "rectangle"
           },
           "props": {
-            "left": 175,
-            "top": 26,
+            "left": 176,
+            "top": 25,
             "width": 73,
             "height": 18,
             "fontSize": 9,
@@ -1429,11 +1532,11 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 136,
-            "top": 14,
-            "width": 38,
-            "height": 10,
-            "fontSize": 8,
+            "left": 183,
+            "top": 12,
+            "width": 53,
+            "height": 14,
+            "fontSize": 10,
             "lineHeight": 1.05,
             "whiteSpace": "nowrap"
           },
@@ -1448,13 +1551,45 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 130,
-            "top": 25,
-            "width": 50,
-            "height": 18,
-            "fontSize": 15,
+            "left": 175,
+            "top": 22,
+            "width": 70,
+            "height": 25,
+            "fontSize": 17,
             "lineHeight": 1,
             "whiteSpace": "nowrap"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|sse-headline",
+          "scope": "offers-2",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 12,
+            "width": 240,
+            "textAlign": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|sse-headline",
+          "scope": "offers-3",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 12,
+            "width": 101,
+            "top": 9,
+            "textAlign": "left",
+            "justifyContent": "flex-start",
+            "height": 33,
+            "fontSize": 12
           },
           "editable": true
         }
@@ -1478,17 +1613,22 @@
         {
           "cssClass": "sse-headline",
           "properties": {
-            "lineHeight": 1.2
+            "lineHeight": 1,
+            "left": 9,
+            "top": 5,
+            "width": 131,
+            "fontSize": 16,
+            "height": 34
           }
         },
         {
           "cssClass": "offer-value",
           "properties": {
-            "left": 0,
+            "left": -4,
             "top": 0,
-            "width": "100%",
-            "height": 25,
-            "fontSize": 29,
+            "width": 148,
+            "height": 35,
+            "fontSize": 41,
             "lineHeight": 0.85,
             "letterSpacing": -0.5
           }
@@ -1496,13 +1636,21 @@
         {
           "cssClass": "offer-subline",
           "properties": {
-            "left": 0,
-            "top": 25,
-            "width": "100%",
-            "height": 7,
-            "fontSize": 6,
+            "left": 63,
+            "top": 9,
+            "width": 64,
+            "height": 25,
+            "fontSize": 9,
             "lineHeight": 1.1,
-            "letterSpacing": 0
+            "letterSpacing": 0,
+            "display": "flex",
+            "alignItems": "flex-end",
+            "whiteSpace": "normal"
+          },
+          "fit": {
+            "mode": "wrap",
+            "maxLines": 2,
+            "minFontSize": 6
           }
         },
         {
@@ -1524,7 +1672,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(7, 54, 116);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 320px;\n      height: 50px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(7, 54, 116);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(7, 54, 116);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.2;\n      white-space: nowrap;\n    }\n\n    /* ── OfferSlot internals (single canonical): value + INLINE subline ── */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: auto;\n      text-align: left;\n      line-height: 44px;\n      letter-spacing: -0.5px;\n      font-size: 34px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 76px;\n      top: 15px;\n      width: 108px;\n      text-align: left;\n      font-size: 13px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n      white-space: nowrap;\n    }\n\n    /* ── T&C wrappers (far-left tiny zone) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 5px;\n      top: 2px;\n      width: 62px;\n      height: 46px;\n    }\n\n    /* ── Offer count variants ── */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    /* Dual: two compact inline pairs. */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 14px; top: 8px; width: 126px; }\n    .offers-2 .offer-slot-2 { left: 172px; top: 8px; width: 126px; }\n    .offers-2 .plus-1 { left: 146px; top: 12px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 24px; line-height: 36px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { left: 56px; top: 9px; font-size: 9px; width: 70px; }\n\n    /* Triple: three mini stacked-pairs (value over subline). Structurally\n       supported but extremely tight at 50px — see SIZE_CONVERSION_PLAN. */\n    .offers-3 .offer-slot-1 { left: 8px; top: 6px; width: 92px; }\n    .offers-3 .offer-slot-2 { left: 116px; top: 6px; width: 92px; }\n    .offers-3 .offer-slot-3 { left: 224px; top: 6px; width: 92px; }\n    .offers-3 .plus-1 { left: 101px; top: 14px; }\n    .offers-3 .plus-2 { left: 209px; top: 14px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value {\n      font-size: 18px; line-height: 20px; width: 100%; text-align: center;\n    }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px; top: 24px; width: 100%; text-align: center; font-size: 8px;\n    }\n    /* Logos overlap the third slot — hide the blue logo in triple. */\n    .offers-3 .logo-act1 { visibility: hidden; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 4px;\n      width: 90px;\n      height: 32px;\n      left: 178px;\n      top: 9px;\n      font-size: 11px;\n    }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 320px;\n      height: 50px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .terms-prices,\n    .terms-solo,\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.2;\n      white-space: nowrap;\n    }\n\n    /* ── OfferSlot internals (single canonical): value + INLINE subline ── */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: auto;\n      text-align: left;\n      line-height: 44px;\n      letter-spacing: -0.5px;\n      font-size: 34px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 76px;\n      top: 15px;\n      width: 108px;\n      text-align: left;\n      font-size: 13px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n      white-space: normal;\n    }\n\n    /* ── T&C wrappers (far-left tiny zone) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 5px;\n      top: 2px;\n      width: 62px;\n      height: 46px;\n    }\n\n    /* ── Offer count variants ── */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    /* Dual: two compact inline pairs. */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 14px; top: 8px; width: 126px; }\n    .offers-2 .offer-slot-2 { left: 172px; top: 8px; width: 126px; }\n    .offers-2 .plus-1 { left: 146px; top: 12px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 24px; line-height: 36px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { left: 56px; top: 9px; font-size: 9px; width: 70px; }\n\n    /* Triple: three mini stacked-pairs (value over subline). Structurally\n       supported but extremely tight at 50px — see SIZE_CONVERSION_PLAN. */\n    .offers-3 .offer-slot-1 { left: 8px; top: 6px; width: 92px; }\n    .offers-3 .offer-slot-2 { left: 116px; top: 6px; width: 92px; }\n    .offers-3 .offer-slot-3 { left: 224px; top: 6px; width: 92px; }\n    .offers-3 .plus-1 { left: 101px; top: 14px; }\n    .offers-3 .plus-2 { left: 209px; top: 14px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value {\n      font-size: 18px; line-height: 20px; width: 100%; text-align: center;\n    }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px; top: 24px; width: 100%; text-align: center; font-size: 8px;\n    }\n    /* Logos overlap the third slot — hide the blue logo in triple. */\n    .offers-3 .logo-act1 { visibility: hidden; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 4px;\n      width: 90px;\n      height: 32px;\n      left: 178px;\n      top: 9px;\n      font-size: 11px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n    /* Act 4 only: white over blue wave on 320×50 */\n    #headline-act4 {\n      color: rgb(255, 255, 255);\n      top: 9px;\n    }\n"
     },
     "728x90": {
       "canvas": {
@@ -1546,7 +1694,7 @@
           "kind": "image",
           "zIndex": 1,
           "base": {
-            "left": -143,
+            "left": -145,
             "top": -36,
             "width": 1106,
             "height": 162,
@@ -1576,7 +1724,7 @@
           "kind": "image",
           "zIndex": 2,
           "base": {
-            "left": 426,
+            "left": 416,
             "top": -99,
             "width": 1000,
             "height": 296,
@@ -1606,30 +1754,26 @@
           "kind": "text",
           "zIndex": 3,
           "base": {
-            "left": 30,
-            "top": 16,
-            "width": 178,
-            "height": 58,
-            "fontSize": 25,
-            "cssClass": "headline-act3",
-            "display": "flex",
-            "alignItems": "center"
+            "cssClass": "sse-headline"
           },
           "binding": {
             "field": "heading3_text"
           },
           "clips": [
             {
-              "id": "headline-act3-slideInRight",
+              "id": "headline-act3-slideInRight-frames-4",
               "label": "Headline Act3 slideInRight",
               "preset": "slideInRight",
-              "start": "swap",
-              "end": "act3_exit-1",
+              "start": "roundel_in",
+              "end": "act4_in",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 160,
+                "enter_distance_px": 60,
                 "enter_duration_pct": 5
-              }
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
           ]
         },
@@ -1640,12 +1784,12 @@
           "group": "Roundel frame",
           "zIndex": 4,
           "base": {
-            "left": 300,
-            "top": 3,
-            "width": 84,
-            "height": 84,
+            "left": 312,
+            "top": -4,
+            "width": 101,
+            "height": 100,
             "cssClass": "roundel-frame",
-            "backgroundColor": "rgb(0, 45, 114)",
+            "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
             "overflow": "hidden"
           },
@@ -1738,7 +1882,10 @@
                 "fade_pct": 2
               }
             }
-          ]
+          ],
+          "fit": {
+            "minFontSize": 18
+          }
         },
         {
           "id": "headline-act2",
@@ -1747,28 +1894,41 @@
           "kind": "text",
           "zIndex": 4,
           "base": {
-            "left": 30,
-            "top": 16,
-            "width": 231,
-            "height": 58,
-            "fontSize": 25,
-            "cssClass": "headline-act2"
+            "cssClass": "sse-headline"
           },
           "binding": {
             "field": "heading2_text"
           },
           "clips": [
             {
-              "id": "headline-act2-slideInRight",
+              "id": "headline-act2-slideInRight-frames-3",
               "label": "Headline Act2 slideInRight",
               "preset": "slideInRight",
               "start": "bn_h2_in",
-              "end": 64.9,
+              "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_distance_px": 30,
+                "enter_distance_px": 60,
                 "enter_duration_pct": 5
-              }
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "headline-act2-slideInRight-frames-4",
+              "label": "Headline Act2 slideInRight",
+              "preset": "slideInRight",
+              "start": "act2_in",
+              "end": "offers_exit",
+              "params": {
+                "exit_dy": 20,
+                "enter_distance_px": 60,
+                "enter_duration_pct": 5
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
           ]
         },
@@ -1779,12 +1939,7 @@
           "kind": "text",
           "zIndex": 5,
           "base": {
-            "left": 30,
-            "top": 17,
-            "width": 179,
-            "height": 56,
-            "fontSize": 25,
-            "cssClass": "headline-act1"
+            "cssClass": "sse-headline"
           },
           "binding": {
             "field": "heading1_text"
@@ -1797,7 +1952,7 @@
               "start": "act1_in",
               "end": "bn_h2_in",
               "params": {
-                "enter_distance_px": 160,
+                "enter_distance_px": 60,
                 "enter_duration_pct": 5
               }
             }
@@ -1815,7 +1970,7 @@
             "width": 115,
             "height": 115,
             "fontSize": 24,
-            "backgroundColor": "rgb(0, 45, 114)",
+            "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
             "display": "flex",
             "alignItems": "center",
@@ -1908,10 +2063,10 @@
           "kind": "group",
           "zIndex": 9,
           "base": {
-            "left": 287,
-            "top": 17,
-            "width": 331,
-            "height": 68,
+            "left": 315,
+            "top": 12,
+            "width": 366,
+            "height": 75,
             "cssClass": "offer-slot-1"
           },
           "clips": [
@@ -1922,7 +2077,7 @@
               "start": 13.9,
               "end": "wave2_in+5",
               "params": {
-                "enter_distance_px": 180,
+                "enter_distance_px": 20,
                 "exit_dy": 20,
                 "enter_duration_pct": 5
               }
@@ -1982,7 +2137,7 @@
               "start": 20.6,
               "end": "wave2_in+5",
               "params": {
-                "enter_distance_px": 180,
+                "enter_distance_px": 20,
                 "exit_dy": 20,
                 "enter_duration_pct": 5
               }
@@ -2042,7 +2197,7 @@
               "start": 27.5,
               "end": "wave2_in+5",
               "params": {
-                "enter_distance_px": 180,
+                "enter_distance_px": 20,
                 "exit_dy": 20,
                 "enter_duration_pct": 5
               }
@@ -2056,11 +2211,11 @@
           "kind": "text",
           "zIndex": 14,
           "base": {
-            "left": 0,
-            "top": 58,
+            "left": 15,
+            "top": 65,
             "width": 214,
             "height": 18,
-            "fontSize": 10,
+            "fontSize": 8,
             "cssClass": "terms-prices"
           },
           "binding": {
@@ -2071,8 +2226,8 @@
               "id": "terms-prices-fadeUp",
               "label": "Terms Prices fadeUp",
               "preset": "fadeUp",
-              "start": "bn_offers_in",
-              "end": "wave2_in+5",
+              "start": "terms_in",
+              "end": "act1_out",
               "params": {
                 "enter_dy": -7,
                 "settled_dy": 2,
@@ -2088,10 +2243,10 @@
           "kind": "text",
           "zIndex": 15,
           "base": {
-            "left": 0,
-            "top": 68,
+            "left": 15,
+            "top": 78,
             "width": 214,
-            "fontSize": 10,
+            "fontSize": 8,
             "cssClass": "unit-rate-prices"
           },
           "binding": {
@@ -2103,7 +2258,7 @@
               "label": "Unit Rate Prices fadeUp",
               "preset": "fadeUp",
               "start": "bn_offers_in",
-              "end": "wave2_in+5",
+              "end": "tc_exit",
               "params": {
                 "enter_dy": -17,
                 "settled_dy": -11,
@@ -2119,11 +2274,11 @@
           "kind": "text",
           "zIndex": 16,
           "base": {
-            "left": 0,
-            "top": 58,
+            "left": 15,
+            "top": 67,
             "width": 214,
             "height": 18,
-            "fontSize": 10,
+            "fontSize": 8,
             "cssClass": "terms-solo"
           },
           "binding": {
@@ -2135,7 +2290,7 @@
               "label": "Terms Solo fadeUp",
               "preset": "fadeUp",
               "start": "bn_offers_in",
-              "end": "wave2_in+5",
+              "end": "tc_exit",
               "params": {
                 "enter_dy": -7,
                 "settled_dy": 2,
@@ -2144,6 +2299,54 @@
               }
             }
           ]
+        },
+        {
+          "id": "headline-act4",
+          "label": "Headline Act4",
+          "group": "Headlines",
+          "kind": "text",
+          "zIndex": 2,
+          "base": {
+            "cssClass": "sse-headline"
+          },
+          "binding": {
+            "field": "heading4_text"
+          },
+          "clips": [
+            {
+              "id": "headline-act4-slideInRight-frames-3",
+              "label": "Headline Act4 slideInRight",
+              "preset": "slideInRight",
+              "start": "act4_in",
+              "end": "act3_exit-1",
+              "params": {
+                "exit_dy": 10,
+                "enter_distance_px": 60,
+                "enter_duration_pct": 5
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "headline-act4-slideInRight",
+              "label": "Headline Act4 slideInRight",
+              "preset": "slideInRight",
+              "start": "act4_in",
+              "end": "act3_exit-1",
+              "params": {
+                "exit_dy": 10,
+                "enter_distance_px": 60,
+                "enter_duration_pct": 5
+              },
+              "profiles": [
+                "frames-4"
+              ]
+            }
+          ],
+          "fit": {
+            "maxLines": 4
+          }
         }
       ],
       "variantRules": [
@@ -2299,10 +2502,10 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 245,
-            "top": 16,
-            "width": 158,
-            "height": 62
+            "left": 254,
+            "top": 8,
+            "width": 172,
+            "height": 68
           },
           "editable": true
         },
@@ -2315,10 +2518,10 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 407,
-            "top": 16,
-            "width": 158,
-            "height": 62
+            "left": 432,
+            "top": 8,
+            "width": 172,
+            "height": 68
           },
           "editable": true
         },
@@ -2331,11 +2534,11 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 400,
-            "top": 28,
-            "width": 26,
-            "height": 32,
-            "fontSize": 38
+            "left": 413,
+            "top": 22,
+            "width": 28,
+            "height": 35,
+            "fontSize": 41
           },
           "editable": true
         },
@@ -2348,11 +2551,11 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 0,
-            "top": 0,
-            "width": 158,
-            "height": 45,
-            "fontSize": 60
+            "left": 30,
+            "top": 1,
+            "width": 111,
+            "height": 48,
+            "fontSize": 65
           },
           "editable": true
         },
@@ -2366,10 +2569,12 @@
           },
           "props": {
             "left": 0,
-            "top": 48,
-            "width": 158,
-            "height": 14,
-            "fontSize": 14
+            "top": 57,
+            "width": 172,
+            "height": 15,
+            "fontSize": 15,
+            "textAlign": "center",
+            "justifyContent": "center"
           },
           "editable": true
         },
@@ -2398,7 +2603,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 371,
+            "left": 367,
             "top": 17,
             "width": 110,
             "height": 58
@@ -2414,7 +2619,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 501,
+            "left": 493,
             "top": 17,
             "width": 110,
             "height": 58
@@ -2430,7 +2635,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 344,
+            "left": 342,
             "top": 26,
             "width": 26,
             "height": 32,
@@ -2447,7 +2652,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 474,
+            "left": 467,
             "top": 26,
             "width": 26,
             "height": 32,
@@ -2485,7 +2690,9 @@
             "top": 44,
             "width": 110,
             "height": 12,
-            "fontSize": 11
+            "fontSize": 11,
+            "textAlign": "center",
+            "justifyContent": "center"
           },
           "editable": true
         },
@@ -2498,7 +2705,7 @@
             "cta_type_enum": "rectangle"
           },
           "props": {
-            "left": 305,
+            "left": 279,
             "top": 27,
             "width": 157,
             "height": 37,
@@ -2587,13 +2794,17 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 312,
-            "top": 22,
+            "left": 333,
+            "top": 24,
             "width": 60,
             "height": 16,
             "fontSize": 15,
             "lineHeight": 1.05,
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
           },
           "editable": true
         },
@@ -2606,13 +2817,52 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 298,
-            "top": 40,
+            "left": 318,
+            "top": 37,
             "width": 90,
             "height": 34,
-            "fontSize": 28,
+            "fontSize": 22,
             "lineHeight": 1,
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|sse-headline",
+          "scope": "offers-2",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 30,
+            "width": 191,
+            "textAlign": "left",
+            "top": 10,
+            "height": 56
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|sse-headline",
+          "scope": "offers-3",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 30,
+            "width": 160,
+            "textAlign": "left",
+            "justifyContent": "flex-start",
+            "top": 10,
+            "display": "flex",
+            "alignItems": "center",
+            "height": 56
           },
           "editable": true
         }
@@ -2621,7 +2871,6 @@
         {
           "cssClass": "sse-bottom-line",
           "properties": {
-            "height": 1.3,
             "lineHeight": 1.3
           }
         },
@@ -2643,17 +2892,22 @@
         {
           "cssClass": "sse-headline",
           "properties": {
-            "lineHeight": 1.15
+            "lineHeight": 1.15,
+            "left": 30,
+            "top": 10,
+            "width": 179,
+            "height": 56,
+            "fontSize": 25
           }
         },
         {
           "cssClass": "offer-value",
           "properties": {
-            "left": -131,
+            "left": -145,
             "top": -4,
-            "width": 331,
-            "height": 52,
-            "fontSize": 73,
+            "width": 366,
+            "height": 57,
+            "fontSize": 81,
             "lineHeight": 0.85,
             "letterSpacing": -0.5,
             "textAlign": "center"
@@ -2662,14 +2916,17 @@
         {
           "cssClass": "offer-subline",
           "properties": {
-            "left": 0,
-            "top": 39,
-            "width": 331,
-            "height": 18,
-            "fontSize": 15,
+            "left": 107,
+            "top": 42,
+            "width": 366,
+            "height": 20,
+            "fontSize": 17,
             "lineHeight": 1.1,
             "letterSpacing": 0,
-            "textAlign": "center"
+            "textAlign": "left",
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start"
           }
         },
         {
@@ -2700,7 +2957,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(7, 54, 116);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 728px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(7, 54, 116);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(7, 54, 116);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.15;\n      white-space: normal;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: left;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 66px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 47px;\n      width: 100%;\n      text-align: left;\n      font-size: 14px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n      white-space: nowrap;\n    }\n\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 16px;\n      top: 8px;\n      width: 214px;\n      height: 78px;\n    }\n\n    .cta {\n      padding: 0px 16px;\n      box-sizing: border-box;\n    }\n\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 248px; top: 16px; width: 158px; height: 62px; }\n    .offers-2 .offer-slot-2 { left: 410px; top: 16px; width: 158px; height: 62px; }\n    .offers-2 .plus-1 { left: 387px; top: 28px; width: 26px; height: 32px; font-size: 38px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px; top: 0px; width: 158px; height: 45px; font-size: 60px; text-align: center;\n    }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px; top: 48px; width: 158px; height: 14px; font-size: 14px; text-align: center;\n    }\n\n    .offers-3 .offer-slot-1 { left: 235px; top: 18px; width: 110px; height: 58px; }\n    .offers-3 .offer-slot-2 { left: 375px; top: 18px; width: 110px; height: 58px; }\n    .offers-3 .offer-slot-3 { left: 515px; top: 18px; width: 110px; height: 58px; }\n    .offers-3 .plus-1 { left: 348px; top: 28px; width: 26px; height: 32px; font-size: 36px; }\n    .offers-3 .plus-2 { left: 488px; top: 28px; width: 26px; height: 32px; font-size: 36px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px; top: 0px; width: 110px; height: 42px; font-size: 46px; text-align: center;\n    }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px; top: 44px; width: 110px; height: 12px; font-size: 11px; text-align: center;\n    }\n\n    .cta-rect .cta {\n      border-radius: 6px;\n      width: 128px;\n      height: 38px;\n      left: 335px;\n      top: 26px;\n      font-size: 18px;\n    }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 728px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.15;\n      white-space: normal;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: left;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 66px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 47px;\n      width: 100%;\n      text-align: left;\n      font-size: 14px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n      white-space: nowrap;\n    }\n\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 16px;\n      top: 8px;\n      width: 214px;\n      height: 78px;\n    }\n\n    .cta {\n      padding: 0px 16px;\n      box-sizing: border-box;\n    }\n\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 248px; top: 16px; width: 158px; height: 62px; }\n    .offers-2 .offer-slot-2 { left: 410px; top: 16px; width: 158px; height: 62px; }\n    .offers-2 .plus-1 { left: 387px; top: 28px; width: 26px; height: 32px; font-size: 38px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px; top: 0px; width: 158px; height: 45px; font-size: 60px; text-align: center;\n    }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px; top: 48px; width: 158px; height: 14px; font-size: 14px; text-align: center;\n    }\n\n    .offers-3 .offer-slot-1 { left: 235px; top: 18px; width: 110px; height: 58px; }\n    .offers-3 .offer-slot-2 { left: 375px; top: 18px; width: 110px; height: 58px; }\n    .offers-3 .offer-slot-3 { left: 515px; top: 18px; width: 110px; height: 58px; }\n    .offers-3 .plus-1 { left: 348px; top: 28px; width: 26px; height: 32px; font-size: 36px; }\n    .offers-3 .plus-2 { left: 488px; top: 28px; width: 26px; height: 32px; font-size: 36px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px; top: 0px; width: 110px; height: 42px; font-size: 46px; text-align: center;\n    }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px; top: 44px; width: 110px; height: 12px; font-size: 11px; text-align: center;\n    }\n\n    .cta-rect .cta {\n      border-radius: 6px;\n      width: 128px;\n      height: 38px;\n      left: 335px;\n      top: 26px;\n      font-size: 18px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n\n    /* Act 4 only: lower headline placement on 728×90 */\n    #headline-act4 {\n      top: 17px;\n    }\n"
     },
     "300x250": {
       "canvas": {
@@ -2781,26 +3038,24 @@
           "kind": "text",
           "zIndex": 3,
           "base": {
-            "left": 17,
-            "top": 26,
-            "width": 200,
-            "fontSize": 16,
-            "cssClass": "headline-act3",
-            "height": 30
+            "cssClass": "sse-headline"
           },
           "binding": {
             "field": "heading3_text"
           },
           "clips": [
             {
-              "id": "headline-act3-slideInRight",
+              "id": "headline-act3-slideInRight-frames-4",
               "label": "Headline Act3 slideInRight",
               "preset": "slideInRight",
-              "start": "swap",
-              "end": "act3_exit-1",
+              "start": "roundel_in",
+              "end": "act4_in",
               "params": {
                 "exit_dy": 10
-              }
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
           ]
         },
@@ -2812,11 +3067,11 @@
           "zIndex": 4,
           "base": {
             "left": 32,
-            "top": 82,
+            "top": 72,
             "width": 118,
             "height": 118,
             "cssClass": "roundel-frame",
-            "backgroundColor": "rgb(0, 45, 114)",
+            "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
             "overflow": "hidden"
           },
@@ -2921,26 +3176,37 @@
           "kind": "text",
           "zIndex": 4,
           "base": {
-            "left": 17,
-            "top": 26,
-            "width": 250,
-            "fontSize": 16,
-            "cssClass": "headline-act2",
-            "height": 30
+            "cssClass": "sse-headline"
           },
           "binding": {
             "field": "heading2_text"
           },
           "clips": [
             {
-              "id": "headline-act2-slideInRight",
+              "id": "headline-act2-slideInRight-frames-3",
               "label": "Headline Act2 slideInRight",
               "preset": "slideInRight",
               "start": "act2_in",
-              "end": "swap",
+              "end": "offers_exit",
               "params": {
                 "exit_dy": 20
-              }
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "headline-act2-slideInRight-frames-4",
+              "label": "Headline Act2 slideInRight",
+              "preset": "slideInRight",
+              "start": "act2_in",
+              "end": "offers_exit",
+              "params": {
+                "exit_dy": 20
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
           ]
         },
@@ -2951,12 +3217,7 @@
           "kind": "text",
           "zIndex": 5,
           "base": {
-            "left": 17,
-            "top": 26,
-            "width": 200,
-            "fontSize": 16,
-            "cssClass": "headline-act1",
-            "height": 30
+            "cssClass": "sse-headline"
           },
           "binding": {
             "field": "heading1_text"
@@ -2984,7 +3245,7 @@
             "width": 80,
             "height": 80,
             "fontSize": 13,
-            "backgroundColor": "rgb(0, 45, 114)",
+            "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
             "display": "flex",
             "alignItems": "center",
@@ -3091,7 +3352,7 @@
               "start": "act1_in",
               "end": "offers_exit",
               "params": {
-                "enter_distance_px": 340,
+                "enter_distance_px": 60,
                 "exit_dy": 20
               }
             }
@@ -3150,7 +3411,7 @@
               "start": "offer2_in",
               "end": "offers_exit",
               "params": {
-                "enter_distance_px": 340,
+                "enter_distance_px": 60,
                 "exit_dy": 20
               }
             }
@@ -3209,7 +3470,7 @@
               "start": "offer3_in",
               "end": "offers_exit",
               "params": {
-                "enter_distance_px": 340,
+                "enter_distance_px": 60,
                 "exit_dy": 20
               }
             }
@@ -3270,7 +3531,7 @@
               "label": "Unit Rate Prices fadeUp",
               "preset": "fadeUp",
               "start": "act1_out",
-              "end": "swap+1",
+              "end": "tc_exit",
               "params": {
                 "enter_dy": -17,
                 "settled_dy": -11,
@@ -3305,7 +3566,7 @@
               "label": "Terms Solo fadeUp",
               "preset": "fadeUp",
               "start": "terms_in",
-              "end": "end",
+              "end": "tc_exit",
               "params": {
                 "enter_dy": -7,
                 "settled_dy": 2,
@@ -3314,6 +3575,50 @@
               }
             }
           ]
+        },
+        {
+          "id": "headline-act4",
+          "label": "Headline Act4",
+          "group": "Headlines",
+          "kind": "text",
+          "zIndex": 2,
+          "base": {
+            "cssClass": "sse-headline"
+          },
+          "binding": {
+            "field": "heading4_text"
+          },
+          "clips": [
+            {
+              "id": "headline-act4-slideInRight-frames-3",
+              "label": "Headline Act4 slideInRight",
+              "preset": "slideInRight",
+              "start": "act4_in",
+              "end": "act3_exit-1",
+              "params": {
+                "exit_dy": 10
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "headline-act4-slideInRight",
+              "label": "Headline Act4 slideInRight",
+              "preset": "slideInRight",
+              "start": "act4_in",
+              "end": "act3_exit-1",
+              "params": {
+                "exit_dy": 10
+              },
+              "profiles": [
+                "frames-4"
+              ]
+            }
+          ],
+          "fit": {
+            "maxLines": 4
+          }
         }
       ],
       "variantRules": [
@@ -3386,8 +3691,10 @@
           },
           "props": {
             "top": 57,
-            "fontSize": 16,
-            "left": 0
+            "fontSize": 14,
+            "left": -13,
+            "width": 136,
+            "height": 16
           },
           "editable": true
         },
@@ -3400,8 +3707,8 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 17,
-            "top": 60,
+            "left": 13,
+            "top": 58,
             "width": 126,
             "height": 110
           },
@@ -3417,7 +3724,7 @@
           },
           "props": {
             "left": 162,
-            "top": 60,
+            "top": 58,
             "width": 126,
             "height": 90
           },
@@ -3433,7 +3740,7 @@
           },
           "props": {
             "left": 87,
-            "top": 135,
+            "top": 143,
             "width": 126,
             "height": 81
           },
@@ -3449,9 +3756,13 @@
           },
           "props": {
             "left": 139,
-            "top": 94,
+            "top": 101,
             "width": 22,
-            "height": 36
+            "height": 36,
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
           },
           "editable": true
         },
@@ -3483,8 +3794,8 @@
           "props": {
             "top": 46,
             "fontSize": 12,
-            "left": 0,
-            "width": 126,
+            "left": 10,
+            "width": 107,
             "height": 11
           },
           "editable": true
@@ -3664,100 +3975,6 @@
           "editable": true
         },
         {
-          "id": "offers-2|headline-act1",
-          "scope": "offers-2",
-          "layerId": "headline-act1",
-          "cssClass": "headline-act1",
-          "when": {
-            "offer_count_num": 2
-          },
-          "props": {
-            "left": 10,
-            "width": 280,
-            "textAlign": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-2|headline-act2",
-          "scope": "offers-2",
-          "layerId": "headline-act2",
-          "cssClass": "headline-act2",
-          "when": {
-            "offer_count_num": 2
-          },
-          "props": {
-            "left": 10,
-            "width": 280,
-            "textAlign": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-2|headline-act3",
-          "scope": "offers-2",
-          "layerId": "headline-act3",
-          "cssClass": "headline-act3",
-          "when": {
-            "offer_count_num": 2
-          },
-          "props": {
-            "left": 10,
-            "width": 280,
-            "textAlign": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|headline-act1",
-          "scope": "offers-3",
-          "layerId": "headline-act1",
-          "cssClass": "headline-act1",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 20,
-            "width": 280,
-            "textAlign": "left",
-            "top": 26,
-            "justifyContent": "flex-start"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|headline-act2",
-          "scope": "offers-3",
-          "layerId": "headline-act2",
-          "cssClass": "headline-act2",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 20,
-            "width": 280,
-            "textAlign": "left",
-            "justifyContent": "flex-start"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|headline-act3",
-          "scope": "offers-3",
-          "layerId": "headline-act3",
-          "cssClass": "headline-act3",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 20,
-            "width": 280,
-            "textAlign": "left",
-            "justifyContent": "flex-start"
-          },
-          "editable": true
-        },
-        {
           "id": "roundel-frame-off|roundel-frame|visibility",
           "scope": "roundel-frame-off",
           "layerId": "roundel-frame",
@@ -3812,7 +4029,7 @@
           },
           "props": {
             "left": 42,
-            "top": 116,
+            "top": 106,
             "width": 98,
             "height": 24,
             "fontSize": 20,
@@ -3831,7 +4048,7 @@
           },
           "props": {
             "left": 38,
-            "top": 136,
+            "top": 126,
             "width": 102,
             "height": 64,
             "fontSize": 42,
@@ -3865,6 +4082,37 @@
             "visibility": "hidden"
           },
           "editable": true
+        },
+        {
+          "id": "offers-2|sse-headline",
+          "scope": "offers-2",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 10,
+            "width": 280,
+            "textAlign": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|sse-headline",
+          "scope": "offers-3",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 10,
+            "top": 19,
+            "width": 280,
+            "height": 31,
+            "fontSize": 18,
+            "textAlign": "center"
+          },
+          "editable": true
         }
       ],
       "classRules": [
@@ -3885,7 +4133,13 @@
         },
         {
           "cssClass": "sse-headline",
-          "properties": {}
+          "properties": {
+            "left": 17,
+            "top": 25,
+            "width": 255,
+            "fontSize": 18,
+            "height": 31
+          }
         },
         {
           "cssClass": "offer-value",
@@ -3926,7 +4180,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(7, 54, 116);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 300px;\n      height: 250px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(7, 54, 116);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(7, 54, 116);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    /* ── OfferSlot internals (base = single-offer canonical) ── */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: center;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 108px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 75px;\n      width: 100%;\n      text-align: center;\n      font-size: 24px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n    }\n\n    /* ── T&C wrappers ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 13px;\n      top: 220px;\n      width: 200px;\n      height: 30px;\n    }\n\n    /* ── Offer count variants ──\n       Base rules above ARE the single-offer canonical values; variants\n       override only what differs. */\n\n    /* Single offer: left-aligned with the headline text above (left 15px). */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-1 [data-gwd-group=\"OfferSlot\"] .offer-value { text-align: left; }\n    .offers-1 [data-gwd-group=\"OfferSlot\"] .offer-subline { text-align: left; }\n\n    /* Centred variants (2 and 3 offers): the headline centres too, inside\n       a symmetric box (10px padding each side) so it can't protrude left. */\n    .offers-2 .headline-act1,\n    .offers-2 .headline-act2,\n    .offers-2 .headline-act3,\n    .offers-3 .headline-act1,\n    .offers-3 .headline-act2,\n    .offers-3 .headline-act3 {\n      left: 10px;\n      width: 280px;\n      text-align: center;\n    }\n\n    /* Dual: row centred on the canvas — plus centred at x=150, slots\n       symmetric either side. */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 26px; top: 68px; width: 110px; }\n    .offers-2 .offer-slot-2 { left: 164px; top: 68px; width: 110px; }\n    .offers-2 .plus-1 { left: 138px; top: 77px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 68px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 16px; top: 50px; white-space: nowrap; }\n\n    /* Triple: dual-style centred top row, third offer centred beneath.\n       No plus before the third offer (matches the reference design). */\n    .offers-3 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-3 .offer-slot-1 { left: 26px; top: 58px; width: 110px; }\n    .offers-3 .offer-slot-2 { left: 164px; top: 58px; width: 110px; }\n    .offers-3 .offer-slot-3 { left: 80px; top: 118px; width: 140px; }\n    .offers-3 .plus-1 { left: 138px; top: 72px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 56px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 14px; top: 39px; white-space: nowrap; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 4px;\n      width: 120px;\n      height: 36px;\n      left: 90px;\n      top: 112px;\n      font-size: 12px;\n    }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 300px;\n      height: 250px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    /* ── OfferSlot internals (base = single-offer canonical) ── */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: center;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 108px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 75px;\n      width: 100%;\n      text-align: center;\n      font-size: 24px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n    }\n\n    /* ── T&C wrappers ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 13px;\n      top: 220px;\n      width: 200px;\n      height: 30px;\n    }\n\n    /* ── Offer count variants ──\n       Base rules above ARE the single-offer canonical values; variants\n       override only what differs. */\n\n    /* Single offer: left-aligned with the headline text above (left 15px). */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-1 [data-gwd-group=\"OfferSlot\"] .offer-value { text-align: left; }\n    .offers-1 [data-gwd-group=\"OfferSlot\"] .offer-subline { text-align: left; }\n\n    /* Centred variants (2 and 3 offers): the headline centres too, inside\n       a symmetric box (10px padding each side) so it can't protrude left. */\n/* Dual: row centred on the canvas — plus centred at x=150, slots\n       symmetric either side. */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 26px; top: 68px; width: 110px; }\n    .offers-2 .offer-slot-2 { left: 164px; top: 68px; width: 110px; }\n    .offers-2 .plus-1 { left: 138px; top: 77px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 68px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 16px; top: 50px; white-space: nowrap; }\n\n    /* Triple: dual-style centred top row, third offer centred beneath.\n       No plus before the third offer (matches the reference design). */\n    .offers-3 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-3 .offer-slot-1 { left: 26px; top: 58px; width: 110px; }\n    .offers-3 .offer-slot-2 { left: 164px; top: 58px; width: 110px; }\n    .offers-3 .offer-slot-3 { left: 80px; top: 118px; width: 140px; }\n    .offers-3 .plus-1 { left: 138px; top: 72px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 56px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 14px; top: 39px; white-space: nowrap; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 4px;\n      width: 120px;\n      height: 36px;\n      left: 90px;\n      top: 112px;\n      font-size: 12px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     },
     "160x600": {
       "canvas": {
@@ -4011,26 +4265,24 @@
           "kind": "text",
           "zIndex": 3,
           "base": {
-            "left": 10,
-            "top": 60,
-            "width": 140,
-            "fontSize": 26,
-            "cssClass": "headline-act3",
-            "height": 130
+            "cssClass": "sse-headline"
           },
           "binding": {
             "field": "heading3_text"
           },
           "clips": [
             {
-              "id": "headline-act3-slideInRight",
+              "id": "headline-act3-slideInRight-frames-4",
               "label": "Headline Act3 slideInRight",
               "preset": "slideInRight",
-              "start": "swap",
-              "end": "act3_exit-1",
+              "start": "roundel_in",
+              "end": "act4_in",
               "params": {
                 "exit_dy": 10
-              }
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
           ],
           "fit": {
@@ -4049,7 +4301,7 @@
             "width": 120,
             "height": 120,
             "cssClass": "roundel-frame",
-            "backgroundColor": "rgb(0, 45, 114)",
+            "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
             "overflow": "hidden"
           },
@@ -4142,7 +4394,10 @@
                 "fade_pct": 2
               }
             }
-          ]
+          ],
+          "fit": {
+            "minFontSize": 12
+          }
         },
         {
           "id": "headline-act2",
@@ -4151,26 +4406,37 @@
           "kind": "text",
           "zIndex": 4,
           "base": {
-            "left": 10,
-            "top": 25,
-            "width": 140,
-            "fontSize": 26,
-            "cssClass": "headline-act2",
-            "height": 130
+            "cssClass": "sse-headline"
           },
           "binding": {
             "field": "heading2_text"
           },
           "clips": [
             {
-              "id": "headline-act2-slideInRight",
+              "id": "headline-act2-slideInRight-frames-3",
               "label": "Headline Act2 slideInRight",
               "preset": "slideInRight",
               "start": "act2_in",
-              "end": "swap",
+              "end": "offers_exit",
               "params": {
                 "exit_dy": 20
-              }
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "headline-act2-slideInRight-frames-4",
+              "label": "Headline Act2 slideInRight",
+              "preset": "slideInRight",
+              "start": "act2_in",
+              "end": "offers_exit",
+              "params": {
+                "exit_dy": 20
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
           ],
           "fit": {
@@ -4184,12 +4450,9 @@
           "kind": "text",
           "zIndex": 5,
           "base": {
-            "left": 10,
-            "top": 25,
-            "width": 140,
-            "fontSize": 26,
-            "cssClass": "headline-act1",
-            "height": 130
+            "cssClass": "sse-headline",
+            "display": "flex",
+            "alignItems": "center"
           },
           "binding": {
             "field": "heading1_text"
@@ -4220,7 +4483,7 @@
             "width": 100,
             "height": 100,
             "fontSize": 15,
-            "backgroundColor": "rgb(0, 45, 114)",
+            "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
             "display": "flex",
             "alignItems": "center",
@@ -4327,7 +4590,7 @@
               "start": "act1_in",
               "end": "offers_exit",
               "params": {
-                "enter_distance_px": 340,
+                "enter_distance_px": 60,
                 "exit_dy": 20
               }
             }
@@ -4386,7 +4649,7 @@
               "start": "offer2_in",
               "end": "offers_exit",
               "params": {
-                "enter_distance_px": 340,
+                "enter_distance_px": 60,
                 "exit_dy": 20
               }
             }
@@ -4445,7 +4708,7 @@
               "start": "offer3_in",
               "end": "offers_exit",
               "params": {
-                "enter_distance_px": 340,
+                "enter_distance_px": 60,
                 "exit_dy": 20
               }
             }
@@ -4505,7 +4768,7 @@
               "label": "Unit Rate Prices fadeUp",
               "preset": "fadeUp",
               "start": "act1_out",
-              "end": "swap+1",
+              "end": "tc_exit",
               "params": {
                 "enter_dy": -17,
                 "settled_dy": -11,
@@ -4537,7 +4800,7 @@
               "label": "Terms Solo fadeUp",
               "preset": "fadeUp",
               "start": "terms_in",
-              "end": "wave2_in+7",
+              "end": "tc_exit",
               "params": {
                 "enter_dy": -7,
                 "settled_dy": 2,
@@ -4546,6 +4809,50 @@
               }
             }
           ]
+        },
+        {
+          "id": "headline-act4",
+          "label": "Headline Act4",
+          "group": "Headlines",
+          "kind": "text",
+          "zIndex": 2,
+          "base": {
+            "cssClass": "sse-headline"
+          },
+          "binding": {
+            "field": "heading4_text"
+          },
+          "clips": [
+            {
+              "id": "headline-act4-slideInRight-frames-3",
+              "label": "Headline Act4 slideInRight",
+              "preset": "slideInRight",
+              "start": "act4_in",
+              "end": "act3_exit-1",
+              "params": {
+                "exit_dy": 10
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "headline-act4-slideInRight",
+              "label": "Headline Act4 slideInRight",
+              "preset": "slideInRight",
+              "start": "act4_in",
+              "end": "act3_exit-1",
+              "params": {
+                "exit_dy": 10
+              },
+              "profiles": [
+                "frames-4"
+              ]
+            }
+          ],
+          "fit": {
+            "maxLines": 4
+          }
         }
       ],
       "variantRules": [
@@ -5023,12 +5330,58 @@
           },
           "props": {
             "left": 12,
-            "top": 282,
+            "top": 268,
             "width": 136,
             "height": 60,
-            "fontSize": 38,
+            "fontSize": 28,
             "lineHeight": 1,
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "center",
+            "textAlign": "center",
+            "justifyContent": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|sse-headline",
+          "scope": "offers-2",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 11,
+            "top": 25,
+            "width": 138,
+            "height": 130,
+            "fontSize": 26,
+            "lineHeight": 1.25,
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|sse-headline",
+          "scope": "offers-3",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 11,
+            "top": 25,
+            "width": 138,
+            "height": 130,
+            "fontSize": 26,
+            "lineHeight": 1.25,
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
           },
           "editable": true
         }
@@ -5052,7 +5405,14 @@
         {
           "cssClass": "sse-headline",
           "properties": {
-            "lineHeight": 1.25
+            "lineHeight": 1.25,
+            "left": 11,
+            "top": 25,
+            "width": 138,
+            "fontSize": 26,
+            "height": 130,
+            "textAlign": "center",
+            "justifyContent": "center"
           }
         },
         {
@@ -5107,7 +5467,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(7, 54, 116);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 160px;\n      height: 600px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(7, 54, 116);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(7, 54, 116);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.25;\n      text-align: center;\n    }\n\n    /* ── OfferSlot internals (single-offer canonical) ──\n       Narrow column: subline is centred and ALLOWED TO WRAP. */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: center;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 96px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 88px;\n      width: 100%;\n      text-align: center;\n      font-size: 20px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n      /* Narrow column: subline may wrap to two centred lines (single). */\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 18px;\n      box-sizing: border-box;\n    }\n\n    /* ── T&C wrappers (bottom-left, flush like the reference) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 8px;\n      top: 572px;\n      width: 145px;\n      height: 34px;\n    }\n\n    /* ── Offer count variants ── */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    /* Dual: STACKED vertically (no width for a row). One-line sublines. */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 10px; top: 365px; width: 140px; }\n    .offers-2 .offer-slot-2 { left: 10px; top: 480px; width: 140px; }\n    .offers-2 .plus-1 { left: 68px; top: 448px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 56px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 13px; top: 50px; white-space: nowrap; }\n\n    /* Triple: three stacked, tighter. */\n    .offers-3 .offer-slot-1 { left: 10px; top: 330px; width: 140px; }\n    .offers-3 .offer-slot-2 { left: 10px; top: 425px; width: 140px; }\n    .offers-3 .offer-slot-3 { left: 10px; top: 520px; width: 140px; }\n    .offers-3 .plus-1 { left: 68px; top: 402px; }\n    .offers-3 .plus-2 { left: 68px; top: 497px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 44px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 12px; top: 40px; white-space: nowrap; }\n    /* Stacked triple collides with the bottom logo/T&Cs zone — pull the\n       logo up between headline and offers for this count. */\n    .offers-3 .logo-act1 { top: 245px; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 5px;\n      width: 130px;\n      height: 44px;\n      left: 15px;\n      top: 268px;\n      font-size: 15px;\n    }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 160px;\n      height: 600px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.25;\n      text-align: center;\n    }\n\n    /* ── OfferSlot internals (single-offer canonical) ──\n       Narrow column: subline is centred and ALLOWED TO WRAP. */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: center;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 96px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 88px;\n      width: 100%;\n      text-align: center;\n      font-size: 20px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n      /* Narrow column: subline may wrap to two centred lines (single). */\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 18px;\n      box-sizing: border-box;\n    }\n\n    /* ── T&C wrappers (bottom-left, flush like the reference) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 8px;\n      top: 572px;\n      width: 145px;\n      height: 34px;\n    }\n\n    /* ── Offer count variants ── */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    /* Dual: STACKED vertically (no width for a row). One-line sublines. */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 10px; top: 365px; width: 140px; }\n    .offers-2 .offer-slot-2 { left: 10px; top: 480px; width: 140px; }\n    .offers-2 .plus-1 { left: 68px; top: 448px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 56px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 13px; top: 50px; white-space: nowrap; }\n\n    /* Triple: three stacked, tighter. */\n    .offers-3 .offer-slot-1 { left: 10px; top: 330px; width: 140px; }\n    .offers-3 .offer-slot-2 { left: 10px; top: 425px; width: 140px; }\n    .offers-3 .offer-slot-3 { left: 10px; top: 520px; width: 140px; }\n    .offers-3 .plus-1 { left: 68px; top: 402px; }\n    .offers-3 .plus-2 { left: 68px; top: 497px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 44px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 12px; top: 40px; white-space: nowrap; }\n    /* Stacked triple collides with the bottom logo/T&Cs zone — pull the\n       logo up between headline and offers for this count. */\n    .offers-3 .logo-act1 { top: 245px; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 5px;\n      width: 130px;\n      height: 44px;\n      left: 15px;\n      top: 268px;\n      font-size: 15px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     },
     "300x600": {
       "canvas": {
@@ -5159,7 +5519,7 @@
           "kind": "image",
           "zIndex": 1,
           "base": {
-            "left": -20,
+            "left": -38,
             "top": 202,
             "width": 340,
             "height": 400,
@@ -5192,26 +5552,24 @@
           "kind": "text",
           "zIndex": 4,
           "base": {
-            "left": 20,
-            "top": 50,
-            "width": 260,
-            "fontSize": 34,
-            "cssClass": "headline-act3",
-            "height": 100
+            "cssClass": "sse-headline"
           },
           "binding": {
             "field": "heading3_text"
           },
           "clips": [
             {
-              "id": "headline-act3-slideInRight",
+              "id": "headline-act3-slideInRight-frames-4",
               "label": "Headline Act3 slideInRight",
               "preset": "slideInRight",
-              "start": "swap",
-              "end": "act3_exit-1",
+              "start": "roundel_in",
+              "end": "act4_in",
               "params": {
                 "exit_dy": 10
-              }
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
           ]
         },
@@ -5227,7 +5585,7 @@
             "width": 150,
             "height": 150,
             "cssClass": "roundel-frame",
-            "backgroundColor": "rgb(0, 45, 114)",
+            "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
             "overflow": "hidden"
           },
@@ -5332,26 +5690,37 @@
           "kind": "text",
           "zIndex": 3,
           "base": {
-            "left": 20,
-            "top": 50,
-            "width": 260,
-            "fontSize": 34,
-            "cssClass": "headline-act2",
-            "height": 100
+            "cssClass": "sse-headline"
           },
           "binding": {
             "field": "heading2_text"
           },
           "clips": [
             {
-              "id": "headline-act2-slideInRight",
+              "id": "headline-act2-slideInRight-frames-3",
               "label": "Headline Act2 slideInRight",
               "preset": "slideInRight",
               "start": "act2_in",
-              "end": "swap",
+              "end": "offers_exit",
               "params": {
                 "exit_dy": 20
-              }
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "headline-act2-slideInRight-frames-4",
+              "label": "Headline Act2 slideInRight",
+              "preset": "slideInRight",
+              "start": "act2_in",
+              "end": "offers_exit",
+              "params": {
+                "exit_dy": 20
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
           ]
         },
@@ -5362,12 +5731,7 @@
           "kind": "text",
           "zIndex": 2,
           "base": {
-            "left": 20,
-            "top": 50,
-            "width": 260,
-            "fontSize": 34,
-            "cssClass": "headline-act1",
-            "height": 100
+            "cssClass": "sse-headline"
           },
           "binding": {
             "field": "heading1_text"
@@ -5390,12 +5754,12 @@
           "kind": "text",
           "zIndex": 5,
           "base": {
-            "left": 130,
+            "left": 85,
             "top": 202,
             "width": 130,
             "height": 130,
             "fontSize": 19,
-            "backgroundColor": "rgb(0, 45, 114)",
+            "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
             "display": "flex",
             "alignItems": "center",
@@ -5502,7 +5866,7 @@
               "start": "act1_in",
               "end": "offers_exit",
               "params": {
-                "enter_distance_px": 340,
+                "enter_distance_px": 60,
                 "exit_dy": 20
               }
             }
@@ -5561,7 +5925,7 @@
               "start": "offer2_in",
               "end": "offers_exit",
               "params": {
-                "enter_distance_px": 340,
+                "enter_distance_px": 60,
                 "exit_dy": 20
               }
             }
@@ -5620,7 +5984,7 @@
               "start": "offer3_in",
               "end": "offers_exit",
               "params": {
-                "enter_distance_px": 340,
+                "enter_distance_px": 60,
                 "exit_dy": 20
               }
             }
@@ -5680,7 +6044,7 @@
               "label": "Unit Rate Prices fadeUp",
               "preset": "fadeUp",
               "start": "act1_out",
-              "end": "swap+1",
+              "end": "tc_exit",
               "params": {
                 "enter_dy": -17,
                 "settled_dy": -11,
@@ -5712,7 +6076,7 @@
               "label": "Terms Solo fadeUp",
               "preset": "fadeUp",
               "start": "terms_in",
-              "end": "wave2_in+7",
+              "end": "tc_exit",
               "params": {
                 "enter_dy": -7,
                 "settled_dy": 2,
@@ -5721,6 +6085,50 @@
               }
             }
           ]
+        },
+        {
+          "id": "headline-act4",
+          "label": "Headline Act4",
+          "group": "Headlines",
+          "kind": "text",
+          "zIndex": 2,
+          "base": {
+            "cssClass": "sse-headline"
+          },
+          "binding": {
+            "field": "heading4_text"
+          },
+          "clips": [
+            {
+              "id": "headline-act4-slideInRight-frames-3",
+              "label": "Headline Act4 slideInRight",
+              "preset": "slideInRight",
+              "start": "act4_in",
+              "end": "act3_exit-1",
+              "params": {
+                "exit_dy": 10
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "headline-act4-slideInRight",
+              "label": "Headline Act4 slideInRight",
+              "preset": "slideInRight",
+              "start": "act4_in",
+              "end": "act3_exit-1",
+              "params": {
+                "exit_dy": 10
+              },
+              "profiles": [
+                "frames-4"
+              ]
+            }
+          ],
+          "fit": {
+            "maxLines": 4
+          }
         }
       ],
       "variantRules": [
@@ -6193,6 +6601,38 @@
             "whiteSpace": "nowrap"
           },
           "editable": true
+        },
+        {
+          "id": "offers-2|sse-headline",
+          "scope": "offers-2",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 10,
+            "width": 280,
+            "textAlign": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|sse-headline",
+          "scope": "offers-3",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 10,
+            "top": 50,
+            "width": 280,
+            "height": 100,
+            "fontSize": 34,
+            "lineHeight": 1.25,
+            "textAlign": "center"
+          },
+          "editable": true
         }
       ],
       "classRules": [
@@ -6214,7 +6654,14 @@
         {
           "cssClass": "sse-headline",
           "properties": {
-            "lineHeight": 1.25
+            "lineHeight": 1.25,
+            "left": 20,
+            "top": 50,
+            "width": 260,
+            "fontSize": 34,
+            "height": 100,
+            "textAlign": "center",
+            "justifyContent": "center"
           }
         },
         {
@@ -6265,7 +6712,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(7, 54, 116);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 300px;\n      height: 600px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(7, 54, 116);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(7, 54, 116);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.25;\n      text-align: center;\n    }\n\n    /* ── OfferSlot internals (single-offer canonical: all centred) ── */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: center;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 130px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 114px;\n      width: 100%;\n      text-align: center;\n      font-size: 26px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n      white-space: nowrap;   /* one line; runtime fitter shrinks long copy */\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 26px;\n      box-sizing: border-box;\n    }\n\n    /* ── T&C wrappers (bottom-left) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 15px;\n      top: 568px;\n      width: 260px;\n      height: 26px;\n    }\n\n    /* ── Offer count variants ── */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    /* Dual: side-by-side row centred (MPU-dual style, scaled up). */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 26px; top: 390px; width: 110px; }\n    .offers-2 .offer-slot-2 { left: 164px; top: 390px; width: 110px; }\n    .offers-2 .plus-1 { left: 138px; top: 399px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 68px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 16px; top: 62px; white-space: nowrap; }\n\n    /* Triple: row + third centred beneath (MPU-triple style). */\n    .offers-3 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-3 .offer-slot-1 { left: 26px; top: 180px; width: 110px; }\n    .offers-3 .offer-slot-2 { left: 164px; top: 180px; width: 110px; }\n    .offers-3 .offer-slot-3 { left: 80px; top: 280px; width: 140px; }\n    .offers-3 .plus-1 { left: 138px; top: 226px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 60px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 15px; top: 56px; white-space: nowrap; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 5px;\n      width: 180px;\n      height: 48px;\n      left: 60px;\n      top: 230px;\n      font-size: 17px;\n    }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 300px;\n      height: 600px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.25;\n      text-align: center;\n    }\n\n    /* ── OfferSlot internals (single-offer canonical: all centred) ── */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: center;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 130px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 114px;\n      width: 100%;\n      text-align: center;\n      font-size: 26px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n      white-space: nowrap;   /* one line; runtime fitter shrinks long copy */\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 26px;\n      box-sizing: border-box;\n    }\n\n    /* ── T&C wrappers (bottom-left) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 15px;\n      top: 568px;\n      width: 260px;\n      height: 26px;\n    }\n\n    /* ── Offer count variants ── */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    /* Dual: side-by-side row centred (MPU-dual style, scaled up). */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 26px; top: 390px; width: 110px; }\n    .offers-2 .offer-slot-2 { left: 164px; top: 390px; width: 110px; }\n    .offers-2 .plus-1 { left: 138px; top: 399px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 68px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 16px; top: 62px; white-space: nowrap; }\n\n    /* Triple: row + third centred beneath (MPU-triple style). */\n    .offers-3 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-3 .offer-slot-1 { left: 26px; top: 180px; width: 110px; }\n    .offers-3 .offer-slot-2 { left: 164px; top: 180px; width: 110px; }\n    .offers-3 .offer-slot-3 { left: 80px; top: 280px; width: 140px; }\n    .offers-3 .plus-1 { left: 138px; top: 226px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 60px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 15px; top: 56px; white-space: nowrap; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 5px;\n      width: 180px;\n      height: 48px;\n      left: 60px;\n      top: 230px;\n      font-size: 17px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     },
     "970x250": {
       "canvas": {
@@ -6287,8 +6734,8 @@
           "kind": "image",
           "zIndex": 1,
           "base": {
-            "left": -100,
-            "top": -125,
+            "left": -89,
+            "top": -77,
             "width": 1720,
             "height": 500,
             "cssClass": "greenwave"
@@ -6347,28 +6794,26 @@
           "kind": "text",
           "zIndex": 3,
           "base": {
-            "left": 50,
-            "top": 85,
-            "width": 225,
-            "fontSize": 34,
-            "cssClass": "headline-act3",
-            "height": 90
+            "cssClass": "sse-headline"
           },
           "binding": {
             "field": "heading3_text"
           },
           "clips": [
             {
-              "id": "headline-act3-slideInRight",
+              "id": "headline-act3-slideInRight-frames-4",
               "label": "Headline Act3 slideInRight",
               "preset": "slideInRight",
-              "start": "swap",
-              "end": "act3_exit-1",
+              "start": "roundel_in",
+              "end": "act4_in",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 150,
+                "enter_distance_px": 60,
                 "enter_duration_pct": 5
-              }
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
           ]
         },
@@ -6384,7 +6829,7 @@
             "width": 170,
             "height": 170,
             "cssClass": "roundel-frame",
-            "backgroundColor": "rgb(0, 45, 114)",
+            "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
             "overflow": "hidden"
           },
@@ -6477,7 +6922,10 @@
                 "fade_pct": 2
               }
             }
-          ]
+          ],
+          "fit": {
+            "minFontSize": 12
+          }
         },
         {
           "id": "headline-act2",
@@ -6486,28 +6934,41 @@
           "kind": "text",
           "zIndex": 4,
           "base": {
-            "left": 50,
-            "top": 85,
-            "width": 270,
-            "fontSize": 34,
-            "cssClass": "headline-act2",
-            "height": 90
+            "cssClass": "sse-headline"
           },
           "binding": {
             "field": "heading2_text"
           },
           "clips": [
             {
-              "id": "headline-act2-slideInRight",
+              "id": "headline-act2-slideInRight-frames-3",
               "label": "Headline Act2 slideInRight",
               "preset": "slideInRight",
               "start": "act2_in",
-              "end": "swap",
+              "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_distance_px": 150,
+                "enter_distance_px": 60,
                 "enter_duration_pct": 5
-              }
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "headline-act2-slideInRight-frames-4",
+              "label": "Headline Act2 slideInRight",
+              "preset": "slideInRight",
+              "start": "act2_in",
+              "end": "offers_exit",
+              "params": {
+                "exit_dy": 20,
+                "enter_distance_px": 60,
+                "enter_duration_pct": 5
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
           ]
         },
@@ -6518,12 +6979,7 @@
           "kind": "text",
           "zIndex": 5,
           "base": {
-            "left": 50,
-            "top": 80,
-            "width": 230,
-            "fontSize": 34,
-            "cssClass": "headline-act1",
-            "height": 90
+            "cssClass": "sse-headline"
           },
           "binding": {
             "field": "heading1_text"
@@ -6536,7 +6992,7 @@
               "start": "act1_in",
               "end": "act1_out",
               "params": {
-                "enter_distance_px": 150,
+                "enter_distance_px": 60,
                 "enter_duration_pct": 5
               }
             }
@@ -6554,7 +7010,7 @@
             "width": 170,
             "height": 170,
             "fontSize": 24,
-            "backgroundColor": "rgb(0, 45, 114)",
+            "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
             "display": "flex",
             "alignItems": "center",
@@ -6661,7 +7117,7 @@
               "start": "act1_in",
               "end": "offers_exit",
               "params": {
-                "enter_distance_px": 340,
+                "enter_distance_px": 60,
                 "exit_dy": 20
               }
             }
@@ -6720,7 +7176,7 @@
               "start": "offer2_in",
               "end": "offers_exit",
               "params": {
-                "enter_distance_px": 340,
+                "enter_distance_px": 60,
                 "exit_dy": 20
               }
             }
@@ -6779,7 +7235,7 @@
               "start": "offer3_in",
               "end": "offers_exit",
               "params": {
-                "enter_distance_px": 340,
+                "enter_distance_px": 60,
                 "exit_dy": 20
               }
             }
@@ -6839,7 +7295,7 @@
               "label": "Unit Rate Prices fadeUp",
               "preset": "fadeUp",
               "start": "act1_out",
-              "end": "swap+1",
+              "end": "tc_exit",
               "params": {
                 "enter_dy": -17,
                 "settled_dy": -11,
@@ -6871,7 +7327,7 @@
               "label": "Terms Solo fadeUp",
               "preset": "fadeUp",
               "start": "terms_in",
-              "end": "end",
+              "end": "tc_exit",
               "params": {
                 "enter_dy": -7,
                 "settled_dy": 2,
@@ -6880,6 +7336,54 @@
               }
             }
           ]
+        },
+        {
+          "id": "headline-act4",
+          "label": "Headline Act4",
+          "group": "Headlines",
+          "kind": "text",
+          "zIndex": 2,
+          "base": {
+            "cssClass": "sse-headline"
+          },
+          "binding": {
+            "field": "heading4_text"
+          },
+          "clips": [
+            {
+              "id": "headline-act4-slideInRight-frames-3",
+              "label": "Headline Act4 slideInRight",
+              "preset": "slideInRight",
+              "start": "act4_in",
+              "end": "act3_exit-1",
+              "params": {
+                "exit_dy": 10,
+                "enter_distance_px": 60,
+                "enter_duration_pct": 5
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "headline-act4-slideInRight",
+              "label": "Headline Act4 slideInRight",
+              "preset": "slideInRight",
+              "start": "act4_in",
+              "end": "act3_exit-1",
+              "params": {
+                "exit_dy": 10,
+                "enter_distance_px": 60,
+                "enter_duration_pct": 5
+              },
+              "profiles": [
+                "frames-4"
+              ]
+            }
+          ],
+          "fit": {
+            "maxLines": 4
+          }
         }
       ],
       "variantRules": [
@@ -6974,10 +7478,10 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 318,
-            "top": 15,
-            "width": 251,
-            "height": 251
+            "left": 290,
+            "top": 10,
+            "width": 293,
+            "height": 293
           },
           "editable": true
         },
@@ -6990,10 +7494,10 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 520,
-            "top": 15,
-            "width": 251,
-            "height": 207
+            "left": 526,
+            "top": 10,
+            "width": 293,
+            "height": 241
           },
           "editable": true
         },
@@ -7006,10 +7510,10 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 421,
-            "top": 141,
-            "width": 251,
-            "height": 193
+            "left": 411,
+            "top": 122,
+            "width": 293,
+            "height": 225
           },
           "editable": true
         },
@@ -7022,10 +7526,10 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 525,
-            "top": 88,
-            "width": 44,
-            "height": 73
+            "left": 532,
+            "top": 83,
+            "width": 51,
+            "height": 85
           },
           "editable": true
         },
@@ -7038,10 +7542,10 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 992,
-            "top": -66,
-            "width": 44,
-            "height": 73
+            "left": 1077,
+            "top": -96,
+            "width": 51,
+            "height": 85
           },
           "editable": true
         },
@@ -7054,11 +7558,11 @@
             "offer_count_num": 3
           },
           "props": {
-            "fontSize": 80,
-            "top": 12,
-            "left": -1,
-            "width": 251,
-            "height": 68
+            "fontSize": 93,
+            "top": 16,
+            "left": 29,
+            "width": 236,
+            "height": 77
           },
           "editable": true
         },
@@ -7071,11 +7575,13 @@
             "offer_count_num": 3
           },
           "props": {
-            "top": 80,
-            "fontSize": 22,
-            "left": 48,
-            "width": 154,
-            "height": 14
+            "top": 93,
+            "fontSize": 19,
+            "left": 57,
+            "width": 180,
+            "height": 16,
+            "textAlign": "center",
+            "justifyContent": "center"
           },
           "editable": true
         },
@@ -7355,13 +7861,47 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 352,
-            "top": 119,
-            "width": 216,
-            "height": 76,
-            "fontSize": 62,
+            "left": 386,
+            "top": 117,
+            "width": 148,
+            "height": 46,
+            "fontSize": 64,
             "lineHeight": 1,
             "whiteSpace": "nowrap"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|sse-headline",
+          "scope": "offers-2",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 39,
+            "top": 80,
+            "width": 246,
+            "height": 90,
+            "fontSize": 34,
+            "lineHeight": 1.25
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|sse-headline",
+          "scope": "offers-3",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 39,
+            "top": 80,
+            "width": 246,
+            "height": 90,
+            "fontSize": 34,
+            "lineHeight": 1.25
           },
           "editable": true
         }
@@ -7385,7 +7925,12 @@
         {
           "cssClass": "sse-headline",
           "properties": {
-            "lineHeight": 1.25
+            "lineHeight": 1.25,
+            "left": 39,
+            "top": 80,
+            "width": 246,
+            "fontSize": 34,
+            "height": 90
           }
         },
         {
@@ -7436,7 +7981,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(7, 54, 116);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 970px;\n      height: 250px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(7, 54, 116);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(7, 54, 116);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.25;\n    }\n\n    /* ── OfferSlot internals (single-offer canonical) ──\n       Billboard alignment: subline LEFT-aligns to the value's left edge. */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: left;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 145px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 126px;\n      width: 100%;\n      text-align: left;\n      font-size: 28px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n    }\n\n    /* ── T&C wrappers (bottom-left) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 20px;\n      top: 226px;\n      width: 420px;\n      height: 26px;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 30px;\n      box-sizing: border-box;\n    }\n\n    /* ── Offer count variants ── */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    /* Dual: row right of the headline column (which ends ~x320). */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 350px; top: 55px; width: 180px; }\n    .offers-2 .offer-slot-2 { left: 580px; top: 55px; width: 180px; }\n    .offers-2 .plus-1 { left: 540px; top: 60px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 72px; text-align: center; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 18px; top: 64px; text-align: center; white-space: nowrap; }\n\n    /* Triple: full row with both pluses; the blue logo moves to the bottom\n       right corner so the third slot has the column. */\n    .offers-3 .offer-slot-1 { left: 340px; top: 60px; width: 170px; }\n    .offers-3 .offer-slot-2 { left: 555px; top: 60px; width: 170px; }\n    .offers-3 .offer-slot-3 { left: 770px; top: 60px; width: 170px; }\n    .offers-3 .plus-1 { left: 517px; top: 65px; }\n    .offers-3 .plus-2 { left: 732px; top: 65px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 54px; text-align: center; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 14px; top: 50px; text-align: center; white-space: nowrap; }\n    .offers-3 .logo-act1 { left: 790px; top: 192px; width: 140px; height: 50px; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 6px;\n      width: 220px;\n      height: 56px;\n      left: 375px;\n      top: 97px;\n      font-size: 20px;\n    }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 970px;\n      height: 250px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.25;\n    }\n\n    /* ── OfferSlot internals (single-offer canonical) ──\n       Billboard alignment: subline LEFT-aligns to the value's left edge. */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: left;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 145px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 126px;\n      width: 100%;\n      text-align: left;\n      font-size: 28px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n    }\n\n    /* ── T&C wrappers (bottom-left) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 20px;\n      top: 226px;\n      width: 420px;\n      height: 26px;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 30px;\n      box-sizing: border-box;\n    }\n\n    /* ── Offer count variants ── */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    /* Dual: row right of the headline column (which ends ~x320). */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 350px; top: 55px; width: 180px; }\n    .offers-2 .offer-slot-2 { left: 580px; top: 55px; width: 180px; }\n    .offers-2 .plus-1 { left: 540px; top: 60px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 72px; text-align: center; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 18px; top: 64px; text-align: center; white-space: nowrap; }\n\n    /* Triple: full row with both pluses; the blue logo moves to the bottom\n       right corner so the third slot has the column. */\n    .offers-3 .offer-slot-1 { left: 340px; top: 60px; width: 170px; }\n    .offers-3 .offer-slot-2 { left: 555px; top: 60px; width: 170px; }\n    .offers-3 .offer-slot-3 { left: 770px; top: 60px; width: 170px; }\n    .offers-3 .plus-1 { left: 517px; top: 65px; }\n    .offers-3 .plus-2 { left: 732px; top: 65px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 54px; text-align: center; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 14px; top: 50px; text-align: center; white-space: nowrap; }\n    .offers-3 .logo-act1 { left: 790px; top: 192px; width: 140px; height: 50px; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 6px;\n      width: 220px;\n      height: 56px;\n      left: 375px;\n      top: 97px;\n      font-size: 20px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     }
   }
 }

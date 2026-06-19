@@ -44,6 +44,7 @@ import {
 } from '@/lib/selection-state';
 import { activeOfferMemberIds, offerInteractionTree } from '@/lib/offer-interaction-model';
 import { isOfferTimelineLayer } from '@/lib/timeline-rows';
+import { clipsForProfile } from '@/lib/headline-motion';
 import { activeFrameScope, beatsForFrameScope } from '@/lib/timing-profiles';
 import {
   addAnimationIntentToLayer,
@@ -53,19 +54,23 @@ import {
   addCreativeShapeLayer,
   addCreativeLayerClip,
   clearCreativeTargetActiveOverride,
+  copyCreativeHeadlineOfferLayout,
   currentSizeCreative,
   deleteCreativeLayer,
   deepClone,
   duplicateCreativeLayer,
   findCreativeLayer,
   findCreativeTarget,
+  headlineOfferVariantRule,
   moveCreativeLayerToZIndex,
   promoteCreativeTargetToSharedStyle,
   reorderCreativeLayerZ,
+  resetCreativeHeadlineOfferLayout,
   updateCreativeLayerMetadata,
   updateCreativeLayerBase,
   updateCreativeLayerClip,
   updateCreativeLayerFit,
+  updateCreativeClassFit,
   replaceCreativeLayer,
   updateCreativeTargetSharedValue,
   updateCreativeTargetValue as updateCreativeTargetDocumentValue,
@@ -94,10 +99,29 @@ const selectedFeedRowFromState = (state) => {
     || {};
 };
 
+const fitRuleForClassRule = (rule) => {
+  if (!rule?.fit || !rule.cssClass) return null;
+  const baseFontSize = Number(rule.properties?.fontSize);
+  const minFromBase = (ratio, fallback) => (
+    Number.isFinite(baseFontSize) && baseFontSize > 0
+      ? Math.max(fallback, Math.round(baseFontSize * ratio))
+      : fallback
+  );
+  return {
+    cssClass: rule.cssClass,
+    minFontSize: rule.fit.minFontSize ?? minFromBase(0.75, 6),
+    ...rule.fit,
+  };
+};
+
 const fitRuleForLayer = (layer) => {
   const cssClass = layer?.base?.cssClass || layer?.id;
   if (!cssClass || layer?.kind === 'image' || layer?.kind === 'shape' || layer?.kind === 'group') return null;
   if (String(layer.id || '') === 'cta') return null;
+  const isHeadline = cssClass === 'sse-headline' || String(layer.id || '').startsWith('headline-');
+  if (layer.fit && isHeadline) {
+    return { cssClass: 'sse-headline', mode: 'sharedEqualizedFit', ...layer.fit };
+  }
   if (layer.fit) return { cssClass, ...layer.fit };
   const baseFontSize = Number(layer?.base?.fontSize);
   const minFromBase = (ratio, fallback) => (
@@ -106,7 +130,7 @@ const fitRuleForLayer = (layer) => {
       : fallback
   );
   if (String(layer.id || '').startsWith('headline-')) {
-    return { cssClass, mode: 'shrink', minFontSize: minFromBase(0.85, 12), maxLines: 2 };
+    return { cssClass: 'sse-headline', mode: 'sharedEqualizedFit', minFontSize: minFromBase(0.85, 12), maxLines: 2 };
   }
   if (/terms|unit-rate/.test(String(layer.id || ''))) {
     return { cssClass, mode: 'shrink', minFontSize: minFromBase(0.75, 6), maxLines: 2 };
@@ -116,9 +140,44 @@ const fitRuleForLayer = (layer) => {
 
 const creativeFitRules = (state) => {
   const sizeCreative = currentSizeCreative(state.creativeDocument, state.size);
-  return (sizeCreative?.layers || [])
-    .map(fitRuleForLayer)
-    .filter(Boolean);
+  const headlineClassRule = (sizeCreative?.classRules || []).find((rule) => rule.cssClass === 'sse-headline');
+  const classRuleProps = headlineClassRule?.properties || {};
+  const minFromClass = Number(classRuleProps.fontSize);
+  const minFontSize = Number.isFinite(minFromClass) && minFromClass > 0
+    ? Math.max(12, Math.round(minFromClass * 0.85))
+    : 12;
+  const headlineLayers = (sizeCreative?.layers || []).filter((layer) => String(layer.id || '').startsWith('headline-'));
+  const headlineFitLayer = headlineLayers.find((layer) => layer.fit) || headlineLayers[0];
+  const seen = new Set();
+  const layerRules = (sizeCreative?.layers || [])
+    .map((layer) => {
+      if (String(layer.id || '').startsWith('headline-')) {
+        if (layer !== headlineFitLayer) return null;
+        return {
+          cssClass: 'sse-headline',
+          mode: 'sharedEqualizedFit',
+          ...(headlineFitLayer?.fit || {}),
+          minFontSize: headlineFitLayer?.fit?.minFontSize ?? minFontSize,
+          maxLines: headlineFitLayer?.fit?.maxLines ?? 2,
+        };
+      }
+      return fitRuleForLayer(layer);
+    })
+    .filter((rule) => {
+      if (!rule) return false;
+      if (seen.has(rule.cssClass)) return false;
+      seen.add(rule.cssClass);
+      return true;
+    });
+  const classRules = (sizeCreative?.classRules || [])
+    .map((rule) => fitRuleForClassRule(rule))
+    .filter((rule) => {
+      if (!rule) return false;
+      if (seen.has(rule.cssClass)) return false;
+      seen.add(rule.cssClass);
+      return true;
+    });
+  return [...layerRules, ...classRules];
 };
 
 const editableBeatName = (value) => (
@@ -336,8 +395,12 @@ export const useEditorStore = create<any>((set, get) => ({
     if (next) get().setCanvasSelection(next.selectedTargetId, next.selectedTargetIds, next.isolationPath);
   },
   selectedClip: () => {
-    const layer = get().selectedLayer();
-    return (layer?.clips || []).find((clip) => clip.id === get().selectedClipId) || layer?.clips?.[0] || null;
+    const state = get();
+    const layer = state.selectedLayer();
+    if (!layer) return null;
+    const profile = activeFrameScope(state.activeScopes());
+    const clips = clipsForProfile(layer.clips || [], profile);
+    return clips.find((clip) => clip.id === state.selectedClipId) || clips[0] || null;
   },
 
   pushHistory: (changes) => {
@@ -368,6 +431,10 @@ export const useEditorStore = create<any>((set, get) => ({
     }
     if (change.kind === 'creativeFit') {
       get().applyCreativeLayerFitValue(change.size, change.layerId, change.field, value);
+      return;
+    }
+    if (change.kind === 'creativeClassFit') {
+      get().applyCreativeClassFitValue(change.size, change.cssClass, change.field, value);
       return;
     }
     if (change.kind === 'creativeLayerReplace') {
@@ -694,6 +761,33 @@ export const useEditorStore = create<any>((set, get) => ({
     }
   },
 
+  applyCreativeClassFitValue: (size, cssClass, field, value) => {
+    const state = get();
+    if (!state.creativeDocument) return;
+    const next = updateCreativeClassFit(state.creativeDocument, size, cssClass, field, value);
+    set({ creativeDocument: next, creativeDirty: true });
+    get().setStatus('Unsaved creative changes', 'warn');
+  },
+
+  updateCreativeClassFitValue: (cssClass, field, value, { record = true, before = undefined } = {}) => {
+    const state = get();
+    const sizeCreative = currentSizeCreative(state.creativeDocument, state.size);
+    const rule = sizeCreative?.classRules?.find((item) => item.cssClass === cssClass);
+    const nextValue = value === '' ? '' : typeof value === 'boolean' ? value : Number.isFinite(Number(value)) ? Number(value) : value;
+    const previous = before ?? rule?.fit?.[field];
+    get().applyCreativeClassFitValue(state.size, cssClass, field, nextValue);
+    if (record) {
+      get().pushHistory([{
+        kind: 'creativeClassFit',
+        size: state.size,
+        cssClass,
+        field,
+        before: previous,
+        after: nextValue,
+      }]);
+    }
+  },
+
   replaceCreativeLayerDocument: (size, layerId, nextLayer) => {
     const state = get();
     if (!state.creativeDocument) return;
@@ -776,6 +870,46 @@ export const useEditorStore = create<any>((set, get) => ({
     set({ creativeDocument: next, creativeDirty: true });
     get().setStatus('Saved active values as shared style', 'warn');
     get().pushHistory([{ kind: 'creativeTargetSharedPromote', size: state.size, targetId, activeScopes, fields, before, after: null }]);
+  },
+
+  copyHeadlineOfferLayout: (sourceOfferCount, targetOfferCount = null) => {
+    const state = get();
+    if (!state.creativeDocument) return;
+    const target = targetOfferCount || state.offerCount;
+    const before = headlineOfferVariantRule(currentSizeCreative(state.creativeDocument, state.size), target);
+    const next = copyCreativeHeadlineOfferLayout(
+      state.creativeDocument,
+      state.size,
+      sourceOfferCount,
+      target,
+    );
+    set({ creativeDocument: next, creativeDirty: true });
+    get().setStatus(`Copied ${sourceOfferCount}-offer headline layout to ${target}-offer`, 'warn');
+    get().pushHistory([{
+      kind: 'headlineOfferLayoutCopy',
+      size: state.size,
+      sourceOfferCount,
+      targetOfferCount: target,
+      before,
+      after: headlineOfferVariantRule(currentSizeCreative(next, state.size), target),
+    }]);
+  },
+
+  resetHeadlineOfferLayout: (offerCount = null) => {
+    const state = get();
+    if (!state.creativeDocument) return;
+    const target = offerCount || state.offerCount;
+    const before = headlineOfferVariantRule(currentSizeCreative(state.creativeDocument, state.size), target);
+    const next = resetCreativeHeadlineOfferLayout(state.creativeDocument, state.size, target);
+    set({ creativeDocument: next, creativeDirty: true });
+    get().setStatus(`${target}-offer headline now uses the 1-offer baseline`, 'warn');
+    get().pushHistory([{
+      kind: 'headlineOfferLayoutReset',
+      size: state.size,
+      offerCount: target,
+      before,
+      after: null,
+    }]);
   },
 
   nudgeSelectedTarget: (dx, dy) => {

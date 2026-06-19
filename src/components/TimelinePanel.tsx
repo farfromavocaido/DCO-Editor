@@ -7,6 +7,7 @@ import { EditorIcon } from '@/components/EditorIcon';
 import { animationFamilyForLayer, timelineSpanForClip } from '@/lib/animation-intents';
 import { compileAnimationClips } from '@/lib/creative-compiler';
 import { currentSizeCreative } from '@/lib/creative-model';
+import { clipsForProfile } from '@/lib/headline-motion';
 import { activeOfferMemberIds } from '@/lib/offer-interaction-model';
 import {
   OFFERS_BLOCK_ID,
@@ -17,7 +18,7 @@ import {
   offerLayerVariantState,
   timelineLayerLabel,
 } from '@/lib/timeline-rows';
-import { beatsForScopes } from '@/lib/timing-profiles';
+import { beatsForScopes, activeFrameScope } from '@/lib/timing-profiles';
 import { activeScopesFromControls } from '@/lib/feed-model';
 import { PlayheadReadout } from '@/components/PlayheadReadout';
 import { useEditorStore } from '@/store/editor-store';
@@ -207,6 +208,7 @@ function TimelineLayerRow({
   layer,
   offerCount,
   beats,
+  frameScope,
   selectedLayerId,
   selectedTargetId,
   selectedTargetIds,
@@ -234,6 +236,7 @@ function TimelineLayerRow({
     isolatedGroupId,
   ) || (selectedLayerId === layerId && selectedTargetId === layerId);
   const label = timelineLayerLabel(layer, offerCount, activeOfferIds);
+  const visibleClips = clipsForProfile(layer.clips || [], frameScope);
 
   return (
     <div
@@ -292,7 +295,7 @@ function TimelineLayerRow({
       </div>
       {!dimmed ? (
         <div className="timeline-track">
-          {(layer.clips || []).map((clip) => (
+          {visibleClips.map((clip) => (
             <TimelineClipBar
               key={clip.id}
               layer={layer}
@@ -346,6 +349,7 @@ export function TimelinePanel() {
     roundelMode,
   }), [ctaShape, frameCount, includeRoundelFrame, offerCount, roundelMode, tcMode]);
   const beats = beatsForScopes(document, activeScopes);
+  const frameScope = activeFrameScope(activeScopes);
   const seconds = document?.clock?.durationS ? (percent / 100) * document.clock.durationS : 0;
   const activeOfferIds = activeOfferMemberIds(document, size, activeScopes);
   const timelineActiveOfferIds = activeOfferIds.length ? activeOfferIds : null;
@@ -508,6 +512,7 @@ export function TimelinePanel() {
                       offerCount={Number(offerCount)}
                       activeOfferIds={timelineActiveOfferIds}
                       beats={beats}
+                      frameScope={frameScope}
                       selectedLayerId={selectedLayerId}
                       selectedTargetId={selectedTargetId}
                       selectedTargetIds={selectedTargetIds}
@@ -535,6 +540,7 @@ export function TimelinePanel() {
                           offerCount={Number(offerCount)}
                           activeOfferIds={timelineActiveOfferIds}
                           beats={beats}
+                          frameScope={frameScope}
                           selectedLayerId={selectedLayerId}
                           selectedTargetId={selectedTargetId}
                           selectedTargetIds={selectedTargetIds}
@@ -565,6 +571,7 @@ export function TimelinePanel() {
               offerCount={Number(offerCount)}
               activeOfferIds={timelineActiveOfferIds}
               beats={beats}
+              frameScope={frameScope}
               selectedLayerId={selectedLayerId}
               selectedTargetId={selectedTargetId}
               selectedTargetIds={selectedTargetIds}

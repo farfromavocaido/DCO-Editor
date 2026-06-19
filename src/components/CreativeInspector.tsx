@@ -5,13 +5,14 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { animationFamilyForLayer, animationIntentDefinitions, timelineSpanForClip } from '@/lib/animation-intents';
 import { compileAnimationClips } from '@/lib/creative-compiler';
-import { currentSizeCreative } from '@/lib/creative-model';
+import { currentSizeCreative, isHeadlineLayer } from '@/lib/creative-model';
 import { activeScopesFromControls, fieldInputValue, rowLabel } from '@/lib/feed-model';
 import { beatsForScopes } from '@/lib/timing-profiles';
 import { deriveSelectedTarget, OFFERS_BLOCK_ID } from '@/lib/selection-groups';
 import { fitSizeStatus } from '@/lib/selection-chrome';
 import { useEditorStore } from '@/store/editor-store';
 import { EditorIcon } from '@/components/EditorIcon';
+import HeadlineOfferLayoutSection from '@/components/HeadlineOfferLayoutSection';
 
 const boxFields = ['left', 'top', 'width', 'height'];
 const typeFields = ['fontSize', 'lineHeight', 'letterSpacing'];
@@ -110,7 +111,7 @@ function InspectorSection({ id, title, open, onToggle, children }) {
 }
 
 export function CreativeInspector() {
-  const [openSections, setOpenSections] = useState(() => new Set(['layout', 'type', 'style', 'animation']));
+  const [openSections, setOpenSections] = useState(() => new Set(['layout', 'headline-offers', 'type', 'style', 'animation']));
   const [layerCode, setLayerCode] = useState('');
   const [codeError, setCodeError] = useState('');
   const document = useEditorStore((s) => s.creativeDocument);
@@ -140,6 +141,7 @@ export function CreativeInspector() {
   const promoteTargetToSharedStyle = useEditorStore((s) => s.promoteCreativeTargetToSharedStyle);
   const clearTargetOverrides = useEditorStore((s) => s.clearCreativeTargetOverrides);
   const updateLayerFit = useEditorStore((s) => s.updateCreativeLayerFitValue);
+  const updateClassFit = useEditorStore((s) => s.updateCreativeClassFitValue);
   const setResizeMode = useEditorStore((s) => s.setResizeMode);
   const replaceSelectedLayerFromCode = useEditorStore((s) => s.replaceSelectedLayerFromCode);
   const updateClip = useEditorStore((s) => s.updateCreativeLayerClipValue);
@@ -229,15 +231,26 @@ export function CreativeInspector() {
   }
 
   const isGroupedSelection = selectedTarget.kind === 'group' || selectedTarget.kind === 'multi';
+  const isHeadlineSelection = isHeadlineLayer(selectedLayer) && !isGroupedSelection;
   const layoutNote = isolationPath?.length === 1 && isolationPath[0] === OFFERS_BLOCK_ID
     ? 'Editing inside the offer block. Select a slot or plus sign; double-click a slot to edit value and subline placement.'
     : selectedTarget.description;
-  const selectedTargetIsText = selectedTarget.kind === 'nested' || selectedLayer.kind === 'text' || selectedLayer.id === 'cta';
+  const isNestedTextTarget = selectedTarget.kind === 'nested'
+    && ['offer-value', 'offer-subline'].includes(String(selectedTarget.childId || ''));
+  const selectedTargetIsText = isNestedTextTarget || selectedLayer.kind === 'text' || selectedLayer.id === 'cta';
   const canTextFit = !isGroupedSelection
     && selectedTargetIsText
     && selectedLayer.kind !== 'image'
-    && selectedLayer.kind !== 'group'
+    && (selectedLayer.kind !== 'group' || isNestedTextTarget)
     && selectedLayer.id !== 'cta';
+  const activeFit = selectedTarget.kind === 'nested'
+    ? (selectedTarget.fit || {})
+    : (selectedLayer.fit || {});
+  const applyFitUpdate = (field, value) => (
+    selectedTarget.kind === 'nested'
+      ? updateClassFit(selectedTarget.cssClass, field, value)
+      : updateLayerFit(selectedLayer.id, field, value)
+  );
   const fittedFontSize = activeCssClass ? fitResults.get(activeCssClass) : undefined;
   const fitStatus = fitSizeStatus(selectedTarget.values?.fontSize, fittedFontSize);
   const sourceKind = selectedTarget.writeSource?.kind || '';
@@ -314,6 +327,17 @@ export function CreativeInspector() {
           )}
         </InspectorSection>
 
+        {isHeadlineSelection ? (
+          <InspectorSection
+            id="headline-offers"
+            title="Offer layouts"
+            open={openSections.has('headline-offers')}
+            onToggle={() => toggleSection('headline-offers')}
+          >
+            <HeadlineOfferLayoutSection document={document} size={size} offerCount={offerCount} />
+          </InspectorSection>
+        ) : null}
+
         <InspectorSection
           id="style"
           title="Styles"
@@ -347,8 +371,11 @@ export function CreativeInspector() {
           </div>
           <div className="style-field-summary" aria-label="Reusable style fields">
             <span title="Fields on the base layer or shared class">Shared: {sharedFields.length ? sharedFields.join(', ') : 'none'}</span>
-            <span title="Fields overridden for the current offer, T&C, or CTA state">Override: {overrideFields.length ? overrideFields.join(', ') : 'none'}</span>
+            {!isHeadlineSelection ? (
+              <span title="Fields overridden for the current offer, T&C, or CTA state">Override: {overrideFields.length ? overrideFields.join(', ') : 'none'}</span>
+            ) : null}
           </div>
+          {!isHeadlineSelection ? (
           <div className="style-action-row">
             <button
               type="button"
@@ -367,6 +394,9 @@ export function CreativeInspector() {
               Clear override
             </button>
           </div>
+          ) : (
+            <p className="inspector-note">Use the Offer layouts section above to copy or reset headline placement by offer count.</p>
+          )}
         </InspectorSection>
 
         {selectedTargetIsText && !isGroupedSelection ? (
@@ -444,8 +474,8 @@ export function CreativeInspector() {
             <div className="inspector-grid">
               <SelectControl
                 label="mode"
-                value={selectedLayer.fit?.mode || 'shrink'}
-                onChange={(value) => updateLayerFit(selectedLayer.id, 'mode', value)}
+                value={activeFit?.mode || 'shrink'}
+                onChange={(value) => applyFitUpdate('mode', value)}
               >
                 <option value="shrink">shrink</option>
                 <option value="wrap">wrap</option>
@@ -455,14 +485,14 @@ export function CreativeInspector() {
               <FieldControl
                 label="min font"
                 type="text"
-                value={selectedLayer.fit?.minFontSize ?? ''}
-                onChange={(value) => updateLayerFit(selectedLayer.id, 'minFontSize', value)}
+                value={activeFit?.minFontSize ?? ''}
+                onChange={(value) => applyFitUpdate('minFontSize', value)}
               />
               <FieldControl
                 label="max lines"
                 type="text"
-                value={selectedLayer.fit?.maxLines ?? ''}
-                onChange={(value) => updateLayerFit(selectedLayer.id, 'maxLines', value)}
+                value={activeFit?.maxLines ?? ''}
+                onChange={(value) => applyFitUpdate('maxLines', value)}
               />
             </div>
           </InspectorSection>

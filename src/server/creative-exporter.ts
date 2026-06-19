@@ -4,6 +4,8 @@ import path from 'node:path';
 
 import { compileAnimationClips } from '@/lib/creative-compiler';
 import { structuredRuleCss } from '@/lib/creative-css';
+import { clipsForProfile, headlineTransitionRuntimeBlock } from '@/lib/headline-motion';
+import { HEADLINE_CSS_CLASS, isHeadlineLayer } from '@/lib/creative-model';
 import {
   alignOfferValueSymbolsRuntime,
   wrapOfferValueSymbolRuntime,
@@ -127,6 +129,7 @@ const clientInitialRow = (document: Record<string, unknown>) => {
     heading1_text: 'A different kind of energy',
     heading2_text: 'Our very best electricity plan',
     heading3_text: 'A different kind of energy',
+    heading4_text: 'Switch and save today',
     offer_count_num: 1,
     offer1_value_text: '15%',
     offer1_sub_text: 'OFF ELECTRICITY*',
@@ -193,6 +196,7 @@ const clientValidationFields = () => [
   { name: 'heading1_text', label: 'Heading 1' },
   { name: 'heading2_text', label: 'Heading 2' },
   { name: 'heading3_text', label: 'Heading 3' },
+  { name: 'heading4_text', label: 'Heading 4' },
   { name: 'offer1_value_text', label: 'Offer 1 value' },
   { name: 'offer1_sub_text', label: 'Offer 1 subline' },
   { name: 'offer2_value_text', label: 'Offer 2 value' },
@@ -209,7 +213,8 @@ const clientValidationFields = () => [
 const dynamicFieldMapping = () => [
   ['heading1_text', 'text', '', 'Headline 1 copy'],
   ['heading2_text', 'text', '', 'Headline 2 copy'],
-  ['heading3_text', 'text', '', 'Headline 3 copy'],
+  ['heading3_text', 'text', '', 'Act 3 headline copy over the offer roundel'],
+  ['heading4_text', 'text', '', 'Act 4 headline copy over the CTA/endframe'],
   ['offer_count_num', 'integer', '1-3', 'Visible offer count'],
   ['offer1_value_text', 'text', '', 'Offer 1 value'],
   ['offer1_sub_text', 'text', '', 'Offer 1 subline'],
@@ -273,10 +278,33 @@ ${[
   }).join('\n')}
     }`;
 
-const staticRuleForLayer = (layer: Record<string, unknown>, beats: Record<string, number>) => {
+const layerClipsForProfile = (
+  layer: Record<string, unknown>,
+  profile = 'frames-3',
+) => (
+  isHeadlineLayer(layer) ? clipsForProfile(layer.clips, profile) : (layer.clips || [])
+);
+
+const staticRuleForLayer = (
+  layer: Record<string, unknown>,
+  beats: Record<string, number>,
+  options: { profile?: string; selectorPrefix?: string } = {},
+) => {
+  const profile = options.profile || 'frames-3';
+  const clips = layerClipsForProfile(layer, profile);
+  const firstKeyframe = clips.length ? compileAnimationClips(clips, beats)[0] : null;
+  if (isHeadlineLayer(layer)) {
+    const initialTransform = firstKeyframe ? formatTransform(firstKeyframe) : null;
+    const declarations = [];
+    if (initialTransform) declarations.push(`      transform: ${initialTransform};`);
+    if (firstKeyframe?.opacity !== undefined) declarations.push(`      opacity: ${firstKeyframe.opacity};`);
+    if (!declarations.length) return '';
+    return `    ${options.selectorPrefix || ''}#${layer.id} {
+${declarations.join('\n')}
+    }`;
+  }
   const base = layer.base || {};
   const cssClass = base.cssClass || layer.id;
-  const firstKeyframe = layer.clips?.length ? compileAnimationClips(layer.clips, beats)[0] : null;
   const initialTransform = firstKeyframe ? formatTransform(firstKeyframe) : null;
   const declarations = [
     cssDecl('left', base.left, 'px'),
@@ -305,40 +333,96 @@ const animationCssForLayer = (
   layer: Record<string, unknown>,
   beats: Record<string, number>,
   durationS: number,
-  options: { suffix?: string; selectorPrefix?: string } = {},
+  options: { suffix?: string; selectorPrefix?: string; profile?: string } = {},
 ) => {
-  if (!layer.clips?.length) return '';
-  const name = animationNameForLayer(layer, options.suffix || '');
-  const keyframes = compileAnimationClips(layer.clips, beats);
+  const profile = options.profile || 'frames-3';
+  const clips = layerClipsForProfile(layer, profile);
+  if (!clips.length) return '';
+  const name = animationNameForLayer({ ...layer, clips }, options.suffix || '');
+  const keyframes = compileAnimationClips(clips, beats);
   const cssClass = layer.base?.cssClass || layer.id;
-  const selector = `${options.selectorPrefix || ''}.${cssClass}`;
+  const selector = isHeadlineLayer(layer)
+    ? `${options.selectorPrefix || ''}#${layer.id}`
+    : `${options.selectorPrefix || ''}.${cssClass}`;
   return `${renderKeyframes(name, keyframes)}
     ${selector} {
       animation: ${durationS}s linear 0s 1 normal forwards running ${name};
     }`;
 };
 
-const fitRuleForLayer = (layer: Record<string, unknown>) => {
-  const cssClass = layer?.base?.cssClass || layer?.id;
-  if (!cssClass || layer.kind === 'image' || layer.kind === 'shape' || layer.kind === 'group') return null;
-  if (String(layer.id || '') === 'cta') return null;
-  if (layer.fit) return { cssClass, ...layer.fit };
-  const baseFontSize = Number(layer?.base?.fontSize);
+const fitRuleForClassRule = (
+  rule: Record<string, unknown>,
+) => {
+  if (!rule?.fit || !rule.cssClass) return null;
+  const baseFontSize = Number((rule.properties as Record<string, unknown>)?.fontSize);
   const minFromBase = (ratio: number, fallback: number) => (
     Number.isFinite(baseFontSize) && baseFontSize > 0
       ? Math.max(fallback, Math.round(baseFontSize * ratio))
       : fallback
   );
-  if (String(layer.id || '').startsWith('headline-')) return { cssClass, mode: 'shrink', minFontSize: minFromBase(0.85, 12), maxLines: 2 };
+  const fit = rule.fit as Record<string, unknown>;
+  return {
+    cssClass: rule.cssClass,
+    minFontSize: fit.minFontSize ?? minFromBase(0.75, 6),
+    ...fit,
+  };
+};
+
+const fitRuleForLayer = (layer: Record<string, unknown>, classRuleProps: Record<string, unknown> = {}) => {
+  const cssClass = isHeadlineLayer(layer)
+    ? HEADLINE_CSS_CLASS
+    : (layer?.base?.cssClass || layer?.id);
+  if (!cssClass || layer.kind === 'image' || layer.kind === 'shape' || layer.kind === 'group') return null;
+  if (String(layer.id || '') === 'cta') return null;
+  if (layer.fit && isHeadlineLayer(layer)) {
+    return { cssClass, mode: 'sharedEqualizedFit', ...layer.fit };
+  }
+  if (layer.fit) return { cssClass, ...layer.fit };
+  const baseFontSize = Number(classRuleProps.fontSize ?? layer?.base?.fontSize);
+  const minFromBase = (ratio: number, fallback: number) => (
+    Number.isFinite(baseFontSize) && baseFontSize > 0
+      ? Math.max(fallback, Math.round(baseFontSize * ratio))
+      : fallback
+  );
+  if (isHeadlineLayer(layer)) {
+    return { cssClass, mode: 'sharedEqualizedFit', minFontSize: minFromBase(0.85, 12), maxLines: 2 };
+  }
   if (/terms|unit-rate/.test(String(layer.id || ''))) return { cssClass, mode: 'shrink', minFontSize: minFromBase(0.75, 6), maxLines: 2 };
   return null;
 };
 
-const textFitRulesForSize = (sizeCreative: Record<string, unknown>) => (
-  (sizeCreative.layers || [])
-    .map(fitRuleForLayer)
-    .filter(Boolean)
-);
+const textFitRulesForSize = (sizeCreative: Record<string, unknown>) => {
+  const headlineClassRule = (sizeCreative.classRules || []).find(
+    (rule: Record<string, unknown>) => rule.cssClass === HEADLINE_CSS_CLASS,
+  );
+  const classRuleProps = headlineClassRule?.properties || {};
+  const headlineLayers = (sizeCreative.layers || []).filter(isHeadlineLayer);
+  const headlineFitLayer = headlineLayers.find((layer: Record<string, unknown>) => layer.fit) || headlineLayers[0];
+  const seen = new Set<string>();
+  const layerRules = (sizeCreative.layers || [])
+    .map((layer: Record<string, unknown>) => {
+      if (isHeadlineLayer(layer)) {
+        if (layer !== headlineFitLayer) return null;
+        return fitRuleForLayer(layer, classRuleProps);
+      }
+      return fitRuleForLayer(layer, classRuleProps);
+    })
+    .filter((rule) => {
+      if (!rule) return false;
+      if (seen.has(rule.cssClass)) return false;
+      seen.add(rule.cssClass);
+      return true;
+    });
+  const classRules = (sizeCreative.classRules || [])
+    .map((rule: Record<string, unknown>) => fitRuleForClassRule(rule))
+    .filter((rule) => {
+      if (!rule) return false;
+      if (seen.has(rule.cssClass)) return false;
+      seen.add(rule.cssClass);
+      return true;
+    });
+  return [...layerRules, ...classRules];
+};
 
 const dcoFieldForLayer = (layer: Record<string, unknown>) => {
   if (layer.binding?.field) return String(layer.binding.field);
@@ -346,6 +430,7 @@ const dcoFieldForLayer = (layer: Record<string, unknown>) => {
   if (id === 'headline-act1') return 'heading1_text';
   if (id === 'headline-act2') return 'heading2_text';
   if (id === 'headline-act3') return 'heading3_text';
+  if (id === 'headline-act4') return 'heading4_text';
   if (id === 'cta') return 'cta_text';
   if (id === 'plus-1' || id === 'plus-2') return '';
   return '';
@@ -361,7 +446,9 @@ const renderOfferSlot = (layer: Record<string, unknown>) => {
 };
 
 const renderLayer = (layer: Record<string, unknown>, options: RenderOptions = {}) => {
-  const cssClass = layer.base?.cssClass || layer.id;
+  const cssClass = isHeadlineLayer(layer)
+    ? HEADLINE_CSS_CLASS
+    : (layer.base?.cssClass || layer.id);
   if (layer.id === 'terms-prices' || layer.id === 'unit-rate-prices' || layer.id === 'terms-solo') return '';
   if (layer.id.startsWith('offer-slot-')) return renderOfferSlot(layer);
   if (layer.kind === 'image') {
@@ -370,7 +457,7 @@ const renderLayer = (layer: Record<string, unknown>, options: RenderOptions = {}
   const tag = layer.id === 'cta' ? 'div' : 'p';
   const className = [
     'stage-element',
-    /headline/.test(layer.id) ? 'sse-text sse-text-bold sse-headline' : '',
+    /headline/.test(layer.id) ? 'sse-text sse-text-bold' : '',
     /terms|unit-rate/.test(layer.id) ? 'sse-text sse-bottom-line' : '',
     cssClass,
   ].filter(Boolean).join(' ');
@@ -409,7 +496,11 @@ const stateClasses = (row: Record<string, unknown>) => {
   return `offers-${count} ${tc} ${cta} ${frame} ${roundelFrame} ${roundelMode}`;
 };
 
-const runtimeScript = (fitRules: Array<Record<string, unknown>> = [], options: RenderOptions = {}) => {
+const runtimeScript = (
+  fitRules: Array<Record<string, unknown>> = [],
+  options: RenderOptions = {},
+  headlineRuntime: { layers?: Array<Record<string, unknown>>; beatsProfiles?: Record<string, Record<string, number>>; durationS?: number } = {},
+) => {
   const includePreviewBridge = options.includePreviewBridge !== false;
   const previewRowFallback = includePreviewBridge
     ? `
@@ -439,7 +530,7 @@ const runtimeScript = (fitRules: Array<Record<string, unknown>> = [], options: R
           row = row || {};
           var out = {};
           [
-            'heading1_text', 'heading2_text', 'heading3_text',
+            'heading1_text', 'heading2_text', 'heading3_text', 'heading4_text',
             'offer_count_num',
             'offer1_value_text', 'offer1_sub_text',
             'offer2_value_text', 'offer2_sub_text',
@@ -475,6 +566,11 @@ const runtimeScript = (fitRules: Array<Record<string, unknown>> = [], options: R
         }
 
         ${wrapOfferValueSymbolRuntime}
+        ${headlineTransitionRuntimeBlock(
+          headlineRuntime.layers || [],
+          headlineRuntime.beatsProfiles || {},
+          headlineRuntime.durationS || 15,
+        )}
 
         function bindOfferTexts(data) {
           for (var index = 1; index <= 3; index += 1) {
@@ -540,15 +636,50 @@ const runtimeScript = (fitRules: Array<Record<string, unknown>> = [], options: R
         }
 
         function applyTextFitRule(rule) {
+          var elements = [];
           document.querySelectorAll('.' + rule.cssClass).forEach(function(element) {
             if (!element.textContent.trim()) return;
             if (window.getComputedStyle(element).visibility === 'hidden') return;
+            elements.push(element);
+          });
+          if (!elements.length) return;
+
+          var mode = rule.mode || 'shrink';
+          if (mode === 'sharedEqualizedFit') {
+            var fittedSizes = elements.map(function(element) {
+              element.style.fontSize = '';
+              element.style.whiteSpace = '';
+              element.style.overflow = '';
+              element.style.textOverflow = '';
+              element.style.maxHeight = '';
+              var size = parseFloat(window.getComputedStyle(element).fontSize) || parseFloat(rule.minFontSize) || 1;
+              var min = parseFloat(rule.minFontSize) || 1;
+              element.style.fontSize = size + 'px';
+              var maxHeight = ruleMaxHeight(element, rule, size);
+              while (size > min && (element.scrollWidth > element.clientWidth || isTextTooTall(element, rule, size, maxHeight))) {
+                size = Math.max(min, Number((size - 0.5).toFixed(3)));
+                element.style.fontSize = size + 'px';
+                maxHeight = ruleMaxHeight(element, rule, size);
+              }
+              if (maxHeight !== null) {
+                element.style.maxHeight = maxHeight + 'px';
+                element.style.overflow = 'hidden';
+              }
+              return size;
+            });
+            var sharedSize = Math.min.apply(null, fittedSizes);
+            elements.forEach(function(element) {
+              element.style.fontSize = sharedSize + 'px';
+            });
+            return;
+          }
+
+          elements.forEach(function(element) {
             element.style.fontSize = '';
             element.style.whiteSpace = '';
             element.style.overflow = '';
             element.style.textOverflow = '';
             element.style.maxHeight = '';
-            var mode = rule.mode || 'shrink';
             if (mode === 'wrap') {
               element.style.whiteSpace = 'normal';
               return;
@@ -584,6 +715,8 @@ const runtimeScript = (fitRules: Array<Record<string, unknown>> = [], options: R
         }
 
         function equalizeSublines() {
+          var sublineRule = textFitRules.find(function(item) { return item.cssClass === 'offer-subline'; });
+          if (sublineRule && (sublineRule.mode === 'wrap' || Number(sublineRule.maxLines) > 1)) return;
           var sublines = [];
           for (var index = 1; index <= 3; index += 1) {
             var slot = document.getElementById('offer' + index);
@@ -644,6 +777,8 @@ const runtimeScript = (fitRules: Array<Record<string, unknown>> = [], options: R
           setText('#headline-act1', data.heading1_text);
           setText('#headline-act2', data.heading2_text);
           setText('#headline-act3', data.heading3_text);
+          setText('#headline-act4', __headlineAct4DisplayText(data, includeRoundel));
+          applyHeadlineTransitionSkips(data, includeRoundel);
           setText('#cta', data.cta_text);
           setText('.roundel-copy', data.roundel_text_text);
           setText('.roundel-value', data.roundel_value_text);
@@ -699,6 +834,19 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
         .map((layer) => animationCssForLayer(layer, beats, duration, {
           suffix: scope,
           selectorPrefix: `.${scope} `,
+          profile: scope,
+        }))
+        .filter(Boolean);
+    })
+    .join('\n\n');
+  const profileStaticCss = ['frames-4']
+    .filter((scope) => document.clock?.profiles?.[scope])
+    .flatMap((scope) => {
+      const beats = beatsForFrameScope(document, scope);
+      return sizeCreative.layers
+        .map((layer) => staticRuleForLayer(layer, beats, {
+          profile: scope,
+          selectorPrefix: `.${scope} `,
         }))
         .filter(Boolean);
     })
@@ -740,6 +888,8 @@ ${structuredRuleCss(sizeCreative)}
 
 ${defaultAnimationCss}
 
+${profileStaticCss}
+
 ${profileAnimationCss}
 `;
 };
@@ -774,7 +924,14 @@ ${packagedFontPreloadTags(options)}
     <style>
 ${cssForSize(document, size, options)}
     </style>
-${runtimeScript(textFitRulesForSize(sizeCreative), options)}
+${runtimeScript(textFitRulesForSize(sizeCreative), options, {
+  layers: sizeCreative.layers,
+  beatsProfiles: {
+    'frames-3': beatsForFrameScope(document, 'frames-3'),
+    'frames-4': beatsForFrameScope(document, 'frames-4'),
+  },
+  durationS: document.clock.durationS,
+})}
 ${previewValidatorTag(options)}
   </head>
   <body>
@@ -865,6 +1022,7 @@ export const renderClientPreviewValidatorScript = () => `(function() {
     heading1_text: ['#headline-act1'],
     heading2_text: ['#headline-act2'],
     heading3_text: ['#headline-act3'],
+    heading4_text: ['#headline-act4'],
     offer1_value_text: ['#offer1 .offer-value'],
     offer1_sub_text: ['#offer1 .offer-subline'],
     offer2_value_text: ['#offer2 .offer-value'],
@@ -882,6 +1040,7 @@ export const renderClientPreviewValidatorScript = () => `(function() {
     { name: 'heading1_text', label: 'Heading 1' },
     { name: 'heading2_text', label: 'Heading 2' },
     { name: 'heading3_text', label: 'Heading 3' },
+    { name: 'heading4_text', label: 'Heading 4' },
     { name: 'offer1_value_text', label: 'Offer 1 value' },
     { name: 'offer1_sub_text', label: 'Offer 1 subline' },
     { name: 'offer2_value_text', label: 'Offer 2 value' },
@@ -939,6 +1098,7 @@ export const renderClientPreviewValidatorScript = () => `(function() {
       heading1_text: fieldValue(controls, 'heading1_text'),
       heading2_text: fieldValue(controls, 'heading2_text'),
       heading3_text: fieldValue(controls, 'heading3_text'),
+      heading4_text: fieldValue(controls, 'heading4_text'),
       offer_count_num: Number(fieldValue(controls, 'offer_count_num')) || 1,
       offer1_value_text: fieldValue(controls, 'offer1_value_text'),
       offer1_sub_text: fieldValue(controls, 'offer1_sub_text'),
@@ -1372,7 +1532,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         --muted: #99a8b5;
         --teal: #16c7b7;
         --pink: #ff6b9d;
-        --blue: #073674;
+        --blue: rgb(0, 41, 117);
       }
       * { box-sizing: border-box; }
       body {
@@ -1717,7 +1877,8 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         <h2>Headlines</h2>
         <label><span>Heading 1</span><input name="heading1_text" value="${escapeAttr(initialRow.heading1_text)}"></label>
         <label><span>Heading 2</span><input name="heading2_text" value="${escapeAttr(initialRow.heading2_text)}"></label>
-        <label><span>Heading 3</span><input name="heading3_text" value="${escapeAttr(initialRow.heading3_text)}"></label>
+        <label data-heading3-field ${initialRow.include_roundel_frame_bool ? '' : 'hidden'}><span>Heading 3</span><input name="heading3_text" value="${escapeAttr(initialRow.heading3_text)}"></label>
+        <label data-heading4-field><span>Heading 4</span><input name="heading4_text" value="${escapeAttr(initialRow.heading4_text || '')}"></label>
 
         <h2>Offers</h2>
         <label><span>Number</span>
@@ -1738,7 +1899,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         <h2>CTA</h2>
         <label><span>Type</span>
           <select name="cta_type_enum">
-            <option value="roundel">Roundel</option>
+            <option value="roundel">Circle</option>
             <option value="rectangle">Rectangle</option>
           </select>
         </label>
@@ -1826,6 +1987,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
             heading1_text: field('heading1_text'),
             heading2_text: field('heading2_text'),
             heading3_text: field('heading3_text'),
+            heading4_text: field('heading4_text'),
             offer_count_num: Number(field('offer_count_num')) || 1,
             offer1_value_text: field('offer1_value_text'),
             offer1_sub_text: field('offer1_sub_text'),
@@ -1849,6 +2011,13 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           Array.prototype.forEach.call(document.querySelectorAll('[data-offer-block]'), function(block) {
             block.classList.toggle('is-hidden', Number(block.dataset.offerBlock) > Number(row.offer_count_num));
           });
+        }
+
+        function syncHeadlineControls(row) {
+          var heading3Field = document.querySelector('[data-heading3-field]');
+          if (heading3Field) {
+            heading3Field.hidden = row.include_roundel_frame_bool !== 'true';
+          }
         }
 
         function sendRow(frame, row) {
@@ -1934,6 +2103,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         function updateAds() {
           var row = rowFromControls();
           syncOfferControls(row);
+          syncHeadlineControls(row);
           loadActiveAd(false);
           fitAdFrames();
           frames.forEach(function(frame) {

@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { compileAnimationClips, frameAtPercent } from '@/lib/creative-compiler';
+import { compileHeadlineKeyframes, headlineAct4DisplayText } from '@/lib/headline-motion';
 import { cssName, cssValue, structuredRuleCss } from '@/lib/creative-css';
 import {
   collectSnapBounds,
@@ -19,7 +20,7 @@ import {
   scaleTargetIdsForOfferGroup,
   uniformScaleFromHandle,
 } from '@/lib/canvas-group-scale';
-import { currentSizeCreative, findCreativeTarget, targetIdForLayerChild } from '@/lib/creative-model';
+import { currentSizeCreative, findCreativeTarget, HEADLINE_CSS_CLASS, isHeadlineLayer, targetIdForLayerChild } from '@/lib/creative-model';
 import {
   deriveSelectedTarget,
   filterManipulationTargetIds,
@@ -33,7 +34,7 @@ import {
 import { zoomLabel, zoomScale } from '@/lib/canvas-zoom';
 import { assetUrl, fieldValue, previewBackgroundSrc, wrapOfferValueSymbols } from '@/lib/preview-utils';
 import { resizeHandlesForSelection, selectionChromeKind } from '@/lib/selection-chrome';
-import { beatsForScopes } from '@/lib/timing-profiles';
+import { activeFrameScope, beatsForScopes } from '@/lib/timing-profiles';
 import { activeScopesFromControls } from '@/lib/feed-model';
 import {
   offerTargetAtPoint as resolveOfferTargetAtPoint,
@@ -45,6 +46,7 @@ import { PlayheadReadout } from '@/components/PlayheadReadout';
 import { AlignControls, AlignmentGuides, ViewportRulersFrame } from '@/components/CanvasWorkspace';
 import { useEditorStore } from '@/store/editor-store';
 const renderLayerRule = (layer: Record<string, unknown>) => {
+  if (isHeadlineLayer(layer)) return '';
   const base = layer.base || {};
   const cssClass = base.cssClass || layer.id;
   const decl = Object.entries(base)
@@ -525,7 +527,7 @@ export function PreviewPane() {
 
   const layerClass = (layer: Record<string, unknown>, targetId = layer.id) => [
     'stage-element',
-    layer.base?.cssClass || layer.id,
+    isHeadlineLayer(layer) ? HEADLINE_CSS_CLASS : (layer.base?.cssClass || layer.id),
     lockedLayerIds.has(String(layer.id)) ? 'is-locked' : '',
     selectionClassForTarget(String(targetId)),
     targetOutsideIsolation(String(targetId)) ? 'is-outside-isolation' : '',
@@ -585,7 +587,10 @@ export function PreviewPane() {
   ].filter(Boolean).join(' ');
 
   const frameStyle = (layer: Record<string, unknown>, targetId = layer.id) => {
-    const keyframes = compileAnimationClips(layer.clips || [], activeBeats);
+    const profile = activeFrameScope(activeScopes);
+    const keyframes = layer.id?.startsWith('headline-act')
+      ? compileHeadlineKeyframes(layer, sizeCreative?.layers || [], row, profile, activeBeats)
+      : compileAnimationClips(layer.clips || [], activeBeats);
     const frame = frameAtPercent(keyframes, percent);
     const transform = [
       `translate3d(${frame.translate[0]}px, ${frame.translate[1]}px, 0px)`,
@@ -766,7 +771,7 @@ export function PreviewPane() {
     const Tag = layer.id === 'cta' ? 'div' : 'p';
     const className = [
       layerClass(layer),
-      isHeadline ? 'sse-text sse-text-bold sse-headline' : '',
+      isHeadline ? 'sse-text sse-text-bold' : '',
       /terms|unit-rate/.test(layer.id) ? 'sse-text sse-bottom-line' : '',
     ].filter(Boolean).join(' ');
     const boundField = layer.binding?.field;
@@ -774,6 +779,7 @@ export function PreviewPane() {
       : layer.id === 'headline-act1' ? fieldValue(row.heading1_text)
         : layer.id === 'headline-act2' ? fieldValue(row.heading2_text)
           : layer.id === 'headline-act3' ? fieldValue(row.heading3_text)
+            : layer.id === 'headline-act4' ? headlineAct4DisplayText(row, includeRoundelFrame)
             : layer.id === 'cta' ? fieldValue(row.cta_text)
               : layer.id.startsWith('plus-') ? '+'
                 : '';

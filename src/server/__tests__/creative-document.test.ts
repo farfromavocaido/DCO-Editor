@@ -42,10 +42,10 @@ test('preserves 728x90 banner assets and partial bluewave treatment', async () =
   assert.equal(bluewave.asset, 'assets/SVG/bluewave-wider.svg');
   assert.ok(bluewave.base.width > size.canvas.width / 2);
 
-  const headline = size.layers.find((layer) => layer.id === 'headline-act1');
+  const headline = size.classRules.find((rule) => rule.cssClass === 'sse-headline')?.properties;
   assert.ok(headline);
-  assert.ok(headline.base.width <= 230);
-  assert.ok(headline.base.height >= 48);
+  assert.ok(headline.width <= 230);
+  assert.ok(headline.height >= 48);
 });
 
 test('preserves per-size layer, variant, and timeline data for 970x250', async () => {

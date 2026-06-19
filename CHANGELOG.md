@@ -3,14 +3,21 @@
 ## [Unreleased]
 
 ### Added
+- **Feed variable schema docs:** `docs/FEED_VARIABLE_SCHEMA.md` (full reference) and `docs/FEED_DYNAMIC_FIELDS.md` (send-over guide: headings, act timing, sample values; `cta_type_enum` uses `roundel` not `circle`).
 - **Offer value currency symbols:** £ and € in offer blocks are auto-wrapped with the same smaller `sym-pct` styling and runtime alignment used for `%` (editor preview and Studio export). Roundel, headings, and other text are unchanged.
 
 ### Fixed
+- **320×50 T&C copy:** `terms-prices` and `terms-solo` now share the unit-rate text box (position, size, alignment, font). Clip timing unchanged; `settled_dy: -11` keeps copy in the visible band on the 50px canvas.
+- **320×50 Headline 4:** white text and `top: 9px` via `#headline-act4` override in manualCss (shared headline class unchanged on other acts).
+- **728×90 Headline 4:** `top: 17px` via `#headline-act4` override in manualCss (other headlines stay at 10px).
+- **Offer subline fit in inspector:** Fit controls appear when selecting nested offer sublines; class-rule fit is persisted and exported. 320×50 sublines use bottom alignment, wrap, max 2 lines. `frames-3` `act4_in` now lands at swap (+0.1%) so heading 4 crossfades in as heading 2 exits, instead of waiting until `cta_in`. T&Cs still exit at the CTA frame. Matches the manual 300×600 fix across all MPU sizes.
+- **728×90 T&C visibility:** removed erroneous `height: 1.3px` on `.sse-bottom-line` that clipped prices-mode legal copy to a single pixel row.
 - **T&C Prices control:** selecting “Prices” in the top bar no longer throws when the embedded feed schema listed legacy `solo`/`prices` enum options instead of `tcs_only`/`tcs_units`.
 - **GitHub Pages password gate:** hosted client preview at `/` requires password `ssedco` (session-based, client-side only; not applied to editor ZIP exports).
 - Vendored `campaign/assets/fonts/MuseoSans_700.otf` for reproducible CI and ZIP exports.
 
 ### Changed
+- **Brand palette:** standardised campaign colours to dark blue `rgb(0, 41, 117)`, green `rgb(0, 229, 165)`, and white `rgb(255, 255, 255)` across creative JSON, editor chrome, and export preview (SVG assets unchanged).
 - **Flattened repo layout:** moved `editor-app/` contents to the repository root; `package.json`, `campaign/`, and `src/` now live at the top level.
 - **Editor-only repo cleanup:** removed GWD/`gwd-tl` infrastructure. Campaign data lives in `campaign/`; exports go to `output/`. Feed rows are embedded in the creative document. Legacy layout API and sidebar removed.
 

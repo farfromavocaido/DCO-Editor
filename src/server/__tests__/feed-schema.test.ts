@@ -63,6 +63,7 @@ test('defines metadata for every existing Studio profile field', () => {
     'heading1_text',
     'heading2_text',
     'heading3_text',
+    'heading4_text',
     'offer_count_num',
     'offer1_value_text',
     'offer1_sub_text',

@@ -1674,6 +1674,24 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         border-color: var(--teal);
         box-shadow: 0 0 0 2px rgba(22, 199, 183, 0.18);
       }
+      label.is-disabled span {
+        color: rgba(153, 168, 181, 0.72);
+      }
+      input:disabled,
+      textarea:disabled,
+      select:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        color: var(--muted);
+        border-color: rgba(43, 56, 70, 0.72);
+        box-shadow: none;
+      }
+      input:disabled:focus,
+      textarea:disabled:focus,
+      select:disabled:focus {
+        border-color: rgba(43, 56, 70, 0.72);
+        box-shadow: none;
+      }
       .grid-2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -1877,7 +1895,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         <h2>Headlines</h2>
         <label><span>Heading 1</span><input name="heading1_text" value="${escapeAttr(initialRow.heading1_text)}"></label>
         <label><span>Heading 2</span><input name="heading2_text" value="${escapeAttr(initialRow.heading2_text)}"></label>
-        <label data-heading3-field ${initialRow.include_roundel_frame_bool ? '' : 'hidden'}><span>Heading 3</span><input name="heading3_text" value="${escapeAttr(initialRow.heading3_text)}"></label>
+        <label data-heading3-field class="${initialRow.include_roundel_frame_bool ? '' : 'is-disabled'}"><span>Heading 3</span><input name="heading3_text" value="${escapeAttr(initialRow.heading3_text)}" ${initialRow.include_roundel_frame_bool ? '' : 'disabled'}></label>
         <label data-heading4-field><span>Heading 4</span><input name="heading4_text" value="${escapeAttr(initialRow.heading4_text || '')}"></label>
 
         <h2>Offers</h2>
@@ -2015,8 +2033,13 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
 
         function syncHeadlineControls(row) {
           var heading3Field = document.querySelector('[data-heading3-field]');
+          var heading3Input = document.querySelector('[name="heading3_text"]');
+          var enabled = row.include_roundel_frame_bool === 'true';
           if (heading3Field) {
-            heading3Field.hidden = row.include_roundel_frame_bool !== 'true';
+            heading3Field.classList.toggle('is-disabled', !enabled);
+          }
+          if (heading3Input) {
+            heading3Input.disabled = !enabled;
           }
         }
 

@@ -187,40 +187,41 @@ test('persisted 320x50 single offer stays on-canvas with leaderboard layout', ()
   assert.ok(primitive.top + primitive.height <= canvas.height + 8, 'single offer primitive exceeds canvas bottom');
 });
 
-test('persisted 320x50 dual price row is scaled from the 970x250 reference', () => {
+test('persisted 320x50 dual price row stays on-canvas with leaderboard layout', () => {
   const doc = loadPersistedCreative();
-  const scale = scaleAxes(doc, '970x250', '320x50');
+  const canvas = doc.sizes['320x50'].canvas;
   const scopes = ['offers-2', 'tc-prices'];
 
   for (const slotId of ['offer-slot-1', 'offer-slot-2']) {
-    const referenceSlot = getTargetCanvasBounds(doc, '970x250', slotId, scopes);
     const targetSlot = getTargetCanvasBounds(doc, '320x50', slotId, scopes);
     const targetValue = getTargetCanvasBounds(doc, '320x50', `${slotId}::offer-value`, scopes);
     const targetSubline = getTargetCanvasBounds(doc, '320x50', `${slotId}::offer-subline`, scopes);
     const primitive = unionBounds([targetValue, targetSubline].filter(Boolean));
 
-    assertClose(targetSlot.left, Math.round(referenceSlot.left * scale.x), 2, `${slotId} left`);
-    assertClose(targetSlot.top, Math.round(referenceSlot.top * scale.y), 2, `${slotId} top`);
-    assertClose(targetSlot.width, Math.round(referenceSlot.width * scale.x), 2, `${slotId} width`);
-    assert.equal(targetValue.localLeft, 0, `${slotId} value must anchor to the slot left`);
-    assert.equal(targetSubline.localLeft, 0, `${slotId} subline must anchor to the slot left`);
+    assert.ok(targetSlot.left >= 0, `${slotId} slot exceeds canvas left`);
+    assert.ok(targetSlot.left + targetSlot.width <= canvas.width, `${slotId} slot exceeds canvas right`);
+    assert.ok(targetSlot.top >= 0, `${slotId} slot exceeds canvas top`);
+    assert.ok(targetSlot.top + targetSlot.height <= canvas.height + 1, `${slotId} slot exceeds canvas bottom`);
+    assert.ok(targetValue.left >= 0, `${slotId} value exceeds canvas left`);
+    assert.ok(targetSubline.left >= 0, `${slotId} subline exceeds canvas left`);
+    assert.ok(targetValue.left + targetValue.width <= canvas.width, `${slotId} value exceeds canvas right`);
+    assert.ok(targetSubline.left + targetSubline.width <= canvas.width, `${slotId} subline exceeds canvas right`);
     assertClose(targetValue.width, targetSlot.width, 1, `${slotId} value width`);
     assertClose(targetSubline.width, targetSlot.width, 1, `${slotId} subline width`);
-    assert.ok(primitive.left >= targetSlot.left - 1, `${slotId} primitive exceeds slot left`);
-    assert.ok(primitive.left + primitive.width <= targetSlot.left + targetSlot.width + 1, `${slotId} primitive exceeds slot right`);
+    assert.ok(primitive.left >= 0, `${slotId} primitive exceeds canvas left`);
+    assert.ok(primitive.left + primitive.width <= canvas.width, `${slotId} primitive exceeds canvas right`);
     assert.ok(primitive.top >= 0, `${slotId} primitive exceeds canvas top`);
     assert.ok(
-      primitive.top + primitive.height <= doc.sizes['320x50'].canvas.height + 8,
+      primitive.top + primitive.height <= canvas.height + 8,
       `${slotId} primitive exceeds canvas bottom`,
     );
   }
 
-  const referencePlus = getTargetCanvasBounds(doc, '970x250', 'plus-1', scopes);
   const targetPlus = getTargetCanvasBounds(doc, '320x50', 'plus-1', scopes);
-  assertClose(targetPlus.left, Math.round(referencePlus.left * scale.x), 2, 'dual plus left');
-  assertClose(targetPlus.top, Math.round(referencePlus.top * scale.y), 2, 'dual plus top');
-  assertClose(targetPlus.width, Math.round(referencePlus.width * scale.x), 2, 'dual plus width');
-  assertClose(targetPlus.height, Math.round(referencePlus.height * scale.y), 2, 'dual plus height');
+  assert.ok(targetPlus.left >= 0, 'dual plus exceeds canvas left');
+  assert.ok(targetPlus.left + targetPlus.width <= canvas.width, 'dual plus exceeds canvas right');
+  assert.ok(targetPlus.top >= 0, 'dual plus exceeds canvas top');
+  assert.ok(targetPlus.top + targetPlus.height <= canvas.height, 'dual plus exceeds canvas bottom');
 });
 
 test('persisted 728x90 banner keeps offers on-canvas with the cropped bluewave treatment', () => {

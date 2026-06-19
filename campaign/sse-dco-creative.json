@@ -67,7 +67,7 @@
       "frames-4": {
         "start": 0,
         "act1_begin": 6,
-        "act1_in": 8,
+        "act1_in": 11.9,
         "offer2_in": 11,
         "offer3_in": 14,
         "plus1_in": 16,
@@ -297,7 +297,7 @@
         "heading1_text": "A different kind of energy",
         "heading2_text": "Our very best electricity plan",
         "heading3_text": "A different kind of energy",
-        "offer_count_num": 2,
+        "offer_count_num": 3,
         "offer1_value_text": "15%",
         "offer1_sub_text": "OFF ELECTRICITY*",
         "offer2_value_text": "30%",
@@ -631,7 +631,7 @@
               "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_distance_px": 60,
+                "enter_distance_px": 20,
                 "enter_duration_pct": 4
               },
               "profiles": [

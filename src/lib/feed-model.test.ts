@@ -9,6 +9,7 @@ import {
   selectFeedDraftVariant,
   updateFeedDraftField,
 } from './feed-model';
+import { backgroundImageFieldName, backgroundFieldsFromRow } from './feed-background';
 
 const fields = [
   { name: 'heading1_text', type: 'string' },
@@ -19,7 +20,7 @@ const fields = [
   { name: 'roundel_text_text', type: 'string' },
   { name: 'roundel_value_text', type: 'string' },
   { name: 'Active', type: 'boolean' },
-  { name: 'background_image_url', type: 'image' },
+  { name: backgroundImageFieldName('300x250'), type: 'image' },
 ];
 
 const rows = [
@@ -33,7 +34,7 @@ const rows = [
     roundel_value_text: '',
     heading1_text: 'A different kind of energy',
     Active: true,
-    background_image_url: 'https://example.com/bg.jpg',
+    ...backgroundFieldsFromRow({ [backgroundImageFieldName('300x250')]: 'https://example.com/bg.jpg' }),
   },
   {
     Unique_ID: 'triple',
@@ -45,7 +46,7 @@ const rows = [
     roundel_value_text: '€1,080',
     heading1_text: 'Triple headline',
     Active: true,
-    background_image_url: 'https://example.com/triple-bg.jpg',
+    ...backgroundFieldsFromRow({ [backgroundImageFieldName('300x250')]: 'https://example.com/triple-bg.jpg' }),
   },
 ];
 
@@ -96,13 +97,13 @@ test('coerces sample field input values for preview state', () => {
   draft = updateFeedDraftField(draft, fields, 'offer_count_num', '9');
   draft = updateFeedDraftField(draft, fields, 'Active', false);
   draft = updateFeedDraftField(draft, fields, 'include_roundel_frame_bool', 'true');
-  draft = updateFeedDraftField(draft, fields, 'background_image_url', 'https://example.com/fresh-bg.jpg');
+  draft = updateFeedDraftField(draft, fields, backgroundImageFieldName('300x250'), 'https://example.com/fresh-bg.jpg');
 
   assert.equal(draft.rows[0].offer_count_num, 3);
   assert.equal(draft.rows[0].Active, false);
   assert.equal(draft.rows[0].include_roundel_frame_bool, true);
-  assert.equal(draft.rows[0].background_image_url, 'https://example.com/fresh-bg.jpg');
-  assert.equal(fieldInputValue(draft.rows[0], fields.find((field) => field.name === 'background_image_url')), 'https://example.com/fresh-bg.jpg');
+  assert.equal(draft.rows[0].background_image_url_300x250.Url, 'https://example.com/fresh-bg.jpg');
+  assert.equal(fieldInputValue(draft.rows[0], fields.find((field) => field.name === backgroundImageFieldName('300x250'))), 'https://example.com/fresh-bg.jpg');
 });
 
 test('rejects invalid enum input before it reaches the preview', () => {

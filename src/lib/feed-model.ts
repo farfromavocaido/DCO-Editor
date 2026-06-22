@@ -42,7 +42,7 @@ const clampInteger = (value, field) => {
 const coerceFieldValue = (field, value) => {
   if (field.type === 'boolean') return coerceBoolean(value);
   if (field.type === 'integer') return clampInteger(value, field);
-  if (field.type === 'url') return { Url: String(value?.Url ?? value ?? '') };
+  if (field.type === 'image' || field.type === 'url') return { Url: String(value?.Url ?? value ?? '') };
   if (field.type === 'enum') {
     if (field.name === 'tc_type_enum') {
       const canonical = normalizeTcTypeEnum(value);
@@ -77,7 +77,7 @@ export const selectedFeedDraftRow = (draft) => draft.rows[draft.selectedIndex] |
 
 export const fieldInputValue = (row, field) => {
   const value = row?.[field.name];
-  if (field.type === 'url' && value && typeof value === 'object') return value.Url || '';
+  if ((field.type === 'url' || field.type === 'image') && value && typeof value === 'object') return value.Url || '';
   if (value === undefined || value === null) return '';
   return String(value);
 };

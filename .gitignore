@@ -33,6 +33,9 @@ wheels/
 /output/
 /site/
 
+# stale pre-flattening build dir (repo was flattened to root)
+/editor-app/
+
 # misc
 .DS_Store
 *.pem

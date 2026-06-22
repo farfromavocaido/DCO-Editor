@@ -61,7 +61,7 @@ test('exports production HTML with referenced dynamic fields, not baked feed row
   assert.match(html, /data-dco-field="tc_terms_text"/);
   assert.match(html, /data-dco-field="roundel_text_text"/);
   assert.match(html, /data-dco-field="roundel_value_text"/);
-  assert.match(html, /data-dco-field="background_image_url"/);
+  assert.match(html, /data-dco-field="background_image_url_300x250"/);
   assert.match(html, /data-dco-state="offer_count_num,tc_type_enum,cta_type_enum,include_roundel_frame_bool,roundel_value_text"/);
   assert.match(html, /\.frames-4 #headline-act4/);
   assert.doesNotMatch(html, /window\.__SSE_DCO_PREVIEW__\s*=/);
@@ -154,7 +154,7 @@ test('builds a client preview package with html variants, assets, and self-conta
   const variant = String(entries.find((entry) => entry.path === 'ads/html/SSE_DCO_728x90_offers-3_tcs-units_rectangle.html')?.data || '');
   assert.match(variant, /offers-3 tc-prices cta-rect/);
   assert.match(variant, /src="\.\.\/assets\/bg_728x90\.jpg"/);
-  assert.match(variant, /data-dco-field="background_image_url"/);
+  assert.match(variant, /data-dco-field="background_image_url_728x90"/);
   assert.match(variant, /<script src="\.\.\/\.\.\/preview-validator\.js"><\/script>/);
   assert.match(variant, /@font-face/);
   assert.match(variant, /font-family: "Museo"/);
@@ -169,15 +169,15 @@ test('builds a base agency package with one production html file per size', asyn
   const document = await readCreativeDocument();
   const entries = await buildBasePackageEntries(document);
   const names = entries.map((entry) => entry.path).sort();
-  const htmlNames = names.filter((name) => name.startsWith('ads/html/') && name.endsWith('.html'));
+  const htmlNames = names.filter((name) => name.endsWith('/index.html'));
 
   assert.deepEqual(htmlNames, [
-    'ads/html/SSE_DCO_160x600.html',
-    'ads/html/SSE_DCO_300x250.html',
-    'ads/html/SSE_DCO_300x600.html',
-    'ads/html/SSE_DCO_320x50.html',
-    'ads/html/SSE_DCO_728x90.html',
-    'ads/html/SSE_DCO_970x250.html',
+    'ads/160x600/index.html',
+    'ads/300x250/index.html',
+    'ads/300x600/index.html',
+    'ads/320x50/index.html',
+    'ads/728x90/index.html',
+    'ads/970x250/index.html',
   ]);
   assert.ok(names.includes('mapping.txt'));
   assert.ok(names.includes('ads/assets/SVG/SSELogoBlue.svg'));
@@ -188,11 +188,16 @@ test('builds a base agency package with one production html file per size', asyn
   assert.ok(!names.includes('preview-validator.js'));
   assert.ok(!names.some((name) => /offers-\d_/.test(name)));
 
-  const html = String(entries.find((entry) => entry.path === 'ads/html/SSE_DCO_728x90.html')?.data || '');
+  const html = String(entries.find((entry) => entry.path === 'ads/728x90/index.html')?.data || '');
   const mapping = String(entries.find((entry) => entry.path === 'mapping.txt')?.data || '');
   assert.match(html, /data-dco-field="heading1_text"/);
-  assert.match(html, /data-dco-field="background_image_url"/);
-  assert.match(html, /id="bg-image" src="" data-dco-field="background_image_url"/);
+  assert.match(html, /data-dco-field="background_image_url_728x90"/);
+  assert.match(html, /id="bg-image" src="" data-dco-field="background_image_url_728x90"/);
+  assert.match(html, /Enabler\.setProfileId\(10960467\)/);
+  assert.match(html, /devDynamicContent\.SSE_ROI_Delivery/);
+  assert.match(html, /background_image_url_728x90\.Url/);
+  assert.match(html, /728x90_hiker\.jpg/);
+  assert.match(html, /Enabler\.setDevDynamicContent\(devDynamicContent\)/);
   assert.doesNotMatch(html, /\.\.\/assets\/bg_728x90\.jpg/);
   assert.doesNotMatch(html, /preview-validator\.js/);
   assert.doesNotMatch(html, /<script id="sse-dco-preview-feed">/);
@@ -203,7 +208,8 @@ test('builds a base agency package with one production html file per size', asyn
   assert.match(mapping, /offer_count_num\tinteger\t1-3/);
   assert.match(mapping, /tc_type_enum\tenum\ttcs_only \| tcs_units/);
   assert.match(mapping, /cta_type_enum\tenum\troundel \| rectangle/);
-  assert.match(mapping, /background_image_url\timage/);
+  assert.match(mapping, /background_image_url_300x250\timage/);
+  assert.match(mapping, /background_image_url_728x90\timage/);
   assert.doesNotMatch(mapping, legacyFieldPattern(['Headline', 'Act1']));
   assert.doesNotMatch(mapping, legacyFieldPattern(['Offer', 'Count']));
   assert.doesNotMatch(mapping, legacyFieldPattern(['TC', 'Mode']));

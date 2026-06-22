@@ -59,7 +59,8 @@ See [docs/WORKFLOW.md](docs/WORKFLOW.md) for detail.
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — app structure, data flow, path resolution
 - [docs/WORKFLOW.md](docs/WORKFLOW.md) — editor usage and export
 - [docs/API.md](docs/API.md) — REST route reference
-- [CHANGELOG.md](CHANGELOG.md) — app changes
+- [docs/FEED_VARIABLE_SCHEMA.md](docs/FEED_VARIABLE_SCHEMA.md) — full feed field reference + schema-extension mechanism
+- [docs/FEED_DYNAMIC_FIELDS.md](docs/FEED_DYNAMIC_FIELDS.md) — feed send-over guide
 
 ## Project layout
 
@@ -67,12 +68,14 @@ See [docs/WORKFLOW.md](docs/WORKFLOW.md) for detail.
 ├── campaign/
 │   ├── sse-dco-creative.json
 │   └── assets/
-├── output/                 generated HTML (gitignored)
+├── output/                 generated HTML + ZIPs (gitignored)
+├── site/                   static client preview build (gitignored)
+├── scripts/                one-off data migrations + preview-site export
 ├── src/
 │   ├── app/              Next.js routes (page + API + asset proxy)
 │   ├── components/       TopBar, PreviewPane, LayerTree, TimelinePanel, etc.
-│   ├── lib/              creative compiler, model, alignment, text-fit
-│   ├── server/           creative-document, feed-schema, creative-exporter
+│   ├── lib/              creative compiler/model/css, feed-model, feed-background, alignment, text-fit
+│   ├── server/           creative-document, feed-schema, creative-exporter, render-creative-preview, html-highlighter, http, paths
 │   └── store/            Zustand editor state
 ├── docs/
 └── vitest.config.ts

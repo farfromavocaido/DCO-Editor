@@ -11,6 +11,14 @@ import {
   wrapOfferValueSymbolRuntime,
 } from '@/lib/offer-value-symbols';
 import { beatsForFrameScope } from '@/lib/timing-profiles';
+import {
+  CREATIVE_AD_SIZES,
+  backgroundFieldsFromRow,
+  backgroundImageFieldName,
+  backgroundImageFieldDefinitions,
+  imageFieldUrl,
+  studioDevBackgroundUrl,
+} from '@/lib/feed-background';
 import { appRoot, outputRoot, projectRoot } from './paths';
 
 const DEFAULT_STATE = 'offers-1 tc-solo cta-roundel frames-3 roundel-frame-off roundel-copy-only';
@@ -32,6 +40,7 @@ type RenderOptions = {
   fontBasePath?: string;
   includePackagedBackground?: boolean;
   includePreviewBridge?: boolean;
+  includeStudioDynamicContent?: boolean;
   previewValidatorScriptPath?: string;
 };
 
@@ -119,7 +128,11 @@ const rowForClientVariant = (
     roundel_value_text: matching?.roundel_value_text || offerMatch?.roundel_value_text || fallback.roundel_value_text || '',
     tc_terms_text: matching?.tc_terms_text || offerMatch?.tc_terms_text || fallback.tc_terms_text || '*T&Cs apply',
     tc_units_text: matching?.tc_units_text || offerMatch?.tc_units_text || fallback.tc_units_text || '',
-    background_image_url: matching?.background_image_url || offerMatch?.background_image_url || fallback.background_image_url || '',
+    ...backgroundFieldsFromRow({
+      ...fallback,
+      ...(offerMatch || {}),
+      ...(matching || {}),
+    }),
   };
 };
 
@@ -145,7 +158,7 @@ const clientInitialRow = (document: Record<string, unknown>) => {
     tc_type_enum: 'tcs_only',
     tc_terms_text: '*T&Cs apply',
     tc_units_text: 'Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat',
-    background_image_url: '',
+    ...backgroundFieldsFromRow({}),
     ...fallback,
   };
 };
@@ -230,8 +243,79 @@ const dynamicFieldMapping = () => [
   ['include_roundel_frame_bool', 'boolean', 'true | false', 'Show optional roundel frame; false keeps the three-act timing'],
   ['roundel_text_text', 'text', '', 'Optional roundel frame copy'],
   ['roundel_value_text', 'text', '', 'Optional large roundel value'],
-  ['background_image_url', 'image', '', 'Background image URL; leave blank to use packaged size background'],
+  ...backgroundImageFieldDefinitions().map((field) => [
+    field.name,
+    'image',
+    '',
+    field.description,
+  ] as const),
 ];
+
+const STUDIO_DEV_DYNAMIC_SCALAR_FIELDS = [
+  '_id',
+  'Unique_ID',
+  'Reporting_label',
+  'Active',
+  'Default',
+  'heading1_text',
+  'heading2_text',
+  'heading3_text',
+  'heading4_text',
+  'offer_count_num',
+  'offer1_value_text',
+  'offer1_sub_text',
+  'offer2_value_text',
+  'offer2_sub_text',
+  'offer3_value_text',
+  'offer3_sub_text',
+  'tc_type_enum',
+  'tc_terms_text',
+  'tc_units_text',
+  'cta_type_enum',
+  'cta_text',
+  'include_roundel_frame_bool',
+  'roundel_text_text',
+  'roundel_value_text',
+] as const;
+
+const studioDevDynamicLiteral = (fieldName: string, value: unknown) => {
+  if (typeof value === 'boolean') return value ? 'true' : 'false';
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  return jsString(String(value ?? ''));
+};
+
+export const renderStudioDynamicContentScript = (
+  document: Record<string, unknown>,
+  sampleRow: Record<string, unknown> = {},
+) => {
+  const profileId = Number(document.feed?.studioProfileId || 10960467);
+  const profileElement = String(document.feed?.studioProfileElement || 'SSE_ROI_Delivery');
+  const row = { ...(document.feed?.sampleRows?.[0] || {}), ...sampleRow };
+  const lines = [
+    '    <script type="text/javascript">',
+    '      Enabler.setProfileId(' + profileId + ');',
+    '      var devDynamicContent = {};',
+    `      devDynamicContent.${profileElement} = [{}];`,
+  ];
+
+  for (const fieldName of STUDIO_DEV_DYNAMIC_SCALAR_FIELDS) {
+    if (!Object.prototype.hasOwnProperty.call(row, fieldName)) continue;
+    lines.push(
+      `      devDynamicContent.${profileElement}[0].${fieldName} = ${studioDevDynamicLiteral(fieldName, row[fieldName])};`,
+    );
+  }
+
+  for (const size of CREATIVE_AD_SIZES) {
+    const fieldName = backgroundImageFieldName(size);
+    const url = studioDevBackgroundUrl(size, row[fieldName] ?? row.background_image_url);
+    lines.push(`      devDynamicContent.${profileElement}[0].${fieldName} = {};`);
+    lines.push(`      devDynamicContent.${profileElement}[0].${fieldName}.Url = ${jsString(url)};`);
+  }
+
+  lines.push('      Enabler.setDevDynamicContent(devDynamicContent);');
+  lines.push('    </script>');
+  return lines.join('\n');
+};
 
 export const renderMappingTxt = () => [
   'SSE DCO dynamic field mapping',
@@ -488,7 +572,8 @@ const stateClasses = (row: Record<string, unknown>) => {
   const count = Math.min(3, Math.max(1, Number.parseInt(row.offer_count_num, 10) || 1));
   const tc = row.tc_type_enum === 'tcs_units' ? 'tc-prices' : 'tc-solo';
   const includeRoundel = row.include_roundel_frame_bool === true
-    || ['true', '1', 'yes', 'on'].includes(String(row.include_roundel_frame_bool || '').trim().toLowerCase());
+    || row.include_roundel_frame === true
+    || ['true', '1', 'yes', 'on'].includes(String(row.include_roundel_frame_bool || row.include_roundel_frame || '').trim().toLowerCase());
   const cta = includeRoundel || ['rectangle', 'rect'].includes(String(row.cta_type_enum || '')) ? 'cta-rect' : 'cta-roundel';
   const frame = includeRoundel ? 'frames-4' : 'frames-3';
   const roundelFrame = includeRoundel ? 'roundel-frame-on' : 'roundel-frame-off';
@@ -526,6 +611,23 @@ const runtimeScript = (
           return String(value);
         }
 
+        function imageFieldValue(value) {
+          if (value && typeof value === 'object' && value.Url !== undefined) {
+            return String(value.Url || '');
+          }
+          return fieldValue(value);
+        }
+
+        function backgroundFieldNameForSize(size) {
+          return 'background_image_url_' + size;
+        }
+
+        function backgroundImageUrlForSize(data, size) {
+          var sized = imageFieldValue(data[backgroundFieldNameForSize(size)]);
+          if (sized) return sized;
+          return imageFieldValue(data.background_image_url);
+        }
+
         function normalizeProfileRow(row) {
           row = row || {};
           var out = {};
@@ -537,10 +639,14 @@ const runtimeScript = (
             'offer3_value_text', 'offer3_sub_text',
             'tc_type_enum', 'tc_terms_text', 'tc_units_text',
             'cta_type_enum', 'cta_text',
-            'include_roundel_frame_bool', 'roundel_text_text', 'roundel_value_text',
+            'include_roundel_frame_bool', 'include_roundel_frame',
+            'roundel_text_text', 'roundel_value_text',
             'background_image_url'
           ].forEach(function(key) {
             out[key] = fieldValue(row[key]);
+          });
+          ${JSON.stringify(CREATIVE_AD_SIZES)}.forEach(function(size) {
+            out[backgroundFieldNameForSize(size)] = imageFieldValue(row[backgroundFieldNameForSize(size)]);
           });
           return out;
         }
@@ -751,15 +857,19 @@ const runtimeScript = (
 
         function applyBackgroundImage(data) {
           var image = document.getElementById('bg-image');
-          if (!image || !data.background_image_url) return;
-          image.setAttribute('src', data.background_image_url);
+          if (!image || !root) return;
+          var size = root.getAttribute('data-size') || '';
+          var url = backgroundImageUrlForSize(data, size);
+          if (!url) return;
+          image.setAttribute('src', url);
         }
 
         function applyRuntimeState(row) {
           root = root || document.getElementById('page-content');
           if (!root) return;
           var data = normalizeProfileRow(row);
-          var includeRoundel = booleanValue(data.include_roundel_frame_bool);
+          var includeRoundel = booleanValue(data.include_roundel_frame_bool)
+            || booleanValue(data.include_roundel_frame);
           root.classList.remove(
             'offers-1', 'offers-2', 'offers-3',
             'tc-solo', 'tc-prices',
@@ -810,9 +920,23 @@ ${previewRowFallback}
         window.applyRuntimeState = applyRuntimeState;
         window.applySseDcoRuntimeState = applyRuntimeState;
 ${previewMessageBridge}
-        window.addEventListener('DOMContentLoaded', function() {
+        function bootstrapRuntime() {
           applyRuntimeState(firstDynamicRow());
-        });
+        }
+
+        function scheduleRuntimeBootstrap() {
+          if (typeof Enabler !== 'undefined' && Enabler.addEventListener && typeof studio !== 'undefined' && studio.events) {
+            if (Enabler.isInitialized && Enabler.isInitialized()) {
+              bootstrapRuntime();
+            } else {
+              Enabler.addEventListener(studio.events.StudioEvent.INIT, bootstrapRuntime);
+            }
+            return;
+          }
+          bootstrapRuntime();
+        }
+
+        window.addEventListener('DOMContentLoaded', scheduleRuntimeBootstrap);
       })();
     </script>`;
 };
@@ -903,7 +1027,7 @@ const renderBody = (document: Record<string, unknown>, size: string, options: Re
     .filter(Boolean)
     .join('\n');
   return `      <main id="page-content" class="stage page-content ${DEFAULT_STATE}" data-size="${escapeAttr(size)}" data-dco-state="offer_count_num,tc_type_enum,cta_type_enum,include_roundel_frame_bool,roundel_value_text">
-          <img alt="" draggable="false" class="stage-element bg-image" id="bg-image" src="${escapeAttr(background)}" data-dco-field="background_image_url">
+          <img alt="" draggable="false" class="stage-element bg-image" id="bg-image" src="${escapeAttr(background)}" data-dco-field="${escapeAttr(backgroundImageFieldName(size))}">
 ${layers}
 ${renderTermsWrappers(sizeCreative)}
       </main>`;
@@ -912,6 +1036,9 @@ ${renderTermsWrappers(sizeCreative)}
 export const renderStudioReadyHtml = (document: Record<string, unknown>, size: string, options: RenderOptions = {}) => {
   const sizeCreative = document.sizes?.[size];
   if (!sizeCreative) throw new Error(`Unknown creative size: ${size}`);
+  const studioDynamicContentScript = options.includeStudioDynamicContent
+    ? `\n${renderStudioDynamicContentScript(document)}\n`
+    : '';
   return `<!DOCTYPE html>
 <html>
   <head>
@@ -920,7 +1047,7 @@ export const renderStudioReadyHtml = (document: Record<string, unknown>, size: s
     <meta name="viewport" content="width=${sizeCreative.canvas.width}, initial-scale=1.0">
     <title>SSE DCO ${escapeHtml(size)}</title>
 ${packagedFontPreloadTags(options)}
-    <script src="https://s0.2mdn.net/ads/studio/Enabler.js"></script>
+    <script src="https://s0.2mdn.net/ads/studio/Enabler.js"></script>${studioDynamicContentScript}
     <style>
 ${cssForSize(document, size, options)}
     </style>
@@ -1510,6 +1637,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
   const sizes = canvasMetaForClient(document);
   const initialRow = clientInitialRow(document);
   const initialSize = sizes[0] || { size: '', width: 0, height: 0, src: '' };
+  const initialBackground = imageFieldUrl(initialRow[backgroundImageFieldName(initialSize.size)]);
   const sizeOptions = sizes.map((item) => (
     `<option value="${escapeAttr(item.size)}">${escapeHtml(item.size)}</option>`
   )).join('');
@@ -1890,7 +2018,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
             ${sizeOptions}
           </select>
         </label>
-        <label><span>Background</span><input name="background_image_url" value="${escapeAttr(initialRow.background_image_url)}" placeholder="Use packaged background"></label>
+        <label><span>Background</span><input name="background_image_url" value="${escapeAttr(initialBackground)}" placeholder="Use packaged background for this size"></label>
 
         <h2>Headlines</h2>
         <label><span>Heading 1</span><input name="heading1_text" value="${escapeAttr(initialRow.heading1_text)}"></label>
@@ -1981,6 +2109,19 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         var replayButton = document.getElementById('replay-ad');
         var previewZoom = 'fit';
         var ZOOM_LEVELS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
+        var backgroundSizes = ${jsString(CREATIVE_AD_SIZES)};
+        var backgroundBySize = {};
+        var trackedBackgroundSize = field('Ad_Size');
+        backgroundSizes.forEach(function(size) {
+          backgroundBySize[size] = defaults['background_image_url_' + size] && defaults['background_image_url_' + size].Url
+            ? defaults['background_image_url_' + size].Url
+            : (defaults['background_image_url_' + size] || defaults.background_image_url || '');
+        });
+
+        function syncBackgroundControl() {
+          var input = document.querySelector('[name="background_image_url"]');
+          if (input) input.value = backgroundBySize[trackedBackgroundSize] || '';
+        }
 
         function field(name) {
           var control = controls.elements[name] || document.querySelector('[name="' + name + '"]');
@@ -1996,12 +2137,13 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         }
 
         function rowFromControls() {
+          backgroundBySize[trackedBackgroundSize] = field('background_image_url');
           var includeRoundelFrame = field('include_roundel_frame_bool') === 'true';
           var ctaType = includeRoundelFrame ? 'rectangle' : field('cta_type_enum');
           if (includeRoundelFrame && controls.elements.cta_type_enum) {
             controls.elements.cta_type_enum.value = 'rectangle';
           }
-          return {
+          var row = {
             heading1_text: field('heading1_text'),
             heading2_text: field('heading2_text'),
             heading3_text: field('heading3_text'),
@@ -2021,8 +2163,11 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
             tc_type_enum: field('tc_type_enum'),
             tc_terms_text: field('tc_terms_text'),
             tc_units_text: field('tc_units_text'),
-            background_image_url: field('background_image_url')
           };
+          backgroundSizes.forEach(function(size) {
+            row['background_image_url_' + size] = backgroundBySize[size] || '';
+          });
+          return row;
         }
 
         function syncOfferControls(row) {
@@ -2139,7 +2284,14 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         }
 
         controls.addEventListener('input', updateAds);
-        controls.addEventListener('change', updateAds);
+        controls.addEventListener('change', function(event) {
+          if (event.target && event.target.name === 'Ad_Size') {
+            backgroundBySize[trackedBackgroundSize] = field('background_image_url');
+            trackedBackgroundSize = field('Ad_Size');
+            syncBackgroundControl();
+          }
+          updateAds();
+        });
         frames.forEach(function(frame) {
           frame.addEventListener('load', updateAds);
         });
@@ -2239,12 +2391,13 @@ export const buildBasePackageEntries = async (document: Record<string, unknown>)
   const sizes = Object.keys(document.sizes || {});
   for (const size of sizes) {
     entries.push({
-      path: `ads/html/SSE_DCO_${size}.html`,
+      path: `ads/${size}/index.html`,
       data: renderStudioReadyHtml(document, size, {
         assetBasePath: '../',
         fontBasePath: '../assets/fonts/',
         includePackagedBackground: false,
         includePreviewBridge: false,
+        includeStudioDynamicContent: true,
       }),
     });
   }

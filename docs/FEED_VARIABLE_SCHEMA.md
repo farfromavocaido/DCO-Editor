@@ -2,6 +2,19 @@
 
 Reference for every dynamic field in the SSE DCO feed profile (`SSE_DCO_Offers`). Source of truth for field definitions: `src/server/feed-schema.ts` (`FEED_SCHEMA_FIELDS`). Embedded copy lives in `campaign/sse-dco-creative.json` under `feed.fields` and `feed.sampleRows`.
 
+> **Campaign-specific vs generic.** The field *names* and *copy* below (offers, T&Cs, roundel) belong to the SSE campaign and are illustrative. The *mechanism* — how the field list is composed, how values are coerced, and how runtime scopes are derived — is generic and is what carries over to other campaigns. See [How the schema is composed](#how-the-schema-is-composed) for the reusable parts.
+
+## How the schema is composed
+
+`FEED_SCHEMA_FIELDS` in `feed-schema.ts` is a single array built from two sources:
+
+1. **Static field definitions** — the literal entries (`heading1_text`, `offer1_value_text`, …).
+2. **Generated field definitions** — entries spread in from helpers, currently `...backgroundImageFieldDefinitions()` from `src/lib/feed-background.ts`, which emits one field per canonical ad size.
+
+Each field definition is `{ name, label, type, group, description, ...constraints }`. `type` drives coercion (see [Cross-cutting coercion](#cross-cutting-coercion)); `group` drives inspector grouping; `min`/`max`/`options` are per-type constraints. To add a campaign field, add a definition to the static list (or to a generator) — every consumer (validation, inspector, export) reads the same array, so no other wiring is required.
+
+`CREATIVE_AD_SIZES` (in `feed-background.ts`) is the canonical size list (`160x600`, `300x250`, `300x600`, `320x50`, `728x90`, `970x250`). Generators that need to vary by size key off it.
+
 ## Profile
 
 | Property | Value |
@@ -15,7 +28,7 @@ Reference for every dynamic field in the SSE DCO feed profile (`SSE_DCO_Offers`)
 
 | Meaning | Behaviour |
 |---|---|
-| **Required for save** | All 25 fields are always written back with coerced values. Missing keys are filled in during `validateFeedRows()`. |
+| **Required for save** | All schema fields are always written back with coerced values. Missing keys are filled in during `validateFeedRows()`. The field count is whatever `FEED_SCHEMA_FIELDS` resolves to — currently 24 static fields plus 6 generated per-size background fields = **30**. |
 | **Optional content** | Most copy/asset fields accept an empty string. Empty values hide or skip layers depending on runtime scope (see per-field notes). |
 | **Studio-only meta** | `_id`, `Unique_ID`, `Reporting_label`, `Active`, `Default` are for DV360/Studio row management. They are not read by exported ad runtime JavaScript. |
 
@@ -45,7 +58,7 @@ When a field is missing or empty at render time, behaviour depends on context:
 | **Production export** | `firstDynamicRow()` uses `window.dynamicContent`; empty/missing keys become `''` via `normalizeProfileRow()`. No hard-coded copy defaults in production HTML. |
 | **Client preview / WIP** | `clientInitialRow()` seeds demo copy, then merges `feed.sampleRows[0]`. Key literals: `cta_text` → `'Switch today'`, `tc_terms_text` → `'*T&Cs apply'`, `roundel_text_text` → `'Save up to'`, `include_roundel_frame_bool` → `false`, `offer_count_num` → `1`, `cta_type_enum` → `'roundel'`, `tc_type_enum` → `'tcs_only'`. |
 | **Variant row matching** | `rowForClientVariant()` merges sample rows by offer count / T&C / CTA shape, with the same string fallbacks as client preview for CTA, T&C, roundel, and background fields. |
-| **Background image** | Empty `background_image_url` → packaged size background from creative JSON (`previewBackgroundSrc()` / no `applyBackgroundImage()` call). |
+| **Background image** | Empty per-size `background_image_url_{size}` → packaged size background from creative JSON (`previewBackgroundSrc()` / no `applyBackgroundImage()` call). |
 | **Offer count at runtime** | `deriveOfferCount()`: uses `offer_count_num` if 1–3; else counts non-empty `offerN_value_text`; minimum `1`. |
 | **T&C mode at runtime** | Any value other than `tcs_units` → `tc-solo` scope (terms-only). |
 | **CTA shape at runtime** | `rectangle` or legacy `rect`, or `include_roundel_frame_bool` → `cta-rect`; otherwise `cta-roundel`. |
@@ -348,17 +361,32 @@ Offer slots 2 and 3 are hidden at runtime when `offer_count_num` is 1 or 2 respe
 
 ---
 
-### Assets
+### Assets — per-size background images
 
-#### `background_image_url`
+Background images are **per size**. `backgroundImageFieldDefinitions()` (in `src/lib/feed-background.ts`) generates one `image` field per entry in `CREATIVE_AD_SIZES`:
+
+| Field | Size |
+|---|---|
+| `background_image_url_160x600` | 160×600 |
+| `background_image_url_300x250` | 300×250 |
+| `background_image_url_300x600` | 300×600 |
+| `background_image_url_320x50` | 320×50 |
+| `background_image_url_728x90` | 728×90 |
+| `background_image_url_970x250` | 970×250 |
+
+Each behaves identically:
 
 | | |
 |---|---|
 | **Type** | `image` |
-| **Description** | Optional image URL or asset path for the ad background. |
+| **Description** | Optional image URL or asset path for that size's background. |
 | **Validation** | Any string. Relative paths may use `assets/…` or `/assets/…`; absolute URLs supported. |
 | **Required** | Optional. |
-| **Fallback** | Empty → **packaged size background** from creative JSON (`sizes[size].assets.background`). Preview maps `assets/foo` → `/assets/foo`. Runtime only replaces `#bg-image` when URL is non-empty. |
+| **Fallback** | Empty → **packaged size background** from creative JSON (`sizes[size].assets.background`). Preview maps `assets/foo` → `/assets/foo`. Runtime only replaces `#bg-image` when the URL is non-empty. |
+
+Resolution helper: `backgroundImageUrlForSize(row, size)` reads the per-size field for `size`. The exporter resolves `row['background_image_url_' + size] ?? row.background_image_url`.
+
+> **Legacy `background_image_url`.** The old single, size-agnostic `background_image_url` field is no longer in `FEED_SCHEMA_FIELDS`. The export runtime still reads it as a **fallback** when the per-size field is absent, so older feed rows keep working, but new rows should set the per-size fields.
 
 ---
 
@@ -379,7 +407,8 @@ These are not separate feed fields; they are computed from the fields above (`co
 
 | File | Role |
 |---|---|
-| `src/server/feed-schema.ts` | Canonical field list and save-time validation |
+| `src/server/feed-schema.ts` | Canonical field list (`FEED_SCHEMA_FIELDS`) and save-time validation |
+| `src/lib/feed-background.ts` | Canonical ad-size list and generated per-size background field definitions |
 | `src/lib/feed-model.ts` | Editor coercion, variant selection, scope derivation |
 | `src/server/creative-exporter.ts` | Export runtime, preview defaults, copy validation |
 | `src/lib/headline-motion.ts` | Headline act skip plan and H4 display fallback |

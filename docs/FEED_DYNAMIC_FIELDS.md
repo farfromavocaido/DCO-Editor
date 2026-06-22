@@ -219,16 +219,20 @@ When **`true`**: `frames-4` timing, Act 3 headline visible, CTA becomes rectangu
 
 ---
 
-## Background
+## Background (per size)
 
-### `background_image_url`
+Background images are **per ad size**. One field is generated per canonical size: `background_image_url_160x600`, `background_image_url_300x250`, `background_image_url_300x600`, `background_image_url_320x50`, `background_image_url_728x90`, `background_image_url_970x250`.
+
+### `background_image_url_{size}`
 
 - **Type:** image (URL or asset path string)
-- **Description:** Optional full-bleed background. Relative paths may use `assets/…` or `/assets/…`; absolute URLs supported.
+- **Description:** Optional full-bleed background for that size. Relative paths may use `assets/…` or `/assets/…`; absolute URLs supported.
 - **Validation:** any string
 - **Required:** optional
 - **Default / fallback:** empty → **packaged per-size background** from the creative JSON (Studio convention: blank means default art)
 - **Sample:** `""` (empty — uses packaged background)
+
+> The legacy size-agnostic `background_image_url` is no longer a schema field. The export runtime still reads it as a fallback for older rows (`row['background_image_url_' + size] ?? row.background_image_url`), but new rows should set the per-size fields. Full reference: [FEED_VARIABLE_SCHEMA.md](./FEED_VARIABLE_SCHEMA.md#assets--per-size-background-images).
 
 ---
 

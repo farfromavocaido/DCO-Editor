@@ -962,7 +962,7 @@ export function PreviewPane() {
               alt=""
               draggable={false}
               className="stage-element bg-image"
-              src={previewBackgroundSrc(row.background_image_url, sizeCreative.assets.background)}
+              src={previewBackgroundSrc(row, size, sizeCreative.assets.background)}
               style={{ transform: 'none', opacity: 1 }}
               onPointerDown={(event) => {
                 event.stopPropagation();

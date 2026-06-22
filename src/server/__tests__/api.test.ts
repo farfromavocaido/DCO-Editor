@@ -92,7 +92,7 @@ test('GET /api/creative/[size]/source returns formatted highlighted HTML source'
   assert.ok(payload.byteLength > 1000);
   assert.match(payload.html, /<title>SSE DCO 970x250<\/title>/);
   assert.match(payload.html, /data-dco-field="heading1_text"/);
-  assert.match(payload.html, /data-dco-field="background_image_url"/);
+  assert.match(payload.html, /data-dco-field="background_image_url_970x250"/);
   assert.doesNotMatch(payload.html, /window\.__SSE_DCO_PREVIEW__\s*=/);
   assert.doesNotMatch(payload.html, /id="sse-dco-preview-feed"/);
   assert.match(payload.html, /\n  <head>\n/);
@@ -187,8 +187,10 @@ test('POST /api/creative/base-package returns the agency upload zip', async () =
   const bytes = Buffer.from(await response.arrayBuffer());
   assert.equal(bytes.subarray(0, 4).toString('binary'), 'PK\u0003\u0004');
   assert.ok(bytes.includes(Buffer.from('mapping.txt')));
-  assert.ok(bytes.includes(Buffer.from('background_image_url')));
-  assert.ok(bytes.includes(Buffer.from('ads/html/SSE_DCO_728x90.html')));
+  assert.ok(bytes.includes(Buffer.from('background_image_url_728x90')));
+  assert.ok(bytes.includes(Buffer.from('ads/728x90/index.html')));
+  assert.ok(bytes.includes(Buffer.from('Enabler.setProfileId(10960467)')));
+  assert.ok(bytes.includes(Buffer.from('devDynamicContent.SSE_ROI_Delivery')));
   assert.ok(!bytes.includes(Buffer.from('ads/assets/bg_728x90.jpg')));
   assert.ok(!bytes.includes(Buffer.from('preview-page.html')));
   assert.ok(!bytes.includes(Buffer.from('preview-validator.js')));

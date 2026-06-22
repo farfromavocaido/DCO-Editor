@@ -78,7 +78,7 @@
         "offers_exit": 57.7,
         "wave2_in": 54.7,
         "swap": 56.7,
-        "cta_in": 78.2,
+        "cta_in": 74.1,
         "cta_pulse_start": 91,
         "cta_pulse_peak": 93,
         "cta_pulse_end": 94,
@@ -89,7 +89,7 @@
         "bn_blue_in": 71,
         "bn_white_in": 74,
         "bn_cta_in": 78,
-        "tc_exit": 80,
+        "tc_exit": 60.1,
         "act4_in": 77.7,
         "act2_out": 45,
         "act3_in": 45,
@@ -280,11 +280,46 @@
         "description": "Unit-rate text; line breaks are preserved."
       },
       {
-        "name": "background_image_url",
-        "label": "Background image",
+        "name": "background_image_url_160x600",
+        "label": "Background 160x600",
         "type": "image",
         "group": "Assets",
-        "description": "Optional image URL for the ad background."
+        "description": "Optional background image URL for 160x600. Leave blank to use the packaged default."
+      },
+      {
+        "name": "background_image_url_300x250",
+        "label": "Background 300x250",
+        "type": "image",
+        "group": "Assets",
+        "description": "Optional background image URL for 300x250. Leave blank to use the packaged default."
+      },
+      {
+        "name": "background_image_url_300x600",
+        "label": "Background 300x600",
+        "type": "image",
+        "group": "Assets",
+        "description": "Optional background image URL for 300x600. Leave blank to use the packaged default."
+      },
+      {
+        "name": "background_image_url_320x50",
+        "label": "Background 320x50",
+        "type": "image",
+        "group": "Assets",
+        "description": "Optional background image URL for 320x50. Leave blank to use the packaged default."
+      },
+      {
+        "name": "background_image_url_728x90",
+        "label": "Background 728x90",
+        "type": "image",
+        "group": "Assets",
+        "description": "Optional background image URL for 728x90. Leave blank to use the packaged default."
+      },
+      {
+        "name": "background_image_url_970x250",
+        "label": "Background 970x250",
+        "type": "image",
+        "group": "Assets",
+        "description": "Optional background image URL for 970x250. Leave blank to use the packaged default."
       }
     ],
     "sampleRows": [
@@ -297,25 +332,44 @@
         "heading1_text": "A different kind of energy",
         "heading2_text": "Our very best electricity plan",
         "heading3_text": "A different kind of energy",
-        "offer_count_num": 3,
+        "offer_count_num": 1,
         "offer1_value_text": "15%",
         "offer1_sub_text": "OFF ELECTRICITY*",
         "offer2_value_text": "30%",
         "offer2_sub_text": "OFF GAS*",
         "offer3_value_text": "€125",
         "offer3_sub_text": "OFF YOUR FIRST BILL*",
-        "tc_type_enum": "tcs_only",
+        "tc_type_enum": "tcs_units",
         "tc_terms_text": "*T&Cs apply",
         "tc_units_text": "Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat",
         "cta_type_enum": "rectangle",
         "cta_text": "Switch today",
-        "background_image_url": "",
         "include_roundel_frame_bool": true,
         "roundel_text_text": "Save up to",
         "roundel_value_text": "€1,080",
-        "heading4_text": "Switch and save today"
+        "heading4_text": "Switch and save today",
+        "background_image_url_160x600": {
+          "Url": ""
+        },
+        "background_image_url_300x250": {
+          "Url": ""
+        },
+        "background_image_url_300x600": {
+          "Url": ""
+        },
+        "background_image_url_320x50": {
+          "Url": ""
+        },
+        "background_image_url_728x90": {
+          "Url": ""
+        },
+        "background_image_url_970x250": {
+          "Url": ""
+        }
       }
-    ]
+    ],
+    "studioProfileId": 10960467,
+    "studioProfileElement": "SSE_ROI_Delivery"
   },
   "presets": [
     {
@@ -2873,14 +2927,14 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 30,
-            "width": 160,
+            "left": 31,
+            "width": 210,
             "textAlign": "left",
             "justifyContent": "flex-start",
-            "top": 10,
+            "top": 13,
             "display": "flex",
             "alignItems": "center",
-            "height": 56
+            "height": 58
           },
           "editable": true
         }
@@ -3758,7 +3812,7 @@
           },
           "props": {
             "left": 87,
-            "top": 143,
+            "top": 136,
             "width": 126,
             "height": 81
           },
@@ -3774,7 +3828,7 @@
           },
           "props": {
             "left": 139,
-            "top": 101,
+            "top": 96,
             "width": 22,
             "height": 36,
             "textAlign": "center",
@@ -5425,7 +5479,7 @@
           "properties": {
             "lineHeight": 1.25,
             "left": 11,
-            "top": 25,
+            "top": 55,
             "width": 138,
             "fontSize": 26,
             "height": 130,
@@ -5871,7 +5925,7 @@
           "zIndex": 8,
           "base": {
             "left": 20,
-            "top": 160,
+            "top": 190,
             "width": 260,
             "height": 180,
             "cssClass": "offer-slot-1"
@@ -6689,17 +6743,21 @@
             "top": 0,
             "fontSize": 130,
             "lineHeight": 0.85,
-            "letterSpacing": -0.5
+            "letterSpacing": -0.5,
+            "textAlign": "center",
+            "justifyContent": "center"
           }
         },
         {
           "cssClass": "offer-subline",
           "properties": {
             "left": 0,
-            "top": 114,
+            "top": 111,
             "fontSize": 26,
             "lineHeight": 1.1,
-            "letterSpacing": 0
+            "letterSpacing": 0,
+            "textAlign": "center",
+            "justifyContent": "center"
           }
         },
         {

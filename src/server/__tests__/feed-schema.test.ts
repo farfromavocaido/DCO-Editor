@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
+import { backgroundImageFieldDefinitions, backgroundImageFieldName, backgroundFieldsFromRow } from '@/lib/feed-background';
 import { readCreativeDocument } from '../creative-document';
 import {
   FEED_SCHEMA_FIELDS,
@@ -36,7 +37,7 @@ const sampleRow = {
   include_roundel_frame_bool: false,
   roundel_text_text: '',
   roundel_value_text: '',
-  background_image_url: 'https://example.com/bg.jpg',
+  ...backgroundFieldsFromRow({ [backgroundImageFieldName('300x250')]: 'https://example.com/bg.jpg' }),
 };
 
 const writeTempCreativeDocument = async (rows = [sampleRow]) => {
@@ -79,7 +80,7 @@ test('defines metadata for every existing Studio profile field', () => {
     'include_roundel_frame_bool',
     'roundel_text_text',
     'roundel_value_text',
-    'background_image_url',
+    ...backgroundImageFieldDefinitions().map((field) => field.name),
   ]);
   assert.deepEqual(FEED_SCHEMA_FIELDS.find((field) => field.name === 'tc_type_enum').options, ['tcs_only', 'tcs_units']);
   assert.deepEqual(FEED_SCHEMA_FIELDS.find((field) => field.name === 'cta_type_enum').options, ['roundel', 'rectangle']);
@@ -91,9 +92,11 @@ test('reads profile name, rows, and exposes the background image field', async (
   const payload = await readFeedSchema(file);
 
   assert.equal(payload.profileName, 'SSE_DCO_Offers');
+  assert.equal(payload.studioProfileId, 10960467);
+  assert.equal(payload.studioProfileElement, 'SSE_ROI_Delivery');
   assert.equal(payload.rows.length, 1);
-  assert.equal(payload.rows[0].background_image_url, 'https://example.com/bg.jpg');
-  assert.equal(payload.fields.find((field) => field.name === 'background_image_url').type, 'image');
+  assert.equal(payload.rows[0].background_image_url_300x250.Url, 'https://example.com/bg.jpg');
+  assert.equal(payload.fields.find((field) => field.name === 'background_image_url_728x90').type, 'image');
 });
 
 test('validates enums and coerces offer count into the supported range', () => {
@@ -150,11 +153,15 @@ test('writes edited rows back into the creative document feed section', async ()
   const file = await writeTempCreativeDocument();
 
   await writeFeedSchemaRows([
-    { ...sampleRow, heading1_text: 'Fresh headline', background_image_url: 'https://example.com/fresh-bg.jpg' },
+    {
+      ...sampleRow,
+      heading1_text: 'Fresh headline',
+      ...backgroundFieldsFromRow({ [backgroundImageFieldName('300x250')]: 'https://example.com/fresh-bg.jpg' }),
+    },
   ], file);
   const raw = JSON.parse(await fs.readFile(file, 'utf8'));
 
   assert.equal(raw.feed.profileName, 'SSE_DCO_Offers');
   assert.equal(raw.feed.sampleRows[0].heading1_text, 'Fresh headline');
-  assert.equal(raw.feed.sampleRows[0].background_image_url, 'https://example.com/fresh-bg.jpg');
+  assert.equal(raw.feed.sampleRows[0].background_image_url_300x250.Url, 'https://example.com/fresh-bg.jpg');
 });

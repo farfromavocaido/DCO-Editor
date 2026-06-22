@@ -1,0 +1,78 @@
+<!--
+ * Dynamic Content Enable code for Profile: 10960467
+ *
+ * The following code initializes the following dynamic variables for
+ * development testing and live serving of Fields associated to the above profile
+-->
+
+<!-- DynamicContent Start: HTML5 invocation code. -->
+<script type="text/javascript">
+
+// Dynamic Content variables and sample values
+    Enabler.setProfileId(10960467);
+    var devDynamicContent = {};
+
+    devDynamicContent.SSE_ROI_Delivery = [{}];
+    devDynamicContent.SSE_ROI_Delivery[0]._id = 0;
+    devDynamicContent.SSE_ROI_Delivery[0].Unique_ID = "Adsu_ROI_Prospecting-Main-1_https:\/\/s0.2mdn.net\/creatives\/assets\/5656026\/";
+    devDynamicContent.SSE_ROI_Delivery[0].Reporting_label = "AlwaysOn_ADKE-DCO Launch_D_hiker_15pc-EleGas+220WC_Save-667_rect_TC-only";
+    devDynamicContent.SSE_ROI_Delivery[0].TargetingCode = ["Adsu_ROI_Prospecting-Main"];
+    devDynamicContent.SSE_ROI_Delivery[0].Increment = 1;
+    devDynamicContent.SSE_ROI_Delivery[0].Region = ["ROI"];
+    devDynamicContent.SSE_ROI_Delivery[0].Audience = ["Prospecting-Main"];
+    devDynamicContent.SSE_ROI_Delivery[0].Partner = ["Adsure"];
+    devDynamicContent.SSE_ROI_Delivery[0].Campaign_type = ["AlwaysOn"];
+    devDynamicContent.SSE_ROI_Delivery[0].Product = "Dual";
+    devDynamicContent.SSE_ROI_Delivery[0].Preview_Active = true;
+    devDynamicContent.SSE_ROI_Delivery[0].Start_Date = {};
+    devDynamicContent.SSE_ROI_Delivery[0].Start_Date.RawValue = "06/01/2026 00:00+08:00";
+    devDynamicContent.SSE_ROI_Delivery[0].Start_Date.UtcValue = 1780243200000;
+    devDynamicContent.SSE_ROI_Delivery[0].End_Date = {};
+    devDynamicContent.SSE_ROI_Delivery[0].End_Date.RawValue = "12/31/2026 00:00+08:00";
+    devDynamicContent.SSE_ROI_Delivery[0].End_Date.UtcValue = 1798646400000;
+    devDynamicContent.SSE_ROI_Delivery[0]._00_Exit_URL = {};
+    devDynamicContent.SSE_ROI_Delivery[0]._00_Exit_URL.Url = "https://www.sseairtricity.com/ie/home/products/electricity-and-gas-welcome-credit?utm_campaign=SSE_DCO&utm_medium=display&utm_term=sse533&utm_content=AlwaysOn";
+    devDynamicContent.SSE_ROI_Delivery[0].heading1_text = "A different kind of energy";
+    devDynamicContent.SSE_ROI_Delivery[0].heading2_text = "Our very best electricity plan";
+    devDynamicContent.SSE_ROI_Delivery[0].heading3_text = "A different kind of energy";
+    devDynamicContent.SSE_ROI_Delivery[0].offer_count_num = 2;
+    devDynamicContent.SSE_ROI_Delivery[0].offer1_value_text = "15%";
+    devDynamicContent.SSE_ROI_Delivery[0].offer1_sub_text = "OFF ELECTRICITY & GAS*";
+    devDynamicContent.SSE_ROI_Delivery[0].offer2_value_text = "\u20AC220";
+    devDynamicContent.SSE_ROI_Delivery[0].offer2_sub_text = "OFF YOUR FIRST BILL";
+    devDynamicContent.SSE_ROI_Delivery[0].offer3_value_text = "";
+    devDynamicContent.SSE_ROI_Delivery[0].offer3_sub_text = "";
+    devDynamicContent.SSE_ROI_Delivery[0].tc_type_enum = "tcs_only";
+    devDynamicContent.SSE_ROI_Delivery[0].tc_terms_text = "T&Cs apply";
+    devDynamicContent.SSE_ROI_Delivery[0].tc_units_text = "Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat";
+    devDynamicContent.SSE_ROI_Delivery[0].cta_type_enum = "rectangle";
+    devDynamicContent.SSE_ROI_Delivery[0].cta_text = "Switch today";
+    devDynamicContent.SSE_ROI_Delivery[0].include_roundel_frame = true;
+    devDynamicContent.SSE_ROI_Delivery[0].roundel_text_text = "Save up to";
+    devDynamicContent.SSE_ROI_Delivery[0].roundel_value_text = "\u20AC667";
+    devDynamicContent.SSE_ROI_Delivery[0].heading4_text = "Switch and save today";
+    devDynamicContent.SSE_ROI_Delivery[0].include_heading4_enum = true;
+    devDynamicContent.SSE_ROI_Delivery[0].background_image_label = "hiker";
+    devDynamicContent.SSE_ROI_Delivery[0].background_image_url_160x600 = {};
+    devDynamicContent.SSE_ROI_Delivery[0].background_image_url_160x600.Url = "https://s0.2mdn.net/creatives/assets/5656026/160x600_hiker.jpg";
+    devDynamicContent.SSE_ROI_Delivery[0].background_image_url_300x250 = {};
+    devDynamicContent.SSE_ROI_Delivery[0].background_image_url_300x250.Url = "https://s0.2mdn.net/creatives/assets/5656026/300x250_hiker.jpg";
+    devDynamicContent.SSE_ROI_Delivery[0].background_image_url_300x600 = {};
+    devDynamicContent.SSE_ROI_Delivery[0].background_image_url_300x600.Url = "https://s0.2mdn.net/creatives/assets/5656026/300x600_hiker.jpg";
+    devDynamicContent.SSE_ROI_Delivery[0].background_image_url_320x50 = {};
+    devDynamicContent.SSE_ROI_Delivery[0].background_image_url_320x50.Url = "";
+    devDynamicContent.SSE_ROI_Delivery[0].background_image_url_728x90 = {};
+    devDynamicContent.SSE_ROI_Delivery[0].background_image_url_728x90.Url = "https://s0.2mdn.net/creatives/assets/5656026/728x90_hiker.jpg";
+    devDynamicContent.SSE_ROI_Delivery[0].background_image_url_970x250 = {};
+    devDynamicContent.SSE_ROI_Delivery[0].background_image_url_970x250.Url = "https://s0.2mdn.net/creatives/assets/5656026/970x250_hiker.jpg";
+    Enabler.setDevDynamicContent(devDynamicContent);
+
+</script>
+
+<!--
+ * You may access the variables in the following manner
+ * AFTER the Studio Enabler is initialized.
+ * var Unique_ID = dynamicContent.SSE_ROI_Delivery[0].Unique_ID;
+ * Note: be sure to use "dynamicContent", not "devDynamicContent"
+ * Note: be sure to use ExitOverride to create your exit URL dynamically; follow the instructions on our Help center: https://support.google.com/richmedia/answer/2664807
+-->

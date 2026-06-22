@@ -22,8 +22,10 @@ test('loads the checked-in SSE DCO creative document', async () => {
     '970x250',
   ]);
   assert.equal(document.feed.profileName, 'SSE_DCO_Offers');
-  assert.equal(typeof document.feed.sampleRows[0].background_image_url, 'string');
-  assert.ok(document.feed.fields.some((field) => field.name === 'background_image_url' && field.type === 'image'));
+  assert.equal(document.feed.studioProfileId, 10960467);
+  assert.equal(document.feed.studioProfileElement, 'SSE_ROI_Delivery');
+  assert.equal(document.feed.sampleRows[0].background_image_url_300x250.Url, '');
+  assert.ok(document.feed.fields.some((field) => field.name === 'background_image_url_728x90' && field.type === 'image'));
   assert.ok(document.presets.some((preset) => preset.id === 'fade'));
 });
 

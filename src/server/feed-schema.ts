@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { backgroundImageFieldDefinitions } from '@/lib/feed-background';
 import { readCreativeDocument, writeCreativeDocument } from './creative-document';
 import { normalizeTcTypeEnum } from '@/lib/feed-model';
 
@@ -27,7 +28,7 @@ export const FEED_SCHEMA_FIELDS = [
   { name: 'include_roundel_frame_bool', label: 'Offer roundel frame', type: 'boolean', group: 'Creative State', description: 'Whether the optional Act 3 offer roundel frame is shown.' },
   { name: 'roundel_text_text', label: 'Roundel text', type: 'string', group: 'Copy', description: 'Text shown inside the optional roundel frame.' },
   { name: 'roundel_value_text', label: 'Roundel value', type: 'string', group: 'Copy', description: 'Optional large value shown inside the roundel frame.' },
-  { name: 'background_image_url', label: 'Background image', type: 'image', group: 'Assets', description: 'Optional image URL for the ad background.' },
+  ...backgroundImageFieldDefinitions(),
 ] as const;
 
 export type FeedField = (typeof FEED_SCHEMA_FIELDS)[number];
@@ -61,7 +62,7 @@ const coerceUrl = (value: unknown) => {
 const coerceField = (field: FeedField, value: unknown) => {
   if (field.type === 'boolean') return coerceBoolean(value);
   if (field.type === 'integer') return coerceInteger(value, field);
-  if (field.type === 'url') return coerceUrl(value);
+  if (field.type === 'image' || field.type === 'url') return coerceUrl(value);
   if (field.type === 'enum') {
     if (field.name === 'tc_type_enum') {
       const canonical = normalizeTcTypeEnum(value);
@@ -103,6 +104,8 @@ export const readFeedSchema = async (documentPath?: string) => {
     : FEED_SCHEMA_FIELDS.map((field) => ({ ...field }));
   return {
     profileName: feed.profileName,
+    studioProfileId: feed.studioProfileId,
+    studioProfileElement: feed.studioProfileElement,
     fields: normalizeFeedFields(rawFields),
     rows: feed.sampleRows || [],
   };

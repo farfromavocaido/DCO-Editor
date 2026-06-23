@@ -640,11 +640,11 @@ const runtimeScript = (
             'tc_type_enum', 'tc_terms_text', 'tc_units_text',
             'cta_type_enum', 'cta_text',
             'include_roundel_frame_bool', 'include_roundel_frame',
-            'roundel_text_text', 'roundel_value_text',
-            'background_image_url'
+            'roundel_text_text', 'roundel_value_text'
           ].forEach(function(key) {
             out[key] = fieldValue(row[key]);
           });
+          out.background_image_url = imageFieldValue(row.background_image_url);
           ${JSON.stringify(CREATIVE_AD_SIZES)}.forEach(function(size) {
             out[backgroundFieldNameForSize(size)] = imageFieldValue(row[backgroundFieldNameForSize(size)]);
           });
@@ -860,7 +860,10 @@ const runtimeScript = (
           if (!image || !root) return;
           var size = root.getAttribute('data-size') || '';
           var url = backgroundImageUrlForSize(data, size);
-          if (!url) return;
+          if (!url || url === '[object Object]') {
+            url = image.getAttribute('data-packaged-src') || image.getAttribute('src') || '';
+          }
+          if (!url || url === '[object Object]') return;
           image.setAttribute('src', url);
         }
 
@@ -1048,7 +1051,7 @@ const renderBody = (document: Record<string, unknown>, size: string, options: Re
     .filter(Boolean)
     .join('\n');
   return `      <main id="page-content" class="stage page-content ${DEFAULT_STATE}" data-size="${escapeAttr(size)}" data-dco-state="offer_count_num,tc_type_enum,cta_type_enum,include_roundel_frame_bool,roundel_value_text">
-          <img alt="" draggable="false" class="stage-element bg-image" id="bg-image" src="${escapeAttr(background)}" data-dco-field="${escapeAttr(backgroundImageFieldName(size))}">
+          <img alt="" draggable="false" class="stage-element bg-image" id="bg-image" src="${escapeAttr(background)}" data-packaged-src="${escapeAttr(background)}" data-dco-field="${escapeAttr(backgroundImageFieldName(size))}">
 ${layers}
 ${renderTermsWrappers(sizeCreative)}
       </main>`;
@@ -2133,10 +2136,19 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         var backgroundSizes = ${jsString(CREATIVE_AD_SIZES)};
         var backgroundBySize = {};
         var trackedBackgroundSize = field('Ad_Size');
+
+        function previewImageFieldUrl(value) {
+          if (value && typeof value === 'object' && value.Url !== undefined) {
+            return String(value.Url || '').trim();
+          }
+          return String(value == null ? '' : value).trim();
+        }
+
         backgroundSizes.forEach(function(size) {
-          backgroundBySize[size] = defaults['background_image_url_' + size] && defaults['background_image_url_' + size].Url
-            ? defaults['background_image_url_' + size].Url
-            : (defaults['background_image_url_' + size] || defaults.background_image_url || '');
+          var fieldName = 'background_image_url_' + size;
+          backgroundBySize[size] = previewImageFieldUrl(defaults[fieldName])
+            || previewImageFieldUrl(defaults.background_image_url)
+            || '';
         });
 
         function syncBackgroundControl() {
@@ -2186,7 +2198,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
             tc_units_text: field('tc_units_text'),
           };
           backgroundSizes.forEach(function(size) {
-            row['background_image_url_' + size] = backgroundBySize[size] || '';
+            row['background_image_url_' + size] = previewImageFieldUrl(backgroundBySize[size]) || '';
           });
           return row;
         }

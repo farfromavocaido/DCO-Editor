@@ -88,6 +88,23 @@ test('preview ad html skips empty Enabler bootstrap so iframe postMessage text p
   assert.doesNotMatch(html, /Enabler\.addEventListener\(studio\.events\.StudioEvent\.INIT, bootstrapRuntime\)/);
 });
 
+test('preview ad html falls back to packaged background when feed URL is blank', async () => {
+  const document = await readCreativeDocument();
+  const html = renderStudioReadyHtml(document, '160x600', { assetBasePath: '../' });
+
+  assert.match(html, /data-packaged-src="\.\.\/assets\/bg_160x600\.jpg"/);
+  assert.match(html, /getAttribute\('data-packaged-src'\)/);
+  assert.match(html, /out\.background_image_url = imageFieldValue\(row\.background_image_url\)/);
+});
+
+test('client preview page normalizes blank background feed objects to empty strings', async () => {
+  const document = await readCreativeDocument();
+  const html = renderClientPreviewPage(document, { includeValidator: false });
+
+  assert.match(html, /function previewImageFieldUrl\(value\)/);
+  assert.match(html, /previewImageFieldUrl\(backgroundBySize\[size\]\) \|\| ''/);
+});
+
 test('studio export still waits for Enabler init before bootstrap', async () => {
   const document = await readCreativeDocument();
   const html = renderStudioReadyHtml(document, '160x600', {
@@ -213,7 +230,7 @@ test('builds a base agency package with one production html file per size', asyn
   const mapping = String(entries.find((entry) => entry.path === 'mapping.txt')?.data || '');
   assert.match(html, /data-dco-field="heading1_text"/);
   assert.match(html, /data-dco-field="background_image_url_728x90"/);
-  assert.match(html, /id="bg-image" src="" data-dco-field="background_image_url_728x90"/);
+  assert.match(html, /id="bg-image" src="" data-packaged-src="" data-dco-field="background_image_url_728x90"/);
   assert.match(html, /Enabler\.setProfileId\(10960467\)/);
   assert.match(html, /devDynamicContent\.SSE_ROI_Delivery/);
   assert.match(html, /background_image_url_728x90\.Url/);

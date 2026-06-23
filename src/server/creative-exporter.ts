@@ -920,11 +920,32 @@ ${previewRowFallback}
         window.applyRuntimeState = applyRuntimeState;
         window.applySseDcoRuntimeState = applyRuntimeState;
 ${previewMessageBridge}
+${includePreviewBridge ? `
+        function hasBootstrapRow(row) {
+          if (window.__SSE_DCO_PREVIEW__) return true;
+          if (window.dynamicContent) return true;
+          if (!row || typeof row !== 'object') return false;
+          return [
+            'heading1_text', 'heading2_text', 'heading3_text', 'heading4_text',
+            'offer1_value_text', 'offer2_value_text', 'offer3_value_text',
+            'cta_text', 'roundel_text_text', 'roundel_value_text'
+          ].some(function(key) {
+            return fieldValue(row[key]).trim();
+          });
+        }` : ''}
         function bootstrapRuntime() {
-          applyRuntimeState(firstDynamicRow());
+          var row = firstDynamicRow();
+${includePreviewBridge ? `
+          if (!hasBootstrapRow(row)) return;` : ''}
+          applyRuntimeState(row);
         }
 
         function scheduleRuntimeBootstrap() {
+${includePreviewBridge ? `
+          // Client preview iframes receive feed rows via postMessage; do not wait for
+          // Enabler INIT (which would bootstrap with an empty row and wipe preview text).
+          bootstrapRuntime();
+          return;` : `
           if (typeof Enabler !== 'undefined' && Enabler.addEventListener && typeof studio !== 'undefined' && studio.events) {
             if (Enabler.isInitialized && Enabler.isInitialized()) {
               bootstrapRuntime();
@@ -932,7 +953,7 @@ ${previewMessageBridge}
               Enabler.addEventListener(studio.events.StudioEvent.INIT, bootstrapRuntime);
             }
             return;
-          }
+          }`}
           bootstrapRuntime();
         }
 

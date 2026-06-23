@@ -78,6 +78,27 @@ test('exports ad html that accepts client preview post messages', async () => {
   assert.match(html, /src="\.\.\/assets\/bg_728x90\.jpg"/);
 });
 
+test('preview ad html skips empty Enabler bootstrap so iframe postMessage text persists', async () => {
+  const document = await readCreativeDocument();
+  const html = renderStudioReadyHtml(document, '160x600', { assetBasePath: '../' });
+
+  assert.match(html, /function hasBootstrapRow\(row\)/);
+  assert.match(html, /if \(!hasBootstrapRow\(row\)\) return;/);
+  assert.match(html, /Client preview iframes receive feed rows via postMessage/);
+  assert.doesNotMatch(html, /Enabler\.addEventListener\(studio\.events\.StudioEvent\.INIT, bootstrapRuntime\)/);
+});
+
+test('studio export still waits for Enabler init before bootstrap', async () => {
+  const document = await readCreativeDocument();
+  const html = renderStudioReadyHtml(document, '160x600', {
+    includePreviewBridge: false,
+    includeStudioDynamicContent: true,
+  });
+
+  assert.match(html, /Enabler\.addEventListener\(studio\.events\.StudioEvent\.INIT, bootstrapRuntime\)/);
+  assert.doesNotMatch(html, /function hasBootstrapRow\(row\)/);
+});
+
 test('exports WIP HTML with baked preview row and state classes', async () => {
   const document = await readCreativeDocument();
   const html = renderStudioReadyHtml(document, '300x250');

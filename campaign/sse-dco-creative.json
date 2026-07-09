@@ -581,7 +581,7 @@
             "top": 14,
             "width": 38,
             "height": 10,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": 8,
             "lineHeight": 1.05,
@@ -619,7 +619,7 @@
             "top": 25,
             "width": 50,
             "height": 18,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": 15,
             "lineHeight": 1,
@@ -744,7 +744,7 @@
             "alignItems": "center",
             "justifyContent": "center",
             "textAlign": "center",
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "color": "rgb(0, 41, 117)",
             "lineHeight": 1.1,
@@ -863,7 +863,7 @@
             "top": 12,
             "width": 16,
             "height": 26,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": "22px",
             "color": "rgb(255, 255, 255)",
@@ -923,7 +923,7 @@
             "top": 14,
             "width": 14,
             "height": 22,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": "18px",
             "color": "rgb(255, 255, 255)",
@@ -1218,7 +1218,11 @@
             "textAlign": "center",
             "justifyContent": "center"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 1
+          }
         },
         {
           "id": "offers-3|offer-slot-1",
@@ -1343,7 +1347,11 @@
             "display": "flex",
             "alignItems": "center"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 1
+          }
         },
         {
           "id": "cta-rect|cta",
@@ -1744,7 +1752,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 320px;\n      height: 50px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .terms-prices,\n    .terms-solo,\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.2;\n      white-space: nowrap;\n    }\n\n    /* ── OfferSlot internals (single canonical): value + INLINE subline ── */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: auto;\n      text-align: left;\n      line-height: 44px;\n      letter-spacing: -0.5px;\n      font-size: 34px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 76px;\n      top: 15px;\n      width: 108px;\n      text-align: left;\n      font-size: 13px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n      white-space: normal;\n    }\n\n    /* ── T&C wrappers (far-left tiny zone) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 5px;\n      top: 2px;\n      width: 62px;\n      height: 46px;\n    }\n\n    /* ── Offer count variants ── */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    /* Dual: two compact inline pairs. */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 14px; top: 8px; width: 126px; }\n    .offers-2 .offer-slot-2 { left: 172px; top: 8px; width: 126px; }\n    .offers-2 .plus-1 { left: 146px; top: 12px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 24px; line-height: 36px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { left: 56px; top: 9px; font-size: 9px; width: 70px; }\n\n    /* Triple: three mini stacked-pairs (value over subline). Structurally\n       supported but extremely tight at 50px — see SIZE_CONVERSION_PLAN. */\n    .offers-3 .offer-slot-1 { left: 8px; top: 6px; width: 92px; }\n    .offers-3 .offer-slot-2 { left: 116px; top: 6px; width: 92px; }\n    .offers-3 .offer-slot-3 { left: 224px; top: 6px; width: 92px; }\n    .offers-3 .plus-1 { left: 101px; top: 14px; }\n    .offers-3 .plus-2 { left: 209px; top: 14px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value {\n      font-size: 18px; line-height: 20px; width: 100%; text-align: center;\n    }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px; top: 24px; width: 100%; text-align: center; font-size: 8px;\n    }\n    /* Logos overlap the third slot — hide the blue logo in triple. */\n    .offers-3 .logo-act1 { visibility: hidden; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 4px;\n      width: 90px;\n      height: 32px;\n      left: 178px;\n      top: 9px;\n      font-size: 11px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n    /* Act 4 only: white over blue wave on 320×50 */\n    #headline-act4 {\n      color: rgb(255, 255, 255);\n      top: 9px;\n    }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 320px;\n      height: 50px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .terms-prices,\n    .terms-solo,\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.2;\n      white-space: nowrap;\n    }\n\n    /* ── OfferSlot internals (single canonical): value + INLINE subline ── */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: auto;\n      text-align: left;\n      line-height: 44px;\n      letter-spacing: -0.5px;\n      font-size: 34px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 76px;\n      top: 15px;\n      width: 108px;\n      text-align: left;\n      font-size: 13px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n      white-space: normal;\n    }\n\n    /* ── T&C wrappers (far-left tiny zone) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 5px;\n      top: 2px;\n      width: 62px;\n      height: 46px;\n    }\n\n    /* ── Offer count variants ── */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    /* Dual: two compact inline pairs. */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 14px; top: 8px; width: 126px; }\n    .offers-2 .offer-slot-2 { left: 172px; top: 8px; width: 126px; }\n    .offers-2 .plus-1 { left: 146px; top: 12px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 24px; line-height: 36px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { left: 56px; top: 9px; font-size: 9px; width: 70px; }\n\n    /* Triple: three mini stacked-pairs (value over subline). Structurally\n       supported but extremely tight at 50px — see SIZE_CONVERSION_PLAN. */\n    .offers-3 .offer-slot-1 { left: 8px; top: 6px; width: 92px; }\n    .offers-3 .offer-slot-2 { left: 116px; top: 6px; width: 92px; }\n    .offers-3 .offer-slot-3 { left: 224px; top: 6px; width: 92px; }\n    .offers-3 .plus-1 { left: 101px; top: 14px; }\n    .offers-3 .plus-2 { left: 209px; top: 14px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value {\n      font-size: 18px; line-height: 20px; width: 100%; text-align: center;\n    }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px; top: 24px; width: 100%; text-align: center; font-size: 8px;\n    }\n    /* Logos overlap the third slot — hide the blue logo in triple. */\n    .offers-3 .logo-act1 { visibility: hidden; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 4px;\n      width: 90px;\n      height: 32px;\n      left: 178px;\n      top: 9px;\n      font-size: 11px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n    /* Act 4 only: white over blue wave on 320×50 */\n    #headline-act4 {\n      color: rgb(255, 255, 255);\n      top: 9px;\n    }\n"
     },
     "728x90": {
       "canvas": {
@@ -1891,7 +1899,7 @@
             "top": 22,
             "width": 60,
             "height": 16,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": 15,
             "lineHeight": 1.05,
@@ -1929,7 +1937,7 @@
             "top": 40,
             "width": 90,
             "height": 34,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": 28,
             "lineHeight": 1,
@@ -2048,7 +2056,7 @@
             "alignItems": "center",
             "justifyContent": "center",
             "textAlign": "center",
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "color": "rgb(255, 255, 255)",
             "lineHeight": 1.1,
@@ -2167,7 +2175,7 @@
             "top": 26,
             "width": 28,
             "height": 36,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": "38px",
             "color": "rgb(255, 255, 255)",
@@ -2227,7 +2235,7 @@
             "top": 26,
             "width": 28,
             "height": 36,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": "36px",
             "color": "rgb(255, 255, 255)",
@@ -3029,7 +3037,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 728px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.15;\n      white-space: normal;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: left;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 66px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 47px;\n      width: 100%;\n      text-align: left;\n      font-size: 14px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n      white-space: nowrap;\n    }\n\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 16px;\n      top: 8px;\n      width: 214px;\n      height: 78px;\n    }\n\n    .cta {\n      padding: 0px 16px;\n      box-sizing: border-box;\n    }\n\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 248px; top: 16px; width: 158px; height: 62px; }\n    .offers-2 .offer-slot-2 { left: 410px; top: 16px; width: 158px; height: 62px; }\n    .offers-2 .plus-1 { left: 387px; top: 28px; width: 26px; height: 32px; font-size: 38px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px; top: 0px; width: 158px; height: 45px; font-size: 60px; text-align: center;\n    }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px; top: 48px; width: 158px; height: 14px; font-size: 14px; text-align: center;\n    }\n\n    .offers-3 .offer-slot-1 { left: 235px; top: 18px; width: 110px; height: 58px; }\n    .offers-3 .offer-slot-2 { left: 375px; top: 18px; width: 110px; height: 58px; }\n    .offers-3 .offer-slot-3 { left: 515px; top: 18px; width: 110px; height: 58px; }\n    .offers-3 .plus-1 { left: 348px; top: 28px; width: 26px; height: 32px; font-size: 36px; }\n    .offers-3 .plus-2 { left: 488px; top: 28px; width: 26px; height: 32px; font-size: 36px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px; top: 0px; width: 110px; height: 42px; font-size: 46px; text-align: center;\n    }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px; top: 44px; width: 110px; height: 12px; font-size: 11px; text-align: center;\n    }\n\n    .cta-rect .cta {\n      border-radius: 6px;\n      width: 128px;\n      height: 38px;\n      left: 335px;\n      top: 26px;\n      font-size: 18px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n\n    /* Act 4 only: lower headline placement on 728×90 */\n    #headline-act4 {\n      top: 17px;\n    }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 728px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.15;\n      white-space: normal;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: left;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 66px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 47px;\n      width: 100%;\n      text-align: left;\n      font-size: 14px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n      white-space: nowrap;\n    }\n\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 16px;\n      top: 8px;\n      width: 214px;\n      height: 78px;\n    }\n\n    .cta {\n      padding: 0px 16px;\n      box-sizing: border-box;\n    }\n\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 248px; top: 16px; width: 158px; height: 62px; }\n    .offers-2 .offer-slot-2 { left: 410px; top: 16px; width: 158px; height: 62px; }\n    .offers-2 .plus-1 { left: 387px; top: 28px; width: 26px; height: 32px; font-size: 38px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px; top: 0px; width: 158px; height: 45px; font-size: 60px; text-align: center;\n    }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px; top: 48px; width: 158px; height: 14px; font-size: 14px; text-align: center;\n    }\n\n    .offers-3 .offer-slot-1 { left: 235px; top: 18px; width: 110px; height: 58px; }\n    .offers-3 .offer-slot-2 { left: 375px; top: 18px; width: 110px; height: 58px; }\n    .offers-3 .offer-slot-3 { left: 515px; top: 18px; width: 110px; height: 58px; }\n    .offers-3 .plus-1 { left: 348px; top: 28px; width: 26px; height: 32px; font-size: 36px; }\n    .offers-3 .plus-2 { left: 488px; top: 28px; width: 26px; height: 32px; font-size: 36px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px; top: 0px; width: 110px; height: 42px; font-size: 46px; text-align: center;\n    }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px; top: 44px; width: 110px; height: 12px; font-size: 11px; text-align: center;\n    }\n\n    .cta-rect .cta {\n      border-radius: 6px;\n      width: 128px;\n      height: 38px;\n      left: 335px;\n      top: 26px;\n      font-size: 18px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n\n    /* Act 4 only: lower headline placement on 728×90 */\n    #headline-act4 {\n      top: 17px;\n    }\n"
     },
     "300x250": {
       "canvas": {
@@ -3173,7 +3181,7 @@
             "top": 116,
             "width": 98,
             "height": 24,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": 20,
             "lineHeight": 1.05,
@@ -3211,7 +3219,7 @@
             "top": 139,
             "width": 131,
             "height": 63,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": 42,
             "lineHeight": 1,
@@ -3323,7 +3331,7 @@
             "alignItems": "center",
             "justifyContent": "center",
             "textAlign": "center",
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "color": "rgb(255, 255, 255)",
             "lineHeight": 1.1,
@@ -3441,7 +3449,7 @@
             "top": 78,
             "width": 24,
             "height": 40,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": "43px",
             "color": "rgb(255, 255, 255)",
@@ -3500,7 +3508,7 @@
             "top": 127,
             "width": 22,
             "height": 36,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": "43px",
             "color": "rgb(255, 255, 255)",
@@ -4231,6 +4239,10 @@
             "fontSize": 24,
             "lineHeight": 1.1,
             "letterSpacing": 0
+          },
+          "fit": {
+            "mode": "wrap",
+            "maxLines": 2
           }
         },
         {
@@ -4252,7 +4264,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 300px;\n      height: 250px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    /* ── OfferSlot internals (base = single-offer canonical) ── */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: center;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 108px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 75px;\n      width: 100%;\n      text-align: center;\n      font-size: 24px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n    }\n\n    /* ── T&C wrappers ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 13px;\n      top: 220px;\n      width: 200px;\n      height: 30px;\n    }\n\n    /* ── Offer count variants ──\n       Base rules above ARE the single-offer canonical values; variants\n       override only what differs. */\n\n    /* Single offer: left-aligned with the headline text above (left 15px). */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-1 [data-gwd-group=\"OfferSlot\"] .offer-value { text-align: left; }\n    .offers-1 [data-gwd-group=\"OfferSlot\"] .offer-subline { text-align: left; }\n\n    /* Centred variants (2 and 3 offers): the headline centres too, inside\n       a symmetric box (10px padding each side) so it can't protrude left. */\n/* Dual: row centred on the canvas — plus centred at x=150, slots\n       symmetric either side. */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 26px; top: 68px; width: 110px; }\n    .offers-2 .offer-slot-2 { left: 164px; top: 68px; width: 110px; }\n    .offers-2 .plus-1 { left: 138px; top: 77px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 68px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 16px; top: 50px; white-space: nowrap; }\n\n    /* Triple: dual-style centred top row, third offer centred beneath.\n       No plus before the third offer (matches the reference design). */\n    .offers-3 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-3 .offer-slot-1 { left: 26px; top: 58px; width: 110px; }\n    .offers-3 .offer-slot-2 { left: 164px; top: 58px; width: 110px; }\n    .offers-3 .offer-slot-3 { left: 80px; top: 118px; width: 140px; }\n    .offers-3 .plus-1 { left: 138px; top: 72px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 56px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 14px; top: 39px; white-space: nowrap; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 4px;\n      width: 120px;\n      height: 36px;\n      left: 90px;\n      top: 112px;\n      font-size: 12px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 300px;\n      height: 250px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    /* ── OfferSlot internals (base = single-offer canonical) ── */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: center;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 108px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 75px;\n      width: 100%;\n      text-align: center;\n      font-size: 24px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n    }\n\n    /* ── T&C wrappers ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 13px;\n      top: 220px;\n      width: 200px;\n      height: 30px;\n    }\n\n    /* ── Offer count variants ──\n       Base rules above ARE the single-offer canonical values; variants\n       override only what differs. */\n\n    /* Single offer: left-aligned with the headline text above (left 15px). */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-1 [data-gwd-group=\"OfferSlot\"] .offer-value { text-align: left; }\n    .offers-1 [data-gwd-group=\"OfferSlot\"] .offer-subline { text-align: left; }\n\n    /* Centred variants (2 and 3 offers): the headline centres too, inside\n       a symmetric box (10px padding each side) so it can't protrude left. */\n/* Dual: row centred on the canvas — plus centred at x=150, slots\n       symmetric either side. */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 26px; top: 68px; width: 110px; }\n    .offers-2 .offer-slot-2 { left: 164px; top: 68px; width: 110px; }\n    .offers-2 .plus-1 { left: 138px; top: 77px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 68px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 16px; top: 50px; white-space: nowrap; }\n\n    /* Triple: dual-style centred top row, third offer centred beneath.\n       No plus before the third offer (matches the reference design). */\n    .offers-3 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-3 .offer-slot-1 { left: 26px; top: 58px; width: 110px; }\n    .offers-3 .offer-slot-2 { left: 164px; top: 58px; width: 110px; }\n    .offers-3 .offer-slot-3 { left: 80px; top: 118px; width: 140px; }\n    .offers-3 .plus-1 { left: 138px; top: 72px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 56px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 14px; top: 39px; white-space: nowrap; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 4px;\n      width: 120px;\n      height: 36px;\n      left: 90px;\n      top: 112px;\n      font-size: 12px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     },
     "160x600": {
       "canvas": {
@@ -4403,7 +4415,7 @@
             "top": 258,
             "width": 100,
             "height": 24,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": 20,
             "lineHeight": 1.05,
@@ -4441,7 +4453,7 @@
             "top": 282,
             "width": 136,
             "height": 60,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": 38,
             "lineHeight": 1,
@@ -4561,7 +4573,7 @@
             "alignItems": "center",
             "justifyContent": "center",
             "textAlign": "center",
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "color": "rgb(255, 255, 255)",
             "lineHeight": 1.1,
@@ -4679,7 +4691,7 @@
             "top": 452,
             "width": 24,
             "height": 34,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": "34px",
             "color": "rgb(255, 255, 255)",
@@ -4738,7 +4750,7 @@
             "top": 540,
             "width": 24,
             "height": 34,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": "34px",
             "color": "rgb(255, 255, 255)",
@@ -5509,6 +5521,10 @@
             "letterSpacing": 0,
             "width": 150,
             "height": 20
+          },
+          "fit": {
+            "mode": "wrap",
+            "maxLines": 2
           }
         },
         {
@@ -5539,7 +5555,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 160px;\n      height: 600px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.25;\n      text-align: center;\n    }\n\n    /* ── OfferSlot internals (single-offer canonical) ──\n       Narrow column: subline is centred and ALLOWED TO WRAP. */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: center;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 96px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 88px;\n      width: 100%;\n      text-align: center;\n      font-size: 20px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n      /* Narrow column: subline may wrap to two centred lines (single). */\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 18px;\n      box-sizing: border-box;\n    }\n\n    /* ── T&C wrappers (bottom-left, flush like the reference) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 8px;\n      top: 572px;\n      width: 145px;\n      height: 34px;\n    }\n\n    /* ── Offer count variants ── */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    /* Dual: STACKED vertically (no width for a row). One-line sublines. */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 10px; top: 365px; width: 140px; }\n    .offers-2 .offer-slot-2 { left: 10px; top: 480px; width: 140px; }\n    .offers-2 .plus-1 { left: 68px; top: 448px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 56px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 13px; top: 50px; white-space: nowrap; }\n\n    /* Triple: three stacked, tighter. */\n    .offers-3 .offer-slot-1 { left: 10px; top: 330px; width: 140px; }\n    .offers-3 .offer-slot-2 { left: 10px; top: 425px; width: 140px; }\n    .offers-3 .offer-slot-3 { left: 10px; top: 520px; width: 140px; }\n    .offers-3 .plus-1 { left: 68px; top: 402px; }\n    .offers-3 .plus-2 { left: 68px; top: 497px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 44px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 12px; top: 40px; white-space: nowrap; }\n    /* Stacked triple collides with the bottom logo/T&Cs zone — pull the\n       logo up between headline and offers for this count. */\n    .offers-3 .logo-act1 { top: 245px; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 5px;\n      width: 130px;\n      height: 44px;\n      left: 15px;\n      top: 268px;\n      font-size: 15px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 160px;\n      height: 600px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.25;\n      text-align: center;\n    }\n\n    /* ── OfferSlot internals (single-offer canonical) ──\n       Narrow column: subline is centred and ALLOWED TO WRAP. */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: center;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 96px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 88px;\n      width: 100%;\n      text-align: center;\n      font-size: 20px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n      /* Narrow column: subline may wrap to two centred lines (single). */\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 18px;\n      box-sizing: border-box;\n    }\n\n    /* ── T&C wrappers (bottom-left, flush like the reference) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 8px;\n      top: 572px;\n      width: 145px;\n      height: 34px;\n    }\n\n    /* ── Offer count variants ── */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    /* Dual: STACKED vertically (no width for a row). One-line sublines. */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 10px; top: 365px; width: 140px; }\n    .offers-2 .offer-slot-2 { left: 10px; top: 480px; width: 140px; }\n    .offers-2 .plus-1 { left: 68px; top: 448px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 56px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 13px; top: 50px; white-space: nowrap; }\n\n    /* Triple: three stacked, tighter. */\n    .offers-3 .offer-slot-1 { left: 10px; top: 330px; width: 140px; }\n    .offers-3 .offer-slot-2 { left: 10px; top: 425px; width: 140px; }\n    .offers-3 .offer-slot-3 { left: 10px; top: 520px; width: 140px; }\n    .offers-3 .plus-1 { left: 68px; top: 402px; }\n    .offers-3 .plus-2 { left: 68px; top: 497px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 44px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 12px; top: 40px; white-space: nowrap; }\n    /* Stacked triple collides with the bottom logo/T&Cs zone — pull the\n       logo up between headline and offers for this count. */\n    .offers-3 .logo-act1 { top: 245px; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 5px;\n      width: 130px;\n      height: 44px;\n      left: 15px;\n      top: 268px;\n      font-size: 15px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     },
     "300x600": {
       "canvas": {
@@ -5687,7 +5703,7 @@
             "top": 224,
             "width": 120,
             "height": 28,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": 24,
             "lineHeight": 1.05,
@@ -5725,7 +5741,7 @@
             "top": 254,
             "width": 184,
             "height": 68,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": 52,
             "lineHeight": 1,
@@ -5837,7 +5853,7 @@
             "alignItems": "center",
             "justifyContent": "center",
             "textAlign": "center",
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "color": "rgb(255, 255, 255)",
             "lineHeight": 1.1,
@@ -5955,7 +5971,7 @@
             "top": 389,
             "width": 24,
             "height": 40,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": "43px",
             "color": "rgb(255, 255, 255)",
@@ -6014,7 +6030,7 @@
             "top": 532,
             "width": 31,
             "height": 51,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": "43px",
             "color": "rgb(255, 255, 255)",
@@ -6758,6 +6774,10 @@
             "letterSpacing": 0,
             "textAlign": "center",
             "justifyContent": "center"
+          },
+          "fit": {
+            "mode": "wrap",
+            "maxLines": 2
           }
         },
         {
@@ -6788,7 +6808,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 300px;\n      height: 600px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.25;\n      text-align: center;\n    }\n\n    /* ── OfferSlot internals (single-offer canonical: all centred) ── */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: center;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 130px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 114px;\n      width: 100%;\n      text-align: center;\n      font-size: 26px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n      white-space: nowrap;   /* one line; runtime fitter shrinks long copy */\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 26px;\n      box-sizing: border-box;\n    }\n\n    /* ── T&C wrappers (bottom-left) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 15px;\n      top: 568px;\n      width: 260px;\n      height: 26px;\n    }\n\n    /* ── Offer count variants ── */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    /* Dual: side-by-side row centred (MPU-dual style, scaled up). */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 26px; top: 390px; width: 110px; }\n    .offers-2 .offer-slot-2 { left: 164px; top: 390px; width: 110px; }\n    .offers-2 .plus-1 { left: 138px; top: 399px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 68px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 16px; top: 62px; white-space: nowrap; }\n\n    /* Triple: row + third centred beneath (MPU-triple style). */\n    .offers-3 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-3 .offer-slot-1 { left: 26px; top: 180px; width: 110px; }\n    .offers-3 .offer-slot-2 { left: 164px; top: 180px; width: 110px; }\n    .offers-3 .offer-slot-3 { left: 80px; top: 280px; width: 140px; }\n    .offers-3 .plus-1 { left: 138px; top: 226px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 60px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 15px; top: 56px; white-space: nowrap; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 5px;\n      width: 180px;\n      height: 48px;\n      left: 60px;\n      top: 230px;\n      font-size: 17px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 300px;\n      height: 600px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.25;\n      text-align: center;\n    }\n\n    /* ── OfferSlot internals (single-offer canonical: all centred) ── */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: center;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 130px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 114px;\n      width: 100%;\n      text-align: center;\n      font-size: 26px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n      white-space: nowrap;   /* one line; runtime fitter shrinks long copy */\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 26px;\n      box-sizing: border-box;\n    }\n\n    /* ── T&C wrappers (bottom-left) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 15px;\n      top: 568px;\n      width: 260px;\n      height: 26px;\n    }\n\n    /* ── Offer count variants ── */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    /* Dual: side-by-side row centred (MPU-dual style, scaled up). */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 26px; top: 390px; width: 110px; }\n    .offers-2 .offer-slot-2 { left: 164px; top: 390px; width: 110px; }\n    .offers-2 .plus-1 { left: 138px; top: 399px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 68px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 16px; top: 62px; white-space: nowrap; }\n\n    /* Triple: row + third centred beneath (MPU-triple style). */\n    .offers-3 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-3 .offer-slot-1 { left: 26px; top: 180px; width: 110px; }\n    .offers-3 .offer-slot-2 { left: 164px; top: 180px; width: 110px; }\n    .offers-3 .offer-slot-3 { left: 80px; top: 280px; width: 140px; }\n    .offers-3 .plus-1 { left: 138px; top: 226px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 60px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 15px; top: 56px; white-space: nowrap; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 5px;\n      width: 180px;\n      height: 48px;\n      left: 60px;\n      top: 230px;\n      font-size: 17px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     },
     "970x250": {
       "canvas": {
@@ -6935,7 +6955,7 @@
             "top": 86,
             "width": 120,
             "height": 30,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": 26,
             "lineHeight": 1.05,
@@ -6973,7 +6993,7 @@
             "top": 119,
             "width": 216,
             "height": 76,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": 62,
             "lineHeight": 1,
@@ -7092,7 +7112,7 @@
             "alignItems": "center",
             "justifyContent": "center",
             "textAlign": "center",
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "color": "rgb(255, 255, 255)",
             "lineHeight": 1.1,
@@ -7210,7 +7230,7 @@
             "top": 60,
             "width": 30,
             "height": 50,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": "52px",
             "color": "rgb(255, 255, 255)",
@@ -7269,7 +7289,7 @@
             "top": 65,
             "width": 30,
             "height": 50,
-            "fontFamily": "Museo, \"Museo Sans\", Arial, sans-serif",
+            "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
             "fontSize": "46px",
             "color": "rgb(255, 255, 255)",
@@ -8027,6 +8047,10 @@
             "fontSize": 28,
             "lineHeight": 1.1,
             "letterSpacing": 0
+          },
+          "fit": {
+            "mode": "wrap",
+            "maxLines": 2
           }
         },
         {
@@ -8057,7 +8081,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 970px;\n      height: 250px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, \"Museo Sans\", Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.25;\n    }\n\n    /* ── OfferSlot internals (single-offer canonical) ──\n       Billboard alignment: subline LEFT-aligns to the value's left edge. */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: left;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 145px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 126px;\n      width: 100%;\n      text-align: left;\n      font-size: 28px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n    }\n\n    /* ── T&C wrappers (bottom-left) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 20px;\n      top: 226px;\n      width: 420px;\n      height: 26px;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 30px;\n      box-sizing: border-box;\n    }\n\n    /* ── Offer count variants ── */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    /* Dual: row right of the headline column (which ends ~x320). */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 350px; top: 55px; width: 180px; }\n    .offers-2 .offer-slot-2 { left: 580px; top: 55px; width: 180px; }\n    .offers-2 .plus-1 { left: 540px; top: 60px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 72px; text-align: center; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 18px; top: 64px; text-align: center; white-space: nowrap; }\n\n    /* Triple: full row with both pluses; the blue logo moves to the bottom\n       right corner so the third slot has the column. */\n    .offers-3 .offer-slot-1 { left: 340px; top: 60px; width: 170px; }\n    .offers-3 .offer-slot-2 { left: 555px; top: 60px; width: 170px; }\n    .offers-3 .offer-slot-3 { left: 770px; top: 60px; width: 170px; }\n    .offers-3 .plus-1 { left: 517px; top: 65px; }\n    .offers-3 .plus-2 { left: 732px; top: 65px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 54px; text-align: center; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 14px; top: 50px; text-align: center; white-space: nowrap; }\n    .offers-3 .logo-act1 { left: 790px; top: 192px; width: 140px; height: 50px; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 6px;\n      width: 220px;\n      height: 56px;\n      left: 375px;\n      top: 97px;\n      font-size: 20px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n    .sse-text-bold {\n      font-weight: 700;\n    }\n    .sse-bottom-line {\n      line-height: 1.3;\n    }\n    .bg-image {\n      position: absolute;\n      visibility: inherit;\n      left: 0px;\n      top: 0px;\n      width: 970px;\n      height: 250px;\n    }\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C mode variants ── */\n    .tc-solo .terms-prices,\n    .tc-solo .unit-rate-prices,\n    .tc-solo .tc-prices-group {\n      visibility: hidden;\n    }\n    .tc-prices .terms-solo,\n    .tc-prices .tc-solo-group {\n      visibility: hidden;\n    }\n\n    .sse-headline {\n      line-height: 1.25;\n    }\n\n    /* ── OfferSlot internals (single-offer canonical) ──\n       Billboard alignment: subline LEFT-aligns to the value's left edge. */\n    [data-gwd-group=\"OfferSlot\"] .offer-value {\n      left: 0px;\n      top: 0px;\n      width: 100%;\n      text-align: left;\n      line-height: 0.85;\n      letter-spacing: -0.5px;\n      font-size: 145px;\n      white-space: nowrap;\n    }\n    [data-gwd-group=\"OfferSlot\"] .offer-subline {\n      left: 0px;\n      top: 126px;\n      width: 100%;\n      text-align: left;\n      font-size: 28px;\n      letter-spacing: 0px;\n      line-height: 1.1;\n      text-transform: uppercase;\n    }\n\n    /* ── T&C wrappers (bottom-left) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n      left: 20px;\n      top: 226px;\n      width: 420px;\n      height: 26px;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 30px;\n      box-sizing: border-box;\n    }\n\n    /* ── Offer count variants ── */\n    .offers-1 .offer-slot-2,\n    .offers-1 .offer-slot-3,\n    .offers-1 .plus-1,\n    .offers-1 .plus-2 {\n      visibility: hidden;\n    }\n\n    /* Dual: row right of the headline column (which ends ~x320). */\n    .offers-2 .offer-slot-3,\n    .offers-2 .plus-2 {\n      visibility: hidden;\n    }\n    .offers-2 .offer-slot-1 { left: 350px; top: 55px; width: 180px; }\n    .offers-2 .offer-slot-2 { left: 580px; top: 55px; width: 180px; }\n    .offers-2 .plus-1 { left: 540px; top: 60px; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 72px; text-align: center; }\n    .offers-2 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 18px; top: 64px; text-align: center; white-space: nowrap; }\n\n    /* Triple: full row with both pluses; the blue logo moves to the bottom\n       right corner so the third slot has the column. */\n    .offers-3 .offer-slot-1 { left: 340px; top: 60px; width: 170px; }\n    .offers-3 .offer-slot-2 { left: 555px; top: 60px; width: 170px; }\n    .offers-3 .offer-slot-3 { left: 770px; top: 60px; width: 170px; }\n    .offers-3 .plus-1 { left: 517px; top: 65px; }\n    .offers-3 .plus-2 { left: 732px; top: 65px; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-value { font-size: 54px; text-align: center; }\n    .offers-3 [data-gwd-group=\"OfferSlot\"] .offer-subline { font-size: 14px; top: 50px; text-align: center; white-space: nowrap; }\n    .offers-3 .logo-act1 { left: 790px; top: 192px; width: 140px; height: 50px; }\n\n    /* ── CTA shape variants ── */\n    .cta-rect .cta {\n      border-radius: 6px;\n      width: 220px;\n      height: 56px;\n      left: 375px;\n      top: 97px;\n      font-size: 20px;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     }
   }
 }

@@ -1,3 +1,16 @@
+/* Brand font for the preview stage: Museo — the slab family, NOT Museo Sans.
+   Served from campaign/assets/fonts via the /assets proxy so the editor canvas
+   measures and renders the exact file every export packages. local("☺") never
+   matches, so a Museo installed on this machine can never mask the packaged
+   file. */
+@font-face {
+  font-family: "Museo";
+  src: local("☺"), url("/assets/fonts/Museo700-Regular.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+
 :root {
   color-scheme: dark;
   --ink: #e6ecf1;

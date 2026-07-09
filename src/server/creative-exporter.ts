@@ -11,6 +11,8 @@ import {
   wrapOfferValueSymbolRuntime,
 } from '@/lib/offer-value-symbols';
 import { beatsForFrameScope } from '@/lib/timing-profiles';
+import { textFitEngineSource } from '@/lib/text-fit';
+import { textFitRulesForSize } from '@/lib/text-fit-rules';
 import {
   CREATIVE_AD_SIZES,
   backgroundFieldsFromRow,
@@ -37,7 +39,9 @@ const jsString = (value: unknown) => JSON.stringify(value);
 
 type RenderOptions = {
   assetBasePath?: string;
+  assetUrlMap?: Record<string, string>;
   fontBasePath?: string;
+  fontUrlMap?: Record<string, string>;
   includePackagedBackground?: boolean;
   includePreviewBridge?: boolean;
   includeStudioDynamicContent?: boolean;
@@ -51,6 +55,10 @@ type PackageEntry = {
 
 type ClientPreviewPackageOptions = {
   includeValidator?: boolean;
+};
+
+type BasePackageOptions = {
+  assetMode?: 'packaged' | 'cdn';
 };
 
 const clientFontSourcePath = (filename: string) => (
@@ -82,10 +90,30 @@ const createClientFontEntry = (filename: string, families: string[], weight: num
   resolveSourcePath: () => resolveClientFontSourcePath(filename),
 });
 
+// ── Brand font: Museo (the slab family in Museo700-Regular.otf) ──────────────
+// BE HYPER-EXPLICIT HERE. "Museo" and "Museo Sans" are two different typefaces
+// with different glyph widths. The ads use Museo — the NON-Sans one — and every
+// export flavour must load Museo700-Regular.otf for the "Museo" family. Never
+// alias one file to the other: a substitution renders the wrong brand font AND
+// invalidates every text-fit measurement QA'd against the real Museo.
 const CLIENT_FONT_FILES = [
   createClientFontEntry('Museo700-Regular.otf', ['Museo'], 700),
-  createClientFontEntry('MuseoSans_700.otf', ['Museo Sans'], 700),
 ];
+
+// No Studio CDN asset exists for the real Museo yet, so fonts are packaged in
+// every mode (including CDN asset mode). If Museo700-Regular.otf is uploaded
+// to Studio later, map 'Museo700-Regular.otf' to its s0.2mdn.net URL here —
+// and only to a URL that genuinely serves that exact file.
+const CDN_FONT_URLS: Record<string, string> = {};
+
+const CDN_ASSET_URLS: Record<string, string> = {
+  'assets/SVG/SSELogoBlue.svg': 'https://s0.2mdn.net/creatives/assets/5627651/SSELogoBlue.svg',
+  'assets/SVG/SSELogoWhite.svg': 'https://s0.2mdn.net/creatives/assets/5627651/SSELogoWhite.svg',
+  'assets/SVG/bluewave-wider.svg': 'https://s0.2mdn.net/creatives/assets/5627651/bluewave-wider.svg',
+  'assets/SVG/bluewave.svg': 'https://s0.2mdn.net/creatives/assets/5627651/bluewave.svg',
+  'assets/SVG/greenwave-wider.svg': 'https://s0.2mdn.net/creatives/assets/5627651/greenwave-wider.svg',
+  'assets/SVG/greenwave.svg': 'https://s0.2mdn.net/creatives/assets/5627651/greenwave.svg',
+};
 
 const clientVariantMatrix = () => {
   const rows = [];
@@ -165,19 +193,22 @@ const clientInitialRow = (document: Record<string, unknown>) => {
 
 const assetSrc = (src: unknown, options: RenderOptions = {}) => {
   const value = String(src ?? '');
+  const mappedUrl = options.assetUrlMap?.[value.replace(/^\/+/, '')];
+  if (mappedUrl) return mappedUrl;
   if (!options.assetBasePath || /^(?:https?:)?\/\//.test(value) || value.startsWith('/')) return value;
   return `${options.assetBasePath.replace(/\/?$/, '/')}${value.replace(/^\/+/, '')}`;
 };
 
-const localFontUrl = (filename: string, options: RenderOptions = {}) => (
-  `${String(options.fontBasePath || '').replace(/\/?$/, '/')}${filename}`
+const fontUrl = (filename: string, options: RenderOptions = {}) => (
+  options.fontUrlMap?.[filename]
+    || `${String(options.fontBasePath || '').replace(/\/?$/, '/')}${filename}`
 );
 
 const localFontFaceCss = (options: RenderOptions = {}) => {
-  if (!options.fontBasePath) return '';
+  if (!options.fontBasePath && !options.fontUrlMap) return '';
   return CLIENT_FONT_FILES.flatMap((font) => font.families.map((family) => `    @font-face {
       font-family: "${family}";
-      src: ${PACKAGED_FONT_LOCAL_BLOCK}, url("${localFontUrl(font.filename, options)}") format("opentype");
+      src: ${PACKAGED_FONT_LOCAL_BLOCK}, url("${fontUrl(font.filename, options)}") format("opentype");
       font-weight: ${font.weight};
       font-style: normal;
       font-display: block;
@@ -185,10 +216,19 @@ const localFontFaceCss = (options: RenderOptions = {}) => {
 };
 
 const packagedFontPreloadTags = (options: RenderOptions = {}) => {
-  if (!options.fontBasePath) return '';
-  return CLIENT_FONT_FILES.map((font) => (
-    `    <link rel="preload" href="${escapeAttr(localFontUrl(font.filename, options))}" as="font" type="font/otf" crossorigin>`
-  )).join('\n');
+  if (!options.fontBasePath && !options.fontUrlMap) return '';
+  const seen = new Set<string>();
+  return CLIENT_FONT_FILES
+    .map((font) => fontUrl(font.filename, options))
+    .filter((url) => {
+      if (seen.has(url)) return false;
+      seen.add(url);
+      return true;
+    })
+    .map((url) => (
+      `    <link rel="preload" href="${escapeAttr(url)}" as="font" type="font/otf" crossorigin>`
+    ))
+    .join('\n');
 };
 
 const packagedFontIsolationCss = () => `
@@ -434,80 +474,6 @@ const animationCssForLayer = (
     }`;
 };
 
-const fitRuleForClassRule = (
-  rule: Record<string, unknown>,
-) => {
-  if (!rule?.fit || !rule.cssClass) return null;
-  const baseFontSize = Number((rule.properties as Record<string, unknown>)?.fontSize);
-  const minFromBase = (ratio: number, fallback: number) => (
-    Number.isFinite(baseFontSize) && baseFontSize > 0
-      ? Math.max(fallback, Math.round(baseFontSize * ratio))
-      : fallback
-  );
-  const fit = rule.fit as Record<string, unknown>;
-  return {
-    cssClass: rule.cssClass,
-    minFontSize: fit.minFontSize ?? minFromBase(0.75, 6),
-    ...fit,
-  };
-};
-
-const fitRuleForLayer = (layer: Record<string, unknown>, classRuleProps: Record<string, unknown> = {}) => {
-  const cssClass = isHeadlineLayer(layer)
-    ? HEADLINE_CSS_CLASS
-    : (layer?.base?.cssClass || layer?.id);
-  if (!cssClass || layer.kind === 'image' || layer.kind === 'shape' || layer.kind === 'group') return null;
-  if (String(layer.id || '') === 'cta') return null;
-  if (layer.fit && isHeadlineLayer(layer)) {
-    return { cssClass, mode: 'sharedEqualizedFit', ...layer.fit };
-  }
-  if (layer.fit) return { cssClass, ...layer.fit };
-  const baseFontSize = Number(classRuleProps.fontSize ?? layer?.base?.fontSize);
-  const minFromBase = (ratio: number, fallback: number) => (
-    Number.isFinite(baseFontSize) && baseFontSize > 0
-      ? Math.max(fallback, Math.round(baseFontSize * ratio))
-      : fallback
-  );
-  if (isHeadlineLayer(layer)) {
-    return { cssClass, mode: 'sharedEqualizedFit', minFontSize: minFromBase(0.85, 12), maxLines: 2 };
-  }
-  if (/terms|unit-rate/.test(String(layer.id || ''))) return { cssClass, mode: 'shrink', minFontSize: minFromBase(0.75, 6), maxLines: 2 };
-  return null;
-};
-
-const textFitRulesForSize = (sizeCreative: Record<string, unknown>) => {
-  const headlineClassRule = (sizeCreative.classRules || []).find(
-    (rule: Record<string, unknown>) => rule.cssClass === HEADLINE_CSS_CLASS,
-  );
-  const classRuleProps = headlineClassRule?.properties || {};
-  const headlineLayers = (sizeCreative.layers || []).filter(isHeadlineLayer);
-  const headlineFitLayer = headlineLayers.find((layer: Record<string, unknown>) => layer.fit) || headlineLayers[0];
-  const seen = new Set<string>();
-  const layerRules = (sizeCreative.layers || [])
-    .map((layer: Record<string, unknown>) => {
-      if (isHeadlineLayer(layer)) {
-        if (layer !== headlineFitLayer) return null;
-        return fitRuleForLayer(layer, classRuleProps);
-      }
-      return fitRuleForLayer(layer, classRuleProps);
-    })
-    .filter((rule) => {
-      if (!rule) return false;
-      if (seen.has(rule.cssClass)) return false;
-      seen.add(rule.cssClass);
-      return true;
-    });
-  const classRules = (sizeCreative.classRules || [])
-    .map((rule: Record<string, unknown>) => fitRuleForClassRule(rule))
-    .filter((rule) => {
-      if (!rule) return false;
-      if (seen.has(rule.cssClass)) return false;
-      seen.add(rule.cssClass);
-      return true;
-    });
-  return [...layerRules, ...classRules];
-};
-
 const dcoFieldForLayer = (layer: Record<string, unknown>) => {
   if (layer.binding?.field) return String(layer.binding.field);
   const id = String(layer.id || '');
@@ -692,157 +658,35 @@ const runtimeScript = (
           }
         }
 
-        var OFFER_VALUE_MIN_PX = 32;
-
-        function fitOfferValues() {
-          for (var index = 1; index <= 3; index += 1) {
-            var slot = document.getElementById('offer' + index);
-            if (!slot || window.getComputedStyle(slot).visibility === 'hidden') continue;
-            var value = slot.querySelector('.offer-value');
-            if (!value || !value.textContent.trim()) continue;
-            value.style.fontSize = '';
-            var size = parseFloat(window.getComputedStyle(value).fontSize);
-            value.style.fontSize = size + 'px';
-            while (size > OFFER_VALUE_MIN_PX && value.scrollWidth > value.clientWidth) {
-              size -= 0.5;
-              value.style.fontSize = size + 'px';
-            }
-          }
-        }
-
-        function ruleMaxHeight(element, rule, size) {
-          var lines = parseFloat(rule.maxLines);
-          if (!lines || lines <= 0) return null;
-          var lineHeight = parseFloat(window.getComputedStyle(element).lineHeight);
-          if (!lineHeight) lineHeight = size * 1.15;
-          var maxHeight = lineHeight * lines;
-          var boxHeight = element.clientHeight || 0;
-          if (boxHeight <= maxHeight) return maxHeight;
-          var browserLineBoxSlack = Math.max(2, lineHeight * 0.15);
-          return Math.min(boxHeight, maxHeight + browserLineBoxSlack);
-        }
-
-        function textContentHeight(element) {
-          if (!document.createRange) return null;
-          var range = document.createRange();
-          try {
-            range.selectNodeContents(element);
-            var rect = range.getBoundingClientRect();
-            return rect && rect.height > 0 ? rect.height : null;
-          } finally {
-            if (range.detach) range.detach();
-          }
-        }
-
-        function isTextTooTall(element, rule, size, maxHeight) {
-          if (maxHeight === null) return false;
-          var measuredHeight = textContentHeight(element);
-          if (measuredHeight === null) measuredHeight = element.scrollHeight;
-          return measuredHeight > maxHeight + 1;
-        }
-
-        function applyTextFitRule(rule) {
-          var elements = [];
-          document.querySelectorAll('.' + rule.cssClass).forEach(function(element) {
-            if (!element.textContent.trim()) return;
-            if (window.getComputedStyle(element).visibility === 'hidden') return;
-            elements.push(element);
-          });
-          if (!elements.length) return;
-
-          var mode = rule.mode || 'shrink';
-          if (mode === 'sharedEqualizedFit') {
-            var fittedSizes = elements.map(function(element) {
-              element.style.fontSize = '';
-              element.style.whiteSpace = '';
-              element.style.overflow = '';
-              element.style.textOverflow = '';
-              element.style.maxHeight = '';
-              var size = parseFloat(window.getComputedStyle(element).fontSize) || parseFloat(rule.minFontSize) || 1;
-              var min = parseFloat(rule.minFontSize) || 1;
-              element.style.fontSize = size + 'px';
-              var maxHeight = ruleMaxHeight(element, rule, size);
-              while (size > min && (element.scrollWidth > element.clientWidth || isTextTooTall(element, rule, size, maxHeight))) {
-                size = Math.max(min, Number((size - 0.5).toFixed(3)));
-                element.style.fontSize = size + 'px';
-                maxHeight = ruleMaxHeight(element, rule, size);
-              }
-              if (maxHeight !== null) {
-                element.style.maxHeight = maxHeight + 'px';
-                element.style.overflow = 'hidden';
-              }
-              return size;
-            });
-            var sharedSize = Math.min.apply(null, fittedSizes);
-            elements.forEach(function(element) {
-              element.style.fontSize = sharedSize + 'px';
-            });
-            return;
-          }
-
-          elements.forEach(function(element) {
-            element.style.fontSize = '';
-            element.style.whiteSpace = '';
-            element.style.overflow = '';
-            element.style.textOverflow = '';
-            element.style.maxHeight = '';
-            if (mode === 'wrap') {
-              element.style.whiteSpace = 'normal';
-              return;
-            }
-            if (mode === 'clip') {
-              element.style.overflow = 'hidden';
-              return;
-            }
-            if (mode === 'truncate') {
-              element.style.whiteSpace = 'nowrap';
-              element.style.overflow = 'hidden';
-              element.style.textOverflow = 'ellipsis';
-              return;
-            }
-            var size = parseFloat(window.getComputedStyle(element).fontSize) || parseFloat(rule.minFontSize) || 1;
-            var min = parseFloat(rule.minFontSize) || 1;
-            element.style.fontSize = size + 'px';
-            var maxHeight = ruleMaxHeight(element, rule, size);
-            while (size > min && (element.scrollWidth > element.clientWidth || isTextTooTall(element, rule, size, maxHeight))) {
-              size = Math.max(min, Number((size - 0.5).toFixed(3)));
-              element.style.fontSize = size + 'px';
-              maxHeight = ruleMaxHeight(element, rule, size);
-            }
-            if (maxHeight !== null) {
-              element.style.maxHeight = maxHeight + 'px';
-              element.style.overflow = 'hidden';
-            }
-          });
-        }
+        // Shared fit engine — the exact same code the editor preview runs.
+        // Source of truth: src/lib/text-fit.ts (rules: src/lib/text-fit-rules.ts).
+        var textFitEngine = ${textFitEngineSource()}(window);
 
         function fitBoundText() {
-          textFitRules.forEach(applyTextFitRule);
+          if (!root) return;
+          textFitEngine.applyRules(root, textFitRules);
         }
 
-        function equalizeSublines() {
-          var sublineRule = textFitRules.find(function(item) { return item.cssClass === 'offer-subline'; });
-          if (sublineRule && (sublineRule.mode === 'wrap' || Number(sublineRule.maxLines) > 1)) return;
-          var sublines = [];
-          for (var index = 1; index <= 3; index += 1) {
-            var slot = document.getElementById('offer' + index);
-            if (!slot || window.getComputedStyle(slot).visibility === 'hidden') continue;
-            var subline = slot.querySelector('.offer-subline');
-            if (subline && subline.textContent.trim()) sublines.push(subline);
+        var fontRefitWired = false;
+
+        function refitAfterFonts() {
+          if (!root) return;
+          fitBoundText();
+          alignOfferValueSymbols();
+        }
+
+        function scheduleFontRefit() {
+          if (fontRefitWired) return;
+          fontRefitWired = true;
+          if (!(document.fonts && document.fonts.ready)) return;
+          // The first fit can only measure fallback metrics while the packaged
+          // font is still in flight; measure again with the real glyphs.
+          document.fonts.ready.then(function() {
+            window.requestAnimationFrame(refitAfterFonts);
+          }).catch(function() {});
+          if (document.fonts.addEventListener) {
+            document.fonts.addEventListener('loadingdone', refitAfterFonts);
           }
-          if (!sublines.length) return;
-          sublines.forEach(function(element) { element.style.fontSize = ''; });
-          var fitted = sublines.map(function(element) {
-            var size = parseFloat(window.getComputedStyle(element).fontSize);
-            element.style.fontSize = size + 'px';
-            while (size > 10 && element.scrollWidth > element.clientWidth) {
-              size -= 0.5;
-              element.style.fontSize = size + 'px';
-            }
-            return size;
-          });
-          var shared = Math.min.apply(null, fitted);
-          sublines.forEach(function(element) { element.style.fontSize = shared + 'px'; });
         }
 
         ${alignOfferValueSymbolsRuntime}
@@ -898,12 +742,11 @@ const runtimeScript = (
           setText('.terms-prices, .terms-solo', data.tc_terms_text);
           setText('.unit-rate-prices', data.tc_units_text);
           applyBackgroundImage(data);
-          fitBoundText();
           bindOfferTexts(data);
-          fitOfferValues();
-          equalizeSublines();
+          fitBoundText();
           alignOfferValueSymbols();
           wireExit();
+          scheduleFontRefit();
           window.__SSE_DCO_READY__ = true;
         }
 
@@ -1104,7 +947,10 @@ export const renderWipHtml = (html: string, row: Record<string, unknown>) => {
 
 export const buildCreativeHtmlFiles = async (document: Record<string, unknown>, size: string) => {
   await fs.mkdir(outputRoot, { recursive: true });
-  const html = renderStudioReadyHtml(document, size);
+  // Local QA files load the packaged Museo (output/ sits beside campaign/), so
+  // they measure and render the same font Studio serves — not whatever happens
+  // to be installed on this machine.
+  const html = renderStudioReadyHtml(document, size, { fontBasePath: '../campaign/assets/fonts/' });
   const outPath = path.resolve(outputRoot, `SSE_DCO_${size}.html`);
   await fs.writeFile(outPath, html);
   const variants = { single: 1, dual: 2, triple: 3 };
@@ -2419,7 +2265,10 @@ export const buildClientPreviewPackageEntries = async (document: Record<string, 
   return entries.sort((a, b) => a.path.localeCompare(b.path));
 };
 
-export const buildBasePackageEntries = async (document: Record<string, unknown>) => {
+export const buildBasePackageEntries = async (document: Record<string, unknown>, options: BasePackageOptions = {}) => {
+  const useCdnAssets = options.assetMode === 'cdn';
+  const assetUrlMap = useCdnAssets ? CDN_ASSET_URLS : undefined;
+  const fontUrlMap = useCdnAssets ? CDN_FONT_URLS : undefined;
   const entries: PackageEntry[] = [];
   const sizes = Object.keys(document.sizes || {});
   for (const size of sizes) {
@@ -2427,7 +2276,11 @@ export const buildBasePackageEntries = async (document: Record<string, unknown>)
       path: `ads/${size}/index.html`,
       data: renderStudioReadyHtml(document, size, {
         assetBasePath: '../',
+        assetUrlMap,
+        // Fonts without a CDN mapping (currently all of them — see
+        // CDN_FONT_URLS) are packaged and referenced relatively in every mode.
         fontBasePath: '../assets/fonts/',
+        fontUrlMap,
         includePackagedBackground: false,
         includePreviewBridge: false,
         includeStudioDynamicContent: true,
@@ -2436,6 +2289,7 @@ export const buildBasePackageEntries = async (document: Record<string, unknown>)
   }
 
   for (const assetPath of collectBasePackageAssetPaths(document)) {
+    if (assetUrlMap?.[assetPath]) continue;
     entries.push({
       path: `ads/${assetPath}`,
       data: await fs.readFile(path.resolve(projectRoot, assetPath)),
@@ -2443,6 +2297,7 @@ export const buildBasePackageEntries = async (document: Record<string, unknown>)
   }
 
   for (const font of CLIENT_FONT_FILES) {
+    if (fontUrlMap?.[font.filename]) continue;
     entries.push({
       path: `ads/assets/fonts/${font.filename}`,
       data: await fs.readFile(await font.resolveSourcePath()),
@@ -2553,6 +2408,6 @@ export const buildClientPreviewZip = async (document: Record<string, unknown>, o
   createZipBuffer(await buildClientPreviewPackageEntries(document, options))
 );
 
-export const buildBasePackageZip = async (document: Record<string, unknown>) => (
-  createZipBuffer(await buildBasePackageEntries(document))
+export const buildBasePackageZip = async (document: Record<string, unknown>, options: BasePackageOptions = {}) => (
+  createZipBuffer(await buildBasePackageEntries(document, options))
 );

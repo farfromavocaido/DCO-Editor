@@ -222,6 +222,16 @@ export function TopBar() {
                 type="button"
                 role="menuitem"
                 onClick={() => {
+                  exportBasePackage({ assetMode: 'cdn' }).catch((error) => setStatus(error.message, 'error'));
+                  setMoreOpen(false);
+                }}
+              >
+                Export agency ZIP with CDN assets
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
                   exportClientPackage({ includeValidator: true }).catch((error) => setStatus(error.message, 'error'));
                   setMoreOpen(false);
                 }}

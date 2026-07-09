@@ -11,6 +11,9 @@ import * as creativeViewRoute from '@/app/api/creative/[size]/view/route';
 import * as creativeSourceRoute from '@/app/api/creative/[size]/source/route';
 import { readCreativeDocument } from '@/server/creative-document';
 
+const CDN_FONT_URL = 'https://s0.2mdn.net/creatives/assets/5627648/MuseoSans_700.otf';
+const CDN_LOGO_URL = 'https://s0.2mdn.net/creatives/assets/5627651/SSELogoBlue.svg';
+
 const truthyFeedBool = (value: unknown) => value === true
   || ['true', '1', 'yes', 'on'].includes(String(value || '').trim().toLowerCase());
 
@@ -197,4 +200,27 @@ test('POST /api/creative/base-package returns the agency upload zip', async () =
   assert.ok(!bytes.includes(Buffer.from('SSE_DCO_PREVIEW_STATE')));
   assert.ok(!bytes.includes(Buffer.from('__SSE_DCO_PREVIEW__')));
   assert.ok(!bytes.includes(Buffer.from('offers-3_tcs-units_rectangle')));
+});
+
+test('POST /api/creative/base-package can return a CDN-linked agency zip', async () => {
+  const response = await basePackagePost(new Request('http://localhost/api/creative/base-package', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ assetMode: 'cdn' }),
+  }));
+
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get('content-type') || '', /application\/zip/);
+  assert.match(response.headers.get('content-disposition') || '', /SSE_DCO_base_cdn_zip\.zip/);
+  const bytes = Buffer.from(await response.arrayBuffer());
+  assert.ok(bytes.includes(Buffer.from('mapping.txt')));
+  assert.ok(bytes.includes(Buffer.from('ads/728x90/index.html')));
+  assert.ok(bytes.includes(Buffer.from(CDN_LOGO_URL)));
+  assert.ok(!bytes.includes(Buffer.from('ads/assets/SVG/SSELogoBlue.svg')));
+  assert.ok(!bytes.includes(Buffer.from('../assets/SVG/SSELogoBlue.svg')));
+  // The real Museo has no Studio CDN asset, so it stays packaged in CDN mode;
+  // the Museo Sans CDN file must never appear (it is a different typeface).
+  assert.ok(bytes.includes(Buffer.from('ads/assets/fonts/Museo700-Regular.otf')));
+  assert.ok(!bytes.includes(Buffer.from(CDN_FONT_URL)));
+  assert.ok(!bytes.includes(Buffer.from('MuseoSans_700.otf')));
 });

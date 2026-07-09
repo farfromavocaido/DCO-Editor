@@ -11,6 +11,9 @@ export async function renderCreativeSourceHtml(size: string, options: PreviewOpt
   const document = options.document || await readCreativeDocument();
   return renderStudioReadyHtml(document, size, {
     assetBasePath: options.assetBasePath ?? '/',
+    // Load the packaged Museo via the /assets proxy so in-editor previews
+    // measure the same font Studio serves.
+    fontBasePath: '/assets/fonts/',
   });
 }
 

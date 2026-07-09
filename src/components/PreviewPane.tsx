@@ -201,10 +201,20 @@ export function PreviewPane() {
   useEffect(() => {
     const stage = stageRef.current;
     if (!stage) return undefined;
+    let cancelled = false;
     const frame = window.requestAnimationFrame(() => {
       applyPreviewTextFitting(stage);
     });
-    return () => window.cancelAnimationFrame(frame);
+    // Refit once Museo lands so the preview never keeps fallback-font metrics
+    // (mirrors scheduleFontRefit in the exported runtime).
+    window.document.fonts?.ready?.then(() => {
+      if (cancelled || !stageRef.current) return;
+      applyPreviewTextFitting(stageRef.current);
+    }).catch(() => {});
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(frame);
+    };
   }, [activeScopes, applyPreviewTextFitting, document, offerCount, row, size]);
 
   const startSelectionDrag = useCallback((event: React.PointerEvent, deepestTargetId: string) => {

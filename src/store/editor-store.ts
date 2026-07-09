@@ -11,6 +11,7 @@ import {
   updateFeedDraftField,
 } from '@/lib/feed-model';
 import { applyTextFitting } from '@/lib/text-fit';
+import { textFitRulesForSize } from '@/lib/text-fit-rules';
 import { nextZoomLevel } from '@/lib/canvas-zoom';
 import {
   alignReferenceForTarget,
@@ -99,86 +100,11 @@ const selectedFeedRowFromState = (state) => {
     || {};
 };
 
-const fitRuleForClassRule = (rule) => {
-  if (!rule?.fit || !rule.cssClass) return null;
-  const baseFontSize = Number(rule.properties?.fontSize);
-  const minFromBase = (ratio, fallback) => (
-    Number.isFinite(baseFontSize) && baseFontSize > 0
-      ? Math.max(fallback, Math.round(baseFontSize * ratio))
-      : fallback
-  );
-  return {
-    cssClass: rule.cssClass,
-    minFontSize: rule.fit.minFontSize ?? minFromBase(0.75, 6),
-    ...rule.fit,
-  };
-};
-
-const fitRuleForLayer = (layer) => {
-  const cssClass = layer?.base?.cssClass || layer?.id;
-  if (!cssClass || layer?.kind === 'image' || layer?.kind === 'shape' || layer?.kind === 'group') return null;
-  if (String(layer.id || '') === 'cta') return null;
-  const isHeadline = cssClass === 'sse-headline' || String(layer.id || '').startsWith('headline-');
-  if (layer.fit && isHeadline) {
-    return { cssClass: 'sse-headline', mode: 'sharedEqualizedFit', ...layer.fit };
-  }
-  if (layer.fit) return { cssClass, ...layer.fit };
-  const baseFontSize = Number(layer?.base?.fontSize);
-  const minFromBase = (ratio, fallback) => (
-    Number.isFinite(baseFontSize) && baseFontSize > 0
-      ? Math.max(fallback, Math.round(baseFontSize * ratio))
-      : fallback
-  );
-  if (String(layer.id || '').startsWith('headline-')) {
-    return { cssClass: 'sse-headline', mode: 'sharedEqualizedFit', minFontSize: minFromBase(0.85, 12), maxLines: 2 };
-  }
-  if (/terms|unit-rate/.test(String(layer.id || ''))) {
-    return { cssClass, mode: 'shrink', minFontSize: minFromBase(0.75, 6), maxLines: 2 };
-  }
-  return null;
-};
-
-const creativeFitRules = (state) => {
-  const sizeCreative = currentSizeCreative(state.creativeDocument, state.size);
-  const headlineClassRule = (sizeCreative?.classRules || []).find((rule) => rule.cssClass === 'sse-headline');
-  const classRuleProps = headlineClassRule?.properties || {};
-  const minFromClass = Number(classRuleProps.fontSize);
-  const minFontSize = Number.isFinite(minFromClass) && minFromClass > 0
-    ? Math.max(12, Math.round(minFromClass * 0.85))
-    : 12;
-  const headlineLayers = (sizeCreative?.layers || []).filter((layer) => String(layer.id || '').startsWith('headline-'));
-  const headlineFitLayer = headlineLayers.find((layer) => layer.fit) || headlineLayers[0];
-  const seen = new Set();
-  const layerRules = (sizeCreative?.layers || [])
-    .map((layer) => {
-      if (String(layer.id || '').startsWith('headline-')) {
-        if (layer !== headlineFitLayer) return null;
-        return {
-          cssClass: 'sse-headline',
-          mode: 'sharedEqualizedFit',
-          ...(headlineFitLayer?.fit || {}),
-          minFontSize: headlineFitLayer?.fit?.minFontSize ?? minFontSize,
-          maxLines: headlineFitLayer?.fit?.maxLines ?? 2,
-        };
-      }
-      return fitRuleForLayer(layer);
-    })
-    .filter((rule) => {
-      if (!rule) return false;
-      if (seen.has(rule.cssClass)) return false;
-      seen.add(rule.cssClass);
-      return true;
-    });
-  const classRules = (sizeCreative?.classRules || [])
-    .map((rule) => fitRuleForClassRule(rule))
-    .filter((rule) => {
-      if (!rule) return false;
-      if (seen.has(rule.cssClass)) return false;
-      seen.add(rule.cssClass);
-      return true;
-    });
-  return [...layerRules, ...classRules];
-};
+// Fit rules come from the same module the exporter embeds into Studio HTML
+// (src/lib/text-fit-rules.ts) so the preview always matches the served ad.
+const creativeFitRules = (state) => (
+  textFitRulesForSize(currentSizeCreative(state.creativeDocument, state.size))
+);
 
 const editableBeatName = (value) => (
   typeof value === 'string' && /^[a-z0-9_]+$/i.test(value) ? value : ''
@@ -1382,8 +1308,9 @@ export const useEditorStore = create<any>((set, get) => ({
     get().setStatus(includeValidator ? 'Downloaded validated client preview ZIP' : 'Downloaded client preview ZIP');
   },
 
-  exportBasePackage: async () => {
-    get().setStatus('Building agency base ZIP');
+  exportBasePackage: async ({ assetMode = 'packaged' } = {}) => {
+    const useCdnAssets = assetMode === 'cdn';
+    get().setStatus(useCdnAssets ? 'Building agency CDN ZIP' : 'Building agency base ZIP');
     const state = get();
     const creativeDocument = state.creativeDocument
       ? {
@@ -1401,6 +1328,7 @@ export const useEditorStore = create<any>((set, get) => ({
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         ...(creativeDocument ? { document: creativeDocument } : {}),
+        ...(useCdnAssets ? { assetMode: 'cdn' } : {}),
       }),
     });
     if (!response.ok) {
@@ -1418,13 +1346,13 @@ export const useEditorStore = create<any>((set, get) => ({
     const url = window.URL.createObjectURL(blob);
     const anchor = window.document.createElement('a');
     anchor.href = url;
-    anchor.download = 'SSE_DCO_base_zip.zip';
+    anchor.download = useCdnAssets ? 'SSE_DCO_base_cdn_zip.zip' : 'SSE_DCO_base_zip.zip';
     anchor.rel = 'noopener';
     window.document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
     window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-    get().setStatus('Downloaded agency base ZIP');
+    get().setStatus(useCdnAssets ? 'Downloaded agency CDN ZIP' : 'Downloaded agency base ZIP');
   },
 
   viewHtml: () => {

@@ -100,11 +100,13 @@ const CLIENT_FONT_FILES = [
   createClientFontEntry('Museo700-Regular.otf', ['Museo'], 700),
 ];
 
-// No Studio CDN asset exists for the real Museo yet, so fonts are packaged in
-// every mode (including CDN asset mode). If Museo700-Regular.otf is uploaded
-// to Studio later, map 'Museo700-Regular.otf' to its s0.2mdn.net URL here —
-// and only to a URL that genuinely serves that exact file.
-const CDN_FONT_URLS: Record<string, string> = {};
+// Studio CDN URLs for brand fonts. Only map a filename to a URL that serves
+// that exact file — never point "Museo" at MuseoSans_700.otf (different
+// typeface / glyph widths). Same Studio folder also hosts MuseoSans_700.otf;
+// that file must not back the Museo family.
+const CDN_FONT_URLS: Record<string, string> = {
+  'Museo700-Regular.otf': 'https://s0.2mdn.net/creatives/assets/5627648/Museo700-Regular.otf',
+};
 
 const CDN_ASSET_URLS: Record<string, string> = {
   'assets/SVG/SSELogoBlue.svg': 'https://s0.2mdn.net/creatives/assets/5627651/SSELogoBlue.svg',
@@ -2277,8 +2279,8 @@ export const buildBasePackageEntries = async (document: Record<string, unknown>,
       data: renderStudioReadyHtml(document, size, {
         assetBasePath: '../',
         assetUrlMap,
-        // Fonts without a CDN mapping (currently all of them — see
-        // CDN_FONT_URLS) are packaged and referenced relatively in every mode.
+        // Fonts with a CDN_FONT_URLS entry use that absolute URL and are not
+        // packaged; anything unmapped stays relative under ads/assets/fonts/.
         fontBasePath: '../assets/fonts/',
         fontUrlMap,
         includePackagedBackground: false,

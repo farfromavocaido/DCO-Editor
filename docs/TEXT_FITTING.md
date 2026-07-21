@@ -48,11 +48,14 @@ the same. Fits are idempotent — every pass resets its inline styles first.
 **The brand font is Museo — `Museo700-Regular.otf`, the slab family — NOT
 Museo Sans.** They are different typefaces with different widths; substituting
 one for the other both renders the wrong brand font and invalidates every
-measurement. Every export flavour packages and `@font-face`s that exact file
-(`local("☺")` in the src list stops installed fonts masking it), the editor
-loads it through the `/assets` proxy, and no CDN mapping may point the Museo
-family at any other file. Ad font stacks are `Museo, Arial, sans-serif` — no
-Museo Sans fallback that could silently mask a load failure.
+measurement. Every export flavour `@font-face`s that exact file
+(`local("☺")` in the src list stops installed fonts masking it). The editor
+loads it through the `/assets` proxy; packaged/client zips include the OTF;
+CDN base zips point at the Studio asset
+`https://s0.2mdn.net/creatives/assets/5627648/Museo700-Regular.otf` via
+`CDN_FONT_URLS`. Never map the Museo family to `MuseoSans_700.otf` (same
+Studio folder, wrong typeface). Ad font stacks are `Museo, Arial, sans-serif`
+— no Museo Sans fallback that could silently mask a load failure.
 
 ## Tests
 

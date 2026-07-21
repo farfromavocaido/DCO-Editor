@@ -13,7 +13,8 @@ import {
 
 const legacyFieldPattern = (parts: string[]) => new RegExp(parts.join('_'));
 
-const CDN_FONT_URL = 'https://s0.2mdn.net/creatives/assets/5627648/MuseoSans_700.otf';
+const CDN_MUSEO_URL = 'https://s0.2mdn.net/creatives/assets/5627648/Museo700-Regular.otf';
+const CDN_MUSEO_SANS_URL = 'https://s0.2mdn.net/creatives/assets/5627648/MuseoSans_700.otf';
 const CDN_SVG_URLS = [
   'https://s0.2mdn.net/creatives/assets/5627651/SSELogoBlue.svg',
   'https://s0.2mdn.net/creatives/assets/5627651/SSELogoWhite.svg',
@@ -278,17 +279,20 @@ test('builds a CDN-linked base agency package without packaged static assets', a
   assert.ok(names.includes('ads/728x90/index.html'));
   assert.ok(!names.some((name) => name.startsWith('ads/assets/SVG/')));
   assert.ok(!names.some((name) => /^ads\/assets\/bg_.*\.jpe?g$/i.test(name)));
-  // The real Museo has no Studio CDN asset yet, so it must stay packaged even
-  // in CDN mode — never silently substituted with the Museo Sans CDN file.
-  assert.ok(names.includes('ads/assets/fonts/Museo700-Regular.otf'));
+  // Museo is CDN-linked in CDN mode — do not package it, and never point the
+  // Museo family at the Museo Sans file that lives in the same Studio folder.
+  assert.ok(!names.includes('ads/assets/fonts/Museo700-Regular.otf'));
   assert.ok(!names.includes('ads/assets/fonts/MuseoSans_700.otf'));
 
   for (const url of CDN_SVG_URLS) {
     assert.ok(html.includes(url), `Expected CDN SVG URL ${url}`);
   }
-  assert.match(html, /font-family: "Museo";[\s\S]*?url\("\.\.\/assets\/fonts\/Museo700-Regular\.otf"\) format\("opentype"\)/);
+  assert.ok(html.includes(CDN_MUSEO_URL), 'Expected Museo CDN URL');
+  assert.match(html, new RegExp(
+    `font-family: "Museo";[\\s\\S]*?url\\("${CDN_MUSEO_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"\\) format\\("opentype"\\)`,
+  ));
   assert.doesNotMatch(html, /font-family: "Museo Sans"/);
-  assert.ok(!html.includes(CDN_FONT_URL), 'the Museo Sans CDN file must never back the Museo family');
+  assert.ok(!html.includes(CDN_MUSEO_SANS_URL), 'the Museo Sans CDN file must never back the Museo family');
   assert.doesNotMatch(html, /MuseoSans_700\.otf/);
   assert.doesNotMatch(html, /src="\.\.\/assets\/SVG\//);
   assert.match(html, /id="bg-image" src="" data-packaged-src="" data-dco-field="background_image_url_728x90"/);

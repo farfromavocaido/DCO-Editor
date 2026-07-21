@@ -18,7 +18,11 @@ const writeEntry = async (relativePath: string, data: string | Buffer) => {
 
 const main = async () => {
   const document = await readCreativeDocument();
-  const entries = await buildClientPreviewPackageEntries(document, { includeValidator: false });
+  // CDN assets/fonts match Studio production handoff (base CDN zip).
+  const entries = await buildClientPreviewPackageEntries(document, {
+    includeValidator: false,
+    assetMode: 'cdn',
+  });
 
   await fs.rm(siteRoot, { recursive: true, force: true });
   await fs.mkdir(siteRoot, { recursive: true });

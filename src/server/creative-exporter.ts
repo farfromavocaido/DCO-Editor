@@ -55,6 +55,8 @@ type PackageEntry = {
 
 type ClientPreviewPackageOptions = {
   includeValidator?: boolean;
+  /** `cdn` matches Studio CDN base zips (fonts/SVGs from s0.2mdn.net). Default `packaged` keeps downloadable ZIPs self-contained. */
+  assetMode?: 'packaged' | 'cdn';
 };
 
 type BasePackageOptions = {
@@ -2210,12 +2212,17 @@ ${includeValidator ? `    <script>
 
 export const buildClientPreviewPackageEntries = async (document: Record<string, unknown>, options: ClientPreviewPackageOptions = {}) => {
   const includeValidator = options.includeValidator !== false;
+  const useCdnAssets = options.assetMode === 'cdn';
+  const assetUrlMap = useCdnAssets ? CDN_ASSET_URLS : undefined;
+  const fontUrlMap = useCdnAssets ? CDN_FONT_URLS : undefined;
   const entries: PackageEntry[] = [];
   const sizes = Object.keys(document.sizes || {});
   for (const size of sizes) {
     const baseHtml = renderStudioReadyHtml(document, size, {
       assetBasePath: '../',
+      assetUrlMap,
       fontBasePath: '../assets/fonts/',
+      fontUrlMap,
       previewValidatorScriptPath: includeValidator ? '../../preview-validator.js' : undefined,
     });
     entries.push({
@@ -2232,6 +2239,7 @@ export const buildClientPreviewPackageEntries = async (document: Record<string, 
   }
 
   for (const assetPath of collectClientAssetPaths(document)) {
+    if (assetUrlMap?.[assetPath]) continue;
     entries.push({
       path: `ads/${assetPath}`,
       data: await fs.readFile(path.resolve(projectRoot, assetPath)),
@@ -2239,6 +2247,7 @@ export const buildClientPreviewPackageEntries = async (document: Record<string, 
   }
 
   for (const font of CLIENT_FONT_FILES) {
+    if (fontUrlMap?.[font.filename]) continue;
     entries.push({
       path: `ads/assets/fonts/${font.filename}`,
       data: await fs.readFile(await font.resolveSourcePath()),

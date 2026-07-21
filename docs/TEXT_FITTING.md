@@ -51,11 +51,13 @@ one for the other both renders the wrong brand font and invalidates every
 measurement. Every export flavour `@font-face`s that exact file
 (`local("☺")` in the src list stops installed fonts masking it). The editor
 loads it through the `/assets` proxy; packaged/client zips include the OTF;
-CDN base zips point at the Studio asset
+CDN base zips and the GitHub Pages preview site (`export:preview-site`) point
+at the Studio asset
 `https://s0.2mdn.net/creatives/assets/5627648/Museo700-Regular.otf` via
-`CDN_FONT_URLS`. Never map the Museo family to `MuseoSans_700.otf` (same
-Studio folder, wrong typeface). Ad font stacks are `Museo, Arial, sans-serif`
-— no Museo Sans fallback that could silently mask a load failure.
+`CDN_FONT_URLS`. Downloadable client ZIPs stay packaged/self-contained. Never
+map the Museo family to `MuseoSans_700.otf` (same Studio folder, wrong
+typeface). Ad font stacks are `Museo, Arial, sans-serif` — no Museo Sans
+fallback that could silently mask a load failure.
 
 ## Tests
 

@@ -28,7 +28,7 @@ Other commands:
 npm test                 # Vitest
 npm run build            # production build
 npm run start            # production server on :5174
-npm run export:preview-site   # static client preview → site/
+npm run export:preview-site   # static client preview → site/ (CDN fonts/SVGs, Studio parity)
 ```
 
 ## What it edits

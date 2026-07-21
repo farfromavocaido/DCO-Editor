@@ -320,6 +320,35 @@ test('builds a client preview package without copy validation when requested', a
   assert.match(variant, /url\("\.\.\/assets\/fonts\/Museo700-Regular\.otf"\) format\("opentype"\)/);
 });
 
+test('builds a CDN-linked client preview package for GitHub Pages parity', async () => {
+  const document = await readCreativeDocument();
+  const entries = await buildClientPreviewPackageEntries(document, {
+    includeValidator: false,
+    assetMode: 'cdn',
+  });
+  const names = entries.map((entry) => entry.path).sort();
+  const html = entries
+    .filter((entry) => entry.path.startsWith('ads/html/') && entry.path.endsWith('.html'))
+    .map((entry) => String(entry.data || ''))
+    .join('\n');
+
+  assert.ok(names.includes('preview-page.html'));
+  assert.ok(names.includes('ads/html/SSE_DCO_728x90.html'));
+  assert.ok(names.includes('ads/assets/bg_728x90.jpg'), 'packaged backgrounds stay local for offline sample rows');
+  assert.ok(!names.includes('ads/assets/fonts/Museo700-Regular.otf'));
+  assert.ok(!names.includes('ads/assets/fonts/MuseoSans_700.otf'));
+  assert.ok(!names.some((name) => name.startsWith('ads/assets/SVG/')));
+
+  assert.ok(html.includes(CDN_MUSEO_URL), 'Expected Museo CDN URL');
+  for (const url of CDN_SVG_URLS) {
+    assert.ok(html.includes(url), `Expected CDN SVG URL ${url}`);
+  }
+  assert.ok(!html.includes(CDN_MUSEO_SANS_URL), 'the Museo Sans CDN file must never back the Museo family');
+  assert.doesNotMatch(html, /MuseoSans_700\.otf/);
+  assert.doesNotMatch(html, /url\("\.\.\/assets\/fonts\/Museo700-Regular\.otf"\)/);
+  assert.doesNotMatch(html, /src="\.\.\/assets\/SVG\//);
+});
+
 test('renders the client preview page as one self-contained document shell', async () => {
   const document = await readCreativeDocument();
   const html = renderClientPreviewPage(document, { includeValidator: true });

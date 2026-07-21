@@ -1,3 +1,4 @@
+import { CDN_FONT_URLS } from '@/lib/brand-font';
 import { readCreativeDocument } from '@/server/creative-document';
 import { renderStudioReadyHtml, renderWipHtml } from '@/server/creative-exporter';
 
@@ -11,9 +12,8 @@ export async function renderCreativeSourceHtml(size: string, options: PreviewOpt
   const document = options.document || await readCreativeDocument();
   return renderStudioReadyHtml(document, size, {
     assetBasePath: options.assetBasePath ?? '/',
-    // Load the packaged Museo via the /assets proxy so in-editor previews
-    // measure the same font Studio serves.
-    fontBasePath: '/assets/fonts/',
+    // Same Studio CDN Museo the editor stage loads — fit + symbol metrics match serve.
+    fontUrlMap: CDN_FONT_URLS,
   });
 }
 

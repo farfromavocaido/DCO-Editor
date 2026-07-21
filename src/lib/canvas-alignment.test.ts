@@ -68,6 +68,40 @@ test('computeAlignPosition centres within canvas reference', () => {
   assert.equal(aligned.top, 20);
 });
 
+test('unit-rate prices are canvas-absolute and share the T&Cs bottom-left', () => {
+  const doc = loadPersistedCreative();
+  const scopes = ['offers-3', 'tc-prices', 'frames-4'];
+  const size = '300x250';
+  const canvas = doc.sizes[size].canvas;
+  const unitLayer = doc.sizes[size].layers.find((layer) => layer.id === 'unit-rate-prices');
+  const termsLayer = doc.sizes[size].layers.find((layer) => layer.id === 'terms-prices');
+  const unit = getTargetCanvasBounds(doc, size, 'unit-rate-prices', scopes);
+  const terms = getTargetCanvasBounds(doc, size, 'terms-prices', scopes);
+  assert.ok(unit, 'unit-rate bounds missing');
+  assert.ok(terms, 'terms bounds missing');
+  assert.equal(unit.coordinateScope, 'canvas');
+  assert.equal(terms.coordinateScope, 'canvas');
+  assert.equal(unit.wrapperClass, '');
+  assert.equal(unit.left, unitLayer.base.left);
+  assert.equal(unit.top, unitLayer.base.top);
+  assert.equal(terms.left, unit.left, 'shared left edge');
+  assertClose(
+    terms.top + terms.height,
+    unit.top + unit.height,
+    1,
+    'shared bottom edge',
+  );
+  assert.equal(unit.width, canvas.width - unit.left * 2, 'symmetric horizontal padding');
+  assert.ok(unit.top > 150, `unit-rate selection should be near the bottom (got top=${unit.top})`);
+  assert.equal(unitLayer.base.fontSize, termsLayer.base.fontSize);
+  assert.equal(unitLayer.fit?.mode, 'shrink');
+  assert.equal(unitLayer.fit?.maxLines, 2);
+  assert.equal(
+    unitLayer.fit?.minFontSize,
+    Math.max(8, Math.round(Number(termsLayer.base.fontSize) * 0.75)),
+  );
+});
+
 test('computeAlignPosition aligns within group reference', () => {
   const bounds = {
     left: 120,

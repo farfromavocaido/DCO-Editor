@@ -1,5 +1,7 @@
 // @ts-nocheck
 
+import { propsWithFitBudget } from '@/lib/fit-box';
+
 const pxFields = new Set([
   'left',
   'top',
@@ -50,18 +52,46 @@ export const renderCssRule = (selector: string, props: Record<string, unknown> =
   return `    ${selector} {\n${declarations.join('\n')}\n    }`;
 };
 
+const fitForClass = (
+  sizeCreative: Record<string, unknown>,
+  cssClass: string,
+  ownFit: Record<string, unknown> | null | undefined,
+) => {
+  if (ownFit && Object.keys(ownFit).length) return ownFit;
+  const classRule = (sizeCreative.classRules || []).find(
+    (rule: Record<string, unknown>) => rule.cssClass === cssClass,
+  );
+  return classRule?.fit || {};
+};
+
 export const structuredRuleCss = (sizeCreative: Record<string, unknown>) => {
   const classRules = (sizeCreative.classRules || [])
     .map((rule: Record<string, unknown>) => renderCssRule(
       selectorForClassRule(rule.cssClass),
-      rule.properties || {},
+      propsWithFitBudget(rule.properties || {}, rule.fit || {}),
     ))
     .filter(Boolean);
   const variantRules = (sizeCreative.variantRules || [])
-    .map((rule: Record<string, unknown>) => renderCssRule(
-      selectorForVariantRule(rule),
-      rule.props || {},
-    ))
+    .map((rule: Record<string, unknown>) => {
+      const cssClass = String(rule.cssClass || rule.layerId || '');
+      const fit = fitForClass(sizeCreative, cssClass, rule.fit);
+      // Variant props overlay class properties so fontSize/lineHeight/align
+      // are available when deriving the maxLines budget.
+      const classProps = (sizeCreative.classRules || []).find(
+        (item: Record<string, unknown>) => item.cssClass === cssClass,
+      )?.properties || {};
+      const merged = { ...classProps, ...(rule.props || {}) };
+      const budgeted = propsWithFitBudget(merged, fit);
+      // Only emit fields the variant actually owns, plus derived height/top.
+      const props = {
+        ...(rule.props || {}),
+        height: budgeted.height,
+        ...(rule.props?.top !== undefined || budgeted.top !== classProps.top
+          ? { top: budgeted.top }
+          : {}),
+      };
+      return renderCssRule(selectorForVariantRule(rule), props);
+    })
     .filter(Boolean);
   return [...classRules, ...variantRules].join('\n\n');
 };

@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { EditorIcon } from '@/components/EditorIcon';
 import { animationFamilyForLayer, timelineSpanForClip } from '@/lib/animation-intents';
@@ -318,6 +318,7 @@ export function TimelinePanel() {
   const document = useEditorStore((s) => s.creativeDocument);
   const size = useEditorStore((s) => s.size);
   const percent = useEditorStore((s) => s.percent);
+  const isPlaying = useEditorStore((s) => s.isPlaying);
   const offerCount = useEditorStore((s) => s.offerCount);
   const tcMode = useEditorStore((s) => s.tcMode);
   const ctaShape = useEditorStore((s) => s.ctaShape);
@@ -331,6 +332,7 @@ export function TimelinePanel() {
   const selectedClipId = useEditorStore((s) => s.selectedClipId);
   const moveLayerToZIndex = useEditorStore((s) => s.moveLayerToZIndex);
   const setPercent = useEditorStore((s) => s.setPercent);
+  const togglePlaying = useEditorStore((s) => s.togglePlaying);
   const selectTimelineLayer = useEditorStore((s) => s.selectTimelineLayer);
   const selectOffersBlock = useEditorStore((s) => s.selectOffersBlock);
   const selectClip = useEditorStore((s) => s.selectClip);
@@ -350,7 +352,28 @@ export function TimelinePanel() {
   }), [ctaShape, frameCount, includeRoundelFrame, offerCount, roundelMode, tcMode]);
   const beats = beatsForScopes(document, activeScopes);
   const frameScope = activeFrameScope(activeScopes);
-  const seconds = document?.clock?.durationS ? (percent / 100) * document.clock.durationS : 0;
+  const durationS = Number(document?.clock?.durationS) || 15;
+  const seconds = (percent / 100) * durationS;
+
+  useEffect(() => {
+    if (!isPlaying) return undefined;
+    let frameId = 0;
+    let lastTs = performance.now();
+    const tick = (now) => {
+      const dt = Math.min(0.05, Math.max(0, (now - lastTs) / 1000));
+      lastTs = now;
+      const current = useEditorStore.getState().percent;
+      const next = current + (dt / durationS) * 100;
+      if (next >= 100) {
+        useEditorStore.getState().setPercent(0, { pause: false });
+      } else {
+        useEditorStore.getState().setPercent(Math.round(next * 10) / 10, { pause: false });
+      }
+      frameId = window.requestAnimationFrame(tick);
+    };
+    frameId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frameId);
+  }, [durationS, isPlaying]);
   const activeOfferIds = activeOfferMemberIds(document, size, activeScopes);
   const timelineActiveOfferIds = activeOfferIds.length ? activeOfferIds : null;
   const zOrderedLayers = [...(sizeCreative?.layers || [])].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
@@ -445,6 +468,15 @@ export function TimelinePanel() {
     <section className="timeline-panel" aria-label="Timeline">
       <div className="timeline-head">
         <div className="timeline-head-readout">
+          <button
+            type="button"
+            className="timeline-play-btn"
+            aria-label={isPlaying ? 'Pause preview' : 'Play preview'}
+            data-tip={isPlaying ? 'Pause' : 'Play'}
+            onClick={() => togglePlaying()}
+          >
+            <EditorIcon name={isPlaying ? 'pause' : 'play'} size={14} />
+          </button>
           <span className="panel-kicker">Timeline</span>
           <PlayheadReadout seconds={seconds} percent={percent} />
         </div>

@@ -10,6 +10,7 @@ import {
 test('resolves beat references with numeric offsets', () => {
   assert.equal(resolveTimeRef('wave2_in+7', { wave2_in: 61 }), 68);
   assert.equal(resolveTimeRef('act3_exit-1', { act3_exit: 96 }), 95);
+  assert.equal(resolveTimeRef('offers_exit+0.6', { offers_exit: 57.7 }), 58.3);
   assert.equal(resolveTimeRef(44, {}), 44);
 });
 
@@ -82,6 +83,43 @@ test('compiles slide and pop presets with transform values for preview/export pa
 
   assert.equal(pop.find((keyframe) => keyframe.at === 69)?.scale, 0.297);
   assert.equal(pop.find((keyframe) => keyframe.at === 82)?.scale, 1.08);
+});
+
+test('waveSweep + late fadeOut does not invent early translate creep', () => {
+  const keyframes = compileAnimationClips([
+    {
+      id: 'bluewave-waveSweep',
+      preset: 'waveSweep',
+      start: 'wave2_in',
+      end: 'end',
+      params: {
+        start_x: 0,
+        end_x: 0,
+        start_y: 280,
+        end_y: 0,
+        sweep_duration_pct: 9,
+        fade_pct: 2,
+      },
+    },
+    {
+      id: 'bluewave-fadeOut',
+      preset: 'custom',
+      start: 96.7,
+      end: 100,
+      keyframes: [
+        { at: 96.7, opacity: 1, easing: 'ease-out' },
+        { at: 100, opacity: 0 },
+      ],
+    },
+  ], { wave2_in: 54.7, end: 100 });
+
+  // Hold off-canvas until wave2_in — opacity-only fadeOut must not zero translate early.
+  assert.deepEqual(frameAtPercent(keyframes, 0).translate, [0, 280]);
+  assert.deepEqual(frameAtPercent(keyframes, 1).translate, [0, 280]);
+  assert.deepEqual(frameAtPercent(keyframes, 30).translate, [0, 280]);
+  assert.deepEqual(frameAtPercent(keyframes, 54.7).translate, [0, 280]);
+  assert.ok(frameAtPercent(keyframes, 60).translate[1] < 200);
+  assert.equal(frameAtPercent(keyframes, 100).opacity, 0);
 });
 
 test('matches legacy gwd-tl pattern defaults for timing and easing', () => {

@@ -7,6 +7,8 @@ export type CreativeKeyframe = {
   translate?: [number, number];
   scale?: number;
   opacity?: number;
+  /** Optional ink color (e.g. skip-hold endframe handoff). Not interpolated. */
+  color?: string;
   easing?: string;
 };
 
@@ -61,13 +63,14 @@ export const resolveTimeRef = (ref: TimeRef, beats: Record<string, number>) => {
   if (typeof ref === 'number') return ref;
   const numeric = Number(ref);
   if (Number.isFinite(numeric)) return numeric;
-  const match = String(ref).match(/^([a-z0-9_]+)\s*([+-]\s*\d+)?$/i);
+  const match = String(ref).match(/^([a-z0-9_]+)\s*([+-]\s*\d+(?:\.\d+)?)?$/i);
   if (!match) throw new Error(`Bad time ref: ${ref}`);
   const [, name, offset] = match;
   if (beats[name] === undefined) throw new Error(`Unknown beat: ${name}`);
-  const value = beats[name] + (offset ? Number.parseInt(offset.replace(/\s/g, ''), 10) : 0);
-  if (value < 0 || value > 100) throw new Error(`Time ref ${ref} resolves to ${value}%`);
-  return value;
+  const value = beats[name] + (offset ? Number.parseFloat(offset.replace(/\s/g, '')) : 0);
+  const rounded = Math.round(value * 1000) / 1000;
+  if (rounded < 0 || rounded > 100) throw new Error(`Time ref ${ref} resolves to ${rounded}%`);
+  return rounded;
 };
 
 const resolveParamTime = (
@@ -90,13 +93,32 @@ const normalizeKeyframes = (keyframes: CreativeKeyframe[]) => {
   return out;
 };
 
-const compileClip = (clip: AnimationClip, beats: Record<string, number>) => {
+/** Forward-fill missing translate/scale/opacity so multi-clip merges never invent [0,0]. */
+const fillMotionChannels = (keyframes: CreativeKeyframe[]) => {
+  let translate: [number, number] | undefined;
+  let scale: number | undefined;
+  let opacity: number | undefined;
+  return keyframes.map((frame) => {
+    if (frame.translate) translate = [frame.translate[0], frame.translate[1]];
+    if (frame.scale !== undefined) scale = frame.scale;
+    if (frame.opacity !== undefined) opacity = frame.opacity;
+    return {
+      ...frame,
+      translate: translate ? [translate[0], translate[1]] as [number, number] : [0, 0],
+      scale: scale !== undefined ? scale : 1,
+      opacity: opacity !== undefined ? opacity : 1,
+    };
+  });
+};
+
+/** Compile one clip to authored frames only — no 0%/100% padding. */
+const compileClipFrames = (clip: AnimationClip, beats: Record<string, number>) => {
   const params = clip.params || {};
   if (clip.preset === 'custom') {
-    return normalizeKeyframes((clip.keyframes || []).map((keyframe) => ({
+    return (clip.keyframes || []).map((keyframe) => ({
       ...keyframe,
       at: resolveTimeRef(keyframe.at, beats),
-    })));
+    }));
   }
 
   const start = resolveTimeRef(clip.start, beats);
@@ -109,42 +131,42 @@ const compileClip = (clip: AnimationClip, beats: Record<string, number>) => {
 
   if (clip.preset === 'fade') {
     const settled = Math.min(end, start + enterDuration);
-    return normalizeKeyframes([
+    return [
       { at: start, opacity: 0 },
       { at: settled, opacity: 1 },
       { at: Math.max(settled, end - fadePct), opacity: 1 },
       { at: end, opacity: 0 },
-    ]);
+    ];
   }
 
   if (clip.preset === 'slideInRight') {
     const settled = Math.min(end, start + enterDuration);
-    return normalizeKeyframes([
+    return [
       {
         at: start,
-        translate: [numberOr(params.enter_distance_px, legacyMotionDefaults.enter.distancePx), 0],
+        translate: [numberOr(params.enter_distance_px, legacyMotionDefaults.enter.distancePx), 0] as [number, number],
         opacity: 0,
         easing: String(params.ease_in || legacyMotionDefaults.enter.easing),
       },
-      { at: settled, translate: [0, 0], opacity: 1 },
-      { at: Math.max(settled, end - fadePct), translate: [0, 0], opacity: 1 },
-      { at: end, translate: [0, numberOr(params.exit_dy, legacyMotionDefaults.exit.dropPx)], opacity: 0 },
-    ]);
+      { at: settled, translate: [0, 0] as [number, number], opacity: 1 },
+      { at: Math.max(settled, end - fadePct), translate: [0, 0] as [number, number], opacity: 1 },
+      { at: end, translate: [0, numberOr(params.exit_dy, legacyMotionDefaults.exit.dropPx)] as [number, number], opacity: 0 },
+    ];
   }
 
   if (clip.preset === 'fadeUp') {
     const settled = Math.min(end, start + enterDuration);
-    return normalizeKeyframes([
+    return [
       {
         at: start,
-        translate: [0, numberOr(params.enter_dy, -7)],
+        translate: [0, numberOr(params.enter_dy, -7)] as [number, number],
         opacity: 0,
         easing: String(params.ease_in || legacyMotionDefaults.enter.easing),
       },
-      { at: settled, translate: [0, numberOr(params.settled_dy, 0)], opacity: 1 },
-      { at: Math.max(settled, end - fadePct), translate: [0, numberOr(params.settled_dy, 0)], opacity: 1 },
-      { at: end, translate: [0, numberOr(params.exit_dy, legacyMotionDefaults.exit.dropPx)], opacity: 0 },
-    ]);
+      { at: settled, translate: [0, numberOr(params.settled_dy, 0)] as [number, number], opacity: 1 },
+      { at: Math.max(settled, end - fadePct), translate: [0, numberOr(params.settled_dy, 0)] as [number, number], opacity: 1 },
+      { at: end, translate: [0, numberOr(params.exit_dy, legacyMotionDefaults.exit.dropPx)] as [number, number], opacity: 0 },
+    ];
   }
 
   if (clip.preset === 'popPulse') {
@@ -153,27 +175,27 @@ const compileClip = (clip: AnimationClip, beats: Record<string, number>) => {
     const pulseStart = resolveParamTime(params, 'pulse_start', beats, Math.min(end, settled + 8));
     const pulsePeak = resolveParamTime(params, 'pulse_peak', beats, Math.min(end, pulseStart + 2));
     const pulseEnd = resolveParamTime(params, 'pulse_end', beats, Math.min(end, pulsePeak + 1));
-    return normalizeKeyframes([
+    return [
       {
         at: start,
-        translate: [0, anchorY],
+        translate: [0, anchorY] as [number, number],
         scale: numberOr(params.start_scale, 0.297),
         opacity: 0,
         easing: String(params.ease_in || legacyMotionDefaults.enter.easing),
       },
-      { at: settled, translate: [0, anchorY], scale: 1, opacity: 1 },
+      { at: settled, translate: [0, anchorY] as [number, number], scale: 1, opacity: 1 },
       {
         at: pulseStart,
-        translate: [0, anchorY],
+        translate: [0, anchorY] as [number, number],
         scale: 1,
         opacity: 1,
         easing: String(params.ease_pulse || legacyMotionDefaults.pulse.easing),
       },
-      { at: pulsePeak, translate: [0, anchorY], scale: numberOr(params.pulse_scale, legacyMotionDefaults.pulse.scalePeak), opacity: 1 },
-      { at: pulseEnd, translate: [0, anchorY], scale: 1, opacity: 1 },
-      { at: Math.max(pulseEnd, end - fadePct), translate: [0, anchorY], scale: 1, opacity: 1 },
-      { at: end, translate: [0, anchorY], scale: 1, opacity: 0 },
-    ]);
+      { at: pulsePeak, translate: [0, anchorY] as [number, number], scale: numberOr(params.pulse_scale, legacyMotionDefaults.pulse.scalePeak), opacity: 1 },
+      { at: pulseEnd, translate: [0, anchorY] as [number, number], scale: 1, opacity: 1 },
+      { at: Math.max(pulseEnd, end - fadePct), translate: [0, anchorY] as [number, number], scale: 1, opacity: 1 },
+      { at: end, translate: [0, anchorY] as [number, number], scale: 1, opacity: 0 },
+    ];
   }
 
   if (clip.preset === 'waveSweep') {
@@ -181,17 +203,17 @@ const compileClip = (clip: AnimationClip, beats: Record<string, number>) => {
     const sweepEnd = Math.min(end, start + numberOr(params.sweep_duration_pct, legacyMotionDefaults.waveSweep.durationPct));
     const startY = params.start_y !== undefined ? numberOr(params.start_y, 0) : numberOr(params.hold_y, 0);
     const endY = params.end_y !== undefined ? numberOr(params.end_y, 0) : numberOr(params.hold_y, 0);
-    return normalizeKeyframes([
+    return [
       {
         at: start,
-        translate: [numberOr(params.start_x, 0), startY],
+        translate: [numberOr(params.start_x, 0), startY] as [number, number],
         opacity: 1,
         easing: String(params.ease_in || legacyMotionDefaults.waveSweep.easing),
       },
-      { at: sweepEnd, translate: [numberOr(params.end_x, 0), endY], opacity: 1 },
-      { at: Math.max(sweepEnd, end - waveFadePct), translate: [numberOr(params.end_x, 0), endY], opacity: 1 },
-      { at: end, translate: [numberOr(params.end_x, 0), endY], opacity: 0 },
-    ]);
+      { at: sweepEnd, translate: [numberOr(params.end_x, 0), endY] as [number, number], opacity: 1 },
+      { at: Math.max(sweepEnd, end - waveFadePct), translate: [numberOr(params.end_x, 0), endY] as [number, number], opacity: 1 },
+      { at: end, translate: [numberOr(params.end_x, 0), endY] as [number, number], opacity: 0 },
+    ];
   }
 
   throw new Error(`Unknown animation preset: ${clip.preset}`);
@@ -202,7 +224,26 @@ export const compileAnimationClips = (
   beats: Record<string, number> = {},
 ) => {
   if (!clips.length) return normalizeKeyframes([]);
-  return normalizeKeyframes(clips.flatMap((clip) => compileClip(clip, beats)));
+  // Merge clips raw, fill missing channels, THEN pad to 0/100. Per-clip padding
+  // used to inject opacity-only frames at 0% that stole translate from [0,0]
+  // and made waveSweep layers creep on-stage before their real start.
+  const merged = clips
+    .flatMap((clip) => compileClipFrames(clip, beats))
+    .sort((a, b) => a.at - b.at);
+  return normalizeKeyframes(fillMotionChannels(merged));
+};
+
+const parseRgb = (value: unknown): [number, number, number] | null => {
+  const match = String(value ?? '').match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i);
+  if (!match) return null;
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+};
+
+const lerpColor = (from: string, to: string, t: number) => {
+  const a = parseRgb(from);
+  const b = parseRgb(to);
+  if (!a || !b) return t < 0.5 ? from : to;
+  return `rgb(${Math.round(lerp(a[0], b[0], t))}, ${Math.round(lerp(a[1], b[1], t))}, ${Math.round(lerp(a[2], b[2], t))})`;
 };
 
 export const frameAtPercent = (keyframes: CreativeKeyframe[] = [], percent = 0) => {
@@ -218,8 +259,19 @@ export const frameAtPercent = (keyframes: CreativeKeyframe[] = [], percent = 0) 
   }
   const span = Math.max(1, next.at - prev.at);
   const ratio = prev.at === next.at ? 0 : (percent - prev.at) / span;
+  // Carry forward when a keyframe omits a channel (defensive; compile fills these).
   const prevTranslate = prev.translate || [0, 0];
   const nextTranslate = next.translate || prevTranslate;
+  // Lerp color across a handoff window (navy→white); otherwise hold the latest.
+  let color: string | undefined;
+  if (prev.color !== undefined && next.color !== undefined && prev.color !== next.color) {
+    color = lerpColor(prev.color, next.color, ratio);
+  } else {
+    for (let index = 0; index < keyframes.length; index += 1) {
+      if (keyframes[index].at > percent) break;
+      if (keyframes[index].color !== undefined) color = keyframes[index].color;
+    }
+  }
   return {
     translate: [
       lerp(prevTranslate[0], nextTranslate[0], ratio),
@@ -227,5 +279,6 @@ export const frameAtPercent = (keyframes: CreativeKeyframe[] = [], percent = 0) 
     ],
     scale: lerp(prev.scale ?? 1, next.scale ?? prev.scale ?? 1, ratio),
     opacity: lerp(prev.opacity ?? 1, next.opacity ?? prev.opacity ?? 1, ratio),
+    ...(color !== undefined ? { color } : {}),
   };
 };

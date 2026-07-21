@@ -189,6 +189,77 @@ test('extends the previous headline window when consecutive copy matches', () =>
   assert.equal(act3.hidden, false);
 });
 
+test('skip-hold still fades the last visible headline out at the skipped act exit', () => {
+  const plan = buildHeadlineMotionPlan(
+    headlineLayers,
+    {
+      heading1_text: 'A different kind of energy',
+      heading2_text: 'Our very best electricity plan',
+      heading3_text: 'A different kind of energy',
+      heading4_text: 'A different kind of energy',
+    },
+    'frames-4',
+    beats,
+  );
+
+  const act3 = plan.find((item) => item.layerId === 'headline-act3');
+  const act4 = plan.find((item) => item.layerId === 'headline-act4');
+  assert.equal(act4?.hidden, true);
+  assert.equal(act3?.hidden, false);
+  assert.equal(act3?.end, 95);
+
+  const opacities = (act3?.keyframes || []).map((frame) => ({ at: frame.at, opacity: frame.opacity }));
+  assert.ok(opacities.some((frame) => frame.opacity === 1), 'must hold visible during the extended window');
+  const exit = [...opacities].reverse().find((frame) => frame.opacity === 0 && frame.at <= 95);
+  assert.ok(exit, 'must fade to 0 at the skipped act exit');
+  assert.equal(exit.at, 95);
+  assert.equal(opacities[opacities.length - 1].opacity, 0);
+  assert.equal(opacities[opacities.length - 1].at, 100);
+});
+
+test('skip-hold crossfades skipped act ink over the enter duration', () => {
+  const layers = headlineLayers.map((layer) => {
+    if (layer.id !== 'headline-act4') return layer;
+    return {
+      ...layer,
+      base: { color: 'rgb(255, 255, 255)' },
+      clips: layer.clips.map((clip) => (
+        clip.profiles?.includes('frames-4')
+          ? { ...clip, params: { ...clip.params, enter_duration_pct: 2 } }
+          : clip
+      )),
+    };
+  });
+  const plan = buildHeadlineMotionPlan(
+    layers,
+    {
+      heading1_text: 'One',
+      heading2_text: 'Two',
+      heading3_text: 'Same end',
+      heading4_text: 'Same end',
+    },
+    'frames-4',
+    beats,
+  );
+
+  const act3 = plan.find((item) => item.layerId === 'headline-act3');
+  assert.equal(act3?.hidden, false);
+  const before = (act3?.keyframes || []).filter((frame) => frame.at <= 80);
+  const afterFade = (act3?.keyframes || []).filter((frame) => frame.at >= 82);
+  assert.ok(before.length > 0);
+  assert.ok(before.every((frame) => frame.color === 'rgb(0, 41, 117)'), 'green-wave window stays navy');
+  assert.ok(afterFade.length > 0);
+  assert.ok(afterFade.every((frame) => frame.color === 'rgb(255, 255, 255)'));
+  assert.ok(
+    (act3?.keyframes || []).some((frame) => frame.at === 80 && frame.color === 'rgb(0, 41, 117)'),
+    'handoff start stays navy',
+  );
+  assert.ok(
+    (act3?.keyframes || []).some((frame) => frame.at === 82 && frame.color === 'rgb(255, 255, 255)'),
+    'handoff end reaches white (~300ms at 2%/15s)',
+  );
+});
+
 test('hides act 3 and keeps act 4 visible when roundel is off', () => {
   const plan = buildHeadlineMotionPlan(
     headlineLayers,

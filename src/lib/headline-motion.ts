@@ -1,6 +1,11 @@
 // @ts-nocheck
 
-import { compileAnimationClips, type AnimationClip, type CreativeKeyframe } from '@/lib/creative-compiler';
+import {
+  compileAnimationClips,
+  resolveTimeRef,
+  type AnimationClip,
+  type CreativeKeyframe,
+} from '@/lib/creative-compiler';
 
 export const HEADLINE_LAYER_IDS = [
   'headline-act1',
@@ -60,20 +65,92 @@ const hiddenKeyframes = (): CreativeKeyframe[] => ([
   { at: 100, translate: [0, 0], opacity: 0 },
 ]);
 
-const mergeSkipHold = (keyframes: CreativeKeyframe[] = [], holdUntil: number) => {
+const DEFAULT_SKIP_FADE_PCT = 2;
+
+/** Authored clip exit (%), not the padded last keyframe at 100. */
+const authoredClipExit = (clips: AnimationClip[] = [], beats: Record<string, number> = {}) => {
+  if (!clips.length) return 100;
+  return Math.max(...clips.map((clip) => resolveTimeRef(clip.end ?? 100, beats)));
+};
+
+/** Brand navy — default headline ink on the green wave. */
+const DEFAULT_HEADLINE_INK = 'rgb(0, 41, 117)';
+
+/**
+ * When a later headline act is skipped (duplicate copy), extend the previous
+ * act through `holdUntil` (the skipped act's authored exit), then fade out.
+ * Always append the exit — holding to 100 without a fade was leaving the last
+ * visible headline stuck at opacity 1.
+ *
+ * When the skipped act has a `base.color` (e.g. white endframe on 320x50),
+ * crossfade the holder's ink → skipped ink over `fadePct` starting at the
+ * skipped act's start (matches the ~300ms logo blue→white handoff at 2%/15s).
+ * Earlier frames stay navy so CSS does not wash the green-wave window white.
+ */
+const applyColorHandoff = (
+  frames: CreativeKeyframe[] = [],
+  colorAt: number,
+  toColor: string,
+  fromColor: string,
+  fadePct = DEFAULT_SKIP_FADE_PCT,
+) => {
+  const sorted = [...frames].sort((a, b) => a.at - b.at);
+  const poseAt = (at: number) => (
+    [...sorted].reverse().find((frame) => frame.at <= at) || sorted[0]
+  );
+  const colorEnd = Math.min(100, Number((colorAt + Math.max(0.01, fadePct)).toFixed(4)));
+  // Drop interior frames so CSS only lerps navy→white across the handoff window.
+  const cleaned = sorted.filter((frame) => frame.at <= colorAt || frame.at >= colorEnd);
+  const withPoint = [
+    ...cleaned.filter((frame) => frame.at !== colorAt && frame.at !== colorEnd),
+    { ...poseAt(colorAt), at: colorAt },
+    { ...poseAt(colorEnd), at: colorEnd },
+  ].sort((a, b) => a.at - b.at);
+
+  return withPoint.map((frame) => ({
+    ...frame,
+    color: frame.at >= colorEnd ? toColor : fromColor,
+  }));
+};
+
+const mergeSkipHold = (
+  keyframes: CreativeKeyframe[] = [],
+  holdUntil: number,
+  fadePct = DEFAULT_SKIP_FADE_PCT,
+  colorHandoff: {
+    at: number;
+    color: string;
+    fromColor?: string;
+    fadePct?: number;
+  } | null = null,
+) => {
   if (!keyframes.length) return keyframes;
   const sorted = [...keyframes].sort((a, b) => a.at - b.at);
   const settled = sorted.find((frame) => frame.opacity === 1) || sorted[0];
   const settledAt = settled?.at ?? sorted[0].at;
-  const tail = sorted.filter((frame) => frame.at >= holdUntil);
-  const exit = tail.length ? tail[tail.length - 1] : sorted[sorted.length - 1];
   const kept = sorted.filter((frame) => frame.at <= settledAt);
-  const hold = [
+  const originalExit = [...sorted]
+    .reverse()
+    .find((frame) => (frame.opacity ?? 1) === 0 && frame.at > settledAt);
+
+  const exitAt = Math.min(100, Math.max(settledAt + 0.01, holdUntil));
+  const fadeStart = Math.max(settledAt, exitAt - fadePct);
+  const exitPose = originalExit
+    ? { ...originalExit, opacity: 0 }
+    : { ...settled, opacity: 0 };
+
+  const frames = [
+    ...kept,
     { ...settled, at: settledAt, opacity: 1 },
-    { ...settled, at: holdUntil, opacity: 1 },
+    { ...settled, at: fadeStart, opacity: 1 },
+    { ...exitPose, at: exitAt, opacity: 0 },
   ];
-  if (exit.at <= holdUntil) return [...kept, ...hold];
-  return [...kept, ...hold, exit];
+  if (exitAt < 100) frames.push({ ...exitPose, at: 100, opacity: 0 });
+  if (!colorHandoff?.color) return frames;
+  const colorAt = Math.max(settledAt, Math.min(fadeStart, colorHandoff.at));
+  const fromColor = colorHandoff.fromColor || DEFAULT_HEADLINE_INK;
+  const colorFadePct = colorHandoff.fadePct ?? DEFAULT_SKIP_FADE_PCT;
+  return applyColorHandoff(frames, colorAt, colorHandoff.color, fromColor, colorFadePct);
 };
 
 type HeadlineWindow = {
@@ -83,6 +160,13 @@ type HeadlineWindow = {
   start: number;
   end: number;
   hidden: boolean;
+  color: string | null;
+  enterDurationPct: number;
+};
+
+const layerInkColor = (layer: Record<string, unknown> | undefined) => {
+  const color = layer?.base?.color;
+  return typeof color === 'string' && color.trim() ? color.trim() : null;
 };
 
 export const buildHeadlineMotionPlan = (
@@ -102,13 +186,22 @@ export const buildHeadlineMotionPlan = (
     const act = index + 1;
     const clips = clipsForProfile(layer.clips, profile);
     const keyframes = clips.length ? compileAnimationClips(clips, beats) : hiddenKeyframes();
+    const end = authoredClipExit(clips, beats);
+    const start = clips.length
+      ? Math.min(...clips.map((clip) => resolveTimeRef(clip.start ?? 0, beats)))
+      : (keyframes[0]?.at ?? 0);
+    const enterDurationPct = Number(clips[0]?.params?.enter_duration_pct);
     return {
       act,
       layerId: String(layer.id),
       keyframes,
-      start: keyframes[0]?.at ?? 0,
-      end: keyframes[keyframes.length - 1]?.at ?? 100,
+      start,
+      end,
       hidden: act === 3 && !includeRoundelFrame,
+      color: layerInkColor(layer),
+      enterDurationPct: Number.isFinite(enterDurationPct) && enterDurationPct > 0
+        ? enterDurationPct
+        : DEFAULT_SKIP_FADE_PCT,
     };
   });
 
@@ -120,7 +213,19 @@ export const buildHeadlineMotionPlan = (
     while (previousIndex >= 0 && windows[previousIndex].hidden) previousIndex -= 1;
     if (previousIndex < 0 || !current) continue;
     const previous = windows[previousIndex];
-    previous.keyframes = mergeSkipHold(previous.keyframes, current.end);
+    previous.keyframes = mergeSkipHold(
+      previous.keyframes,
+      current.end,
+      DEFAULT_SKIP_FADE_PCT,
+      current.color
+        ? {
+          at: current.start,
+          color: current.color,
+          fromColor: previous.color || DEFAULT_HEADLINE_INK,
+          fadePct: current.enterDurationPct,
+        }
+        : null,
+    );
     previous.end = current.end;
     current.hidden = true;
     current.keyframes = hiddenKeyframes();
@@ -150,9 +255,10 @@ const formatTransform = (frame: CreativeKeyframe) => {
 };
 
 export const keyframesCss = (name: string, keyframes: CreativeKeyframe[] = []) => (
-  keyframes.map((frame) => (
-    `      ${frame.at}% { transform: ${formatTransform(frame)}; opacity: ${frame.opacity ?? 1}; }`
-  )).join('\n')
+  keyframes.map((frame) => {
+    const color = frame.color ? `; color: ${frame.color}` : '';
+    return `      ${frame.at}% { transform: ${formatTransform(frame)}; opacity: ${frame.opacity ?? 1}${color}; }`;
+  }).join('\n')
 );
 
 export const headlineSkipOverrideCss = (
@@ -184,6 +290,7 @@ export const serializeHeadlineMotionLayers = (layers: Array<Record<string, unkno
     if (!layer) return null;
     return {
       id,
+      color: layerInkColor(layer),
       clips: {
         'frames-3': clipsForProfile(layer.clips, 'frames-3'),
         'frames-4': clipsForProfile(layer.clips, 'frames-4'),
@@ -230,33 +337,94 @@ export const headlineTransitionRuntimeBlock = (
           ];
         }
 
+        function __compileFade(clip, beats) {
+          var params = clip.params || {};
+          var start = __resolveBeat(clip.start, beats);
+          var end = __resolveBeat(clip.end || 100, beats);
+          var enterDuration = Number(params.enter_duration_pct || 1);
+          var fadePct = Number(params.fade_pct || 2);
+          var settled = Math.min(end, start + enterDuration);
+          return [
+            { at: start, translate: [0, 0], opacity: 0 },
+            { at: settled, translate: [0, 0], opacity: 1 },
+            { at: Math.max(settled, end - fadePct), translate: [0, 0], opacity: 1 },
+            { at: end, translate: [0, 0], opacity: 0 }
+          ];
+        }
+
         function __resolveBeat(ref, beats) {
           if (typeof ref === 'number') return ref;
-          var match = String(ref).match(/^([a-z0-9_]+)\\s*([+-]\\s*\\d+)?$/i);
+          var match = String(ref).match(/^([a-z0-9_]+)\\s*([+-]\\s*\\d+(?:\\.\\d+)?)?$/i);
           if (!match || beats[match[1]] === undefined) return 0;
-          return beats[match[1]] + (match[2] ? parseInt(match[2].replace(/\\s/g, ''), 10) : 0);
+          return beats[match[1]] + (match[2] ? parseFloat(match[2].replace(/\\s/g, '')) : 0);
         }
 
         function __compileHeadlineClips(clips, beats) {
           if (!clips || !clips.length) {
             return [{ at: 0, translate: [0, 0], opacity: 0 }, { at: 100, translate: [0, 0], opacity: 0 }];
           }
+          if (clips[0].preset === 'fade') return __compileFade(clips[0], beats);
           return __compileSlideInRight(clips[0], beats);
         }
 
-        function __mergeSkipHold(keyframes, holdUntil) {
+        var __DEFAULT_HEADLINE_INK = 'rgb(0, 41, 117)';
+
+        function __applyColorHandoff(frames, colorAt, toColor, fromColor, fadePct) {
+          var sorted = frames.slice().sort(function(a, b) { return a.at - b.at; });
+          function poseAt(at) {
+            for (var i = sorted.length - 1; i >= 0; i -= 1) {
+              if (sorted[i].at <= at) return sorted[i];
+            }
+            return sorted[0];
+          }
+          var colorFade = fadePct == null ? 2 : fadePct;
+          var colorEnd = Math.min(100, Number((colorAt + Math.max(0.01, colorFade)).toFixed(4)));
+          var cleaned = sorted.filter(function(frame) {
+            return frame.at <= colorAt || frame.at >= colorEnd;
+          });
+          var withPoint = cleaned.filter(function(frame) {
+            return frame.at !== colorAt && frame.at !== colorEnd;
+          })
+            .concat([Object.assign({}, poseAt(colorAt), { at: colorAt })])
+            .concat([Object.assign({}, poseAt(colorEnd), { at: colorEnd })])
+            .sort(function(a, b) { return a.at - b.at; });
+          return withPoint.map(function(frame) {
+            return Object.assign({}, frame, {
+              color: frame.at >= colorEnd ? toColor : fromColor
+            });
+          });
+        }
+
+        function __mergeSkipHold(keyframes, holdUntil, colorHandoff) {
+          var fadePct = 2;
           var sorted = keyframes.slice().sort(function(a, b) { return a.at - b.at; });
           var settled = sorted.find(function(frame) { return frame.opacity === 1; }) || sorted[0];
           var settledAt = settled ? settled.at : sorted[0].at;
-          var tail = sorted.filter(function(frame) { return frame.at >= holdUntil; });
-          var exit = tail.length ? tail[tail.length - 1] : sorted[sorted.length - 1];
           var kept = sorted.filter(function(frame) { return frame.at <= settledAt; });
-          var hold = [
+          var originalExit = null;
+          for (var i = sorted.length - 1; i >= 0; i -= 1) {
+            var frame = sorted[i];
+            if ((frame.opacity == null ? 1 : frame.opacity) === 0 && frame.at > settledAt) {
+              originalExit = frame;
+              break;
+            }
+          }
+          var exitAt = Math.min(100, Math.max(settledAt + 0.01, holdUntil));
+          var fadeStart = Math.max(settledAt, exitAt - fadePct);
+          var exitPose = originalExit
+            ? Object.assign({}, originalExit, { opacity: 0 })
+            : Object.assign({}, settled, { opacity: 0 });
+          var frames = kept.concat([
             Object.assign({}, settled, { at: settledAt, opacity: 1 }),
-            Object.assign({}, settled, { at: holdUntil, opacity: 1 })
-          ];
-          if (!exit || exit.at <= holdUntil) return kept.concat(hold);
-          return kept.concat(hold, exit);
+            Object.assign({}, settled, { at: fadeStart, opacity: 1 }),
+            Object.assign({}, exitPose, { at: exitAt, opacity: 0 })
+          ]);
+          if (exitAt < 100) frames.push(Object.assign({}, exitPose, { at: 100, opacity: 0 }));
+          if (!colorHandoff || !colorHandoff.color) return frames;
+          var colorAt = Math.max(settledAt, Math.min(fadeStart, colorHandoff.at));
+          var fromColor = colorHandoff.fromColor || __DEFAULT_HEADLINE_INK;
+          var colorFadePct = colorHandoff.fadePct == null ? 2 : colorHandoff.fadePct;
+          return __applyColorHandoff(frames, colorAt, colorHandoff.color, fromColor, colorFadePct);
         }
 
         function __formatTransform(frame) {
@@ -269,7 +437,8 @@ export const headlineTransitionRuntimeBlock = (
 
         function __keyframesCss(name, keyframes) {
           return keyframes.map(function(frame) {
-            return '      ' + frame.at + '% { transform: ' + __formatTransform(frame) + '; opacity: ' + (frame.opacity == null ? 1 : frame.opacity) + '; }';
+            var color = frame.color ? '; color: ' + frame.color : '';
+            return '      ' + frame.at + '% { transform: ' + __formatTransform(frame) + '; opacity: ' + (frame.opacity == null ? 1 : frame.opacity) + color + '; }';
           }).join('\\n');
         }
 
@@ -297,12 +466,20 @@ export const headlineTransitionRuntimeBlock = (
             var act = index + 1;
             var clips = (layer.clips[profile] || []);
             var keyframes = __compileHeadlineClips(clips, beats);
+            var authoredEnd = clips.length ? __resolveBeat(clips[0].end || 100, beats) : 100;
+            var authoredStart = clips.length ? __resolveBeat(clips[0].start || 0, beats) : 0;
+            var enterDuration = clips.length && clips[0].params
+              ? Number(clips[0].params.enter_duration_pct)
+              : NaN;
             return {
               act: act,
               layerId: layer.id,
               keyframes: keyframes,
-              end: keyframes[keyframes.length - 1].at,
-              hidden: act === 3 && !includeRoundel
+              start: authoredStart,
+              end: authoredEnd,
+              hidden: act === 3 && !includeRoundel,
+              color: layer.color || null,
+              enterDurationPct: isFinite(enterDuration) && enterDuration > 0 ? enterDuration : 2
             };
           });
           for (var skippedAct = 2; skippedAct <= 4; skippedAct += 1) {
@@ -313,7 +490,16 @@ export const headlineTransitionRuntimeBlock = (
             while (previousIndex >= 0 && windows[previousIndex].hidden) previousIndex -= 1;
             if (previousIndex < 0 || !current) continue;
             var previous = windows[previousIndex];
-            previous.keyframes = __mergeSkipHold(previous.keyframes, current.end);
+            previous.keyframes = __mergeSkipHold(
+              previous.keyframes,
+              current.end,
+              current.color ? {
+                at: current.start,
+                color: current.color,
+                fromColor: previous.color || __DEFAULT_HEADLINE_INK,
+                fadePct: current.enterDurationPct
+              } : null
+            );
             previous.end = current.end;
             current.hidden = true;
             current.keyframes = [{ at: 0, translate: [0, 0], opacity: 0 }, { at: 100, translate: [0, 0], opacity: 0 }];

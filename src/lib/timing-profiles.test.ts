@@ -89,3 +89,46 @@ test('places frames-3 headline act4 before cta_in for roundel-off handoff', () =
   assert.equal(frames4.act4_in, frames4.cta_in);
   assert.equal(frames4.act4_in, frames4.tc_exit);
 });
+
+test('keeps offer micro-stagger ordered with pluses landing together', () => {
+  assert.ok(FOUR_ACT_BEATS.act1_in < FOUR_ACT_BEATS.offer1_in);
+  assert.ok(FOUR_ACT_BEATS.offer1_in < FOUR_ACT_BEATS.offer2_in);
+  assert.ok(FOUR_ACT_BEATS.offer2_in < FOUR_ACT_BEATS.offer3_in);
+  assert.ok(FOUR_ACT_BEATS.offer3_in < FOUR_ACT_BEATS.plus1_in);
+  assert.equal(FOUR_ACT_BEATS.plus1_in, FOUR_ACT_BEATS.plus2_in);
+  // Headline (act1_in + ~3%) should settle before offer1 starts.
+  assert.ok(FOUR_ACT_BEATS.act1_in + 3 <= FOUR_ACT_BEATS.offer1_in + 0.01);
+});
+
+test('campaign clock profiles keep the same offer/plus choreography', async () => {
+  const creative = (await import('../../campaign/sse-dco-creative.json')).default;
+  for (const profile of ['frames-3', 'frames-4'] as const) {
+    const beats = beatsForScopes(creative, ['offers-3', profile]);
+    assert.ok(beats.act1_in < beats.offer1_in, `${profile}: headline before offer1`);
+    assert.ok(beats.offer1_in < beats.offer2_in, `${profile}: offer1 before offer2`);
+    assert.ok(beats.offer2_in < beats.offer3_in, `${profile}: offer2 before offer3`);
+    assert.equal(beats.plus1_in, beats.plus2_in, `${profile}: pluses land together`);
+    assert.ok(beats.offer3_in < beats.plus1_in, `${profile}: pluses after prices`);
+  }
+  for (const [sizeName, sizeCreative] of Object.entries(creative.sizes)) {
+    for (const layer of sizeCreative.layers || []) {
+      if (!/^offer-slot-|^plus-/.test(layer.id)) continue;
+      for (const clip of layer.clips || []) {
+        assert.equal(typeof clip.start, 'string', `${layer.id} should use named beats`);
+        const duration = Number(clip.params?.enter_duration_pct);
+        assert.ok(Number.isFinite(duration), `${sizeName}/${layer.id} needs enter_duration_pct`);
+        if (layer.id.startsWith('plus-')) {
+          assert.ok(duration >= 2.5, `${sizeName}/${layer.id} pluses should ease in a touch slower`);
+        } else {
+          assert.ok(duration >= 1.8 && duration <= 2.6, `${sizeName}/${layer.id} offer enter duration out of range`);
+        }
+      }
+      if (layer.id === 'offer-slot-1') {
+        assert.equal(layer.clips?.[0]?.start, 'offer1_in', `${sizeName}: offer1 uses offer1_in`);
+      }
+    }
+    const headline = (sizeCreative.layers || []).find((layer) => layer.id === 'headline-act1');
+    const headlineEnter = Number(headline?.clips?.[0]?.params?.enter_duration_pct);
+    assert.ok(headlineEnter > 0 && headlineEnter <= 4, `${sizeName}: headline should settle before offers`);
+  }
+});

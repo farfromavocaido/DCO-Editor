@@ -7,6 +7,10 @@ import { structuredRuleCss } from '@/lib/creative-css';
 import { clipsForProfile, headlineTransitionRuntimeBlock } from '@/lib/headline-motion';
 import { HEADLINE_CSS_CLASS, isHeadlineLayer } from '@/lib/creative-model';
 import {
+  CDN_FONT_URLS,
+  MUSEO_FONT_FILENAME,
+} from '@/lib/brand-font';
+import {
   alignOfferValueSymbolsRuntime,
   wrapOfferValueSymbolRuntime,
 } from '@/lib/offer-value-symbols';
@@ -92,23 +96,12 @@ const createClientFontEntry = (filename: string, families: string[], weight: num
   resolveSourcePath: () => resolveClientFontSourcePath(filename),
 });
 
-// ── Brand font: Museo (the slab family in Museo700-Regular.otf) ──────────────
-// BE HYPER-EXPLICIT HERE. "Museo" and "Museo Sans" are two different typefaces
-// with different glyph widths. The ads use Museo — the NON-Sans one — and every
-// export flavour must load Museo700-Regular.otf for the "Museo" family. Never
-// alias one file to the other: a substitution renders the wrong brand font AND
-// invalidates every text-fit measurement QA'd against the real Museo.
+// ── Brand font: Museo (slab). CDN URL lives in src/lib/brand-font.ts so the
+// editor, /view renders, and CDN packages all load the same Studio file.
+// Never alias "Museo" to MuseoSans_700.otf.
 const CLIENT_FONT_FILES = [
-  createClientFontEntry('Museo700-Regular.otf', ['Museo'], 700),
+  createClientFontEntry(MUSEO_FONT_FILENAME, ['Museo'], 700),
 ];
-
-// Studio CDN URLs for brand fonts. Only map a filename to a URL that serves
-// that exact file — never point "Museo" at MuseoSans_700.otf (different
-// typeface / glyph widths). Same Studio folder also hosts MuseoSans_700.otf;
-// that file must not back the Museo family.
-const CDN_FONT_URLS: Record<string, string> = {
-  'Museo700-Regular.otf': 'https://s0.2mdn.net/creatives/assets/5627648/Museo700-Regular.otf',
-};
 
 const CDN_ASSET_URLS: Record<string, string> = {
   'assets/SVG/SSELogoBlue.svg': 'https://s0.2mdn.net/creatives/assets/5627651/SSELogoBlue.svg',
@@ -210,10 +203,12 @@ const fontUrl = (filename: string, options: RenderOptions = {}) => (
 
 const localFontFaceCss = (options: RenderOptions = {}) => {
   if (!options.fontBasePath && !options.fontUrlMap) return '';
+  // One face spans 100–900 so weight:400 T&Cs and weight:900 heavy copy both
+  // resolve to Museo700-Regular.otf instead of browser-synthesised impostors.
   return CLIENT_FONT_FILES.flatMap((font) => font.families.map((family) => `    @font-face {
       font-family: "${family}";
       src: ${PACKAGED_FONT_LOCAL_BLOCK}, url("${fontUrl(font.filename, options)}") format("opentype");
-      font-weight: ${font.weight};
+      font-weight: 100 900;
       font-style: normal;
       font-display: block;
     }`)).join('\n');
@@ -241,6 +236,9 @@ const packagedFontIsolationCss = () => `
     .stage,
     .stage * {
       font-synthesis: none;
+      text-rendering: auto;
+      -webkit-font-smoothing: auto;
+      -moz-osx-font-smoothing: auto;
     }`;
 
 const previewValidatorTag = (options: RenderOptions = {}) => (
@@ -503,7 +501,7 @@ const renderLayer = (layer: Record<string, unknown>, options: RenderOptions = {}
   const cssClass = isHeadlineLayer(layer)
     ? HEADLINE_CSS_CLASS
     : (layer.base?.cssClass || layer.id);
-  if (layer.id === 'terms-prices' || layer.id === 'unit-rate-prices' || layer.id === 'terms-solo') return '';
+  if (layer.id === 'terms-solo') return '';
   if (layer.id.startsWith('offer-slot-')) return renderOfferSlot(layer);
   if (layer.kind === 'image') {
     return `          <img alt="" draggable="false" class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}" src="${escapeAttr(assetSrc(layer.asset, options))}">`;
@@ -526,14 +524,10 @@ const termsLayer = (sizeCreative: Record<string, unknown>, id: string) => (
 );
 
 const renderTermsWrappers = (sizeCreative: Record<string, unknown>) => {
-  const unit = termsLayer(sizeCreative, 'unit-rate-prices');
-  const prices = termsLayer(sizeCreative, 'terms-prices');
+  // terms-prices + unit-rate-prices render as normal canvas layers.
+  // Only the solo T&Cs line still uses a dedicated wrapper.
   const solo = termsLayer(sizeCreative, 'terms-solo');
-  return `          <div class="stage-static tc-prices-group" data-gwd-group="tc_prices" id="TC_Prices">
-            <p class="gwd-grp-tc sse-text sse-bottom-line ${unit?.base?.cssClass || 'unit-rate-prices'}" data-dco-field="tc_units_text"></p>
-            <p class="gwd-grp-tc sse-text sse-bottom-line ${prices?.base?.cssClass || 'terms-prices'}" data-dco-field="tc_terms_text"></p>
-          </div>
-          <div class="stage-static tc-solo-group" data-gwd-group="tc_solo" id="TC_Solo">
+  return `          <div class="stage-static tc-solo-group" data-gwd-group="tc_solo" id="TC_Solo">
             <p class="gwd-grp-tc sse-text sse-bottom-line ${solo?.base?.cssClass || 'terms-solo'}" data-dco-field="tc_terms_text"></p>
           </div>`;
 };

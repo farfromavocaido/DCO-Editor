@@ -10,11 +10,11 @@
       "start": 0,
       "act1_begin": 11,
       "act1_in": 12,
-      "offer2_in": 15,
-      "offer3_in": 18,
-      "plus1_in": 20,
-      "plus2_in": 23,
-      "terms_in": 20,
+      "offer2_in": 16.3,
+      "offer3_in": 17.4,
+      "plus1_in": 17.6,
+      "plus2_in": 17.6,
+      "terms_in": 17.6,
       "act2_in": 43,
       "act1_out": 44,
       "offers_exit": 66,
@@ -32,18 +32,19 @@
       "bn_white_in": 74,
       "bn_cta_in": 78,
       "tc_exit": 69,
-      "act4_in": 69
+      "act4_in": 69,
+      "offer1_in": 15.2
     },
     "profiles": {
       "frames-3": {
         "start": 0,
         "act1_begin": 11,
         "act1_in": 12,
-        "offer2_in": 15,
-        "offer3_in": 18,
-        "plus1_in": 20,
-        "plus2_in": 23,
-        "terms_in": 20,
+        "offer2_in": 16.3,
+        "offer3_in": 17.4,
+        "plus1_in": 17.6,
+        "plus2_in": 17.6,
+        "terms_in": 17.6,
         "act2_in": 43,
         "act1_out": 44,
         "offers_exit": 66,
@@ -57,22 +58,23 @@
         "end": 100,
         "bn_h2_in": 36,
         "bn_offers_in": 47,
-        "bn_blue_in": 71,
+        "bn_blue_in": 64.3,
         "bn_white_in": 74,
-        "bn_cta_in": 78,
+        "bn_cta_in": 76,
         "tc_exit": 66.5,
         "act4_in": 65.1,
+        "offer1_in": 15.2,
         "roundel_in": 65
       },
       "frames-4": {
         "start": 0,
         "act1_begin": 6,
-        "act1_in": 11.9,
-        "offer2_in": 11,
-        "offer3_in": 14,
-        "plus1_in": 16,
-        "plus2_in": 19,
-        "terms_in": 16,
+        "act1_in": 11,
+        "offer2_in": 15.3,
+        "offer3_in": 16.4,
+        "plus1_in": 16.6,
+        "plus2_in": 16.6,
+        "terms_in": 16.6,
         "act2_in": 33.3,
         "act1_out": 33.3,
         "offers_exit": 57.7,
@@ -94,7 +96,8 @@
         "act2_out": 45,
         "act3_in": 45,
         "act3_out": 55,
-        "roundel_in": 56.7
+        "roundel_in": 56.7,
+        "offer1_in": 14.2
       }
     }
   },
@@ -334,15 +337,15 @@
         "heading3_text": "A different kind of energy",
         "offer_count_num": 3,
         "offer1_value_text": "15%",
-        "offer1_sub_text": "OFF ELECTRICITY*",
+        "offer1_sub_text": "OFF ELECTRICITY and gas*",
         "offer2_value_text": "30%",
         "offer2_sub_text": "OFF GAS*",
         "offer3_value_text": "€125",
         "offer3_sub_text": "OFF YOUR FIRST BILL*",
-        "tc_type_enum": "tcs_units",
+        "tc_type_enum": "tcs_only",
         "tc_terms_text": "*T&Cs apply",
         "tc_units_text": "Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat",
-        "cta_type_enum": "roundel",
+        "cta_type_enum": "rectangle",
         "cta_text": "Switch today",
         "include_roundel_frame_bool": false,
         "roundel_text_text": "Save up to",
@@ -718,7 +721,7 @@
               "end": "bn_h2_in",
               "params": {
                 "enter_distance_px": 60,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 3
               }
             }
           ],
@@ -733,7 +736,7 @@
           "kind": "text",
           "zIndex": 6,
           "base": {
-            "left": 182,
+            "left": 172,
             "top": 7,
             "width": 56,
             "height": 56,
@@ -842,12 +845,13 @@
               "id": "offer-slot-1-slideInRight",
               "label": "Offer Slot 1 slideInRight",
               "preset": "slideInRight",
-              "start": "act1_in",
+              "start": "offer1_in",
               "end": "offers_exit",
               "params": {
                 "enter_distance_px": 60,
                 "exit_dy": 20,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 2.35,
+                "ease_in": "cubic-bezier(0.22, 0.82, 0.28, 1)"
               }
             }
           ]
@@ -879,7 +883,9 @@
               "start": "plus1_in",
               "end": "offers_exit",
               "params": {
-                "enter_dy": -8
+                "enter_dy": -8,
+                "enter_duration_pct": 2.8,
+                "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
           ]
@@ -907,7 +913,8 @@
               "params": {
                 "enter_distance_px": 60,
                 "exit_dy": 20,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 2.15,
+                "ease_in": "cubic-bezier(0.2, 0.75, 0.25, 1)"
               }
             }
           ]
@@ -939,7 +946,9 @@
               "start": "plus2_in",
               "end": "offers_exit",
               "params": {
-                "enter_dy": -8
+                "enter_dy": -8,
+                "enter_duration_pct": 2.8,
+                "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
           ]
@@ -967,7 +976,8 @@
               "params": {
                 "enter_distance_px": 60,
                 "exit_dy": 20,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 1.95,
+                "ease_in": "cubic-bezier(0.18, 0.7, 0.22, 1)"
               }
             }
           ]
@@ -979,16 +989,16 @@
           "kind": "text",
           "zIndex": 14,
           "base": {
-            "left": 4,
-            "top": 50,
-            "width": 190,
-            "height": 9,
-            "fontSize": 6,
-            "textAlign": "left",
             "display": "flex",
             "alignItems": "flex-end",
             "justifyContent": "flex-start",
-            "cssClass": "terms-prices"
+            "textAlign": "left",
+            "cssClass": "terms-prices",
+            "left": 6,
+            "top": 42,
+            "width": 160,
+            "height": 8,
+            "fontSize": 6
           },
           "binding": {
             "field": "tc_terms_text"
@@ -1001,8 +1011,8 @@
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_dy": -17,
-                "settled_dy": -11,
+                "enter_dy": -6,
+                "settled_dy": 0,
                 "exit_dy": 7
               }
             }
@@ -1015,14 +1025,16 @@
           "kind": "text",
           "zIndex": 15,
           "base": {
-            "left": -51,
-            "top": 51,
-            "width": 190,
-            "fontSize": 6,
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left",
             "cssClass": "unit-rate-prices",
-            "height": 9,
-            "textAlign": "right",
-            "justifyContent": "flex-end"
+            "left": 6,
+            "top": 40,
+            "width": 132,
+            "height": 14,
+            "fontSize": 6
           },
           "binding": {
             "field": "tc_units_text"
@@ -1035,12 +1047,18 @@
               "start": "act1_out",
               "end": "tc_exit",
               "params": {
-                "enter_dy": -17,
-                "settled_dy": -11,
+                "enter_dy": -6,
+                "settled_dy": 0,
                 "exit_dy": 5
               }
             }
-          ]
+          ],
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 1,
+            "minFontSize": 5,
+            "align": "bottom"
+          }
         },
         {
           "id": "terms-solo",
@@ -1088,7 +1106,8 @@
           "base": {
             "cssClass": "sse-headline",
             "display": "flex",
-            "alignItems": "flex-end"
+            "alignItems": "flex-end",
+            "color": "rgb(255, 255, 255)"
           },
           "binding": {
             "field": "heading4_text"
@@ -1141,7 +1160,7 @@
           },
           "props": {
             "left": 147,
-            "top": 5,
+            "top": 6,
             "width": 74,
             "height": 37
           },
@@ -1157,7 +1176,7 @@
           },
           "props": {
             "left": 222,
-            "top": 5,
+            "top": 6,
             "width": 74,
             "height": 35
           },
@@ -1173,7 +1192,7 @@
           },
           "props": {
             "left": 192,
-            "top": 18,
+            "top": 19,
             "width": 12,
             "height": 12,
             "fontSize": 17,
@@ -1210,18 +1229,20 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": -24,
-            "top": 27,
-            "width": 74,
+            "left": -21,
+            "top": 25,
+            "width": 64,
             "height": 16,
             "fontSize": 7,
             "textAlign": "center",
-            "justifyContent": "center"
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "flex-start"
           },
           "editable": true,
           "fit": {
             "mode": "shrink",
-            "maxLines": 1
+            "maxLines": 2
           }
         },
         {
@@ -1337,20 +1358,20 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 31,
-            "top": 23,
+            "left": 29,
+            "top": 24,
             "fontSize": 6,
             "width": 65,
             "height": 15,
             "textAlign": "center",
             "justifyContent": "center",
             "display": "flex",
-            "alignItems": "center"
+            "alignItems": "flex-start"
           },
           "editable": true,
           "fit": {
             "mode": "shrink",
-            "maxLines": 1
+            "maxLines": 2
           }
         },
         {
@@ -1362,7 +1383,7 @@
             "cta_type_enum": "rectangle"
           },
           "props": {
-            "left": 176,
+            "left": 151,
             "top": 25,
             "width": 73,
             "height": 18,
@@ -1705,24 +1726,27 @@
         {
           "cssClass": "offer-value",
           "properties": {
-            "left": -9,
+            "left": -10,
             "top": 2,
-            "width": 70,
+            "width": 69,
             "height": 35,
             "fontSize": 41,
             "lineHeight": 0.85,
             "letterSpacing": -0.5,
-            "textAlign": "left",
-            "whiteSpace": "nowrap"
+            "textAlign": "right",
+            "whiteSpace": "nowrap",
+            "justifyContent": "flex-end",
+            "display": "flex",
+            "alignItems": "flex-end"
           }
         },
         {
           "cssClass": "offer-subline",
           "properties": {
             "left": 61,
-            "top": 26,
+            "top": 40,
             "width": 65,
-            "height": 11,
+            "height": "",
             "fontSize": 9,
             "lineHeight": 1.1,
             "letterSpacing": 0,
@@ -1733,7 +1757,7 @@
             "textTransform": "uppercase"
           },
           "fit": {
-            "mode": "wrap",
+            "mode": "shrink",
             "maxLines": 2,
             "minFontSize": 6
           }
@@ -1860,7 +1884,10 @@
                 "frames-4"
               ]
             }
-          ]
+          ],
+          "fit": {
+            "mode": "wrap"
+          }
         },
         {
           "id": "roundel-frame",
@@ -2015,7 +2042,10 @@
                 "frames-4"
               ]
             }
-          ]
+          ],
+          "fit": {
+            "mode": "wrap"
+          }
         },
         {
           "id": "headline-act1",
@@ -2038,10 +2068,13 @@
               "end": "bn_h2_in",
               "params": {
                 "enter_distance_px": 60,
-                "enter_duration_pct": 5
+                "enter_duration_pct": 3
               }
             }
-          ]
+          ],
+          "fit": {
+            "mode": "wrap"
+          }
         },
         {
           "id": "cta",
@@ -2159,12 +2192,13 @@
               "id": "offer-slot-1-slideInRight",
               "label": "Offer Slot 1 slideInRight",
               "preset": "slideInRight",
-              "start": 13.9,
+              "start": "offer1_in",
               "end": "wave2_in+5",
               "params": {
                 "enter_distance_px": 20,
                 "exit_dy": 20,
-                "enter_duration_pct": 5
+                "enter_duration_pct": 2.35,
+                "ease_in": "cubic-bezier(0.22, 0.82, 0.28, 1)"
               }
             }
           ]
@@ -2193,10 +2227,12 @@
               "id": "plus-1-fadeUp",
               "label": "Plus 1 fadeUp",
               "preset": "fadeUp",
-              "start": 18.7,
+              "start": "plus1_in",
               "end": "wave2_in+5",
               "params": {
-                "enter_dy": -8
+                "enter_dy": -8,
+                "enter_duration_pct": 2.8,
+                "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
           ]
@@ -2219,12 +2255,13 @@
               "id": "offer-slot-2-slideInRight",
               "label": "Offer Slot 2 slideInRight",
               "preset": "slideInRight",
-              "start": 20.6,
+              "start": "offer2_in",
               "end": "wave2_in+5",
               "params": {
                 "enter_distance_px": 20,
                 "exit_dy": 20,
-                "enter_duration_pct": 5
+                "enter_duration_pct": 2.15,
+                "ease_in": "cubic-bezier(0.2, 0.75, 0.25, 1)"
               }
             }
           ]
@@ -2253,10 +2290,12 @@
               "id": "plus-2-fadeUp",
               "label": "Plus 2 fadeUp",
               "preset": "fadeUp",
-              "start": 25.5,
+              "start": "plus2_in",
               "end": "wave2_in+5",
               "params": {
-                "enter_dy": -8
+                "enter_dy": -8,
+                "enter_duration_pct": 2.8,
+                "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
           ]
@@ -2279,12 +2318,13 @@
               "id": "offer-slot-3-slideInRight",
               "label": "Offer Slot 3 slideInRight",
               "preset": "slideInRight",
-              "start": 27.5,
+              "start": "offer3_in",
               "end": "wave2_in+5",
               "params": {
                 "enter_distance_px": 20,
                 "exit_dy": 20,
-                "enter_duration_pct": 5
+                "enter_duration_pct": 1.95,
+                "ease_in": "cubic-bezier(0.18, 0.7, 0.22, 1)"
               }
             }
           ]
@@ -2296,12 +2336,16 @@
           "kind": "text",
           "zIndex": 14,
           "base": {
-            "left": 15,
-            "top": 65,
-            "width": 214,
-            "height": 18,
-            "fontSize": 8,
-            "cssClass": "terms-prices"
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left",
+            "cssClass": "terms-prices",
+            "left": 16,
+            "top": 78,
+            "width": 160,
+            "height": 10,
+            "fontSize": 8
           },
           "binding": {
             "field": "tc_terms_text"
@@ -2314,8 +2358,8 @@
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_dy": -7,
-                "settled_dy": 2,
+                "enter_dy": -6,
+                "settled_dy": 0,
                 "exit_dy": 7
               }
             }
@@ -2328,11 +2372,16 @@
           "kind": "text",
           "zIndex": 15,
           "base": {
-            "left": 15,
-            "top": 78,
-            "width": 214,
-            "fontSize": 8,
-            "cssClass": "unit-rate-prices"
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left",
+            "cssClass": "unit-rate-prices",
+            "left": 16,
+            "top": 69,
+            "width": 696,
+            "height": 19,
+            "fontSize": 8
           },
           "binding": {
             "field": "tc_units_text"
@@ -2345,12 +2394,18 @@
               "start": "bn_offers_in",
               "end": "tc_exit",
               "params": {
-                "enter_dy": -17,
-                "settled_dy": -11,
+                "enter_dy": -6,
+                "settled_dy": 0,
                 "exit_dy": 5
               }
             }
-          ]
+          ],
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 8,
+            "align": "bottom"
+          }
         },
         {
           "id": "terms-solo",
@@ -2430,7 +2485,7 @@
             }
           ],
           "fit": {
-            "maxLines": 4
+            "mode": "wrap"
           }
         }
       ],
@@ -2588,7 +2643,7 @@
           },
           "props": {
             "left": 254,
-            "top": 8,
+            "top": 10,
             "width": 172,
             "height": 68
           },
@@ -2604,7 +2659,7 @@
           },
           "props": {
             "left": 432,
-            "top": 8,
+            "top": 10,
             "width": 172,
             "height": 68
           },
@@ -2620,7 +2675,7 @@
           },
           "props": {
             "left": 413,
-            "top": 22,
+            "top": 24,
             "width": 28,
             "height": 35,
             "fontSize": 41
@@ -2636,9 +2691,9 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 30,
+            "left": 20,
             "top": 1,
-            "width": 111,
+            "width": 133,
             "height": 48,
             "fontSize": 65,
             "textAlign": "center"
@@ -2655,14 +2710,20 @@
           },
           "props": {
             "left": 0,
-            "top": 57,
-            "width": 172,
-            "height": 15,
+            "top": 55,
+            "width": 173,
+            "height": "",
             "fontSize": 15,
             "textAlign": "center",
-            "justifyContent": "center"
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "flex-start"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "minFontSize": 8,
+            "maxLines": 1
+          }
         },
         {
           "id": "offers-3|offer-slot-1",
@@ -2774,14 +2835,21 @@
           },
           "props": {
             "left": 0,
-            "top": 44,
-            "width": 110,
-            "height": 12,
+            "top": 40,
+            "width": 106,
+            "height": 11,
             "fontSize": 11,
             "textAlign": "center",
-            "justifyContent": "center"
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "flex-start"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "maxLines": 2,
+            "minFontSize": 12,
+            "mode": "shrink"
+          }
         },
         {
           "id": "cta-rect|cta",
@@ -2926,7 +2994,7 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 30,
+            "left": 18,
             "width": 191,
             "textAlign": "left",
             "top": 10,
@@ -2942,11 +3010,11 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 31,
+            "left": 18,
             "width": 210,
             "textAlign": "left",
             "justifyContent": "flex-start",
-            "top": 13,
+            "top": 11,
             "display": "flex",
             "alignItems": "center",
             "height": 58
@@ -2980,10 +3048,10 @@
           "cssClass": "sse-headline",
           "properties": {
             "lineHeight": 1.15,
-            "left": 30,
-            "top": 10,
-            "width": 179,
-            "height": 56,
+            "left": 19,
+            "top": 9,
+            "width": 223,
+            "height": 57,
             "fontSize": 25,
             "whiteSpace": "normal"
           }
@@ -2991,24 +3059,25 @@
         {
           "cssClass": "offer-value",
           "properties": {
-            "left": -145,
-            "top": -4,
-            "width": 366,
-            "height": 57,
+            "left": -79,
+            "top": -6,
+            "width": 180,
+            "height": 58,
             "fontSize": 81,
             "lineHeight": 0.85,
             "letterSpacing": -0.5,
-            "textAlign": "center",
-            "whiteSpace": "nowrap"
+            "textAlign": "right",
+            "whiteSpace": "nowrap",
+            "justifyContent": "flex-end"
           }
         },
         {
           "cssClass": "offer-subline",
           "properties": {
             "left": 107,
-            "top": 42,
-            "width": 366,
-            "height": 20,
+            "top": 26,
+            "width": 121,
+            "height": 39,
             "fontSize": 17,
             "lineHeight": 1.1,
             "letterSpacing": 0,
@@ -3018,6 +3087,11 @@
             "justifyContent": "flex-start",
             "textTransform": "uppercase",
             "whiteSpace": "nowrap"
+          },
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 12
           }
         },
         {
@@ -3320,7 +3394,9 @@
               "preset": "slideInRight",
               "start": "act1_in",
               "end": "act1_out",
-              "params": {}
+              "params": {
+                "enter_duration_pct": 3
+              }
             }
           ]
         },
@@ -3440,11 +3516,13 @@
               "id": "offer-slot-1-slideInRight",
               "label": "Offer Slot 1 slideInRight",
               "preset": "slideInRight",
-              "start": "act1_in",
+              "start": "offer1_in",
               "end": "offers_exit",
               "params": {
                 "enter_distance_px": 60,
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 2.4,
+                "ease_in": "cubic-bezier(0.22, 0.82, 0.28, 1)"
               }
             }
           ]
@@ -3476,7 +3554,9 @@
               "start": "plus1_in",
               "end": "offers_exit",
               "params": {
-                "enter_dy": -10
+                "enter_dy": -10,
+                "enter_duration_pct": 2.8,
+                "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
           ]
@@ -3503,7 +3583,9 @@
               "end": "offers_exit",
               "params": {
                 "enter_distance_px": 60,
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 2.15,
+                "ease_in": "cubic-bezier(0.2, 0.75, 0.25, 1)"
               }
             }
           ]
@@ -3535,7 +3617,9 @@
               "start": "plus2_in",
               "end": "offers_exit",
               "params": {
-                "enter_dy": -10
+                "enter_dy": -10,
+                "enter_duration_pct": 2.8,
+                "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
           ]
@@ -3562,7 +3646,9 @@
               "end": "offers_exit",
               "params": {
                 "enter_distance_px": 60,
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 2,
+                "ease_in": "cubic-bezier(0.18, 0.7, 0.22, 1)"
               }
             }
           ]
@@ -3574,12 +3660,16 @@
           "kind": "text",
           "zIndex": 14,
           "base": {
-            "left": -4,
-            "top": 11,
-            "width": 80,
-            "height": 30,
-            "fontSize": 10,
-            "cssClass": "terms-prices"
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left",
+            "cssClass": "terms-prices",
+            "left": 10,
+            "top": 229,
+            "width": 160,
+            "height": 13,
+            "fontSize": 10
           },
           "binding": {
             "field": "tc_terms_text"
@@ -3592,8 +3682,8 @@
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_dy": -7,
-                "settled_dy": 2,
+                "enter_dy": -6,
+                "settled_dy": 0,
                 "exit_dy": 7
               }
             }
@@ -3606,12 +3696,16 @@
           "kind": "text",
           "zIndex": 15,
           "base": {
-            "left": -5,
-            "top": 15,
-            "width": 111,
-            "fontSize": 8,
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left",
             "cssClass": "unit-rate-prices",
-            "height": 26
+            "left": 10,
+            "top": 219,
+            "width": 127,
+            "height": 25,
+            "fontSize": 10
           },
           "binding": {
             "field": "tc_units_text"
@@ -3624,14 +3718,17 @@
               "start": "act1_out",
               "end": "tc_exit",
               "params": {
-                "enter_dy": -17,
-                "settled_dy": -11,
+                "enter_dy": -6,
+                "settled_dy": 0,
                 "exit_dy": 5
               }
             }
           ],
           "fit": {
-            "maxLines": 3
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 8,
+            "align": "bottom"
           }
         },
         {
@@ -4403,7 +4500,8 @@
             }
           ],
           "fit": {
-            "maxLines": 4
+            "maxLines": 4,
+            "mode": "wrap"
           }
         },
         {
@@ -4557,7 +4655,8 @@
             }
           ],
           "fit": {
-            "maxLines": 4
+            "maxLines": 4,
+            "mode": "wrap"
           }
         },
         {
@@ -4581,11 +4680,14 @@
               "preset": "slideInRight",
               "start": "act1_in",
               "end": "act1_out",
-              "params": {}
+              "params": {
+                "enter_duration_pct": 3
+              }
             }
           ],
           "fit": {
-            "maxLines": 4
+            "maxLines": 4,
+            "mode": "wrap"
           }
         },
         {
@@ -4704,11 +4806,13 @@
               "id": "offer-slot-1-slideInRight",
               "label": "Offer Slot 1 slideInRight",
               "preset": "slideInRight",
-              "start": "act1_in",
-              "end": "offers_exit",
+              "start": "offer1_in",
+              "end": "offers_exit+0.6",
               "params": {
                 "enter_distance_px": 60,
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 2.2,
+                "ease_in": "ease-out"
               }
             }
           ]
@@ -4740,7 +4844,9 @@
               "start": "plus1_in",
               "end": "offers_exit",
               "params": {
-                "enter_dy": -10
+                "enter_dy": -10,
+                "enter_duration_pct": 2.8,
+                "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
           ]
@@ -4764,10 +4870,12 @@
               "label": "Offer Slot 2 slideInRight",
               "preset": "slideInRight",
               "start": "offer2_in",
-              "end": "offers_exit",
+              "end": "offers_exit+0.3",
               "params": {
                 "enter_distance_px": 60,
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 2.15,
+                "ease_in": "ease-out"
               }
             }
           ]
@@ -4799,7 +4907,9 @@
               "start": "plus2_in",
               "end": "offers_exit",
               "params": {
-                "enter_dy": -10
+                "enter_dy": -10,
+                "enter_duration_pct": 2.8,
+                "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
           ]
@@ -4826,7 +4936,9 @@
               "end": "offers_exit",
               "params": {
                 "enter_distance_px": 60,
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 2.1,
+                "ease_in": "ease-out"
               }
             }
           ]
@@ -4838,12 +4950,16 @@
           "kind": "text",
           "zIndex": 14,
           "base": {
-            "left": 0,
-            "top": 7,
-            "width": 100,
-            "height": 26,
-            "fontSize": 10,
-            "cssClass": "terms-prices"
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left",
+            "cssClass": "terms-prices",
+            "left": 8,
+            "top": 579,
+            "width": 144,
+            "height": 13,
+            "fontSize": 10
           },
           "binding": {
             "field": "tc_terms_text"
@@ -4856,8 +4972,8 @@
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_dy": -7,
-                "settled_dy": 2,
+                "enter_dy": -6,
+                "settled_dy": 0,
                 "exit_dy": 7
               }
             }
@@ -4870,11 +4986,16 @@
           "kind": "text",
           "zIndex": 15,
           "base": {
-            "left": 0,
-            "top": 9,
-            "width": 145,
-            "fontSize": 10,
-            "cssClass": "unit-rate-prices"
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left",
+            "cssClass": "unit-rate-prices",
+            "left": 8,
+            "top": 569,
+            "width": 126,
+            "height": 23,
+            "fontSize": 10
           },
           "binding": {
             "field": "tc_units_text"
@@ -4887,12 +5008,18 @@
               "start": "act1_out",
               "end": "tc_exit",
               "params": {
-                "enter_dy": -17,
-                "settled_dy": -11,
+                "enter_dy": -6,
+                "settled_dy": 0,
                 "exit_dy": 5
               }
             }
-          ]
+          ],
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 8,
+            "align": "bottom"
+          }
         },
         {
           "id": "terms-solo",
@@ -4968,7 +5095,8 @@
             }
           ],
           "fit": {
-            "maxLines": 4
+            "maxLines": 4,
+            "mode": "wrap"
           }
         }
       ],
@@ -4983,7 +5111,7 @@
           },
           "props": {
             "left": -10,
-            "top": 197,
+            "top": 186,
             "width": 181,
             "height": 232
           },
@@ -5015,7 +5143,7 @@
           },
           "props": {
             "left": 60,
-            "top": 294,
+            "top": 296,
             "width": 42,
             "height": 60,
             "fontSize": 58
@@ -5067,7 +5195,7 @@
           },
           "props": {
             "left": 1,
-            "top": 187,
+            "top": 181,
             "width": 158,
             "height": 217
           },
@@ -5115,7 +5243,7 @@
           },
           "props": {
             "left": 67,
-            "top": 250,
+            "top": 252,
             "width": 27,
             "height": 38,
             "fontSize": 36
@@ -5698,7 +5826,11 @@
                 "frames-4"
               ]
             }
-          ]
+          ],
+          "fit": {
+            "maxLines": 2,
+            "mode": "wrap"
+          }
         },
         {
           "id": "roundel-frame",
@@ -5849,7 +5981,11 @@
                 "frames-4"
               ]
             }
-          ]
+          ],
+          "fit": {
+            "maxLines": 2,
+            "mode": "wrap"
+          }
         },
         {
           "id": "headline-act1",
@@ -5870,9 +6006,15 @@
               "preset": "slideInRight",
               "start": "act1_in",
               "end": "act1_out",
-              "params": {}
+              "params": {
+                "enter_duration_pct": 3
+              }
             }
-          ]
+          ],
+          "fit": {
+            "maxLines": 2,
+            "mode": "wrap"
+          }
         },
         {
           "id": "cta",
@@ -5990,11 +6132,13 @@
               "id": "offer-slot-1-slideInRight",
               "label": "Offer Slot 1 slideInRight",
               "preset": "slideInRight",
-              "start": "act1_in",
+              "start": "offer1_in",
               "end": "offers_exit",
               "params": {
                 "enter_distance_px": 60,
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 2.4,
+                "ease_in": "cubic-bezier(0.22, 0.82, 0.28, 1)"
               }
             }
           ]
@@ -6026,7 +6170,9 @@
               "start": "plus1_in",
               "end": "offers_exit",
               "params": {
-                "enter_dy": -10
+                "enter_dy": -10,
+                "enter_duration_pct": 2.8,
+                "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
           ]
@@ -6053,7 +6199,9 @@
               "end": "offers_exit",
               "params": {
                 "enter_distance_px": 60,
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 2.15,
+                "ease_in": "cubic-bezier(0.2, 0.75, 0.25, 1)"
               }
             }
           ]
@@ -6085,7 +6233,9 @@
               "start": "plus2_in",
               "end": "offers_exit",
               "params": {
-                "enter_dy": -10
+                "enter_dy": -10,
+                "enter_duration_pct": 2.8,
+                "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
           ]
@@ -6112,7 +6262,9 @@
               "end": "offers_exit",
               "params": {
                 "enter_distance_px": 60,
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 2,
+                "ease_in": "cubic-bezier(0.18, 0.7, 0.22, 1)"
               }
             }
           ]
@@ -6124,12 +6276,16 @@
           "kind": "text",
           "zIndex": 13,
           "base": {
-            "left": 0,
-            "top": 7,
-            "width": 100,
-            "height": 26,
-            "fontSize": 10,
-            "cssClass": "terms-prices"
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left",
+            "cssClass": "terms-prices",
+            "left": 12,
+            "top": 579,
+            "width": 160,
+            "height": 13,
+            "fontSize": 10
           },
           "binding": {
             "field": "tc_terms_text"
@@ -6142,8 +6298,8 @@
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_dy": -7,
-                "settled_dy": 2,
+                "enter_dy": -6,
+                "settled_dy": 0,
                 "exit_dy": 7
               }
             }
@@ -6156,11 +6312,16 @@
           "kind": "text",
           "zIndex": 14,
           "base": {
-            "left": 0,
-            "top": 12,
-            "width": 260,
-            "fontSize": 10,
-            "cssClass": "unit-rate-prices"
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left",
+            "cssClass": "unit-rate-prices",
+            "left": 12,
+            "top": 569,
+            "width": 276,
+            "height": 23,
+            "fontSize": 10
           },
           "binding": {
             "field": "tc_units_text"
@@ -6173,12 +6334,18 @@
               "start": "act1_out",
               "end": "tc_exit",
               "params": {
-                "enter_dy": -17,
-                "settled_dy": -11,
+                "enter_dy": -6,
+                "settled_dy": 0,
                 "exit_dy": 5
               }
             }
-          ]
+          ],
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 8,
+            "align": "bottom"
+          }
         },
         {
           "id": "terms-solo",
@@ -6254,7 +6421,8 @@
             }
           ],
           "fit": {
-            "maxLines": 4
+            "maxLines": 2,
+            "mode": "wrap"
           }
         }
       ],
@@ -6269,7 +6437,7 @@
           },
           "props": {
             "left": 75,
-            "top": 162,
+            "top": 170,
             "width": 150,
             "height": 245
           },
@@ -6285,7 +6453,7 @@
           },
           "props": {
             "left": 75,
-            "top": 322,
+            "top": 342,
             "width": 150,
             "height": 150
           },
@@ -6301,7 +6469,7 @@
           },
           "props": {
             "left": 132,
-            "top": 272,
+            "top": 292,
             "width": 37,
             "height": 58,
             "fontSize": 55
@@ -6337,11 +6505,16 @@
             "top": 80,
             "fontSize": 22,
             "left": -36,
-            "width": 222,
+            "width": 210,
             "height": 43,
             "whiteSpace": "nowrap"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 16,
+            "maxLines": 2
+          }
         },
         {
           "id": "offers-3|offer-slot-1",
@@ -6811,7 +6984,7 @@
           "cssClass": "offer-subline",
           "properties": {
             "left": 0,
-            "top": 111,
+            "top": 121,
             "fontSize": 26,
             "lineHeight": 1.1,
             "letterSpacing": 0,
@@ -6957,7 +7130,10 @@
                 "frames-4"
               ]
             }
-          ]
+          ],
+          "fit": {
+            "mode": "wrap"
+          }
         },
         {
           "id": "roundel-frame",
@@ -7112,7 +7288,10 @@
                 "frames-4"
               ]
             }
-          ]
+          ],
+          "fit": {
+            "mode": "wrap"
+          }
         },
         {
           "id": "headline-act1",
@@ -7135,10 +7314,13 @@
               "end": "act1_out",
               "params": {
                 "enter_distance_px": 60,
-                "enter_duration_pct": 5
+                "enter_duration_pct": 3
               }
             }
-          ]
+          ],
+          "fit": {
+            "mode": "wrap"
+          }
         },
         {
           "id": "cta",
@@ -7256,11 +7438,13 @@
               "id": "offer-slot-1-slideInRight",
               "label": "Offer Slot 1 slideInRight",
               "preset": "slideInRight",
-              "start": "act1_in",
+              "start": "offer1_in",
               "end": "offers_exit",
               "params": {
                 "enter_distance_px": 60,
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 2.4,
+                "ease_in": "cubic-bezier(0.22, 0.82, 0.28, 1)"
               }
             }
           ]
@@ -7292,7 +7476,9 @@
               "start": "plus1_in",
               "end": "offers_exit",
               "params": {
-                "enter_dy": -10
+                "enter_dy": -10,
+                "enter_duration_pct": 2.8,
+                "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
           ]
@@ -7319,7 +7505,9 @@
               "end": "offers_exit",
               "params": {
                 "enter_distance_px": 60,
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 2.15,
+                "ease_in": "cubic-bezier(0.2, 0.75, 0.25, 1)"
               }
             }
           ]
@@ -7351,7 +7539,9 @@
               "start": "plus2_in",
               "end": "offers_exit",
               "params": {
-                "enter_dy": -10
+                "enter_dy": -10,
+                "enter_duration_pct": 2.8,
+                "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
           ]
@@ -7378,7 +7568,9 @@
               "end": "offers_exit",
               "params": {
                 "enter_distance_px": 60,
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 2,
+                "ease_in": "cubic-bezier(0.18, 0.7, 0.22, 1)"
               }
             }
           ]
@@ -7390,12 +7582,16 @@
           "kind": "text",
           "zIndex": 14,
           "base": {
-            "left": 0,
-            "top": -4,
-            "width": 120,
-            "height": 24,
-            "fontSize": 11,
-            "cssClass": "terms-prices"
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left",
+            "cssClass": "terms-prices",
+            "left": 17,
+            "top": 231,
+            "width": 160,
+            "height": 14,
+            "fontSize": 11
           },
           "binding": {
             "field": "tc_terms_text"
@@ -7408,8 +7604,8 @@
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_dy": -7,
-                "settled_dy": 2,
+                "enter_dy": -6,
+                "settled_dy": 0,
                 "exit_dy": 7
               }
             }
@@ -7422,11 +7618,16 @@
           "kind": "text",
           "zIndex": 15,
           "base": {
-            "left": 0,
-            "top": 7,
-            "width": 420,
-            "fontSize": 11,
-            "cssClass": "unit-rate-prices"
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left",
+            "cssClass": "unit-rate-prices",
+            "left": 17,
+            "top": 219,
+            "width": 300,
+            "height": 26,
+            "fontSize": 11
           },
           "binding": {
             "field": "tc_units_text"
@@ -7439,12 +7640,18 @@
               "start": "act1_out",
               "end": "tc_exit",
               "params": {
-                "enter_dy": -17,
-                "settled_dy": -11,
+                "enter_dy": -6,
+                "settled_dy": 0,
                 "exit_dy": 5
               }
             }
-          ]
+          ],
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 12,
+            "align": "bottom"
+          }
         },
         {
           "id": "terms-solo",
@@ -7524,7 +7731,7 @@
             }
           ],
           "fit": {
-            "maxLines": 4
+            "mode": "wrap"
           }
         }
       ],
@@ -7538,7 +7745,7 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 311,
+            "left": 323,
             "top": 63,
             "width": 224,
             "height": 211
@@ -7554,7 +7761,7 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 537,
+            "left": 549,
             "top": 64,
             "width": 224,
             "height": 174
@@ -7570,7 +7777,7 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 516,
+            "left": 528,
             "top": 81,
             "width": 37,
             "height": 62
@@ -7604,15 +7811,23 @@
             "offer_count_num": 2
           },
           "props": {
-            "top": 80,
-            "fontSize": 22,
-            "left": 0,
-            "width": 224,
-            "height": 25,
+            "top": 77,
+            "fontSize": 18,
+            "left": 25,
+            "width": 171,
+            "height": 30,
             "textAlign": "center",
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-start",
+            "justifyContent": "center"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "maxLines": 2,
+            "minFontSize": 14,
+            "mode": "shrink"
+          }
         },
         {
           "id": "offers-3|offer-slot-1",
@@ -7624,7 +7839,7 @@
           },
           "props": {
             "left": 290,
-            "top": 10,
+            "top": 2,
             "width": 293,
             "height": 293
           },
@@ -7640,7 +7855,7 @@
           },
           "props": {
             "left": 526,
-            "top": 10,
+            "top": 2,
             "width": 293,
             "height": 241
           },
@@ -7656,7 +7871,7 @@
           },
           "props": {
             "left": 411,
-            "top": 122,
+            "top": 113,
             "width": 293,
             "height": 225
           },
@@ -7672,7 +7887,7 @@
           },
           "props": {
             "left": 532,
-            "top": 83,
+            "top": 75,
             "width": 51,
             "height": 85
           },
@@ -7688,7 +7903,7 @@
           },
           "props": {
             "left": 1077,
-            "top": -96,
+            "top": -104,
             "width": 51,
             "height": 85
           },
@@ -7722,15 +7937,22 @@
           },
           "props": {
             "top": 93,
-            "fontSize": 19,
+            "fontSize": 18,
             "left": 57,
             "width": 180,
             "height": 16,
             "textAlign": "center",
             "justifyContent": "center",
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-start"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 14,
+            "maxLines": 2
+          }
         },
         {
           "id": "offers-3|logo-act1",
@@ -8026,7 +8248,7 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 39,
+            "left": 34,
             "top": 80,
             "width": 246,
             "height": 90,
@@ -8097,17 +8319,18 @@
           "cssClass": "offer-subline",
           "properties": {
             "left": 0,
-            "top": 126,
+            "top": 125,
             "fontSize": 28,
             "lineHeight": 1.1,
             "letterSpacing": 0,
-            "width": "100%",
+            "width": 356,
             "textAlign": "left",
-            "textTransform": "uppercase"
+            "textTransform": "uppercase",
+            "height": 32
           },
           "fit": {
-            "mode": "wrap",
-            "maxLines": 2
+            "mode": "shrink",
+            "maxLines": 1
           }
         },
         {

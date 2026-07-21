@@ -18,12 +18,16 @@ const makeElement = ({
   alignItems = '',
   visible = true,
 } = {}) => {
+  const attrs: Record<string, string> = {};
   const element: Record<string, unknown> = {
     className,
     textContent: text,
     style: {} as Record<string, string>,
     parentElement: null,
     matches: (selector: string) => selector === `.${className}`,
+    setAttribute: (name: string, value: string) => { attrs[name] = String(value); },
+    getAttribute: (name: string) => (attrs[name] === undefined ? null : attrs[name]),
+    removeAttribute: (name: string) => { delete attrs[name]; },
   };
   const style = element.style as Record<string, string>;
   const currentSize = () => Number.parseFloat(style.fontSize) || fontSize;
@@ -188,7 +192,7 @@ test('a member inside a hidden slot is skipped via its ancestors', () => {
   assert.equal((inHiddenSlot.style as Record<string, string>).fontSize, undefined);
 });
 
-test('wrap allows extra lines but shrinks once maxLines is exceeded', () => {
+test('shrink with maxLines > 1 wraps and shrinks until the line budget fits', () => {
   const element = makeElement({
     fontSize: 24,
     clientHeight: 44,
@@ -197,15 +201,67 @@ test('wrap allows extra lines but shrinks once maxLines is exceeded', () => {
   });
 
   engine().applyRules(makeRoot([element]), [
-    { cssClass: 'target', wrap: true, maxLines: 2, minFontSize: 10 },
+    { cssClass: 'target', wrap: true, allowShrink: true, maxLines: 2, minFontSize: 10 },
   ]);
 
   const style = element.style as Record<string, string>;
   assert.equal(style.whiteSpace, 'normal');
   assert.equal(style.fontSize, '20px');
+  assert.equal(element.getAttribute('data-fit-clipped'), null);
 });
 
-test('wrapped multi-line content in a bottom-anchored flex box is re-anchored to grow down', () => {
+test('wrap mode keeps the designed size and does not shrink', () => {
+  const element = makeElement({
+    fontSize: 24,
+    clientHeight: 44,
+    fitsAt: (_size, _tracking, whiteSpace) => whiteSpace === 'normal',
+    linesAt: (_size, whiteSpace) => (whiteSpace === 'normal' ? 3 : 1),
+  });
+
+  engine().applyRules(makeRoot([element]), [
+    { cssClass: 'target', wrap: true, allowShrink: false, maxLines: 2, minFontSize: 10 },
+  ]);
+
+  const style = element.style as Record<string, string>;
+  assert.equal(style.whiteSpace, 'normal');
+  assert.equal(style.fontSize, '24px');
+  assert.equal(element.getAttribute('data-fit-clipped'), 'true');
+});
+
+test('copy that measures a hair over N line-heights is not false-flagged as clipped', () => {
+  // Real browsers often report ~2.2 line-boxes for visually 2-line Museo copy.
+  const element = makeElement({
+    fontSize: 20,
+    lineHeightRatio: 1.1,
+    clientHeight: 100,
+    fitsAt: (_size, _tracking, whiteSpace) => whiteSpace === 'normal',
+    linesAt: (_size, whiteSpace) => (whiteSpace === 'normal' ? 2.2 : 1),
+  });
+
+  engine().applyRules(makeRoot([element]), [
+    { cssClass: 'target', wrap: true, allowShrink: true, maxLines: 2, minFontSize: 10 },
+  ]);
+
+  assert.equal(element.getAttribute('data-fit-clipped'), null);
+});
+
+test('shrink with maxLines 1 forces a single line (no wrap)', () => {
+  const element = makeElement({
+    fontSize: 24,
+    fitsAt: (size, _tracking, whiteSpace) => whiteSpace === 'nowrap' && size <= 18,
+    linesAt: (_size, whiteSpace) => (whiteSpace === 'normal' ? 2 : 1),
+  });
+
+  engine().applyRules(makeRoot([element]), [
+    { cssClass: 'target', wrap: false, allowShrink: true, maxLines: 1, minFontSize: 10 },
+  ]);
+
+  const style = element.style as Record<string, string>;
+  assert.equal(style.whiteSpace, 'nowrap');
+  assert.equal(style.fontSize, '18px');
+});
+
+test('wrapped multi-line content keeps bottom flex alignment (wraps upward)', () => {
   const wrapped = makeElement({
     fontSize: 18,
     clientHeight: 44,
@@ -228,8 +284,10 @@ test('wrapped multi-line content in a bottom-anchored flex box is re-anchored to
     { cssClass: 'single', wrap: true, maxLines: 2, minFontSize: 8 },
   ]);
 
-  assert.equal((wrapped.style as Record<string, string>).alignItems, 'flex-start');
-  assert.notEqual((singleLine.style as Record<string, string>).alignItems, 'flex-start');
+  // Engine must not override authored flex-end — last line stays on the
+  // baseline, earlier lines stack upward when maxLines allows wrap.
+  assert.equal((wrapped.style as Record<string, string>).alignItems || '', '');
+  assert.equal((singleLine.style as Record<string, string>).alignItems || '', '');
 });
 
 test('bottom-aligned members keep their glyph bottoms when shrunk', () => {
@@ -311,7 +369,8 @@ test('static truncate mode is applied without shrinking', () => {
   assert.equal(style.overflow, 'hidden');
   assert.equal(style.textOverflow, 'ellipsis');
   assert.equal(style.fontSize, '');
-  assert.deepEqual(results, [{ cssClass: 'target', size: 40 }]);
+  // Width overflow in truncate mode still counts as clipped.
+  assert.deepEqual(results, [{ cssClass: 'target', size: 40, clipped: true }]);
 });
 
 test('empty elements are skipped entirely', () => {
@@ -325,13 +384,15 @@ test('empty elements are skipped entirely', () => {
   assert.equal((element.style as Record<string, string>).fontSize, undefined);
 });
 
-test('applyTextFitting returns a map of final sizes per css class', () => {
+test('applyTextFitting returns size and clipped maps per css class', () => {
   const element = makeElement({ fontSize: 40, fitsAt: (size) => size <= 34 });
 
   const results = applyTextFitting(makeRoot([element]), [
     { cssClass: 'target', minFontSize: 8 },
   ], { win: fakeWindow });
 
-  assert.ok(results instanceof Map);
-  assert.equal(results.get('target'), 34);
+  assert.ok(results.sizes instanceof Map);
+  assert.ok(results.clipped instanceof Map);
+  assert.equal(results.sizes.get('target'), 34);
+  assert.equal(results.clipped.get('target'), false);
 });

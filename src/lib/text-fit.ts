@@ -16,10 +16,13 @@
 //
 // Rule shape is documented in text-fit-rules.ts (the only producer of rules).
 //
-// Fit pipeline per element:  tracking squeeze -> wrap (bounded by maxLines,
-// growing DOWN) -> shrink to a per-variant floor. Rules with shared: true
-// equalize the final size and tracking across all visible members so pricing
-// blocks stay uniform.
+// Fit pipeline per element:
+//   1) set white-space (wrap vs nowrap)
+//   2) tracking squeeze (offer values)
+//   3) if allowShrink: reduce font-size until width + maxLines fit
+//   4) clip leftover overflow; mark data-fit-clipped when still overflowing
+// Modes come from normalizeFitConfig (text-fit-rules.ts). shared: true
+// equalizes final size/tracking across visible members.
 
 const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
   function computedOf(element) {
@@ -83,13 +86,25 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
   }
 
   function overflowsWidth(element) {
-    return element.clientWidth > 0 && element.scrollWidth > element.clientWidth;
+    // Ignore sub-pixel noise (common with fractional layout), but treat a
+    // full extra CSS pixel as real overflow.
+    return element.clientWidth > 0 && (element.scrollWidth - element.clientWidth) > 0.5;
+  }
+
+  function exceedsMaxLines(element, rule, cs, fontSize) {
+    var maxLines = Number(rule.maxLines);
+    if (!isFinite(maxLines) || maxLines <= 0) return false;
+    var lineHeight = lineHeightPx(cs, fontSize);
+    if (lineHeight <= 0) return false;
+    // Range/line-box measurements often land a hair over N * line-height for
+    // copy that clearly fits in N lines. Require more than half an extra line
+    // before treating it as over budget (avoids the maxLines→n+1 false clip).
+    var lines = contentHeight(element) / lineHeight;
+    return lines > maxLines + 0.5;
   }
 
   function tooTall(element, rule, cs, fontSize) {
-    var maxHeight = maxTextHeight(element, rule, cs, fontSize);
-    if (maxHeight === null) return false;
-    return contentHeight(element) > maxHeight + 1;
+    return exceedsMaxLines(element, rule, cs, fontSize);
   }
 
   function overflowing(element, rule, cs, fontSize) {
@@ -126,13 +141,15 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
 
   function fitMember(element, rule) {
     resetStyles(element);
+    element.removeAttribute('data-fit-clipped');
     var cs = computedOf(element);
     var base = cssNumber(cs.fontSize, Number(rule.minFontSize) || 1);
     var ratio = Number(rule.minFontSizeRatio);
     var floor = Math.max(Number(rule.minFontSize) || 1, ratio > 0 ? base * ratio : 0);
     if (floor > base) floor = base;
     var lineRatio = base > 0 ? lineHeightPx(cs, base) / base : 1;
-    if (rule.wrap) element.style.whiteSpace = 'normal';
+    // Explicit white-space so CSS nowrap/normal cannot fight the mode.
+    element.style.whiteSpace = rule.wrap ? 'normal' : 'nowrap';
     element.style.fontSize = base + 'px';
     var trackingEm = 0;
     if (rule.tracking && overflowsWidth(element)) {
@@ -144,10 +161,14 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
     }
     var size = base;
     cs = computedOf(element);
-    while (size > floor && overflowing(element, rule, cs, size)) {
-      size = Math.max(floor, Number((size - 0.5).toFixed(3)));
-      element.style.fontSize = size + 'px';
-      cs = computedOf(element);
+    // allowShrink defaults true for engine-level rules; mode "wrap" sets false.
+    var allowShrink = rule.allowShrink !== false;
+    if (allowShrink) {
+      while (size > floor && overflowing(element, rule, cs, size)) {
+        size = Math.max(floor, Number((size - 0.5).toFixed(3)));
+        element.style.fontSize = size + 'px';
+        cs = computedOf(element);
+      }
     }
     return { element: element, base: base, size: size, trackingEm: trackingEm, lineRatio: lineRatio };
   }
@@ -161,21 +182,45 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
     if (maxHeight !== null) {
       element.style.maxHeight = maxHeight + 'px';
       element.style.overflow = 'hidden';
+    } else if (overflowsWidth(element)) {
+      element.style.overflow = 'hidden';
     }
-    if (rule.wrap) {
-      var lineHeight = lineHeightPx(cs, size);
-      var lines = lineHeight > 0 ? Math.round(contentHeight(element) / lineHeight) : 1;
-      var isFlex = cs.display && String(cs.display).indexOf('flex') !== -1;
-      if (lines > 1 && isFlex && cs.alignItems === 'flex-end') {
-        // Split downwards: the first line must stay put, the second line goes
-        // below it, instead of a bottom-anchored box pushing line one upwards.
-        element.style.alignItems = 'flex-start';
-      }
-    }
+    // Bottom-aligned flex boxes (align-items: flex-end) keep that alignment
+    // when copy wraps: the last line stays on the baseline and earlier lines
+    // stack upward. Do not flip to flex-start — that was fighting Text Y = Bottom.
     if (rule.align === 'bottom' && size < fit.base) {
       var delta = (fit.base - size) * fit.lineRatio;
       if (delta > 0.25) element.style.transform = 'translateY(' + delta.toFixed(2) + 'px)';
     }
+    cs = computedOf(element);
+    var widthClip = overflowsWidth(element);
+    var linesClip = exceedsMaxLines(element, rule, cs, size);
+    var clipped = widthClip || linesClip;
+    if (clipped) {
+      element.setAttribute('data-fit-clipped', 'true');
+      var reasons = [];
+      if (widthClip) reasons.push('width');
+      if (linesClip) {
+        var maxLines = Number(rule.maxLines);
+        reasons.push(
+          isFinite(maxLines) && maxLines > 0
+            ? ('max lines (' + maxLines + ')')
+            : 'height',
+        );
+      }
+      element.setAttribute(
+        'title',
+        'Clipped: still overflows ' + reasons.join(' and ') + ' after fitting',
+      );
+      element.setAttribute('data-fit-clip-reason', reasons.join(','));
+    } else {
+      element.removeAttribute('data-fit-clipped');
+      element.removeAttribute('data-fit-clip-reason');
+      if (element.getAttribute('title') && String(element.getAttribute('title')).indexOf('Clipped:') === 0) {
+        element.removeAttribute('title');
+      }
+    }
+    return clipped;
   }
 
   function applyRule(root, rule) {
@@ -191,10 +236,21 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
     if (resolved.static) {
       var staticSizes = elements.map(function (element) {
         resetStyles(element);
+        element.removeAttribute('data-fit-clipped');
         applyStatic(element, resolved);
-        return cssNumber(computedOf(element).fontSize, Number(resolved.minFontSize) || 1);
+        var cs = computedOf(element);
+        var size = cssNumber(cs.fontSize, Number(resolved.minFontSize) || 1);
+        if (overflowing(element, resolved, cs, size)) {
+          element.setAttribute('data-fit-clipped', 'true');
+          element.setAttribute('title', 'Clipped: overflow hidden (clip/truncate mode)');
+          element.setAttribute('data-fit-clip-reason', 'static');
+        }
+        return size;
       });
-      return Math.min.apply(null, staticSizes);
+      var anyClipped = elements.some(function (element) {
+        return element.getAttribute('data-fit-clipped') === 'true';
+      });
+      return { size: Math.min.apply(null, staticSizes), clipped: anyClipped };
     }
 
     var fits = elements.map(function (element) {
@@ -202,25 +258,32 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
     });
     var sizes = fits.map(function (fit) { return fit.size; });
     var trackings = fits.map(function (fit) { return fit.trackingEm; });
+    var clipped = false;
     if (resolved.shared) {
       var sharedSize = Math.min.apply(null, sizes);
       var sharedTracking = Math.min.apply(null, trackings);
       fits.forEach(function (fit) {
-        applyFinal(fit, resolved, sharedSize, sharedTracking);
+        if (applyFinal(fit, resolved, sharedSize, sharedTracking)) clipped = true;
       });
-      return sharedSize;
+      return { size: sharedSize, clipped: clipped };
     }
     fits.forEach(function (fit) {
-      applyFinal(fit, resolved, fit.size, fit.trackingEm);
+      if (applyFinal(fit, resolved, fit.size, fit.trackingEm)) clipped = true;
     });
-    return Math.min.apply(null, sizes);
+    return { size: Math.min.apply(null, sizes), clipped: clipped };
   }
 
   function applyRules(root, rules) {
     var results = [];
     (rules || []).forEach(function (rule) {
-      var size = applyRule(root, rule);
-      if (size !== undefined) results.push({ cssClass: rule.cssClass, size: size });
+      var result = applyRule(root, rule);
+      if (result !== undefined) {
+        results.push({
+          cssClass: rule.cssClass,
+          size: result.size,
+          clipped: Boolean(result.clipped),
+        });
+      }
     });
     return results;
   }
@@ -234,13 +297,15 @@ export const textFitEngineSource = () => TEXT_FIT_ENGINE_SOURCE;
 /** The evaluated engine factory — the editor runs the exact exported source. */
 export const createTextFitEngine = new Function(`"use strict"; return ${TEXT_FIT_ENGINE_SOURCE};`)();
 
-/** Editor-preview entry point; returns a Map of cssClass -> final font size. */
+/** Editor-preview entry point; returns { sizes, clipped } Maps by cssClass. */
 export const applyTextFitting = (root, rules = [], options = {}) => {
   const win = options.win || (typeof window !== 'undefined' ? window : null);
-  const results = new Map();
-  if (!win || !root) return results;
-  createTextFitEngine(win).applyRules(root, rules).forEach(({ cssClass, size }) => {
-    results.set(cssClass, size);
+  const sizes = new Map();
+  const clipped = new Map();
+  if (!win || !root) return { sizes, clipped };
+  createTextFitEngine(win).applyRules(root, rules).forEach((result) => {
+    sizes.set(result.cssClass, result.size);
+    clipped.set(result.cssClass, Boolean(result.clipped));
   });
-  return results;
+  return { sizes, clipped };
 };

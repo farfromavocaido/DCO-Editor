@@ -10,6 +10,7 @@ import {
   selectFeedDraftVariant,
   updateFeedDraftField,
 } from '@/lib/feed-model';
+import { alignOfferValueSymbols } from '@/lib/offer-value-symbols';
 import { applyTextFitting } from '@/lib/text-fit';
 import { textFitRulesForSize } from '@/lib/text-fit-rules';
 import { nextZoomLevel } from '@/lib/canvas-zoom';
@@ -72,6 +73,7 @@ import {
   updateCreativeLayerClip,
   updateCreativeLayerFit,
   updateCreativeClassFit,
+  updateCreativeTargetFit as updateCreativeTargetFitDocument,
   replaceCreativeLayer,
   updateCreativeTargetSharedValue,
   updateCreativeTargetValue as updateCreativeTargetDocumentValue,
@@ -131,6 +133,7 @@ export const useEditorStore = create<any>((set, get) => ({
   frameCount: 3,
   roundelMode: 'copy-only',
   percent: 19,
+  isPlaying: false,
   feedProfileName: '',
   feedFields: [],
   feedDraft: createFeedDraft([]),
@@ -144,6 +147,7 @@ export const useEditorStore = create<any>((set, get) => ({
   isolatedGroupId: '',
   selectedClipId: '',
   fitResults: new Map(),
+  fitClipped: new Map(),
   scale: 1,
   canvasZoom: 'auto',
   lockedLayerIds: new Set(),
@@ -159,7 +163,12 @@ export const useEditorStore = create<any>((set, get) => ({
   htmlInspectorPayload: null,
 
   setResizeMode: (mode) => set({ resizeMode: mode === 'scale' ? 'scale' : 'frame' }),
-  setPercent: (percent) => set({ percent }),
+  setPercent: (percent, options = {}) => set({
+    percent,
+    ...(options.pause === false ? {} : { isPlaying: false }),
+  }),
+  setPlaying: (isPlaying) => set({ isPlaying: Boolean(isPlaying) }),
+  togglePlaying: () => set({ isPlaying: !get().isPlaying }),
 
   activeScopes: () => {
     const { offerCount, tcMode, ctaShape, includeRoundelFrame, frameCount, roundelMode } = get();
@@ -361,6 +370,16 @@ export const useEditorStore = create<any>((set, get) => ({
     }
     if (change.kind === 'creativeClassFit') {
       get().applyCreativeClassFitValue(change.size, change.cssClass, change.field, value);
+      return;
+    }
+    if (change.kind === 'creativeTargetFit') {
+      get().applyCreativeTargetFitValue(
+        change.size,
+        change.targetId,
+        change.activeScopes || get().activeScopes(),
+        change.field,
+        value,
+      );
       return;
     }
     if (change.kind === 'creativeLayerReplace') {
@@ -707,6 +726,42 @@ export const useEditorStore = create<any>((set, get) => ({
         kind: 'creativeClassFit',
         size: state.size,
         cssClass,
+        field,
+        before: previous,
+        after: nextValue,
+      }]);
+    }
+  },
+
+  applyCreativeTargetFitValue: (size, targetId, activeScopes, field, value) => {
+    const state = get();
+    if (!state.creativeDocument) return;
+    const next = updateCreativeTargetFitDocument(
+      state.creativeDocument,
+      size,
+      targetId,
+      activeScopes,
+      field,
+      value,
+    );
+    set({ creativeDocument: next, creativeDirty: true });
+    get().setStatus('Unsaved creative changes', 'warn');
+  },
+
+  updateCreativeTargetFitValue: (targetId, field, value, { record = true, before = undefined } = {}) => {
+    const state = get();
+    const size = state.size;
+    const activeScopes = state.activeScopes();
+    const target = findCreativeTarget(state.creativeDocument, size, targetId, activeScopes);
+    const nextValue = value === '' ? '' : typeof value === 'boolean' ? value : Number.isFinite(Number(value)) ? Number(value) : value;
+    const previous = before ?? target?.fit?.[field];
+    get().applyCreativeTargetFitValue(size, targetId, activeScopes, field, nextValue);
+    if (record) {
+      get().pushHistory([{
+        kind: 'creativeTargetFit',
+        size,
+        targetId,
+        activeScopes,
         field,
         before: previous,
         after: nextValue,
@@ -1505,8 +1560,11 @@ export const useEditorStore = create<any>((set, get) => ({
   applyPreviewTextFitting: (stageEl) => {
     const state = get();
     if (!stageEl || !state.creativeDocument) return;
-    const fitResults = applyTextFitting(stageEl, creativeFitRules(state));
-    set({ fitResults });
+    const { sizes, clipped } = applyTextFitting(stageEl, creativeFitRules(state));
+    // After fit sizes settle, bottom-align reduced %/£/€ to the digit run
+    // (same routine the exported runtime runs).
+    alignOfferValueSymbols(stageEl);
+    set({ fitResults: sizes, fitClipped: clipped });
   },
 
   init: async () => {

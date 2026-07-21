@@ -397,9 +397,9 @@ test('exports legacy static first-frame state and GWD skeleton text reset', asyn
   const html = renderStudioReadyHtml(document, '300x600');
 
   assert.match(html, /p,\s*h1,\s*h2,\s*h3\s*\{\s*margin:\s*0px;/);
-  assert.match(html, /#headline-act1\s*\{[\s\S]*?transform:\s*translate3d\(320px, 0px, 0px\);[\s\S]*?opacity:\s*0;/);
-  assert.match(html, /\.offer-slot-1\s*\{[\s\S]*?transform:\s*translate3d\(60px, 0px, 0px\);[\s\S]*?opacity:\s*0;/);
-  assert.match(html, /\.plus-1\s*\{[\s\S]*?font-size:\s*43px;[\s\S]*?transform:\s*translate3d\(0px, -10px, 0px\);/);
+  assert.match(html, /#headline-act1\s*\{[\s\S]*?transform:\s*translate3d\(320px, 0px, 0px\)(?:\s+scale3d\([^)]+\))?;[\s\S]*?opacity:\s*0;/);
+  assert.match(html, /\.offer-slot-1\s*\{[\s\S]*?transform:\s*translate3d\(60px, 0px, 0px\)(?:\s+scale3d\([^)]+\))?;[\s\S]*?opacity:\s*0;/);
+  assert.match(html, /\.plus-1\s*\{[\s\S]*?font-size:\s*43px;[\s\S]*?transform:\s*translate3d\(0px, -10px, 0px\)(?:\s+scale3d\([^)]+\))?;/);
   assert.doesNotMatch(html, /font-size:\s*43pxpx/);
 });
 
@@ -429,6 +429,7 @@ test('the serialized fit engine in exported HTML is executable', async () => {
   assert.ok(source, 'serialized engine source not found in exported HTML');
   const factory = new Function(`return ${source};`)();
   const style: Record<string, string> = {};
+  const attrs: Record<string, string> = {};
   const element = {
     className: 'probe',
     textContent: 'copy',
@@ -441,6 +442,9 @@ test('the serialized fit engine in exported HTML is executable', async () => {
     },
     scrollHeight: 20,
     matches: (selector: string) => selector === '.probe',
+    setAttribute: (name: string, value: string) => { attrs[name] = String(value); },
+    getAttribute: (name: string) => (attrs[name] === undefined ? null : attrs[name]),
+    removeAttribute: (name: string) => { delete attrs[name]; },
   };
   const engine = factory({
     getComputedStyle: () => ({
@@ -458,7 +462,7 @@ test('the serialized fit engine in exported HTML is executable', async () => {
     [{ cssClass: 'probe', minFontSize: 8 }],
   );
 
-  assert.deepEqual(results, [{ cssClass: 'probe', size: 30 }]);
+  assert.deepEqual(results, [{ cssClass: 'probe', size: 30, clipped: false }]);
   assert.equal(style.fontSize, '30px');
 });
 

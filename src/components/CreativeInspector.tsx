@@ -141,7 +141,7 @@ export function CreativeInspector() {
   const promoteTargetToSharedStyle = useEditorStore((s) => s.promoteCreativeTargetToSharedStyle);
   const clearTargetOverrides = useEditorStore((s) => s.clearCreativeTargetOverrides);
   const updateLayerFit = useEditorStore((s) => s.updateCreativeLayerFitValue);
-  const updateClassFit = useEditorStore((s) => s.updateCreativeClassFitValue);
+  const updateTargetFit = useEditorStore((s) => s.updateCreativeTargetFitValue);
   const setResizeMode = useEditorStore((s) => s.setResizeMode);
   const replaceSelectedLayerFromCode = useEditorStore((s) => s.replaceSelectedLayerFromCode);
   const updateClip = useEditorStore((s) => s.updateCreativeLayerClipValue);
@@ -246,9 +246,11 @@ export function CreativeInspector() {
   const activeFit = selectedTarget.kind === 'nested'
     ? (selectedTarget.fit || {})
     : (selectedLayer.fit || {});
+  // Nested fit (offer value/subline) writes to classRule under offers-1 and to
+  // variantRules[].fit under offers-2/3 — same independence as layout props.
   const applyFitUpdate = (field, value) => (
     selectedTarget.kind === 'nested'
-      ? updateClassFit(selectedTarget.cssClass, field, value)
+      ? updateTargetFit(selectedTarget.id, field, value)
       : updateLayerFit(selectedLayer.id, field, value)
   );
   const fittedFontSize = activeCssClass ? fitResults.get(activeCssClass) : undefined;
@@ -454,7 +456,7 @@ export function CreativeInspector() {
               options={[
                 { value: 'flex-start', label: 'Top', icon: 'alignTop', tip: 'Align text to the top of the box' },
                 { value: 'center', label: 'Middle', icon: 'alignCenterV', tip: 'Center text vertically inside the box' },
-                { value: 'flex-end', label: 'Bottom', icon: 'alignBottom', tip: 'Align text to the bottom of the box' },
+                { value: 'flex-end', label: 'Bottom', icon: 'alignBottom', tip: 'Align text to the bottom of the box; multi-line wraps upward' },
               ]}
               onChange={setTextVerticalAlign}
             />
@@ -469,7 +471,7 @@ export function CreativeInspector() {
             onToggle={() => toggleSection('fit')}
           >
             <p className="inspector-note">
-              These settings control the real text, not just the selection box. Shrink reduces type until the minimum size, then clips extra lines to the max-line limit.
+              Shrink: reduce type until copy fits. Max lines 1 = single line; max lines 2+ = wrap up to that budget, then shrink. Wrap: keep the designed size and wrap only. Clip/truncate: no wrap or shrink — overflow is hidden. Clipped copy shows a red badge on the canvas.
             </p>
             <div className="inspector-grid">
               <SelectControl

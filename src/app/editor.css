@@ -1,15 +1,5 @@
-/* Brand font for the preview stage: Museo — the slab family, NOT Museo Sans.
-   Served from campaign/assets/fonts via the /assets proxy so the editor canvas
-   measures and renders the exact file every export packages. local("☺") never
-   matches, so a Museo installed on this machine can never mask the packaged
-   file. */
-@font-face {
-  font-family: "Museo";
-  src: local("☺"), url("/assets/fonts/Museo700-Regular.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: block;
-}
+/* Brand @font-face (Museo slab CDN) is injected from src/lib/brand-font.ts in
+   layout.tsx so the editor, /view, and Studio CDN exports share one URL. */
 
 :root {
   color-scheme: dark;
@@ -1402,6 +1392,20 @@ select {
   overflow: hidden;
   background: var(--panel-raised);
   transform-origin: top left;
+  /* Match exported /view ads: editor chrome uses geometricPrecision +
+     antialiased smoothing, which makes Museo look like a different cut. */
+  font-synthesis: none;
+  text-rendering: auto;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+.stage,
+.stage * {
+  font-synthesis: none;
+  text-rendering: auto;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
 }
 
 .layout-style {
@@ -1613,6 +1617,40 @@ select {
 
 .selection-label-current {
   background: rgba(119, 22, 70, 0.9);
+}
+
+.selection-label-clipped {
+  left: auto;
+  right: -2px;
+  top: -2px;
+  width: 8px;
+  height: 8px;
+  min-height: 0;
+  max-width: none;
+  padding: 0;
+  border-radius: 50%;
+  background: #e11d2e;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  color: transparent;
+  font-size: 0;
+  overflow: visible;
+  pointer-events: auto;
+  cursor: help;
+}
+
+/* Quiet clipped marker — hover the element for the reason (native title). */
+.stage [data-fit-clipped="true"]::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  z-index: 5;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e11d2e;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
 }
 
 .isolation-crumb {
@@ -2709,9 +2747,33 @@ select {
 
 .timeline-head-readout {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
   min-width: 0;
+}
+
+.timeline-play-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--panel-2, #141820) 88%, transparent);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.timeline-play-btn:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+  color: var(--accent);
+}
+
+.timeline-play-btn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  outline-offset: 1px;
 }
 
 .timeline-head input[type='range'] {

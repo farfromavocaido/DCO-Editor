@@ -23,6 +23,7 @@ import {
   updateCreativeLayerFit,
   updateCreativeLayerMetadata,
   replaceCreativeLayer,
+  updateCreativeTargetFit,
   updateCreativeTargetSharedValue,
   updateCreativeTargetValue,
 } from './creative-model';
@@ -280,6 +281,7 @@ const nestedDocument = {
         {
           cssClass: 'offer-subline',
           properties: { left: 0, top: 114, fontSize: 26 },
+          fit: { mode: 'wrap', maxLines: 2 },
         },
       ],
       variantRules: [
@@ -297,6 +299,7 @@ const nestedDocument = {
           layerId: 'offer-subline',
           cssClass: 'offer-subline',
           props: { top: 56, fontSize: 15 },
+          fit: { mode: 'shrink', maxLines: 1 },
           editable: true,
         },
       ],
@@ -434,6 +437,68 @@ test('clears active target override fields without deleting unrelated override p
   const rule = next.sizes['300x600'].variantRules.find((item) => item.id === 'offers-3|offer-subline');
   assert.equal(rule.props.top, undefined);
   assert.equal(rule.props.fontSize, 15);
+  assert.equal(rule.fit.mode, 'shrink');
+});
+
+test('nested subline fit reads classRule baseline under offers-1 and variant override under offers-3', () => {
+  const baseline = findCreativeTarget(
+    nestedDocument,
+    '300x600',
+    'offer-slot-1::offer-subline',
+    ['offers-1'],
+  );
+  const scoped = findCreativeTarget(
+    nestedDocument,
+    '300x600',
+    'offer-slot-1::offer-subline',
+    ['offers-3'],
+  );
+
+  assert.equal(baseline.fit.mode, 'wrap');
+  assert.equal(baseline.fit.maxLines, 2);
+  assert.equal(baseline.writeSource.kind, 'classRule');
+  assert.equal(scoped.fit.mode, 'shrink');
+  assert.equal(scoped.fit.maxLines, 1);
+  assert.equal(scoped.writeSource.kind, 'variantRule');
+});
+
+test('writes nested subline fit to classRule under offers-1 and variantRules under offers-3', () => {
+  const baselineNext = updateCreativeTargetFit(
+    nestedDocument,
+    '300x600',
+    'offer-slot-1::offer-subline',
+    ['offers-1'],
+    'mode',
+    'shrink',
+  );
+  assert.equal(baselineNext.sizes['300x600'].classRules[1].fit.mode, 'shrink');
+  assert.equal(baselineNext.sizes['300x600'].variantRules[1].fit.mode, 'shrink');
+
+  const scopedNext = updateCreativeTargetFit(
+    nestedDocument,
+    '300x600',
+    'offer-slot-1::offer-subline',
+    ['offers-3'],
+    'mode',
+    'wrap',
+  );
+  assert.equal(scopedNext.sizes['300x600'].classRules[1].fit.mode, 'wrap');
+  assert.equal(scopedNext.sizes['300x600'].variantRules[1].fit.mode, 'wrap');
+  assert.equal(nestedDocument.sizes['300x600'].variantRules[1].fit.mode, 'shrink');
+});
+
+test('clearing layout override props keeps scoped fit and the variant rule', () => {
+  const next = clearCreativeTargetActiveOverride(
+    nestedDocument,
+    '300x600',
+    'offer-slot-1::offer-subline',
+    ['offers-3'],
+    ['top', 'fontSize'],
+  );
+  const rule = next.sizes['300x600'].variantRules.find((item) => item.id === 'offers-3|offer-subline');
+  assert.ok(rule, 'variant rule must remain while fit override exists');
+  assert.deepEqual(rule.props, {});
+  assert.equal(rule.fit.mode, 'shrink');
 });
 
 test('promotes current override values to the shared reusable style', () => {
@@ -449,7 +514,10 @@ test('promotes current override values to the shared reusable style', () => {
   const variantRule = next.sizes['300x600'].variantRules.find((rule) => rule.id === 'offers-3|offer-subline');
   assert.equal(classRule.properties.top, 56);
   assert.equal(classRule.properties.fontSize, 15);
-  assert.equal(variantRule, undefined);
+  // Layout props cleared after promote; scoped fit must remain independent.
+  assert.ok(variantRule);
+  assert.deepEqual(variantRule.props, {});
+  assert.equal(variantRule.fit.mode, 'shrink');
 });
 
 test('resolves and writes 300x250 headline offer-count variants', () => {

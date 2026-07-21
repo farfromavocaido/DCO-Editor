@@ -95,8 +95,32 @@ test('offer sublines get a shared rule that merges authored fit config', () => {
   const subline = ruleFor(rules, 'offer-subline');
   assert.equal(subline.shared, true, 'authored wrap fit must not disable group equalization');
   assert.equal(subline.wrap, true);
+  assert.equal(subline.allowShrink, false, 'wrap mode must keep the designed font size');
   assert.equal(subline.maxLines, 2);
   assert.equal(subline.minFontSize, 6);
+});
+
+test('shrink mode wraps only when maxLines is greater than 1', () => {
+  const single = ruleFor(textFitRulesForSize(sizeCreative({
+    classRules: [{
+      cssClass: 'offer-subline',
+      properties: { fontSize: 20 },
+      fit: { mode: 'shrink', maxLines: 1 },
+    }],
+  })), 'offer-subline');
+  const multi = ruleFor(textFitRulesForSize(sizeCreative({
+    classRules: [{
+      cssClass: 'offer-subline',
+      properties: { fontSize: 20 },
+      fit: { mode: 'shrink', maxLines: 2 },
+    }],
+  })), 'offer-subline');
+
+  assert.equal(single.wrap, false);
+  assert.equal(single.allowShrink, true);
+  assert.equal(multi.wrap, true);
+  assert.equal(multi.allowShrink, true);
+  assert.equal(multi.maxLines, 2);
 });
 
 test('offer sublines without authored fit still get a shared shrink rule', () => {
@@ -129,6 +153,7 @@ test('variant rules with fit config become scope overrides on the class rule', (
   const subline = ruleFor(rules, 'offer-subline');
   assert.ok(subline.scopes, 'scope overrides missing');
   assert.equal(subline.scopes['offers-3'].wrap, false);
+  assert.equal(subline.scopes['offers-3'].allowShrink, true);
   assert.equal(subline.scopes['offers-3'].maxLines, 1);
 });
 

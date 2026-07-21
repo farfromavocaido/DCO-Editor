@@ -82,6 +82,9 @@ test('GET /api/creative/[size]/view returns Studio-ready HTML preview', async ()
   assert.match(html, /src="\/assets\//);
   assert.doesNotMatch(html, /src="assets\//);
   assert.doesNotMatch(html, /__next/);
+  // Live /view uses the Studio CDN Museo so fit + symbol metrics match serve.
+  assert.match(html, new RegExp(CDN_MUSEO_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.doesNotMatch(html, /url\("\/assets\/fonts\/Museo700-Regular\.otf"\)/);
 });
 
 test('GET /api/creative/[size]/source returns formatted highlighted HTML source', async () => {

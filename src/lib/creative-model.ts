@@ -49,6 +49,23 @@ export const isHeadlineLayer = (layer: Record<string, unknown> | null | undefine
   String(layer?.id || '').startsWith('headline-act')
 );
 
+/**
+ * Only terms-solo still uses a classRule wrapper for local coords.
+ * terms-prices + unit-rate-prices are canvas-absolute (no silent group offset).
+ */
+export const TERMS_WRAPPER_CLASS_BY_LAYER = {
+  'terms-solo': 'tc-solo-group',
+} as const;
+
+export const termsWrapperClassForLayer = (layerId: string) => (
+  TERMS_WRAPPER_CLASS_BY_LAYER[layerId as keyof typeof TERMS_WRAPPER_CLASS_BY_LAYER] || ''
+);
+
+/** Legal copy lines — used for fit-budget / inspector special cases. */
+export const isTermsLegalLayer = (layerId: string) => (
+  /^(terms-prices|unit-rate-prices|terms-solo)$/.test(String(layerId || ''))
+);
+
 const offerChildDefinitions = [
   {
     id: 'offer-value',
@@ -102,6 +119,28 @@ const propsOnlyHideVisibility = (props: Record<string, unknown> = {}) => {
 const findClassRule = (sizeCreative: Record<string, unknown>, cssClass: string) => (
   (sizeCreative?.classRules || []).find((rule: Record<string, unknown>) => rule.cssClass === cssClass)
 );
+
+const numberProp = (value: unknown, fallback = 0) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+/** Stage box for the T&Cs / unit-rate wrapper that owns legal-line local coords. */
+export const termsWrapperBounds = (
+  sizeCreative: Record<string, unknown> | null,
+  layerId: string,
+) => {
+  const cssClass = termsWrapperClassForLayer(layerId);
+  if (!sizeCreative || !cssClass) return null;
+  const props = findClassRule(sizeCreative, cssClass)?.properties || {};
+  return {
+    cssClass,
+    left: numberProp(props.left, 0),
+    top: numberProp(props.top, 0),
+    width: numberProp(props.width, 0),
+    height: numberProp(props.height, 0),
+  };
+};
 
 const findActiveVariantRule = (
   sizeCreative: Record<string, unknown>,
@@ -170,6 +209,13 @@ export const findCreativeTarget = (
       ...(classRule?.properties || {}),
       ...variantProps,
     };
+    // Fit follows the same "1-offer = classRule baseline, offers-2/3 = variant
+    // override" pattern as layout props. Runtime already applies variantRules[].fit
+    // via text-fit-rules scopes; the editor must read/write that same place.
+    const fit = {
+      ...(classRule?.fit || {}),
+      ...(variantRule?.fit || {}),
+    };
     return {
       id: targetId,
       label: `${layer.label || layer.id} / ${child.label}`,
@@ -182,7 +228,7 @@ export const findCreativeTarget = (
       description: child.description,
       values,
       base: values,
-      fit: classRule?.fit || {},
+      fit,
       clips: layer.clips || [],
       writeSource: variantRule
         ? { kind: 'variantRule', ruleId: variantRule.id, scope: variantRule.scope }
@@ -212,6 +258,10 @@ export const findCreativeTarget = (
         : 'Shared headline placement for acts 1–3.',
       values,
       base: values,
+      fit: {
+        ...(layer.fit || {}),
+        ...(variantRule?.fit || {}),
+      },
       clips: layer.clips || [],
       writeSource: variantRule
         ? { kind: 'variantRule', ruleId: variantRule.id, scope: variantRule.scope }
@@ -222,7 +272,12 @@ export const findCreativeTarget = (
   const cssClass = layer.base?.cssClass || layer.id;
   const variantRule = findActiveVariantRule(sizeCreative, { layerId: layer.id, cssClass }, activeScopes);
   const variantProps = mergedActiveVariantProps(sizeCreative, { layerId: layer.id, cssClass }, activeScopes);
+  const wrapper = termsWrapperBounds(sizeCreative, String(layer.id));
+  const bottomLineProps = findClassRule(sizeCreative, 'sse-bottom-line')?.properties || {};
+  const legalLine = isTermsLegalLayer(String(layer.id));
   const values = {
+    // Legal lines inherit shared bottom-line metrics used by fit-budget height.
+    ...(legalLine ? bottomLineProps : {}),
     ...(layer.base || {}),
     ...variantProps,
   };
@@ -233,12 +288,20 @@ export const findCreativeTarget = (
     layer,
     parentLayerId: '',
     cssClass,
-    coordinateScope: 'canvas',
+    coordinateScope: wrapper ? 'group' : 'canvas',
+    wrapperClass: wrapper?.cssClass || '',
+    wrapperBounds: wrapper,
     description: variantRule
       ? `Editing ${variantRule.scope} overrides for this layer.`
-      : 'Position is relative to the canvas.',
+      : (wrapper
+        ? 'Position is relative to the T&Cs group.'
+        : 'Position is relative to the canvas.'),
     values,
     base: values,
+    fit: {
+      ...(layer.fit || {}),
+      ...(variantRule?.fit || {}),
+    },
     clips: layer.clips || [],
     writeSource: variantRule
       ? { kind: 'variantRule', ruleId: variantRule.id, scope: variantRule.scope }
@@ -327,6 +390,44 @@ export const updateCreativeClassFit = (
     [field]: value,
   };
   return next;
+};
+
+/** Write nested/layer fit using the active scope (classRule baseline vs variantRules[].fit). */
+export const updateCreativeTargetFit = (
+  document: Record<string, unknown>,
+  size: string,
+  targetId: string,
+  activeScopes: string[] = [],
+  field: string,
+  value: unknown,
+) => {
+  const next = deepClone(document);
+  const sizeCreative = currentSizeCreative(next, size);
+  if (!sizeCreative) throw new Error(`Unknown size: ${size}`);
+  const parsed = parseCreativeTargetId(targetId);
+  const layer = findCreativeLayer(next, size, parsed.layerId);
+  if (!layer) throw new Error(`Unknown layer: ${parsed.layerId}`);
+
+  if (parsed.isNested) {
+    const child = childDefinitionForTarget(parsed.childId);
+    if (!child) throw new Error(`Unknown nested target: ${parsed.childId}`);
+    const variantRule = findActiveVariantRule(sizeCreative, { cssClass: child.cssClass }, activeScopes);
+    if (variantRule) {
+      variantRule.fit = {
+        ...(variantRule.fit || {}),
+        [field]: value,
+      };
+      return next;
+    }
+    const classRule = ensureClassRule(sizeCreative, child.cssClass);
+    classRule.fit = {
+      ...(classRule.fit || {}),
+      [field]: value,
+    };
+    return next;
+  }
+
+  return updateCreativeLayerFit(document, size, parsed.layerId, field, value);
 };
 
 export const replaceCreativeLayer = (
@@ -610,10 +711,14 @@ export const clearCreativeTargetActiveOverride = (
     }
   } else {
     rule.props = {};
+    delete rule.fit;
   }
 
   const hasProps = Object.keys(rule.props || {}).length > 0;
-  if (!hasProps) {
+  const hasFit = Boolean(rule.fit && Object.keys(rule.fit).length > 0);
+  // Keep the variant rule if a scoped fit override remains — clearing layout
+  // props alone must not wipe independent wrap/shrink settings.
+  if (!hasProps && !hasFit) {
     sizeCreative.variantRules = (sizeCreative.variantRules || []).filter((item: Record<string, unknown>) => item !== rule);
   }
   return next;

@@ -6,6 +6,7 @@ import {
   findCreativeTarget,
   targetIdForLayerChild,
 } from '@/lib/creative-model';
+import { applyFitBudgetToBox } from '@/lib/fit-box';
 import { activeOfferMemberIds } from '@/lib/offer-interaction-model';
 
 export const DEFAULT_SNAP_THRESHOLD = 5;
@@ -35,35 +36,78 @@ export const getTargetCanvasBounds = (
   const parentTarget = target.kind === 'nested'
     ? findCreativeTarget(document, size, target.parentLayerId, activeScopes)
     : null;
-  const parentWidth = numberValue(parentTarget?.values?.width, numberValue(target.values?.width, 80));
-  const parentHeight = numberValue(parentTarget?.values?.height, numberValue(target.values?.height, 40));
+  const wrapper = target.wrapperBounds || null;
+  const parentWidth = numberValue(
+    parentTarget?.values?.width,
+    numberValue(wrapper?.width, numberValue(target.values?.width, 80)),
+  );
+  const parentHeight = numberValue(
+    parentTarget?.values?.height,
+    numberValue(wrapper?.height, numberValue(target.values?.height, 40)),
+  );
   const fontSize = numberValue(target.values?.fontSize, 22);
   const lineHeight = numberValue(target.values?.lineHeight, 1.15);
   const childLeft = numberValue(target.values?.left, 0);
   const childTop = numberValue(target.values?.top, 0);
   const width = dimensionValue(
     target.values?.width,
-    target.kind === 'nested' ? parentWidth : 80,
+    target.kind === 'nested' || wrapper ? parentWidth : 80,
     parentWidth || 80,
   );
   const height = dimensionValue(target.values?.height, fontSize * lineHeight, parentHeight || 40);
-  const left = target.kind === 'nested'
-    ? numberValue(parentTarget?.values?.left, 0) + childLeft
-    : childLeft;
-  const top = target.kind === 'nested'
-    ? numberValue(parentTarget?.values?.top, 0) + childTop
-    : childTop;
+  const originLeft = target.kind === 'nested'
+    ? numberValue(parentTarget?.values?.left, 0)
+    : numberValue(wrapper?.left, 0);
+  const originTop = target.kind === 'nested'
+    ? numberValue(parentTarget?.values?.top, 0)
+    : numberValue(wrapper?.top, 0);
+  const left = originLeft + childLeft;
+  const top = originTop + childTop;
+
+  // Legal lines emit authored top/height in CSS. Applying the maxLines budget
+  // here rewrote top on every move and fought drag writes.
+  // Offer/headline targets still grow the edit chrome to the line budget.
+  const legalLine = /^(terms-prices|unit-rate-prices|terms-solo)$/.test(String(targetId || ''));
+  if (wrapper || legalLine) {
+    return {
+      targetId,
+      coordinateScope: target.coordinateScope,
+      parentLayerId: target.parentLayerId || '',
+      wrapperClass: target.wrapperClass || wrapper?.cssClass || '',
+      left,
+      top,
+      width: Math.max(4, width),
+      height: Math.max(4, height),
+      localLeft: childLeft,
+      localTop: childTop,
+      wrapperWidth: numberValue(wrapper?.width, 0),
+      wrapperHeight: numberValue(wrapper?.height, 0),
+    };
+  }
+
+  // When fit.maxLines is set, selection/edit chrome uses that line budget as
+  // height and shifts top so vertical alignment keeps its anchor edge.
+  const fitted = applyFitBudgetToBox({
+    top,
+    height,
+    localTop: childTop,
+    values: target.values || {},
+    fit: target.fit || target.layer?.fit || {},
+  });
 
   return {
     targetId,
     coordinateScope: target.coordinateScope,
     parentLayerId: target.parentLayerId || '',
+    wrapperClass: '',
     left,
-    top,
+    top: fitted.top,
     width: Math.max(4, width),
-    height: Math.max(4, height),
+    height: Math.max(4, fitted.height),
     localLeft: childLeft,
-    localTop: childTop,
+    localTop: Number.isFinite(fitted.localTop) ? fitted.localTop : childTop,
+    wrapperWidth: 0,
+    wrapperHeight: 0,
   };
 };
 
@@ -244,6 +288,14 @@ export const alignReferenceForTarget = (
       return { left: 0, top: 0, width: parent.width, height: parent.height };
     }
   }
+  if (bounds.coordinateScope === 'group' && bounds.wrapperClass) {
+    return {
+      left: 0,
+      top: 0,
+      width: numberValue(bounds.wrapperWidth, sizeCreative.canvas.width),
+      height: numberValue(bounds.wrapperHeight, sizeCreative.canvas.height),
+    };
+  }
   return {
     left: 0,
     top: 0,
@@ -269,6 +321,16 @@ export const canvasReferenceForAlignment = (
         height: reference.height,
       };
     }
+  }
+  if (bounds.coordinateScope === 'group' && bounds.wrapperClass) {
+    const originLeft = numberValue(bounds.left, 0) - numberValue(bounds.localLeft, 0);
+    const originTop = numberValue(bounds.top, 0) - numberValue(bounds.localTop, 0);
+    return {
+      left: originLeft + reference.left,
+      top: originTop + reference.top,
+      width: reference.width,
+      height: reference.height,
+    };
   }
   return reference;
 };

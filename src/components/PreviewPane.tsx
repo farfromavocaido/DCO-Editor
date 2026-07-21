@@ -20,7 +20,13 @@ import {
   scaleTargetIdsForOfferGroup,
   uniformScaleFromHandle,
 } from '@/lib/canvas-group-scale';
-import { currentSizeCreative, findCreativeTarget, HEADLINE_CSS_CLASS, isHeadlineLayer, targetIdForLayerChild } from '@/lib/creative-model';
+import {
+  currentSizeCreative,
+  findCreativeTarget,
+  HEADLINE_CSS_CLASS,
+  isHeadlineLayer,
+  targetIdForLayerChild,
+} from '@/lib/creative-model';
 import {
   deriveSelectedTarget,
   filterManipulationTargetIds,
@@ -126,6 +132,7 @@ export function PreviewPane() {
   const addShapeLayer = useEditorStore((s) => s.addShapeLayer);
   const moveLayerZ = useEditorStore((s) => s.moveLayerZ);
   const applyPreviewTextFitting = useEditorStore((s) => s.applyPreviewTextFitting);
+  const fitClipped = useEditorStore((s) => s.fitClipped);
   const setCanvasZoom = useEditorStore((s) => s.setCanvasZoom);
   const stepCanvasZoom = useEditorStore((s) => s.stepCanvasZoom);
   const alignSelectedTarget = useEditorStore((s) => s.alignSelectedTarget);
@@ -242,6 +249,8 @@ export function PreviewPane() {
           startTop: numberValue(target.values?.top, 0),
           isNested: target.kind === 'nested',
           parentLayerId: target.parentLayerId || '',
+          originLeft: numberValue(target.wrapperBounds?.left, 0),
+          originTop: numberValue(target.wrapperBounds?.top, 0),
         };
       })
       .filter(Boolean);
@@ -265,12 +274,17 @@ export function PreviewPane() {
         const parentTarget = item.isNested
           ? findCreativeTarget(document, size, item.parentLayerId, activeScopes)
           : null;
-        const parentLeft = numberValue(parentTarget?.values?.left, 0);
-        const parentTop = numberValue(parentTarget?.values?.top, 0);
+        const parentLeft = item.isNested
+          ? numberValue(parentTarget?.values?.left, 0)
+          : item.originLeft;
+        const parentTop = item.isNested
+          ? numberValue(parentTarget?.values?.top, 0)
+          : item.originTop;
+        const hasOrigin = item.isNested || Boolean(item.target.wrapperBounds);
         const proposedLeft = Math.round(item.startLeft + dx);
         const proposedTop = Math.round(item.startTop + dy);
-        const canvasLeft = item.isNested ? parentLeft + proposedLeft : proposedLeft;
-        const canvasTop = item.isNested ? parentTop + proposedTop : proposedTop;
+        const canvasLeft = hasOrigin ? parentLeft + proposedLeft : proposedLeft;
+        const canvasTop = hasOrigin ? parentTop + proposedTop : proposedTop;
         const snap = computeSnap(
           canvasLeft,
           canvasTop,
@@ -281,8 +295,8 @@ export function PreviewPane() {
           undefined,
           userGuides,
         );
-        deltaLeft = (item.isNested ? snap.left - parentLeft : snap.left) - item.startLeft;
-        deltaTop = (item.isNested ? snap.top - parentTop : snap.top) - item.startTop;
+        deltaLeft = (hasOrigin ? snap.left - parentLeft : snap.left) - item.startLeft;
+        deltaTop = (hasOrigin ? snap.top - parentTop : snap.top) - item.startTop;
         setSnapGuides({ vertical: snap.verticalGuides, horizontal: snap.horizontalGuides });
       } else {
         setSnapGuides({ vertical: [], horizontal: [] });
@@ -610,6 +624,7 @@ export function PreviewPane() {
       transform,
       opacity: frame.opacity * isolationOpacityForTarget(String(targetId)),
       pointerEvents: frame.opacity <= 0.03 ? 'none' : 'auto',
+      ...(frame.color ? { color: frame.color } : {}),
     };
   };
 
@@ -637,32 +652,17 @@ export function PreviewPane() {
         boundsMode: selectedTarget.boundsMode || '',
       };
     }
-    const parentTarget = selectedTarget.kind === 'nested'
-      ? findCreativeTarget(document, size, selectedTarget.parentLayerId, activeScopes)
-      : null;
+    const bounds = getTargetCanvasBounds(document, size, selectedTarget.id, activeScopes);
+    if (!bounds) return null;
     const parentLayer = selectedTarget.kind === 'nested'
       ? layerById.get(selectedTarget.parentLayerId)
       : layerById.get(selectedTarget.id);
-    const parentWidth = numberValue(parentTarget?.values?.width, numberValue(selectedTarget.values?.width, 80));
-    const parentHeight = numberValue(parentTarget?.values?.height, numberValue(selectedTarget.values?.height, 40));
-    const fontSize = numberValue(selectedTarget.values?.fontSize, 22);
-    const lineHeight = numberValue(selectedTarget.values?.lineHeight, 1.15);
-    const childLeft = numberValue(selectedTarget.values?.left, 0);
-    const childTop = numberValue(selectedTarget.values?.top, 0);
-    const width = dimensionValue(selectedTarget.values?.width, selectedTarget.kind === 'nested' ? parentWidth : 80, parentWidth || 80);
-    const height = dimensionValue(selectedTarget.values?.height, fontSize * lineHeight, parentHeight || 40);
-    const left = selectedTarget.kind === 'nested'
-      ? numberValue(parentTarget?.values?.left, 0) + childLeft
-      : childLeft;
-    const top = selectedTarget.kind === 'nested'
-      ? numberValue(parentTarget?.values?.top, 0) + childTop
-      : childTop;
     const frame = parentLayer ? frameStyle(parentLayer) : { transform: 'none' };
     return {
-      left,
-      top,
-      width: Math.max(4, width),
-      height: Math.max(4, height),
+      left: bounds.left,
+      top: bounds.top,
+      width: bounds.width,
+      height: bounds.height,
       transform: frame.transform,
       label: selectedTarget.label,
       scope: selectedTarget.coordinateScope,
@@ -746,7 +746,8 @@ export function PreviewPane() {
   };
 
   const renderLayerNode = (layer: Record<string, unknown>) => {
-    if (['terms-prices', 'unit-rate-prices', 'terms-solo'].includes(layer.id)) return null;
+    // terms-solo stays in its dedicated wrapper; prices lines are canvas layers.
+    if (layer.id === 'terms-solo') return null;
     if (layer.id.startsWith('offer-slot-')) return renderOfferSlot(layer);
 
     if (layer.kind === 'shape') {
@@ -817,6 +818,13 @@ export function PreviewPane() {
     if (!showSelectionChrome) return [];
     return resizeHandlesForSelection(selectedTarget, selectedTargetId);
   })();
+  const selectionFitCssClass = selectedTarget?.cssClass
+    || (String(selectedTargetId || '').includes('::offer-subline') ? 'offer-subline' : '')
+    || (String(selectedTargetId || '').includes('::offer-value') ? 'offer-value' : '')
+    || (isHeadlineLayer(selectedTarget?.layer) ? HEADLINE_CSS_CLASS : '');
+  const selectionFitClipped = Boolean(
+    selectionFitCssClass && fitClipped?.get?.(selectionFitCssClass),
+  );
   const showOffersBlock = Number(offerCount) >= 2;
   const distributeCount = selectedTarget?.kind === 'group'
     ? offerBlockLayerIds(offerCount).length
@@ -1000,44 +1008,6 @@ export function PreviewPane() {
             )}
 
             <div
-              className={`stage-static tc-prices-group ${
-                targetOutsideIsolation('unit-rate-prices') && targetOutsideIsolation('terms-prices')
-                  ? 'is-outside-isolation'
-                  : ''
-              }`}
-              data-gwd-group="tc_prices"
-              id="TC_Prices"
-            >
-              <p
-                className={`gwd-grp-tc sse-text sse-bottom-line unit-rate-prices ${targetStateClass('unit-rate-prices')}`}
-                style={visibleTermsFrameStyle('unit-rate-prices')}
-                onPointerDown={(event) => {
-                  const layer = layerById.get('unit-rate-prices');
-                  if (layer) startSelectionDrag(event, layer.id);
-                }}
-                onContextMenu={(event) => {
-                  const layer = layerById.get('unit-rate-prices');
-                  if (layer) openLayerMenu(event, layer);
-                }}
-              >
-                {fieldValue(row.tc_units_text)}
-              </p>
-              <p
-                className={`gwd-grp-tc sse-text sse-bottom-line terms-prices ${targetStateClass('terms-prices')}`}
-                style={visibleTermsFrameStyle('terms-prices')}
-                onPointerDown={(event) => {
-                  const layer = layerById.get('terms-prices');
-                  if (layer) startSelectionDrag(event, layer.id);
-                }}
-                onContextMenu={(event) => {
-                  const layer = layerById.get('terms-prices');
-                  if (layer) openLayerMenu(event, layer);
-                }}
-              >
-                {fieldValue(row.tc_terms_text)}
-              </p>
-            </div>
-            <div
               className={`stage-static tc-solo-group ${targetStateClass('terms-solo')}`}
               data-gwd-group="tc_solo"
               id="TC_Solo"
@@ -1115,6 +1085,13 @@ export function PreviewPane() {
                 }}
               >
                 <span className="selection-label">{selectedTarget?.label || selectionBox.label}</span>
+                {selectionFitClipped ? (
+                  <span
+                    className="selection-label selection-label-clipped"
+                    title="Clipped: text still overflows after fitting (hover the red dot on the copy for detail)"
+                    aria-label="Clipped"
+                  />
+                ) : null}
                 {selectionResizeHandles.map((handle) => (
                   <button
                     key={handle}

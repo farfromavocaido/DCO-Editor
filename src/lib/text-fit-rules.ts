@@ -7,9 +7,10 @@
 //   {
 //     cssClass,             string      elements matched via `.${cssClass}`
 //     shared,               boolean     equalize final size/tracking across visible members
-//     wrap,                 boolean     allow wrapping (white-space: normal) before shrinking
-//     static,               'clip' | 'truncate' | undefined  legacy static modes, no shrinking
-//     maxLines,             number?     wrap allowance; overflow beyond it falls through to shrink
+//     wrap,                 boolean     allow wrapping (white-space: normal)
+//     allowShrink,          boolean     reduce font-size until copy fits (default true)
+//     static,               'clip' | 'truncate' | undefined  no wrap/shrink — overflow only
+//     maxLines,             number?     line budget; with shrink, wrap is allowed when > 1
 //     minFontSize,          number?     absolute px floor
 //     minFontSizeRatio,     number?     floor as a fraction of the CSS base size (per variant)
 //     tracking: { minEm },  object?     negative letter-spacing squeeze tried before shrinking
@@ -17,11 +18,11 @@
 //     scopes,               object?     per-variant overrides keyed by scope class (offers-2 ...)
 //   }
 //
-// Authored `fit` config in the JSON stays in the legacy shape
-// ({ mode, maxLines, minFontSize, ... }); normalizeFitConfig maps it onto the
-// engine shape. `mode: 'wrap'` only *allows* wrapping — it no longer switches
-// off shared sizing or shrink enforcement (that clobbering caused the 320x50
-// headline/subline overflows).
+// Authored modes (normalizeFitConfig):
+//   shrink — shrink first. maxLines <= 1 (or unset) => single line (no wrap).
+//            maxLines > 1 => wrap up to that many lines, shrink until it fits.
+//   wrap   — keep designed font size; wrap to maxLines; never shrink.
+//   clip / truncate — static overflow only (no wrap/shrink).
 
 import { HEADLINE_CSS_CLASS, isHeadlineLayer } from './creative-model';
 
@@ -55,13 +56,27 @@ const minFromBase = (baseFontSize, ratio, fallback) => (
 export const normalizeFitConfig = (fit = {}) => {
   const normalized = {};
   const mode = String(fit.mode || '');
-  if (mode === 'wrap') normalized.wrap = true;
-  if (mode === 'shrink') normalized.wrap = false;
-  if (mode === 'sharedEqualizedFit') normalized.shared = true;
-  if (mode === 'clip' || mode === 'truncate') normalized.static = mode;
+  const maxLines = fit.maxLines !== undefined ? Number(fit.maxLines) : undefined;
+  if (Number.isFinite(maxLines)) normalized.maxLines = maxLines;
+
+  if (mode === 'wrap') {
+    // Fixed designed size — wrap only, never shrink.
+    normalized.wrap = true;
+    normalized.allowShrink = false;
+  } else if (mode === 'shrink') {
+    // Shrink to fit. Wrap only when a multi-line budget is authored.
+    normalized.allowShrink = true;
+    normalized.wrap = Number.isFinite(maxLines) && maxLines > 1;
+  } else if (mode === 'sharedEqualizedFit') {
+    normalized.shared = true;
+  } else if (mode === 'clip' || mode === 'truncate') {
+    normalized.static = mode;
+  }
+
+  // Explicit fields win over mode defaults (scope overrides use this).
   if (fit.wrap !== undefined) normalized.wrap = Boolean(fit.wrap);
+  if (fit.allowShrink !== undefined) normalized.allowShrink = Boolean(fit.allowShrink);
   if (fit.shared !== undefined) normalized.shared = Boolean(fit.shared);
-  if (fit.maxLines !== undefined) normalized.maxLines = Number(fit.maxLines);
   if (fit.minFontSize !== undefined) normalized.minFontSize = Number(fit.minFontSize);
   if (fit.minFontSizeRatio !== undefined) normalized.minFontSizeRatio = Number(fit.minFontSizeRatio);
   if (fit.tracking !== undefined) normalized.tracking = fit.tracking;

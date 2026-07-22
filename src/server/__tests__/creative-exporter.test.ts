@@ -300,29 +300,34 @@ test('builds a CDN-linked base agency package without packaged static assets', a
   assert.match(html, /Enabler\.setDevDynamicContent\(devDynamicContent\)/);
 });
 
-test('builds an embed base agency package with inlined SVGs, CDN font, and packaged backgrounds', async () => {
+test('builds a canonical zip with flat HTML, inlined SVGs, CDN font only, and packaged backgrounds', async () => {
   const document = await readCreativeDocument();
   const entries = await buildBasePackageEntries(document, { assetMode: 'embed' });
   const names = entries.map((entry) => entry.path).sort();
   const html = entries
-    .filter((entry) => entry.path.endsWith('/index.html'))
+    .filter((entry) => /^\d+x\d+\.html$/.test(entry.path))
     .map((entry) => String(entry.data || ''))
     .join('\n');
+  const html728 = String(entries.find((entry) => entry.path === '728x90.html')?.data || '');
 
   assert.ok(names.includes('mapping.txt'));
-  assert.ok(names.includes('ads/728x90/index.html'));
-  assert.ok(names.includes('ads/assets/bg_728x90.jpg'), 'background JPEGs ship in the embed package');
-  assert.ok(!names.some((name) => name.startsWith('ads/assets/SVG/')), 'SVGs are inlined, not packaged as files');
-  assert.ok(!names.includes('ads/assets/fonts/Museo700-Regular.otf'), 'Museo loads from CDN');
-  assert.ok(!names.includes('ads/assets/fonts/MuseoSans_700.otf'));
+  assert.ok(names.includes('300x600.html'));
+  assert.ok(names.includes('728x90.html'));
+  assert.ok(!names.includes('ads/728x90/index.html'), 'canonical zip uses root {size}.html');
+  assert.ok(names.includes('assets/bg_728x90.jpg'), 'background JPEGs ship under assets/');
+  assert.ok(!names.some((name) => name.includes('/SVG/') || name.startsWith('assets/SVG/')), 'SVGs are inlined');
+  assert.ok(!names.includes('assets/fonts/Museo700-Regular.otf'), 'Museo loads from CDN');
+  assert.ok(!names.includes('assets/fonts/MuseoSans_700.otf'));
 
   // Waves/logos/plus are data URIs — not Studio CDN SVG URLs and not relative files.
   for (const url of CDN_SVG_URLS) {
-    assert.ok(!html.includes(url), `embed mode must not use CDN SVG ${url}`);
+    assert.ok(!html.includes(url), `canonical zip must not use CDN SVG ${url}`);
   }
+  assert.doesNotMatch(html, /_hiker\.jpg/, 'must not fall back to Studio hiker CDN backgrounds');
+  assert.doesNotMatch(html, /s0\.2mdn\.net\/creatives\/assets\/(?!5627648\/)/, 'only Museo CDN asset folder allowed');
   assert.match(html, /id="logo-act1"[^>]*src="data:image\/svg\+xml/);
   assert.match(html, /id="plus-1"[^>]*src="data:image\/svg\+xml/);
-  assert.doesNotMatch(html, /src="\.\.\/assets\/SVG\//);
+  assert.doesNotMatch(html, /src="(?:\.\.\/)?assets\/SVG\//);
 
   assert.ok(html.includes(CDN_MUSEO_URL), 'Expected Museo CDN URL');
   assert.match(html, new RegExp(
@@ -332,9 +337,10 @@ test('builds an embed base agency package with inlined SVGs, CDN font, and packa
   assert.doesNotMatch(html, /MuseoSans_700\.otf/);
 
   assert.match(
-    html,
-    /id="bg-image" src="\.\.\/assets\/bg_728x90\.jpg" data-packaged-src="\.\.\/assets\/bg_728x90\.jpg" data-dco-field="background_image_url_728x90"/,
+    html728,
+    /id="bg-image" src="assets\/bg_728x90\.jpg" data-packaged-src="assets\/bg_728x90\.jpg" data-dco-field="background_image_url_728x90"/,
   );
+  assert.match(html728, /background_image_url_728x90\.Url = "assets\/bg_728x90\.jpg"/);
   assert.match(html, /Enabler\.setDevDynamicContent\(devDynamicContent\)/);
 });
 

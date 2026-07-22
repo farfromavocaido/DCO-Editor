@@ -1348,8 +1348,24 @@ select {
   cursor: pointer;
 }
 
+.toolbar-menu-separator {
+  height: 1px;
+  margin: 4px 2px;
+  background: var(--line);
+}
+
 .toolbar-menu button:hover:not(:disabled) {
   background: var(--surface-hover);
+}
+
+.toolbar-menu button.toolbar-menu-primary {
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.toolbar-menu button.toolbar-menu-primary:hover:not(:disabled) {
+  background: rgba(0, 229, 165, 0.26);
 }
 
 .toolbar-menu button:disabled {

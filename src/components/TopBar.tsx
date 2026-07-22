@@ -214,6 +214,18 @@ export function TopBar() {
               <button
                 type="button"
                 role="menuitem"
+                className="toolbar-menu-primary"
+                onClick={() => {
+                  exportBasePackage({ assetMode: 'embed' }).catch((error) => setStatus(error.message, 'error'));
+                  setMoreOpen(false);
+                }}
+              >
+                Export Canonical Zip
+              </button>
+              <div className="toolbar-menu-separator" role="separator" />
+              <button
+                type="button"
+                role="menuitem"
                 onClick={() => {
                   openHtmlInspector().catch((error) => setStatus(error.message, 'error'));
                   setMoreOpen(false);
@@ -260,16 +272,6 @@ export function TopBar() {
                 }}
               >
                 Export agency ZIP with CDN assets
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  exportBasePackage({ assetMode: 'embed' }).catch((error) => setStatus(error.message, 'error'));
-                  setMoreOpen(false);
-                }}
-              >
-                Export agency ZIP with embedded SVGs
               </button>
               <button
                 type="button"

@@ -16,11 +16,12 @@
  *   - writing `element.style.left|top` (motion `transform` left alone)
  *
  * ## Transform-neutral placement (do not regress)
- * Durable `left`/`top` must not bake motion enter poses. `placePlus` measures
- * glyph ink under a temporary rest pose (playhead paused + `transform` cleared)
- * so fadeUp `enter_dy` / editor playhead transforms cannot shift the committed
- * position. Never use `animation: none` — that restarts CSS clips. Fit-time
- * `translateY` on offer-values is intentionally left alone.
+ * Durable `left`/`top` must not bake motion enter poses. SVG plus *images*
+ * place from the CSS layout box (offset size + style left/top) — never
+ * `getBoundingClientRect`, because CSS animations override inline
+ * `transform:none` and would bake fadeUp `enter_dy` into top. Legacy text
+ * pluses still neutralize via temporary `animation:none` + measure Range ink.
+ * Fit-time `translateY` on offer-values is intentionally left alone.
  *
  * Authored subline width stays the fit constraint (ink×1.10 is design-guide only).
  *
@@ -313,57 +314,67 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
   }
 
   /**
-   * Run fn while el is at motion rest. Pauses the animation playhead and
-   * clears transform so Range ink is not shifted by fadeUp enter_dy / editor
-   * playhead frames. Does NOT set animation:none — that restarts CSS clips and
-   * desyncs pluses from offers on late layout. Restores styles afterward so
-   * the same playhead continues.
+   * Run fn while el is at motion rest (legacy text pluses). CSS animations
+   * override plain inline transform:none, so we must clear the animation with
+   * !important for the measure. Callers should prefer layout while the stage
+   * clock is still held (.motion-ready not set) so restoring the animation
+   * does not desync a running timeline.
    */
   function withNeutralMotion(el, fn) {
     if (!el || !el.style) return fn();
     var style = el.style;
     var prevTransform = style.transform;
     var prevWebkitTransform = style.webkitTransform;
-    var prevPlayState = style.animationPlayState;
-    var prevWebkitPlayState = style.webkitAnimationPlayState;
+    var prevAnimation = style.animation;
+    var prevWebkitAnimation = style.webkitAnimation;
     var prevTransition = style.transition;
-    style.animationPlayState = 'paused';
-    style.webkitAnimationPlayState = 'paused';
-    style.transform = 'none';
-    style.webkitTransform = 'none';
+    style.setProperty('animation', 'none', 'important');
+    style.setProperty('-webkit-animation', 'none', 'important');
+    style.setProperty('transform', 'none', 'important');
+    style.setProperty('-webkit-transform', 'none', 'important');
     style.transition = 'none';
     // Force style flush before measuring.
     void el.offsetWidth;
     try {
       return fn();
     } finally {
+      style.removeProperty('animation');
+      style.removeProperty('-webkit-animation');
+      style.removeProperty('transform');
+      style.removeProperty('-webkit-transform');
       style.transform = prevTransform;
       style.webkitTransform = prevWebkitTransform;
-      style.animationPlayState = prevPlayState;
-      style.webkitAnimationPlayState = prevWebkitPlayState;
+      style.animation = prevAnimation;
+      style.webkitAnimation = prevWebkitAnimation;
       style.transition = prevTransition;
     }
   }
 
   /**
    * Place plus relative to stage (x, y).
-   * - alignY 'center' (default): ink centre on (x, y)
-   * - alignY 'top': ink top on y, ink centre on x
-   * SVG plus images fill a square box — use the element rect as ink.
-   * Legacy text pluses still use Range ink (Museo + sits high in the em-box).
-   * Ink is measured at motion rest so enter transforms cannot bake into left/top.
+   * - alignY 'center' (default): ink/box centre on (x, y)
+   * - alignY 'top': ink/box top on y, centre on x
+   * SVG plus images fill a square box — place from layout box only (CSS
+   * animation transforms must not affect durable left/top).
+   * Legacy text pluses still use Range ink under withNeutralMotion.
    */
   function placePlus(plus, x, y, alignY) {
     if (!plus || !isVisible(plus)) return;
-    var parent = plus.offsetParent || plus.parentElement;
     var pw = plus.offsetWidth || cssNumber(window.getComputedStyle(plus).width, 16);
     var ph = plus.offsetHeight || cssNumber(window.getComputedStyle(plus).height, 16);
+    var isImg = plus.tagName === 'IMG' || plus.tagName === 'img';
+    if (isImg) {
+      // Layout box ignores CSS animation transforms (unlike getBoundingClientRect).
+      plus.style.left = (x - pw / 2) + 'px';
+      plus.style.top = (alignY === 'top' ? y : (y - ph / 2)) + 'px';
+      return;
+    }
+    var parent = plus.offsetParent || plus.parentElement;
     plus.style.left = (x - pw / 2) + 'px';
     plus.style.top = (y - ph / 2) + 'px';
     if (!parent) return;
     withNeutralMotion(plus, function() {
-      var isImg = plus.tagName === 'IMG' || plus.tagName === 'img';
-      var ink = isImg ? localRect(plus, parent) : textInk(plus, parent);
+      var ink = textInk(plus, parent);
       if (!(ink.width > 0 || ink.height > 0)) return;
       var inkCx = (ink.left + ink.right) / 2;
       var inkCy = (ink.top + ink.bottom) / 2;

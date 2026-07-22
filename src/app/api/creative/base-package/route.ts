@@ -21,7 +21,7 @@ const filenameForBasePackage = (
   renderMode: 'font' | 'outline',
 ) => {
   if (assetMode === 'cdn') return `${slug}_base_cdn_zip.zip`;
-  if (assetMode === 'embed') return `${slug}_base_embed_zip.zip`;
+  if (assetMode === 'embed') return `${slug}_canonical_zip.zip`;
   return `${slug}_base_zip${renderMode === 'outline' ? '_outlines' : ''}.zip`;
 };
 

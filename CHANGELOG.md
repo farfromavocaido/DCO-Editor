@@ -4,7 +4,7 @@
 
 ### Added
 
-- Agency base package `assetMode: 'embed'`: inlines SVGs as data URIs, loads Museo from the Studio CDN, and packages background JPEGs as relative file refs (`POST /api/creative/base-package`, TopBar **Export agency ZIP with embedded SVGs**).
+- **Export Canonical Zip** (`assetMode: 'embed'`): root `{size}.html` + `assets/` backgrounds, SVGs inlined, Museo from CDN only (no wave/logo/hiker CDN links); highlighted primary action in the More menu.
 - Client / GitHub preview page persists selected size, form values, per-size backgrounds, and zoom in `localStorage` across refresh; **Restore defaults** resets to the baked-in sample row.
 - Parallel campaign documents beside the existing SSE DCO creative JSON (`sse-hiker-welcome`, `sse-keepyuppy-welcome`, `sse-keepyuppy-discount`), with a TopBar campaign switcher that isolates load/save/export per document.
 - Campaign registry (`src/server/campaign-registry.ts`) and `GET /api/campaigns`; creative/feed/export APIs accept `?campaign=<id>`.
@@ -17,7 +17,8 @@
 
 ### Changed
 
-- Exported ads hold CSS animations until `document.fonts.ready` + offer layout settle (`.motion-ready`), so cold first paint matches warm Replay; `placePlus` pauses the playhead instead of `animation: none` (which restarted plus clips).
+- SVG plus placement uses the CSS layout box (not transformed `getBoundingClientRect`), so fadeUp `enter_dy` cannot push pluses down in export/preview; keeps the `.motion-ready` font/layout clock gate for cold/warm timeline parity.
+- Exported ads hold CSS animations until `document.fonts.ready` + offer layout settle (`.motion-ready`), so cold first paint matches warm Replay.
 - CDN / GitHub Pages packages inline `sse-plus.svg` from the campaign file (data URI) so preview and Studio CDN never depend on a missing SVG path; font refit still runs once even without `document.fonts`.
 - 728×90 legal lines now hand off like other sizes: unit rates enter at `act1_out` (was `bn_offers_in`, which left a gap after T&Cs on frames-4).
 - Headline enter slowed to 4%; frames-4 `act1_in` delayed to 12.5 so copy starts after the green wave is mostly swept in; offer micro-stagger shifted to match; light hold rebalance (`act2_in` 32.5, `act4_in` 76).

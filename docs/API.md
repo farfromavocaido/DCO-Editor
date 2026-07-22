@@ -54,11 +54,13 @@ Returns the agency base upload ZIP. Optional body: `{ document, assetMode, rende
 
 `assetMode`:
 
-| Value | Fonts | SVGs | Backgrounds |
-|---|---|---|---|
-| `packaged` (default) | Local OTF in ZIP | Files in ZIP | Feed-only (not packaged) |
-| `cdn` | Studio CDN Museo | Studio CDN (+ plus data URI) | Feed-only (not packaged) |
-| `embed` | Studio CDN Museo | Inlined data URIs | Relative files in ZIP (`ads/assets/bg_*.jpg`) |
+| Value | Layout | Fonts | SVGs | Backgrounds |
+|---|---|---|---|---|
+| `packaged` (default) | `ads/{size}/index.html` | Local OTF in ZIP | Files in ZIP | Feed-only (not packaged) |
+| `cdn` | `ads/{size}/index.html` | Studio CDN Museo | Studio CDN (+ plus data URI) | Feed-only (hiker CDN sample fallback) |
+| `embed` (canonical) | `{size}.html` + `assets/` at zip root | Studio CDN Museo only | Inlined data URIs | Relative `assets/bg_*.jpg` (no asset CDNs) |
+
+Canonical download filename: `{slug}_canonical_zip.zip`.
 
 ## Feed schema
 

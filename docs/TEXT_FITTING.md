@@ -119,11 +119,11 @@ shorter than wrapped copy, and Museo line-boxes hang below the visible mark;
 both skew mid-gap placement. CSS boxes are only for authored envelopes, family
 detection, and writing `left`/`top` (motion `transform` left alone after layout).
 
-**Transform-neutral plus placement:** `placePlus` temporarily pauses the plus
-playhead and clears `transform` while measuring glyph ink, then restores both
-(without `animation: none`, which would restart the clip). Durable `left`/`top`
-must not bake fadeUp `enter_dy` (or the editor playhead enter pose). Combined
-with the `.motion-ready` clock gate, cold first paint matches warm Replay.
+**Transform-neutral plus placement:** SVG plus *images* are placed from the CSS
+layout box (never `getBoundingClientRect`) so CSS fadeUp `enter_dy` cannot bake
+into durable `top` — animated transforms override plain inline `transform:none`.
+Legacy text pluses still neutralize via temporary `animation:none` + Range ink.
+Combined with the `.motion-ready` clock gate, cold first paint matches warm Replay.
 
 **Authored subline width is the fit constraint** (pink text box in the
 inspector). Value-ink × 1.10 is a design guide when authoring only — the

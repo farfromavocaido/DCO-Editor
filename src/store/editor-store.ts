@@ -1521,7 +1521,7 @@ export const useEditorStore = create<any>((set, get) => ({
       : assetMode === 'cdn'
         ? 'Building agency CDN ZIP'
         : assetMode === 'embed'
-          ? 'Building agency embed ZIP'
+          ? 'Building canonical ZIP'
           : 'Building agency base ZIP';
     get().setStatus(statusLabel);
     const state = get();
@@ -1565,7 +1565,7 @@ export const useEditorStore = create<any>((set, get) => ({
     anchor.download = assetMode === 'cdn'
       ? `${slug}_base_cdn_zip.zip`
       : assetMode === 'embed'
-        ? `${slug}_base_embed_zip.zip`
+        ? `${slug}_canonical_zip.zip`
         : `${slug}_base_zip${renderMode === 'outline' ? '_outlines' : ''}.zip`;
     anchor.rel = 'noopener';
     window.document.body.appendChild(anchor);
@@ -1578,7 +1578,7 @@ export const useEditorStore = create<any>((set, get) => ({
         : assetMode === 'cdn'
           ? 'Downloaded agency CDN ZIP'
           : assetMode === 'embed'
-            ? 'Downloaded agency embed ZIP'
+            ? 'Downloaded canonical ZIP'
             : 'Downloaded agency base ZIP',
     );
   },

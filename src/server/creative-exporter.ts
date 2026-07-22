@@ -66,6 +66,12 @@ type RenderOptions = {
   includePackagedBackground?: boolean;
   includePreviewBridge?: boolean;
   includeStudioDynamicContent?: boolean;
+  /**
+   * Override Studio `devDynamicContent` background `.Url` values (per size).
+   * Canonical/embed packages pass packaged relative paths so blank feed rows
+   * do not fall back to the hiker CDN sample set.
+   */
+  studioBackgroundUrlForSize?: (size: string) => string;
   previewValidatorScriptPath?: string;
   /** `font` keeps Museo + live DOM text. `outline` bakes fixed-copy SVG paths and omits the OTF. */
   renderMode?: RenderMode;
@@ -90,7 +96,8 @@ type BasePackageOptions = {
   /**
    * `packaged` — fonts + SVGs in the ZIP (no bg JPEGs; Studio feed supplies them).
    * `cdn` — Museo + wave/logo SVGs from Studio CDN; plus inlined; no bg JPEGs.
-   * `embed` — SVGs inlined (data URIs), Museo from CDN, backgrounds as relative files in the ZIP.
+   * `embed` (canonical) — `{size}.html` + `assets/` at zip root; SVGs inlined;
+   *   Museo from CDN only; backgrounds as relative file refs (no other asset CDNs).
    */
   assetMode?: PackageAssetMode;
   renderMode?: RenderMode;
@@ -385,6 +392,7 @@ const studioDevDynamicLiteral = (fieldName: string, value: unknown) => {
 export const renderStudioDynamicContentScript = (
   document: Record<string, unknown>,
   sampleRow: Record<string, unknown> = {},
+  options: { backgroundUrlForSize?: (size: string) => string } = {},
 ) => {
   const profileId = Number(document.feed?.studioProfileId || 10960467);
   const profileElement = String(document.feed?.studioProfileElement || 'SSE_ROI_Delivery');
@@ -405,7 +413,9 @@ export const renderStudioDynamicContentScript = (
 
   for (const size of CREATIVE_AD_SIZES) {
     const fieldName = backgroundImageFieldName(size);
-    const url = studioDevBackgroundUrl(size, row[fieldName] ?? row.background_image_url);
+    const url = options.backgroundUrlForSize
+      ? options.backgroundUrlForSize(size)
+      : studioDevBackgroundUrl(size, row[fieldName] ?? row.background_image_url);
     lines.push(`      devDynamicContent.${profileElement}[0].${fieldName} = {};`);
     lines.push(`      devDynamicContent.${profileElement}[0].${fieldName}.Url = ${jsString(url)};`);
   }
@@ -1191,7 +1201,9 @@ export const renderStudioReadyHtml = async (
   if (!sizeCreative) throw new Error(`Unknown creative size: ${size}`);
   const renderMode = options.renderMode || 'font';
   const studioDynamicContentScript = options.includeStudioDynamicContent && renderMode === 'font'
-    ? `\n${renderStudioDynamicContentScript(document)}\n`
+    ? `\n${renderStudioDynamicContentScript(document, {}, {
+      backgroundUrlForSize: options.studioBackgroundUrlForSize,
+    })}\n`
     : '';
   const scripts = renderMode === 'outline'
     ? outlineRuntimeScript()
@@ -2751,35 +2763,57 @@ export const buildBasePackageEntries = async (document: Record<string, unknown>,
     : ((useCdnAssets || useEmbedAssets) ? CDN_FONT_URLS : undefined);
   const entries: PackageEntry[] = [];
   const sizes = Object.keys(document.sizes || {});
+  // Canonical (embed): `{size}.html` + `assets/` at zip root.
+  // Agency packaged/CDN: legacy `ads/{size}/index.html` + `ads/assets/`.
+  const htmlPathForSize = (size: string) => (
+    useEmbedAssets ? `${size}.html` : `ads/${size}/index.html`
+  );
+  const packagedAssetEntryPath = (assetPath: string) => (
+    useEmbedAssets ? assetPath : `ads/${assetPath}`
+  );
+  const assetBasePath = useEmbedAssets ? '' : '../';
+  const fontBasePath = renderMode === 'outline'
+    ? undefined
+    : (useEmbedAssets ? 'assets/fonts/' : '../assets/fonts/');
+
   for (const size of sizes) {
     entries.push({
-      path: `ads/${size}/index.html`,
+      path: htmlPathForSize(size),
       data: await renderStudioReadyHtml(document, size, {
-        assetBasePath: '../',
+        assetBasePath,
         assetUrlMap,
         // Fonts with a CDN_FONT_URLS entry use that absolute URL and are not
-        // packaged; anything unmapped stays relative under ads/assets/fonts/.
-        fontBasePath: renderMode === 'outline' ? undefined : '../assets/fonts/',
+        // packaged; anything unmapped stays relative under assets/fonts/.
+        fontBasePath,
         fontUrlMap,
-        // Embed mode ships bg JPEGs beside the HTML; Studio can still override
-        // via data-dco-field. Packaged/CDN leave src empty for feed-only bgs.
+        // Embed/canonical ships bg JPEGs beside the HTML; Studio can still
+        // override via data-dco-field. Packaged/CDN leave src empty for feed-only bgs.
         includePackagedBackground: useEmbedAssets,
         includePreviewBridge: false,
         includeStudioDynamicContent: renderMode === 'font',
+        // Never fall back to the hiker CDN sample set in canonical packages.
+        studioBackgroundUrlForSize: useEmbedAssets
+          ? (adSize) => {
+            const sizeCreative = (document.sizes || {})[adSize] as
+              | { assets?: { background?: string } }
+              | undefined;
+            return String(sizeCreative?.assets?.background || '');
+          }
+          : undefined,
         renderMode,
       }),
     });
   }
 
-  // Embed: package non-SVG assets (backgrounds). CDN/packaged: SVG/fonts only
-  // (bgs come from Studio feed); mapped CDN/embed URLs skip the file copy.
+  // Embed: package non-SVG assets (backgrounds) at `assets/…`. CDN/packaged:
+  // SVG/fonts only under `ads/assets/` (bgs come from Studio feed).
   const packagedAssetPaths = useEmbedAssets
     ? collectClientAssetPaths(document).filter((assetPath) => !isSvgAssetPath(assetPath))
     : collectBasePackageAssetPaths(document);
   for (const assetPath of packagedAssetPaths) {
     if (assetUrlMap?.[assetPath]) continue;
     entries.push({
-      path: `ads/${assetPath}`,
+      path: packagedAssetEntryPath(assetPath),
       data: await fs.readFile(path.resolve(projectRoot, assetPath)),
     });
   }
@@ -2788,7 +2822,9 @@ export const buildBasePackageEntries = async (document: Record<string, unknown>,
     for (const font of CLIENT_FONT_FILES) {
       if (fontUrlMap?.[font.filename]) continue;
       entries.push({
-        path: `ads/assets/fonts/${font.filename}`,
+        path: useEmbedAssets
+          ? `assets/fonts/${font.filename}`
+          : `ads/assets/fonts/${font.filename}`,
         data: await fs.readFile(await font.resolveSourcePath()),
       });
     }

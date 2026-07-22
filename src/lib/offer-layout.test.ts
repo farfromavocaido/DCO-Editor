@@ -42,9 +42,9 @@ test('runtime encodes ink-first helpers and per-family plus anchors', () => {
   assert.match(layoutOffersRuntime, /function textInk\(/);
   assert.match(layoutOffersRuntime, /function clientToLocal\(/);
   assert.match(layoutOffersRuntime, /function withNeutralMotion\(/);
-  // Pause the playhead — never animation:none (that restarts CSS clips).
-  assert.match(layoutOffersRuntime, /animationPlayState = 'paused'/);
-  assert.doesNotMatch(layoutOffersRuntime, /style\.animation = 'none'/);
+  // SVG pluses place from the layout box (skip transformed getBoundingClientRect).
+  assert.match(layoutOffersRuntime, /isImg\) \{\s*[\s\S]*?alignY === 'top' \? y/);
+  assert.match(layoutOffersRuntime, /setProperty\('animation', 'none', 'important'\)/);
   assert.match(layoutOffersRuntime, /function plusAnchorHorizontal\(/);
   assert.match(layoutOffersRuntime, /function plusAnchorVertical\(/);
   assert.match(layoutOffersRuntime, /function plusAnchorTriangular\(/);
@@ -562,4 +562,81 @@ test('placePlus ignores motion enter_dy while measuring glyph ink', () => {
   const top = parseFloat(plus.style.top);
   assert.ok(Math.abs(top - 50) < 8, `plus top=${top}, expected ~50 despite enter_dy`);
   assert.match(plus.style.transform, /translateY\(-8px\)/, 'motion transform restored after measure');
+});
+
+test('SVG plus images place from the layout box, ignoring animated enter_dy', () => {
+  // Shared placePlus path for horizontal / vertical / triangular — regression for
+  // CSS fadeUp enter_dy baking into top when getBoundingClientRect is used.
+  const { document } = installDom();
+  const stage = document.createElement('div');
+  Object.defineProperty(stage, 'offsetWidth', { value: 320 });
+  Object.defineProperty(stage, 'offsetHeight', { value: 50 });
+  stage.getBoundingClientRect = () => stubRect(0, 0, 320, 50) as DOMRect;
+
+  const mk = (index: number, left: number) => {
+    const slot = document.createElement('div');
+    slot.setAttribute('data-gwd-group', 'OfferSlot');
+    slot.setAttribute('data-offer-index', String(index));
+    slot.style.cssText = `position:absolute;left:${left}px;top:8px;width:60px;height:34px`;
+    Object.defineProperty(slot, 'offsetWidth', { value: 60 });
+    Object.defineProperty(slot, 'offsetHeight', { value: 34 });
+    Object.defineProperty(slot, 'offsetLeft', { value: left });
+    Object.defineProperty(slot, 'offsetTop', { value: 8 });
+    slot.getBoundingClientRect = () => stubRect(left, 8, 60, 34) as DOMRect;
+    const value = document.createElement('p');
+    value.className = 'offer-value';
+    const run = document.createElement('span');
+    run.className = 'offer-value-run';
+    run.textContent = `${index}5%`;
+    // Value ink centre Y = 8+5+12 = 25.
+    run.getBoundingClientRect = () => stubRect(left + 8, 13, 40, 24) as DOMRect;
+    const sub = document.createElement('p');
+    sub.className = 'offer-subline';
+    sub.textContent = 'X';
+    sub.getBoundingClientRect = () => stubRect(left + 50, 20, 20, 10) as DOMRect;
+    value.appendChild(run);
+    slot.appendChild(value);
+    slot.appendChild(sub);
+    return slot;
+  };
+
+  stage.appendChild(mk(1, 40));
+  stage.appendChild(mk(2, 140));
+
+  const plus = document.createElement('img');
+  plus.id = 'plus-1';
+  plus.className = 'plus-1';
+  plus.setAttribute('src', 'data:image/svg+xml,plus');
+  plus.style.cssText = 'position:absolute;left:100px;top:20px;width:20px;height:20px';
+  Object.defineProperty(plus, 'offsetWidth', { value: 20 });
+  Object.defineProperty(plus, 'offsetHeight', { value: 20 });
+  Object.defineProperty(plus, 'offsetParent', { get: () => stage });
+  // Simulate CSS fadeUp enter_dy=-10 (animations override inline transform:none).
+  plus.getBoundingClientRect = () => {
+    const top = parseFloat(plus.style.top) || 20;
+    const left = parseFloat(plus.style.left) || 100;
+    return stubRect(left, top - 10, 20, 20) as DOMRect;
+  };
+  stage.appendChild(plus);
+  document.body.appendChild(stage);
+
+  document.createRange = function createRange() {
+    const range = {
+      target: null as Element | null,
+      selectNodeContents(node: Element) { range.target = node; },
+      detach() {},
+      getBoundingClientRect() {
+        const el = range.target as HTMLElement | null;
+        return el ? el.getBoundingClientRect() : stubRect(0, 0, 0, 0);
+      },
+    };
+    return range as unknown as Range;
+  };
+
+  layoutOffers(stage);
+
+  // Horizontal: centre SVG box on value-ink Y≈25 → top = 25 - 10 = 15.
+  // Transformed getBoundingClientRect path would over-correct downward to ~25.
+  const top = parseFloat(plus.style.top);
+  assert.ok(Math.abs(top - 15) < 2, `SVG plus top=${top}, expected 15 (box place); transformed ink would be ~25`);
 });

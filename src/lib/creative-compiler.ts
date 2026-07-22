@@ -131,8 +131,13 @@ const compileClipFrames = (clip: AnimationClip, beats: Record<string, number>) =
 
   if (clip.preset === 'fade') {
     const settled = Math.min(end, start + enterDuration);
+    const enterFrame: CreativeKeyframe = { at: start, opacity: 0 };
+    // Optional — omit by default so existing opacity-only fades stay unchanged.
+    if (params.ease_in !== undefined) {
+      enterFrame.easing = String(params.ease_in || legacyMotionDefaults.enter.easing);
+    }
     return [
-      { at: start, opacity: 0 },
+      enterFrame,
       { at: settled, opacity: 1 },
       { at: Math.max(settled, end - fadePct), opacity: 1 },
       { at: end, opacity: 0 },

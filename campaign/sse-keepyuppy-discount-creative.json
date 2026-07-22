@@ -811,9 +811,10 @@
               "label": "Logo Act1 fade",
               "preset": "fade",
               "start": "act1_begin+3",
-              "end": "bn_white_in",
+              "end": "bn_blue_in+1",
               "params": {
-                "enter_duration_pct": 5
+                "enter_duration_pct": 5,
+                "fade_pct": 2.0
               }
             }
           ]
@@ -837,10 +838,11 @@
               "id": "logo-act3-fade",
               "label": "Logo Act3 fade",
               "preset": "fade",
-              "start": "bn_white_in",
+              "start": "bn_blue_in+6",
               "end": "end",
               "params": {
-                "fade_pct": 4
+                "fade_pct": 4,
+                "enter_duration_pct": 2.0
               }
             }
           ]
@@ -1023,15 +1025,14 @@
           },
           "clips": [
             {
-              "id": "terms-prices-fadeUp",
-              "label": "Terms Prices fadeUp",
-              "preset": "fadeUp",
+              "id": "terms-prices-fade",
+              "label": "Terms Prices fade",
+              "preset": "fade",
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_dy": -6,
-                "settled_dy": 0,
-                "exit_dy": 7
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out"
               }
             }
           ]
@@ -1059,15 +1060,15 @@
           },
           "clips": [
             {
-              "id": "unit-rate-prices-fadeUp",
-              "label": "Unit Rate Prices fadeUp",
-              "preset": "fadeUp",
+              "id": "unit-rate-prices-fade",
+              "label": "Unit Rate Prices fade",
+              "preset": "fade",
               "start": "act1_out",
-              "end": "tc_exit",
+              "end": "offers_exit-2",
               "params": {
-                "enter_dy": -6,
-                "settled_dy": 0,
-                "exit_dy": 5
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
           ],
@@ -1086,7 +1087,7 @@
           "zIndex": 16,
           "base": {
             "left": 6,
-            "top": 49,
+            "top": 38,
             "width": 190,
             "height": 9,
             "fontSize": 6,
@@ -1101,16 +1102,15 @@
           },
           "clips": [
             {
-              "id": "terms-solo-fadeUp",
-              "label": "Terms Solo fadeUp",
-              "preset": "fadeUp",
+              "id": "terms-solo-fade",
+              "label": "Terms Solo fade",
+              "preset": "fade",
               "start": "terms_in",
-              "end": "tc_exit",
+              "end": "offers_exit-2",
               "params": {
-                "enter_dy": -17,
-                "settled_dy": -11,
-                "exit_dy": 0,
-                "fade_pct": 4
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
           ]
@@ -2173,9 +2173,10 @@
               "label": "Logo Act1 fade",
               "preset": "fade",
               "start": "act1_begin+3",
-              "end": "wave2_in+7",
+              "end": "wave2_in+5",
               "params": {
-                "enter_duration_pct": 5
+                "enter_duration_pct": 5,
+                "fade_pct": 2
               }
             }
           ]
@@ -2199,10 +2200,11 @@
               "id": "logo-act3-fade",
               "label": "Logo Act3 fade",
               "preset": "fade",
-              "start": "wave2_in+7",
+              "start": "wave2_in+6",
               "end": "end",
               "params": {
-                "fade_pct": 4
+                "fade_pct": 4,
+                "enter_duration_pct": 2.0
               }
             }
           ]
@@ -2385,15 +2387,14 @@
           },
           "clips": [
             {
-              "id": "terms-prices-fadeUp",
-              "label": "Terms Prices fadeUp",
-              "preset": "fadeUp",
+              "id": "terms-prices-fade",
+              "label": "Terms Prices fade",
+              "preset": "fade",
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_dy": -6,
-                "settled_dy": 0,
-                "exit_dy": 7
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out"
               }
             }
           ]
@@ -2421,15 +2422,15 @@
           },
           "clips": [
             {
-              "id": "unit-rate-prices-fadeUp",
-              "label": "Unit Rate Prices fadeUp",
-              "preset": "fadeUp",
+              "id": "unit-rate-prices-fade",
+              "label": "Unit Rate Prices fade",
+              "preset": "fade",
               "start": "bn_offers_in",
-              "end": "tc_exit",
+              "end": "offers_exit-2",
               "params": {
-                "enter_dy": -6,
-                "settled_dy": 0,
-                "exit_dy": 5
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
           ],
@@ -2448,7 +2449,7 @@
           "zIndex": 16,
           "base": {
             "left": -5,
-            "top": 67,
+            "top": 69,
             "width": 214,
             "height": 18,
             "fontSize": 8,
@@ -2459,16 +2460,15 @@
           },
           "clips": [
             {
-              "id": "terms-solo-fadeUp",
-              "label": "Terms Solo fadeUp",
-              "preset": "fadeUp",
+              "id": "terms-solo-fade",
+              "label": "Terms Solo fade",
+              "preset": "fade",
               "start": "bn_offers_in",
-              "end": "tc_exit",
+              "end": "offers_exit-2",
               "params": {
-                "enter_dy": -7,
-                "settled_dy": 2,
-                "exit_dy": 0,
-                "fade_pct": 4
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
           ]
@@ -3510,9 +3510,10 @@
               "label": "Logo Act1 fade",
               "preset": "fade",
               "start": "act1_begin",
-              "end": "swap+1",
+              "end": "wave2_in+7",
               "params": {
-                "enter_duration_pct": 8
+                "enter_duration_pct": 8,
+                "fade_pct": 7.0
               }
             }
           ]
@@ -3536,10 +3537,11 @@
               "id": "logo-act3-fade",
               "label": "Logo Act3 fade",
               "preset": "fade",
-              "start": "swap",
+              "start": "wave2_in",
               "end": "end",
               "params": {
-                "fade_pct": 4
+                "fade_pct": 4,
+                "enter_duration_pct": 7.0
               }
             }
           ]
@@ -3722,15 +3724,14 @@
           },
           "clips": [
             {
-              "id": "terms-prices-fadeUp",
-              "label": "Terms Prices fadeUp",
-              "preset": "fadeUp",
+              "id": "terms-prices-fade",
+              "label": "Terms Prices fade",
+              "preset": "fade",
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_dy": -6,
-                "settled_dy": 0,
-                "exit_dy": 7
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out"
               }
             }
           ]
@@ -3758,15 +3759,15 @@
           },
           "clips": [
             {
-              "id": "unit-rate-prices-fadeUp",
-              "label": "Unit Rate Prices fadeUp",
-              "preset": "fadeUp",
+              "id": "unit-rate-prices-fade",
+              "label": "Unit Rate Prices fade",
+              "preset": "fade",
               "start": "act1_out",
-              "end": "tc_exit",
+              "end": "offers_exit-2",
               "params": {
-                "enter_dy": -6,
-                "settled_dy": 0,
-                "exit_dy": 5
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
           ],
@@ -3785,7 +3786,7 @@
           "zIndex": 16,
           "base": {
             "left": 0,
-            "top": 7,
+            "top": 9,
             "width": 80,
             "height": 30,
             "fontSize": 10,
@@ -3796,16 +3797,15 @@
           },
           "clips": [
             {
-              "id": "terms-solo-fadeUp",
-              "label": "Terms Solo fadeUp",
-              "preset": "fadeUp",
+              "id": "terms-solo-fade",
+              "label": "Terms Solo fade",
+              "preset": "fade",
               "start": "terms_in",
-              "end": "tc_exit",
+              "end": "offers_exit-2",
               "params": {
-                "enter_dy": -7,
-                "settled_dy": 2,
-                "exit_dy": 0,
-                "fade_pct": 4
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
           ]
@@ -4818,9 +4818,10 @@
               "label": "Logo Act1 fade",
               "preset": "fade",
               "start": "act1_begin+3",
-              "end": "wave2_in+9",
+              "end": "offers_exit",
               "params": {
-                "enter_duration_pct": 5
+                "enter_duration_pct": 5,
+                "fade_pct": 2
               }
             }
           ]
@@ -4844,10 +4845,11 @@
               "id": "logo-act3-fade",
               "label": "Logo Act3 fade",
               "preset": "fade",
-              "start": "wave2_in+9",
+              "start": "wave2_in+8",
               "end": "end",
               "params": {
-                "fade_pct": 4
+                "fade_pct": 4,
+                "enter_duration_pct": 2.0
               }
             }
           ]
@@ -5030,15 +5032,14 @@
           },
           "clips": [
             {
-              "id": "terms-prices-fadeUp",
-              "label": "Terms Prices fadeUp",
-              "preset": "fadeUp",
+              "id": "terms-prices-fade",
+              "label": "Terms Prices fade",
+              "preset": "fade",
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_dy": -6,
-                "settled_dy": 0,
-                "exit_dy": 7
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out"
               }
             }
           ]
@@ -5066,15 +5067,15 @@
           },
           "clips": [
             {
-              "id": "unit-rate-prices-fadeUp",
-              "label": "Unit Rate Prices fadeUp",
-              "preset": "fadeUp",
+              "id": "unit-rate-prices-fade",
+              "label": "Unit Rate Prices fade",
+              "preset": "fade",
               "start": "act1_out",
-              "end": "tc_exit",
+              "end": "offers_exit-2",
               "params": {
-                "enter_dy": -6,
-                "settled_dy": 0,
-                "exit_dy": 5
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
           ],
@@ -5093,7 +5094,7 @@
           "zIndex": 16,
           "base": {
             "left": 0,
-            "top": 7,
+            "top": 9,
             "width": 100,
             "height": 26,
             "fontSize": 10,
@@ -5104,16 +5105,15 @@
           },
           "clips": [
             {
-              "id": "terms-solo-fadeUp",
-              "label": "Terms Solo fadeUp",
-              "preset": "fadeUp",
+              "id": "terms-solo-fade",
+              "label": "Terms Solo fade",
+              "preset": "fade",
               "start": "terms_in",
-              "end": "tc_exit",
+              "end": "offers_exit-2",
               "params": {
-                "enter_dy": -7,
-                "settled_dy": 2,
-                "exit_dy": 0,
-                "fade_pct": 4
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
           ]
@@ -5363,20 +5363,6 @@
             "width": 144,
             "height": 20,
             "whiteSpace": "nowrap"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|logo-act1",
-          "scope": "offers-3",
-          "layerId": "logo-act1",
-          "cssClass": "logo-act1",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "top": 509,
-            "left": 20
           },
           "editable": true
         },
@@ -6145,7 +6131,7 @@
           "zIndex": 6,
           "base": {
             "left": 80,
-            "top": 505,
+            "top": 520,
             "width": 140,
             "height": 50,
             "cssClass": "logo-act1"
@@ -6159,7 +6145,8 @@
               "start": "act1_begin+3",
               "end": "wave2_in+9",
               "params": {
-                "enter_duration_pct": 5
+                "enter_duration_pct": 5,
+                "fade_pct": 9.0
               }
             }
           ]
@@ -6183,10 +6170,11 @@
               "id": "logo-act3-fade",
               "label": "Logo Act3 fade",
               "preset": "fade",
-              "start": "wave2_in+9",
+              "start": "wave2_in",
               "end": "end",
               "params": {
-                "fade_pct": 4
+                "fade_pct": 4,
+                "enter_duration_pct": 9.0
               }
             }
           ]
@@ -6369,15 +6357,14 @@
           },
           "clips": [
             {
-              "id": "terms-prices-fadeUp",
-              "label": "Terms Prices fadeUp",
-              "preset": "fadeUp",
+              "id": "terms-prices-fade",
+              "label": "Terms Prices fade",
+              "preset": "fade",
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_dy": -6,
-                "settled_dy": 0,
-                "exit_dy": 7
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out"
               }
             }
           ]
@@ -6405,15 +6392,15 @@
           },
           "clips": [
             {
-              "id": "unit-rate-prices-fadeUp",
-              "label": "Unit Rate Prices fadeUp",
-              "preset": "fadeUp",
+              "id": "unit-rate-prices-fade",
+              "label": "Unit Rate Prices fade",
+              "preset": "fade",
               "start": "act1_out",
-              "end": "tc_exit",
+              "end": "offers_exit-2",
               "params": {
-                "enter_dy": -6,
-                "settled_dy": 0,
-                "exit_dy": 5
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
           ],
@@ -6432,7 +6419,7 @@
           "zIndex": 15,
           "base": {
             "left": 0,
-            "top": 7,
+            "top": 9,
             "width": 100,
             "height": 26,
             "fontSize": 10,
@@ -6443,16 +6430,15 @@
           },
           "clips": [
             {
-              "id": "terms-solo-fadeUp",
-              "label": "Terms Solo fadeUp",
-              "preset": "fadeUp",
+              "id": "terms-solo-fade",
+              "label": "Terms Solo fade",
+              "preset": "fade",
               "start": "terms_in",
-              "end": "tc_exit",
+              "end": "offers_exit-2",
               "params": {
-                "enter_dy": -7,
-                "settled_dy": 2,
-                "exit_dy": 0,
-                "fade_pct": 4
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
           ]
@@ -7463,10 +7449,10 @@
           "kind": "image",
           "zIndex": 7,
           "base": {
-            "left": 784,
-            "top": 94,
-            "width": 158,
-            "height": 57,
+            "left": 796,
+            "top": 172,
+            "width": 160,
+            "height": 58,
             "cssClass": "logo-act1"
           },
           "asset": "assets/SVG/SSELogoBlue.svg",
@@ -7478,7 +7464,8 @@
               "start": "act1_begin+4",
               "end": "wave2_in+7",
               "params": {
-                "enter_duration_pct": 5
+                "enter_duration_pct": 5,
+                "fade_pct": 7.0
               }
             }
           ]
@@ -7502,10 +7489,11 @@
               "id": "logo-act3-fade",
               "label": "Logo Act3 fade",
               "preset": "fade",
-              "start": "wave2_in+7",
+              "start": "wave2_in",
               "end": "end",
               "params": {
-                "fade_pct": 4
+                "fade_pct": 4,
+                "enter_duration_pct": 7.0
               }
             }
           ]
@@ -7688,15 +7676,14 @@
           },
           "clips": [
             {
-              "id": "terms-prices-fadeUp",
-              "label": "Terms Prices fadeUp",
-              "preset": "fadeUp",
+              "id": "terms-prices-fade",
+              "label": "Terms Prices fade",
+              "preset": "fade",
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_dy": -6,
-                "settled_dy": 0,
-                "exit_dy": 7
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out"
               }
             }
           ]
@@ -7724,15 +7711,15 @@
           },
           "clips": [
             {
-              "id": "unit-rate-prices-fadeUp",
-              "label": "Unit Rate Prices fadeUp",
-              "preset": "fadeUp",
+              "id": "unit-rate-prices-fade",
+              "label": "Unit Rate Prices fade",
+              "preset": "fade",
               "start": "act1_out",
-              "end": "tc_exit",
+              "end": "offers_exit-2",
               "params": {
-                "enter_dy": -6,
-                "settled_dy": 0,
-                "exit_dy": 5
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
           ],
@@ -7751,7 +7738,7 @@
           "zIndex": 16,
           "base": {
             "left": 0,
-            "top": -4,
+            "top": -2,
             "width": 120,
             "height": 24,
             "fontSize": 11,
@@ -7762,16 +7749,15 @@
           },
           "clips": [
             {
-              "id": "terms-solo-fadeUp",
-              "label": "Terms Solo fadeUp",
-              "preset": "fadeUp",
+              "id": "terms-solo-fade",
+              "label": "Terms Solo fade",
+              "preset": "fade",
               "start": "terms_in",
-              "end": "tc_exit",
+              "end": "offers_exit-2",
               "params": {
-                "enter_dy": -7,
-                "settled_dy": 2,
-                "exit_dy": 0,
-                "fade_pct": 4
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
           ]
@@ -8043,22 +8029,6 @@
             "minFontSize": 14,
             "maxLines": 2
           }
-        },
-        {
-          "id": "offers-3|logo-act1",
-          "scope": "offers-3",
-          "layerId": "logo-act1",
-          "cssClass": "logo-act1",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 790,
-            "top": 192,
-            "width": 140,
-            "height": 50
-          },
-          "editable": true
         },
         {
           "id": "cta-rect|cta",

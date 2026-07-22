@@ -41,6 +41,32 @@ test('compiles a fade clip into visible fade-in and fade-out keyframes', () => {
   assert.equal(frameAtPercent(keyframes, 98).opacity, 0.5);
 });
 
+test('legal-line fade keeps opacity-only motion with fadeUp-equivalent enter timing', () => {
+  const keyframes = compileAnimationClips([
+    {
+      id: 'terms-solo-fade',
+      preset: 'fade',
+      start: 'terms_in',
+      end: 'tc_exit',
+      params: { enter_duration_pct: 2, ease_in: 'ease-out', fade_pct: 4 },
+    },
+  ], { terms_in: 17.6, tc_exit: 69 });
+
+  assert.deepEqual(keyframes.map((keyframe) => ({
+    at: keyframe.at,
+    opacity: keyframe.opacity,
+    translate: keyframe.translate,
+    easing: keyframe.easing,
+  })), [
+    { at: 0, opacity: 0, translate: [0, 0], easing: 'ease-out' },
+    { at: 17.6, opacity: 0, translate: [0, 0], easing: 'ease-out' },
+    { at: 19.6, opacity: 1, translate: [0, 0], easing: undefined },
+    { at: 65, opacity: 1, translate: [0, 0], easing: undefined },
+    { at: 69, opacity: 0, translate: [0, 0], easing: undefined },
+    { at: 100, opacity: 0, translate: [0, 0], easing: undefined },
+  ]);
+});
+
 test('compiles slide and pop presets with transform values for preview/export parity', () => {
   const slide = compileAnimationClips([
     {

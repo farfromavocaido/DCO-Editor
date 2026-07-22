@@ -12,6 +12,10 @@
 
 ### Changed
 
+- T&C / unit-rate layers across all campaigns now use opacity-only `fade` (no enter/exit vertical travel); prior `settled_dy` offsets were baked into authored `top` so hold position stays the same. Enter window remains 2% with ease-out.
+- Late legal exits (`terms-solo`, `unit-rate-prices`) use a 1% fade-out and end at `offers_exit-2`, so they are fully gone when offer blocks begin their exit fade.
+- SSE logo handoff: on `300x250` / `300x600` / `970x250`, blue logo box matches white and the blue→white crossfade spans the blue wave sweep; on `320x50` blue fade-out is centered on blue-wave start; on `160x600` / `728x90` blue fade-out aligns with offer-block exit; white fade-in on those non-swap sizes is centered on blue-wave end.
+- Removed `offers-3` blue-only logo geometry overrides (`970x250`, `160x600`) that pulled the blue logo off the white box during the crossfade.
 - DCO layout commit: `placePlus` measures glyph ink at motion rest (ignores fadeUp `enter_dy` / editor playhead transforms), and export runtime refits once on `document.fonts.ready` only (no `loadingdone` mid-enter rewrite). Fixes Replay / cached-font plus drift vs cold load.
 - Fit-budget chrome no longer overrides an explicit authored `height` when `maxLines` is set (fixes offers-3 value/subline canvas drag on tight boxes like 728×90).
 - **Export HTML** downloads a ZIP of the built files (still writes to `output/` as well); pass `download: false` on the API for the previous JSON-only response.

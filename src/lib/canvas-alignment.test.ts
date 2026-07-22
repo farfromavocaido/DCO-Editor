@@ -394,3 +394,23 @@ test('headline geometry lives on shared sse-headline class, not per-act layers',
     assert.equal(perActVariants.length, 0, `${size} should not have per-act headline variant rules`);
   }
 });
+
+test('in-place logo crossfade sizes keep blue and white boxes matched under offers-3', () => {
+  const doc = loadPersistedCreative();
+  for (const size of ['300x250', '300x600', '970x250']) {
+    for (const scopes of [['offers-1'], ['offers-3']]) {
+      const blue = getTargetCanvasBounds(doc, size, 'logo-act1', scopes);
+      const white = getTargetCanvasBounds(doc, size, 'logo-act3', scopes);
+      assert.ok(blue && white, `${size} ${scopes[0]} logos missing`);
+      assert.equal(blue.left, white.left, `${size} ${scopes[0]} logo left mismatch`);
+      assert.equal(blue.top, white.top, `${size} ${scopes[0]} logo top mismatch`);
+      assert.equal(blue.width, white.width, `${size} ${scopes[0]} logo width mismatch`);
+      assert.equal(blue.height, white.height, `${size} ${scopes[0]} logo height mismatch`);
+    }
+    const blueOnlyGeom = (doc.sizes[size].variantRules || []).filter((rule) => (
+      rule.layerId === 'logo-act1'
+      && Object.keys(rule.props || {}).some((key) => ['left', 'top', 'width', 'height'].includes(key))
+    ));
+    assert.equal(blueOnlyGeom.length, 0, `${size} must not have blue-only logo geometry variants`);
+  }
+});

@@ -1516,12 +1516,14 @@ export const useEditorStore = create<any>((set, get) => ({
   },
 
   exportBasePackage: async ({ assetMode = 'packaged', renderMode = 'font' } = {}) => {
-    const useCdnAssets = assetMode === 'cdn';
-    get().setStatus(
-      renderMode === 'outline'
-        ? 'Building outlined base ZIP'
-        : (useCdnAssets ? 'Building agency CDN ZIP' : 'Building agency base ZIP'),
-    );
+    const statusLabel = renderMode === 'outline'
+      ? 'Building outlined base ZIP'
+      : assetMode === 'cdn'
+        ? 'Building agency CDN ZIP'
+        : assetMode === 'embed'
+          ? 'Building agency embed ZIP'
+          : 'Building agency base ZIP';
+    get().setStatus(statusLabel);
     const state = get();
     const creativeDocument = state.creativeDocument
       ? {
@@ -1540,7 +1542,7 @@ export const useEditorStore = create<any>((set, get) => ({
       body: JSON.stringify({
         campaign: state.activeCampaignId,
         ...(creativeDocument ? { document: creativeDocument } : {}),
-        ...(useCdnAssets ? { assetMode: 'cdn' } : {}),
+        ...(assetMode !== 'packaged' ? { assetMode } : {}),
         renderMode,
       }),
     });
@@ -1560,9 +1562,11 @@ export const useEditorStore = create<any>((set, get) => ({
     const anchor = window.document.createElement('a');
     const slug = get().exportSlug();
     anchor.href = url;
-    anchor.download = useCdnAssets
+    anchor.download = assetMode === 'cdn'
       ? `${slug}_base_cdn_zip.zip`
-      : `${slug}_base_zip${renderMode === 'outline' ? '_outlines' : ''}.zip`;
+      : assetMode === 'embed'
+        ? `${slug}_base_embed_zip.zip`
+        : `${slug}_base_zip${renderMode === 'outline' ? '_outlines' : ''}.zip`;
     anchor.rel = 'noopener';
     window.document.body.appendChild(anchor);
     anchor.click();
@@ -1571,7 +1575,11 @@ export const useEditorStore = create<any>((set, get) => ({
     get().setStatus(
       renderMode === 'outline'
         ? 'Downloaded outlined base ZIP'
-        : (useCdnAssets ? 'Downloaded agency CDN ZIP' : 'Downloaded agency base ZIP'),
+        : assetMode === 'cdn'
+          ? 'Downloaded agency CDN ZIP'
+          : assetMode === 'embed'
+            ? 'Downloaded agency embed ZIP'
+            : 'Downloaded agency base ZIP',
     );
   },
 

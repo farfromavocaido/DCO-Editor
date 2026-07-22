@@ -17,9 +17,10 @@
  *
  * ## Transform-neutral placement (do not regress)
  * Durable `left`/`top` must not bake motion enter poses. `placePlus` measures
- * glyph ink under a temporary rest pose (`animation`/`transform` cleared) so
- * fadeUp `enter_dy` / editor playhead transforms cannot shift the committed
- * position. Fit-time `translateY` on offer-values is intentionally left alone.
+ * glyph ink under a temporary rest pose (playhead paused + `transform` cleared)
+ * so fadeUp `enter_dy` / editor playhead transforms cannot shift the committed
+ * position. Never use `animation: none` — that restarts CSS clips. Fit-time
+ * `translateY` on offer-values is intentionally left alone.
  *
  * Authored subline width stays the fit constraint (ink×1.10 is design-guide only).
  *
@@ -312,22 +313,24 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
   }
 
   /**
-   * Run fn while el is at motion rest. Clears animation + transform so Range
-   * ink is not shifted by fadeUp enter_dy / editor playhead frames. Restores
-   * inline styles afterward (CSS keyframes resume on the next frame).
+   * Run fn while el is at motion rest. Pauses the animation playhead and
+   * clears transform so Range ink is not shifted by fadeUp enter_dy / editor
+   * playhead frames. Does NOT set animation:none — that restarts CSS clips and
+   * desyncs pluses from offers on late layout. Restores styles afterward so
+   * the same playhead continues.
    */
   function withNeutralMotion(el, fn) {
     if (!el || !el.style) return fn();
     var style = el.style;
     var prevTransform = style.transform;
     var prevWebkitTransform = style.webkitTransform;
-    var prevAnimation = style.animation;
-    var prevWebkitAnimation = style.webkitAnimation;
+    var prevPlayState = style.animationPlayState;
+    var prevWebkitPlayState = style.webkitAnimationPlayState;
     var prevTransition = style.transition;
+    style.animationPlayState = 'paused';
+    style.webkitAnimationPlayState = 'paused';
     style.transform = 'none';
     style.webkitTransform = 'none';
-    style.animation = 'none';
-    style.webkitAnimation = 'none';
     style.transition = 'none';
     // Force style flush before measuring.
     void el.offsetWidth;
@@ -336,8 +339,8 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     } finally {
       style.transform = prevTransform;
       style.webkitTransform = prevWebkitTransform;
-      style.animation = prevAnimation;
-      style.webkitAnimation = prevWebkitAnimation;
+      style.animationPlayState = prevPlayState;
+      style.webkitAnimationPlayState = prevWebkitPlayState;
       style.transition = prevTransition;
     }
   }

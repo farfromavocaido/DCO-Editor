@@ -70,10 +70,19 @@ rely on CSS `whiteSpace: nowrap` alone to block wrapping — the engine sets
 ## Font loading
 
 Fitting measures the DOM, so it is only correct in the font that finally
-renders. The runtime fits once at bootstrap (fast paint) and schedules **one**
-refit when `document.fonts.ready` resolves (`scheduleFontRefit` → rAF). It does
-**not** also listen for `loadingdone` (that re-ran layout mid fadeUp enter and
-fought plus placement). The editor preview mirrors the same fonts.ready refit.
+renders. Exported ads **pause the CSS motion clock** until Museo is ready:
+
+1. Stage starts without `.motion-ready` → `animation-play-state: paused` (t=0).
+2. Bootstrap binds feed copy and runs an immediate fit/layout pass.
+3. `document.fonts.ready` → one layout commit (`commitOfferLayout`) → rAF →
+   add `.motion-ready` so keyframes run from a clean t=0.
+4. A 3s timeout releases motion even if the Font Loading API hangs.
+
+Cold first impression therefore matches warm Replay: pluses and offers share
+one timeline after correct Museo metrics. The runtime does **not** listen for
+`loadingdone` (that re-ran layout mid fadeUp). `placePlus` pauses the plus
+playhead while measuring (never `animation: none`, which restarts clips).
+The editor preview still refits on `fonts.ready` against the scrub playhead.
 Fits are idempotent — every pass resets its inline styles first.
 
 **The brand font is Museo — `Museo700-Regular.otf`, the slab family — NOT
@@ -110,11 +119,11 @@ shorter than wrapped copy, and Museo line-boxes hang below the visible mark;
 both skew mid-gap placement. CSS boxes are only for authored envelopes, family
 detection, and writing `left`/`top` (motion `transform` left alone after layout).
 
-**Transform-neutral plus placement:** `placePlus` temporarily clears the plus’s
-`animation` / `transform` while measuring glyph ink, then restores them. Durable
-`left`/`top` must not bake fadeUp `enter_dy` (or the editor playhead enter pose).
-This keeps Replay / cached-font loads aligned with cold first paint and with the
-editor stage regardless of scrub percent.
+**Transform-neutral plus placement:** `placePlus` temporarily pauses the plus
+playhead and clears `transform` while measuring glyph ink, then restores both
+(without `animation: none`, which would restart the clip). Durable `left`/`top`
+must not bake fadeUp `enter_dy` (or the editor playhead enter pose). Combined
+with the `.motion-ready` clock gate, cold first paint matches warm Replay.
 
 **Authored subline width is the fit constraint** (pink text box in the
 inspector). Value-ink × 1.10 is a design guide when authoring only — the

@@ -223,9 +223,9 @@ export function PreviewPane() {
     const frame = window.requestAnimationFrame(() => {
       applyPreviewTextFitting(stage);
     });
-    // One post-font layout commit (mirrors export scheduleFontRefit — fonts.ready
-    // only, no loadingdone). placePlus measures at motion rest so playhead enter
-    // pose cannot bake into plus left/top.
+    // One post-font layout commit (export also gates the CSS clock on
+    // fonts.ready via .motion-ready). placePlus measures at motion rest so
+    // playhead enter pose cannot bake into plus left/top.
     window.document.fonts?.ready?.then(() => {
       if (cancelled || !stageRef.current) return;
       applyPreviewTextFitting(stageRef.current);

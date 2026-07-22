@@ -265,6 +265,16 @@ export function TopBar() {
                 type="button"
                 role="menuitem"
                 onClick={() => {
+                  exportBasePackage({ assetMode: 'embed' }).catch((error) => setStatus(error.message, 'error'));
+                  setMoreOpen(false);
+                }}
+              >
+                Export agency ZIP with embedded SVGs
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
                   exportClientPackage({ includeValidator: true }).catch((error) => setStatus(error.message, 'error'));
                   setMoreOpen(false);
                 }}

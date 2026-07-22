@@ -42,6 +42,9 @@ test('runtime encodes ink-first helpers and per-family plus anchors', () => {
   assert.match(layoutOffersRuntime, /function textInk\(/);
   assert.match(layoutOffersRuntime, /function clientToLocal\(/);
   assert.match(layoutOffersRuntime, /function withNeutralMotion\(/);
+  // Pause the playhead — never animation:none (that restarts CSS clips).
+  assert.match(layoutOffersRuntime, /animationPlayState = 'paused'/);
+  assert.doesNotMatch(layoutOffersRuntime, /style\.animation = 'none'/);
   assert.match(layoutOffersRuntime, /function plusAnchorHorizontal\(/);
   assert.match(layoutOffersRuntime, /function plusAnchorVertical\(/);
   assert.match(layoutOffersRuntime, /function plusAnchorTriangular\(/);

@@ -2,14 +2,33 @@ import { NextResponse } from 'next/server';
 
 import { resolveCampaignId } from '@/server/campaign-query';
 import { readCreativeDocumentForCampaign } from '@/server/creative-document';
-import { buildBasePackageZip, exportSlugForDocument } from '@/server/creative-exporter';
+import {
+  buildBasePackageZip,
+  exportSlugForDocument,
+  type PackageAssetMode,
+} from '@/server/creative-exporter';
 
 export const runtime = 'nodejs';
+
+const parseAssetMode = (value: unknown): PackageAssetMode => {
+  if (value === 'cdn' || value === 'embed') return value;
+  return 'packaged';
+};
+
+const filenameForBasePackage = (
+  slug: string,
+  assetMode: PackageAssetMode,
+  renderMode: 'font' | 'outline',
+) => {
+  if (assetMode === 'cdn') return `${slug}_base_cdn_zip.zip`;
+  if (assetMode === 'embed') return `${slug}_base_embed_zip.zip`;
+  return `${slug}_base_zip${renderMode === 'outline' ? '_outlines' : ''}.zip`;
+};
 
 export async function POST(request: Request) {
   try {
     let document = null;
-    let assetMode: 'packaged' | 'cdn' = 'packaged';
+    let assetMode: PackageAssetMode = 'packaged';
     let renderMode: 'font' | 'outline' = 'font';
     let body: {
       document?: Record<string, unknown>;
@@ -20,7 +39,7 @@ export async function POST(request: Request) {
     try {
       body = await request.json();
       document = body?.document || null;
-      assetMode = body?.assetMode === 'cdn' ? 'cdn' : 'packaged';
+      assetMode = parseAssetMode(body?.assetMode);
       renderMode = body?.renderMode === 'outline' ? 'outline' : 'font';
     } catch {
       document = null;
@@ -29,9 +48,7 @@ export async function POST(request: Request) {
     const creative = document || await readCreativeDocumentForCampaign(campaignId);
     const zip = await buildBasePackageZip(creative, { assetMode, renderMode });
     const slug = exportSlugForDocument(creative);
-    const filename = assetMode === 'cdn'
-      ? `${slug}_base_cdn_zip.zip`
-      : `${slug}_base_zip${renderMode === 'outline' ? '_outlines' : ''}.zip`;
+    const filename = filenameForBasePackage(slug, assetMode, renderMode);
     return new NextResponse(zip, {
       headers: {
         'content-type': 'application/zip',

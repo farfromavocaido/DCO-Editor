@@ -300,6 +300,44 @@ test('builds a CDN-linked base agency package without packaged static assets', a
   assert.match(html, /Enabler\.setDevDynamicContent\(devDynamicContent\)/);
 });
 
+test('builds an embed base agency package with inlined SVGs, CDN font, and packaged backgrounds', async () => {
+  const document = await readCreativeDocument();
+  const entries = await buildBasePackageEntries(document, { assetMode: 'embed' });
+  const names = entries.map((entry) => entry.path).sort();
+  const html = entries
+    .filter((entry) => entry.path.endsWith('/index.html'))
+    .map((entry) => String(entry.data || ''))
+    .join('\n');
+
+  assert.ok(names.includes('mapping.txt'));
+  assert.ok(names.includes('ads/728x90/index.html'));
+  assert.ok(names.includes('ads/assets/bg_728x90.jpg'), 'background JPEGs ship in the embed package');
+  assert.ok(!names.some((name) => name.startsWith('ads/assets/SVG/')), 'SVGs are inlined, not packaged as files');
+  assert.ok(!names.includes('ads/assets/fonts/Museo700-Regular.otf'), 'Museo loads from CDN');
+  assert.ok(!names.includes('ads/assets/fonts/MuseoSans_700.otf'));
+
+  // Waves/logos/plus are data URIs — not Studio CDN SVG URLs and not relative files.
+  for (const url of CDN_SVG_URLS) {
+    assert.ok(!html.includes(url), `embed mode must not use CDN SVG ${url}`);
+  }
+  assert.match(html, /id="logo-act1"[^>]*src="data:image\/svg\+xml/);
+  assert.match(html, /id="plus-1"[^>]*src="data:image\/svg\+xml/);
+  assert.doesNotMatch(html, /src="\.\.\/assets\/SVG\//);
+
+  assert.ok(html.includes(CDN_MUSEO_URL), 'Expected Museo CDN URL');
+  assert.match(html, new RegExp(
+    `font-family: "Museo";[\\s\\S]*?url\\("${CDN_MUSEO_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"\\) format\\("opentype"\\)`,
+  ));
+  assert.ok(!html.includes(CDN_MUSEO_SANS_URL));
+  assert.doesNotMatch(html, /MuseoSans_700\.otf/);
+
+  assert.match(
+    html,
+    /id="bg-image" src="\.\.\/assets\/bg_728x90\.jpg" data-packaged-src="\.\.\/assets\/bg_728x90\.jpg" data-dco-field="background_image_url_728x90"/,
+  );
+  assert.match(html, /Enabler\.setDevDynamicContent\(devDynamicContent\)/);
+});
+
 test('builds a client preview package without copy validation when requested', async () => {
   const document = await readCreativeDocument();
   const entries = await buildClientPreviewPackageEntries(document, { includeValidator: false });
@@ -423,8 +461,13 @@ test('exports the shared text-fit engine and fits after binding offer texts', as
   assert.match(html, /first === '\\u00A3' \|\| first === '\\u20AC'/);
   assert.match(
     html,
-    /bindOfferTexts\(data\);\s+fitBoundText\(\);\s+alignOfferValueSymbols\(root\);\s+layoutOffers\(root\);/,
-    'texts must be bound before fitting; symbols + layout after',
+    /bindOfferTexts\(data\);[\s\S]*?commitOfferLayout\(\);/,
+    'texts must be bound before fitting',
+  );
+  assert.match(
+    html,
+    /function commitOfferLayout\(\) \{\s*if \(!root\) return;\s*fitBoundText\(\);\s*alignOfferValueSymbols\(root\);\s*layoutOffers\(root\);/,
+    'symbols + layout run inside the shared layout commit',
   );
   assert.match(html, /var layoutOffers =/);
   assert.doesNotMatch(html, /OFFER_VALUE_MIN_PX/);
@@ -488,14 +531,19 @@ test('local QA exports embed the packaged Museo so they measure what Studio serv
   assert.doesNotMatch(html, /MuseoSans_700\.otf/);
 });
 
-test('refits text once fonts finish loading', async () => {
+test('holds the motion clock until fonts and offer layout settle', async () => {
   const document = await readCreativeDocument();
   const html = await renderStudioReadyHtml(document, '320x50');
 
+  assert.match(html, /\.stage:not\(\.motion-ready\)/);
+  assert.match(html, /animation-play-state:\s*paused\s*!important/);
   assert.match(html, /document\.fonts\.ready/);
-  assert.match(html, /scheduleFontRefit\(\)/);
+  assert.match(html, /startMotionWhenReady\(\)/);
+  assert.match(html, /classList\.add\('motion-ready'\)/);
+  assert.match(html, /MOTION_START_TIMEOUT_MS/);
   // Single post-font commit — do not re-bind on every font load event mid-enter.
   assert.doesNotMatch(html, /addEventListener\(\s*['"]loadingdone['"]/);
+  assert.doesNotMatch(html, /scheduleFontRefit/);
 });
 
 test('exports uniform bottom-aligned tracking rules for pricing blocks', async () => {
@@ -522,7 +570,7 @@ test('exports creative text fit rules for dynamic headline binding', async () =>
   assert.match(html, /var textFitRules = .*"cssClass":"sse-headline"/);
   assert.match(html, /"minFontSize":22/);
   assert.match(html, /"maxLines":2/);
-  assert.match(html, /bindOfferTexts\(data\);\s+fitBoundText\(\);/);
+  assert.match(html, /bindOfferTexts\(data\);[\s\S]*?commitOfferLayout\(\);/);
 });
 
 test('exports text fitting that measures text content height', async () => {

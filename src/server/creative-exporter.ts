@@ -76,15 +76,23 @@ type PackageEntry = {
   data: string | Buffer;
 };
 
+/** How agency/client packages resolve fonts and static assets. */
+export type PackageAssetMode = 'packaged' | 'cdn' | 'embed';
+
 type ClientPreviewPackageOptions = {
   includeValidator?: boolean;
   /** `cdn` matches Studio CDN base zips (fonts/SVGs from s0.2mdn.net). Default `packaged` keeps downloadable ZIPs self-contained. */
-  assetMode?: 'packaged' | 'cdn';
+  assetMode?: PackageAssetMode;
   renderMode?: RenderMode;
 };
 
 type BasePackageOptions = {
-  assetMode?: 'packaged' | 'cdn';
+  /**
+   * `packaged` — fonts + SVGs in the ZIP (no bg JPEGs; Studio feed supplies them).
+   * `cdn` — Museo + wave/logo SVGs from Studio CDN; plus inlined; no bg JPEGs.
+   * `embed` — SVGs inlined (data URIs), Museo from CDN, backgrounds as relative files in the ZIP.
+   */
+  assetMode?: PackageAssetMode;
   renderMode?: RenderMode;
 };
 
@@ -130,6 +138,14 @@ const SSE_PLUS_DATA_URI = `data:image/svg+xml;charset=utf-8,${encodeURIComponent
   readFileSync(path.resolve(projectRoot, SSE_PLUS_ASSET), 'utf8'),
 )}`;
 
+const isSvgAssetPath = (assetPath: string) => /\.svg$/i.test(assetPath);
+
+/** Adobe Animate–style inline: read campaign SVG into a data URI. */
+const dataUriForSvgAsset = (assetPath: string) => {
+  const abs = path.resolve(projectRoot, assetPath);
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(readFileSync(abs, 'utf8'))}`;
+};
+
 const CDN_ASSET_URLS: Record<string, string> = {
   'assets/SVG/SSELogoBlue.svg': 'https://s0.2mdn.net/creatives/assets/5627651/SSELogoBlue.svg',
   'assets/SVG/SSELogoWhite.svg': 'https://s0.2mdn.net/creatives/assets/5627651/SSELogoWhite.svg',
@@ -139,6 +155,17 @@ const CDN_ASSET_URLS: Record<string, string> = {
   'assets/SVG/greenwave.svg': 'https://s0.2mdn.net/creatives/assets/5627651/greenwave.svg',
   // Data URI — CDN/Pages packages need no extra Studio SVG upload.
   [SSE_PLUS_ASSET]: SSE_PLUS_DATA_URI,
+};
+
+/** Map every SVG used by the creative to an inlined data URI (embed packages). */
+const buildEmbedSvgAssetUrlMap = (document: Record<string, unknown>) => {
+  const map: Record<string, string> = {};
+  for (const assetPath of collectClientAssetPaths(document)) {
+    if (isSvgAssetPath(assetPath)) {
+      map[assetPath] = dataUriForSvgAsset(assetPath);
+    }
+  }
+  return map;
 };
 
 const clientVariantMatrix = () => {
@@ -876,31 +903,43 @@ const runtimeScript = (
           textFitEngine.applyRules(root, textFitRules);
         }
 
-        var fontRefitWired = false;
-
-        function refitAfterFonts() {
+        function commitOfferLayout() {
           if (!root) return;
           fitBoundText();
           alignOfferValueSymbols(root);
           layoutOffers(root);
         }
 
-        function scheduleFontRefit() {
-          if (fontRefitWired) return;
-          fontRefitWired = true;
-          // One post-font layout commit only (fonts.ready → rAF). Extra font
-          // load events must not re-run mid fadeUp enter — that fought
-          // transform-neutral placePlus. Bootstrap still fits immediately for
-          // first paint; this pass corrects Museo metrics.
-          var run = function() {
-            window.requestAnimationFrame(refitAfterFonts);
+        // Cold CDN Museo must settle before the 15s clock runs. Pausing via
+        // .motion-ready keeps keyframes at 0% until fonts.ready → layout → play,
+        // so first impression matches warm Replay. Timeout avoids a hung font
+        // load freezing the unit forever.
+        var motionStartScheduled = false;
+        var MOTION_START_TIMEOUT_MS = 3000;
+
+        function releaseMotionClock() {
+          if (!root || root.classList.contains('motion-ready')) return;
+          root.classList.add('motion-ready');
+        }
+
+        function startMotionWhenReady() {
+          if (motionStartScheduled) return;
+          motionStartScheduled = true;
+          var finished = false;
+          var finish = function() {
+            if (finished) return;
+            finished = true;
+            window.requestAnimationFrame(function() {
+              commitOfferLayout();
+              window.requestAnimationFrame(releaseMotionClock);
+            });
           };
-          if (!(document.fonts && document.fonts.ready)) {
-            // Rare hosts without Font Loading API — still settle after first paint.
-            run();
-            return;
+          if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(finish).catch(finish);
+          } else {
+            finish();
           }
-          document.fonts.ready.then(run).catch(run);
+          window.setTimeout(finish, MOTION_START_TIMEOUT_MS);
         }
 
         ${alignOfferValueSymbolsRuntime}
@@ -958,11 +997,11 @@ const runtimeScript = (
           setText('.unit-rate-prices', data.tc_units_text);
           applyBackgroundImage(data);
           bindOfferTexts(data);
-          fitBoundText();
-          alignOfferValueSymbols(root);
-          layoutOffers(root);
+          // Immediate layout for feed swaps after motion has started; cold boot
+          // still holds the clock until startMotionWhenReady releases it.
+          commitOfferLayout();
           wireExit();
-          scheduleFontRefit();
+          startMotionWhenReady();
           window.__SSE_DCO_READY__ = true;
         }
 
@@ -1081,6 +1120,12 @@ ${options.renderMode === 'outline' ? outlinedTextCss : ''}
       height: ${sizeCreative.canvas.height}px;
       transform-style: preserve-3d;
       background: transparent;
+    }
+    /* Hold the motion clock at t=0 until fonts + offer layout settle so cold
+       first paint matches warm Replay (see startMotionWhenReady). */
+    .stage:not(.motion-ready),
+    .stage:not(.motion-ready) * {
+      animation-play-state: paused !important;
     }
     .stage-element,
     .stage-static {
@@ -2692,10 +2737,18 @@ export const buildClientPreviewPackageEntries = async (document: Record<string, 
 };
 
 export const buildBasePackageEntries = async (document: Record<string, unknown>, options: BasePackageOptions = {}) => {
-  const useCdnAssets = options.assetMode === 'cdn';
+  const assetMode = options.assetMode || 'packaged';
+  const useCdnAssets = assetMode === 'cdn';
+  const useEmbedAssets = assetMode === 'embed';
   const renderMode = options.renderMode || 'font';
-  const assetUrlMap = useCdnAssets ? CDN_ASSET_URLS : undefined;
-  const fontUrlMap = renderMode === 'outline' ? undefined : (useCdnAssets ? CDN_FONT_URLS : undefined);
+  const assetUrlMap = useEmbedAssets
+    ? buildEmbedSvgAssetUrlMap(document)
+    : useCdnAssets
+      ? CDN_ASSET_URLS
+      : undefined;
+  const fontUrlMap = renderMode === 'outline'
+    ? undefined
+    : ((useCdnAssets || useEmbedAssets) ? CDN_FONT_URLS : undefined);
   const entries: PackageEntry[] = [];
   const sizes = Object.keys(document.sizes || {});
   for (const size of sizes) {
@@ -2708,7 +2761,9 @@ export const buildBasePackageEntries = async (document: Record<string, unknown>,
         // packaged; anything unmapped stays relative under ads/assets/fonts/.
         fontBasePath: renderMode === 'outline' ? undefined : '../assets/fonts/',
         fontUrlMap,
-        includePackagedBackground: false,
+        // Embed mode ships bg JPEGs beside the HTML; Studio can still override
+        // via data-dco-field. Packaged/CDN leave src empty for feed-only bgs.
+        includePackagedBackground: useEmbedAssets,
         includePreviewBridge: false,
         includeStudioDynamicContent: renderMode === 'font',
         renderMode,
@@ -2716,7 +2771,12 @@ export const buildBasePackageEntries = async (document: Record<string, unknown>,
     });
   }
 
-  for (const assetPath of collectBasePackageAssetPaths(document)) {
+  // Embed: package non-SVG assets (backgrounds). CDN/packaged: SVG/fonts only
+  // (bgs come from Studio feed); mapped CDN/embed URLs skip the file copy.
+  const packagedAssetPaths = useEmbedAssets
+    ? collectClientAssetPaths(document).filter((assetPath) => !isSvgAssetPath(assetPath))
+    : collectBasePackageAssetPaths(document);
+  for (const assetPath of packagedAssetPaths) {
     if (assetUrlMap?.[assetPath]) continue;
     entries.push({
       path: `ads/${assetPath}`,

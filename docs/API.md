@@ -52,6 +52,14 @@ Returns a ZIP client preview package. Optional body: `{ document, includeValidat
 
 Returns the agency base upload ZIP. Optional body: `{ document, assetMode, renderMode }`.
 
+`assetMode`:
+
+| Value | Fonts | SVGs | Backgrounds |
+|---|---|---|---|
+| `packaged` (default) | Local OTF in ZIP | Files in ZIP | Feed-only (not packaged) |
+| `cdn` | Studio CDN Museo | Studio CDN (+ plus data URI) | Feed-only (not packaged) |
+| `embed` | Studio CDN Museo | Inlined data URIs | Relative files in ZIP (`ads/assets/bg_*.jpg`) |
+
 ## Feed schema
 
 Feed data is stored inside the creative document. These routes read/write the embedded `feed` section.

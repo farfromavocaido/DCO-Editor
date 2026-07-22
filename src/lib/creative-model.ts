@@ -13,6 +13,8 @@ export const findCreativeLayer = (
 ) => currentSizeCreative(document, size)?.layers?.find((layer: Record<string, unknown>) => layer.id === layerId);
 
 export const HEADLINE_CSS_CLASS = 'sse-headline';
+export const BG_IMAGE_LAYER_ID = 'bg-image';
+export const BG_IMAGE_CSS_CLASS = 'bg-image';
 
 export const HEADLINE_STYLE_FIELDS = new Set([
   'left',
@@ -28,6 +30,18 @@ export const HEADLINE_STYLE_FIELDS = new Set([
   'minFontSize',
   'whiteSpace',
   'letterSpacing',
+]);
+
+export const BG_IMAGE_STYLE_FIELDS = new Set([
+  'left',
+  'top',
+  'right',
+  'bottom',
+  'width',
+  'height',
+  'objectFit',
+  'objectPosition',
+  'opacity',
 ]);
 
 export const HEADLINE_LAYOUT_FIELDS = [
@@ -48,6 +62,23 @@ export const HEADLINE_LAYOUT_FIELDS = [
 export const isHeadlineLayer = (layer: Record<string, unknown> | null | undefined) => (
   String(layer?.id || '').startsWith('headline-act')
 );
+
+export const isBackgroundLayer = (layer: Record<string, unknown> | null | undefined) => (
+  String(layer?.id || '') === BG_IMAGE_LAYER_ID
+  || String(layer?.base?.cssClass || '') === BG_IMAGE_CSS_CLASS
+);
+
+/** Synthetic background layer when the size only has classRules (legacy docs). */
+export const backgroundLayerDescriptor = (sizeCreative: Record<string, unknown> | null) => ({
+  id: BG_IMAGE_LAYER_ID,
+  label: 'Background',
+  group: 'Waves / background',
+  kind: 'image',
+  zIndex: 0,
+  base: { cssClass: BG_IMAGE_CSS_CLASS },
+  asset: sizeCreative?.assets?.background || '',
+  clips: [],
+});
 
 /**
  * Only terms-solo still uses a classRule wrapper for local coords.
@@ -269,6 +300,30 @@ export const findCreativeTarget = (
     };
   }
 
+  if (isBackgroundLayer(layer)) {
+    const classRule = findClassRule(sizeCreative, BG_IMAGE_CSS_CLASS);
+    const values = {
+      ...(classRule?.properties || {}),
+      ...(layer.base || {}),
+      cssClass: BG_IMAGE_CSS_CLASS,
+    };
+    return {
+      id: BG_IMAGE_LAYER_ID,
+      label: layer.label || 'Background',
+      kind: 'image',
+      layer,
+      parentLayerId: '',
+      cssClass: BG_IMAGE_CSS_CLASS,
+      coordinateScope: 'canvas',
+      description: 'Background image frame (class rule).',
+      values,
+      base: values,
+      fit: {},
+      clips: layer.clips || [],
+      writeSource: { kind: 'classRule', cssClass: BG_IMAGE_CSS_CLASS },
+    };
+  }
+
   const cssClass = layer.base?.cssClass || layer.id;
   const variantRule = findActiveVariantRule(sizeCreative, { layerId: layer.id, cssClass }, activeScopes);
   const variantProps = mergedActiveVariantProps(sizeCreative, { layerId: layer.id, cssClass }, activeScopes);
@@ -338,6 +393,11 @@ export const updateCreativeLayerBase = (
   if (!layer) throw new Error(`Unknown layer: ${layerId}`);
   if (isHeadlineLayer(layer) && HEADLINE_STYLE_FIELDS.has(field)) {
     const classRule = ensureClassRule(sizeCreative, HEADLINE_CSS_CLASS);
+    classRule.properties[field] = value;
+    return next;
+  }
+  if (isBackgroundLayer(layer) && BG_IMAGE_STYLE_FIELDS.has(field)) {
+    const classRule = ensureClassRule(sizeCreative, BG_IMAGE_CSS_CLASS);
     classRule.properties[field] = value;
     return next;
   }
@@ -525,6 +585,9 @@ export const deleteCreativeLayer = (
   size: string,
   layerId: string,
 ) => {
+  if (String(layerId) === BG_IMAGE_LAYER_ID) {
+    throw new Error('Background layer cannot be deleted');
+  }
   const next = deepClone(document);
   const sizeCreative = currentSizeCreative(next, size);
   if (!sizeCreative) throw new Error(`Unknown size: ${size}`);
@@ -633,6 +696,52 @@ const ensureClassRule = (sizeCreative: Record<string, unknown>, cssClass: string
   return rule;
 };
 
+/** Ensure each size has a selectable bg-image layer + classRule frame. */
+export const ensureBackgroundLayers = (document: Record<string, unknown> | null) => {
+  if (!document?.sizes || typeof document.sizes !== 'object') return document;
+  for (const sizeCreative of Object.values(document.sizes) as Array<Record<string, unknown>>) {
+    if (!sizeCreative || typeof sizeCreative !== 'object') continue;
+    const canvas = sizeCreative.canvas || {};
+    const width = Number(canvas.width) || 0;
+    const height = Number(canvas.height) || 0;
+    const classRule = ensureClassRule(sizeCreative, BG_IMAGE_CSS_CLASS);
+    classRule.properties = {
+      left: 0,
+      top: 0,
+      width,
+      height,
+      objectFit: 'cover',
+      ...(classRule.properties || {}),
+    };
+    // Keep bannerette natural aspect when height was left as auto.
+    if (classRule.properties.height === 'auto' && width > 0) {
+      classRule.properties.height = Math.round((width * 90) / 728);
+    }
+    if (!classRule.properties.objectFit) {
+      classRule.properties.objectFit = 'cover';
+    }
+    const layers = sizeCreative.layers || [];
+    sizeCreative.layers = layers;
+    if (!layers.some((layer: Record<string, unknown>) => layer.id === BG_IMAGE_LAYER_ID)) {
+      layers.unshift({
+        ...backgroundLayerDescriptor(sizeCreative),
+        asset: sizeCreative.assets?.background || '',
+      });
+    } else {
+      const existing = layers.find((layer: Record<string, unknown>) => layer.id === BG_IMAGE_LAYER_ID);
+      if (existing) {
+        existing.base = { ...(existing.base || {}), cssClass: BG_IMAGE_CSS_CLASS };
+        if (!existing.asset) existing.asset = sizeCreative.assets?.background || '';
+        if (existing.label == null) existing.label = 'Background';
+        if (existing.group == null) existing.group = 'Waves / background';
+        if (existing.kind == null) existing.kind = 'image';
+        if (!Array.isArray(existing.clips)) existing.clips = [];
+      }
+    }
+  }
+  return document;
+};
+
 const identityForTarget = (
   layer: Record<string, unknown>,
   parsed: { layerId?: string; childId?: string; isNested?: boolean },
@@ -662,6 +771,11 @@ const writeSharedTargetValue = (
   }
   if (isHeadlineLayer(layer) && HEADLINE_STYLE_FIELDS.has(field)) {
     const classRule = ensureClassRule(sizeCreative, HEADLINE_CSS_CLASS);
+    classRule.properties[field] = value;
+    return;
+  }
+  if (isBackgroundLayer(layer) && BG_IMAGE_STYLE_FIELDS.has(field)) {
+    const classRule = ensureClassRule(sizeCreative, BG_IMAGE_CSS_CLASS);
     classRule.properties[field] = value;
     return;
   }
@@ -781,10 +895,16 @@ export const updateCreativeTargetValue = (
   const headlineIdentity = isHeadlineLayer(layer)
     ? { cssClass: HEADLINE_CSS_CLASS }
     : null;
-  const cssClass = headlineIdentity?.cssClass || layer.base?.cssClass || layer.id;
+  const backgroundIdentity = isBackgroundLayer(layer)
+    ? { cssClass: BG_IMAGE_CSS_CLASS }
+    : null;
+  const cssClass = headlineIdentity?.cssClass
+    || backgroundIdentity?.cssClass
+    || layer.base?.cssClass
+    || layer.id;
   const variantRule = findActiveVariantRule(
     sizeCreative,
-    headlineIdentity || { layerId: layer.id, cssClass },
+    headlineIdentity || backgroundIdentity || { layerId: layer.id, cssClass },
     activeScopes,
   );
   if (variantRule) {
@@ -794,6 +914,12 @@ export const updateCreativeTargetValue = (
 
   if (headlineIdentity && HEADLINE_STYLE_FIELDS.has(field)) {
     const classRule = ensureClassRule(sizeCreative, HEADLINE_CSS_CLASS);
+    classRule.properties[field] = value;
+    return next;
+  }
+
+  if (backgroundIdentity && BG_IMAGE_STYLE_FIELDS.has(field)) {
+    const classRule = ensureClassRule(sizeCreative, BG_IMAGE_CSS_CLASS);
     classRule.properties[field] = value;
     return next;
   }

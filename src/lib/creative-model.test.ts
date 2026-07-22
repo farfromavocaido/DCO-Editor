@@ -665,3 +665,17 @@ test('places the MPU optional roundel frame above the waves and below the CTA', 
   assert.ok(byId['roundel-frame'].zIndex > byId.bluewave.zIndex);
   assert.ok(byId['roundel-frame'].zIndex < byId.cta.zIndex);
 });
+
+test('background layer reads and writes the shared bg-image classRule', () => {
+  const doc = loadPersistedCreative();
+  const target = findCreativeTarget(doc, '320x50', 'bg-image', []);
+  assert.equal(target.cssClass, 'bg-image');
+  assert.equal(target.writeSource.kind, 'classRule');
+  assert.ok(Number(target.values.width) > 0);
+
+  const next = updateCreativeTargetValue(doc, '320x50', 'bg-image', [], 'top', -12);
+  const rule = next.sizes['320x50'].classRules.find((item) => item.cssClass === 'bg-image');
+  assert.equal(rule.properties.top, -12);
+
+  assert.throws(() => deleteCreativeLayer(doc, '320x50', 'bg-image'), /cannot be deleted/);
+});

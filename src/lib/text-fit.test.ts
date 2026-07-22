@@ -148,7 +148,7 @@ test('shared rules equalize the final size across all visible members', () => {
   assert.equal((narrow.style as Record<string, string>).fontSize, '30px');
 });
 
-test('tracking applied to one member of a shared group is applied to all', () => {
+test('tracking stays per-box in a shared group; only size is equalized', () => {
   const squeezed = makeElement({
     className: 'offer-value',
     fontSize: 40,
@@ -161,7 +161,7 @@ test('tracking applied to one member of a shared group is applied to all', () =>
   ]);
 
   assert.equal((squeezed.style as Record<string, string>).letterSpacing, '-0.01em');
-  assert.equal((comfortable.style as Record<string, string>).letterSpacing, '-0.01em');
+  assert.equal((comfortable.style as Record<string, string>).letterSpacing || '', '');
   assert.equal((squeezed.style as Record<string, string>).fontSize, '40px');
   assert.equal((comfortable.style as Record<string, string>).fontSize, '40px');
 });
@@ -196,8 +196,8 @@ test('shrink with maxLines > 1 wraps and shrinks until the line budget fits', ()
   const element = makeElement({
     fontSize: 24,
     clientHeight: 44,
-    fitsAt: (_size, _tracking, whiteSpace) => whiteSpace === 'normal',
-    linesAt: (size, whiteSpace) => (whiteSpace === 'normal' ? (size > 20 ? 3 : 2) : 1),
+    fitsAt: (_size, _tracking, whiteSpace) => whiteSpace === 'pre-line',
+    linesAt: (size, whiteSpace) => (whiteSpace === 'pre-line' ? (size > 20 ? 3 : 2) : 1),
   });
 
   engine().applyRules(makeRoot([element]), [
@@ -205,7 +205,7 @@ test('shrink with maxLines > 1 wraps and shrinks until the line budget fits', ()
   ]);
 
   const style = element.style as Record<string, string>;
-  assert.equal(style.whiteSpace, 'normal');
+  assert.equal(style.whiteSpace, 'pre-line');
   assert.equal(style.fontSize, '20px');
   assert.equal(element.getAttribute('data-fit-clipped'), null);
 });
@@ -214,8 +214,8 @@ test('wrap mode keeps the designed size and does not shrink', () => {
   const element = makeElement({
     fontSize: 24,
     clientHeight: 44,
-    fitsAt: (_size, _tracking, whiteSpace) => whiteSpace === 'normal',
-    linesAt: (_size, whiteSpace) => (whiteSpace === 'normal' ? 3 : 1),
+    fitsAt: (_size, _tracking, whiteSpace) => whiteSpace === 'pre-line',
+    linesAt: (_size, whiteSpace) => (whiteSpace === 'pre-line' ? 3 : 1),
   });
 
   engine().applyRules(makeRoot([element]), [
@@ -223,7 +223,7 @@ test('wrap mode keeps the designed size and does not shrink', () => {
   ]);
 
   const style = element.style as Record<string, string>;
-  assert.equal(style.whiteSpace, 'normal');
+  assert.equal(style.whiteSpace, 'pre-line');
   assert.equal(style.fontSize, '24px');
   assert.equal(element.getAttribute('data-fit-clipped'), 'true');
 });
@@ -234,8 +234,8 @@ test('copy that measures a hair over N line-heights is not false-flagged as clip
     fontSize: 20,
     lineHeightRatio: 1.1,
     clientHeight: 100,
-    fitsAt: (_size, _tracking, whiteSpace) => whiteSpace === 'normal',
-    linesAt: (_size, whiteSpace) => (whiteSpace === 'normal' ? 2.2 : 1),
+    fitsAt: (_size, _tracking, whiteSpace) => whiteSpace === 'pre-line',
+    linesAt: (_size, whiteSpace) => (whiteSpace === 'pre-line' ? 2.2 : 1),
   });
 
   engine().applyRules(makeRoot([element]), [
@@ -249,7 +249,7 @@ test('shrink with maxLines 1 forces a single line (no wrap)', () => {
   const element = makeElement({
     fontSize: 24,
     fitsAt: (size, _tracking, whiteSpace) => whiteSpace === 'nowrap' && size <= 18,
-    linesAt: (_size, whiteSpace) => (whiteSpace === 'normal' ? 2 : 1),
+    linesAt: (_size, whiteSpace) => (whiteSpace === 'pre-line' ? 2 : 1),
   });
 
   engine().applyRules(makeRoot([element]), [
@@ -267,8 +267,8 @@ test('wrapped multi-line content keeps bottom flex alignment (wraps upward)', ()
     clientHeight: 44,
     display: 'flex',
     alignItems: 'flex-end',
-    fitsAt: (_size, _tracking, whiteSpace) => whiteSpace === 'normal',
-    linesAt: (_size, whiteSpace) => (whiteSpace === 'normal' ? 2 : 1),
+    fitsAt: (_size, _tracking, whiteSpace) => whiteSpace === 'pre-line',
+    linesAt: (_size, whiteSpace) => (whiteSpace === 'pre-line' ? 2 : 1),
   });
   const singleLine = makeElement({
     className: 'single',
@@ -310,8 +310,8 @@ test('bottom-aligned members keep their glyph bottoms when shrunk', () => {
 test('scope overrides win when the root carries the scope class', () => {
   const element = makeElement({
     fontSize: 24,
-    fitsAt: (size, _tracking, whiteSpace) => (whiteSpace === 'normal' ? true : size <= 20),
-    linesAt: (_size, whiteSpace) => (whiteSpace === 'normal' ? 2 : 1),
+    fitsAt: (size, _tracking, whiteSpace) => (whiteSpace === 'pre-line' ? true : size <= 20),
+    linesAt: (_size, whiteSpace) => (whiteSpace === 'pre-line' ? 2 : 1),
   });
 
   engine().applyRules(
@@ -326,7 +326,7 @@ test('scope overrides win when the root carries the scope class', () => {
   );
 
   const style = element.style as Record<string, string>;
-  assert.notEqual(style.whiteSpace, 'normal', 'offers-3 override must disable wrapping');
+  assert.notEqual(style.whiteSpace, 'pre-line', 'offers-3 override must disable wrapping');
   assert.equal(style.fontSize, '20px');
 });
 

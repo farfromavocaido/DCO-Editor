@@ -4,7 +4,7 @@ Next.js app for authoring SSE DCO display banners from a single creative documen
 
 **Repository:** [github.com/farfromavocaido/DCO-Editor](https://github.com/farfromavocaido/DCO-Editor)
 
-**Client preview (GitHub Pages):** [farfromavocaido.github.io/DCO-Editor/](https://farfromavocaido.github.io/DCO-Editor/) — rebuilt automatically on every push to `main`. A lightweight password gate protects the hosted preview (default password: `ssedco`; override with `PREVIEW_SITE_PASSWORD` when exporting). Client ZIP downloads from the editor are unchanged.
+**Client preview (GitHub Pages):** [farfromavocaido.github.io/DCO-Editor/](https://farfromavocaido.github.io/DCO-Editor/) — rebuilt automatically on every push to `main`. A lightweight password gate protects the hosted preview (default password: `ssedco`; override with `PREVIEW_SITE_PASSWORD` when exporting). The preview remembers size, form values, and zoom in the browser across refresh; **Restore defaults** clears that and reloads the baked-in sample row. Client ZIP downloads from the editor are unchanged.
 
 ## Quick start
 

@@ -3,20 +3,24 @@
 ## Daily editing
 
 1. Start the editor: `just editor` or `npm run dev -- -p 5174`.
-2. Pick a size from the toolbar.
-3. Use the layer tree, canvas, timeline, and inspector to edit positions, styles, and motion clips.
-4. Toggle offer count, T&C mode, and CTA shape to preview feed-driven variants.
-5. **Save creative** writes `campaign/sse-dco-creative.json`.
-6. Edit mock feed rows in the inspector; **Save sample values** persists them into the same document.
+2. Pick a **Campaign** from the toolbar (default SSE DCO; parallel hiker / keepyuppy briefs are separate JSON files).
+3. Pick a size from the toolbar.
+4. Use the layer tree, canvas, timeline, and inspector to edit positions, styles, and motion clips.
+5. Toggle offer count, T&C mode, and CTA shape to preview feed-driven variants.
+6. **Save creative** writes the active campaign JSON under `campaign/`.
+7. Edit mock feed rows in the inspector; **Save sample values** persists them into the same document.
+8. Switching campaigns prompts if there are unsaved creative or sample-value changes.
 
 ## Export
 
 | Action | Output |
 |---|---|
-| **Build HTML** | `output/SSE_DCO_{size}.html` and WIP variant files for all sizes |
+| **Export HTML (font)** | Downloads `{exportSlug}_html.zip`; also writes `output/{exportSlug}_{size}.html` (+ WIP variants) |
+| **Export HTML (SVG outlines)** | Downloads `{exportSlug}_html_outlines.zip`; same files with text baked to SVG paths (no Museo `@font-face`) |
 | **View HTML** | Opens a browser preview of the current size with baked feed row |
 | **HTML source** | Formatted, syntax-highlighted export HTML in the inspector modal |
-| **Client ZIP** | Downloadable preview package with validator |
+| **Client ZIP** | Downloadable preview package with validator (font mode) |
+| **Client ZIP (SVG outlines)** | Fixed-copy outline package without OTF |
 | **Base ZIP** | Agency upload package with mapping and HTML shells |
 
 ## Adding assets
@@ -32,5 +36,6 @@ Add a new entry under `sizes` in `sse-dco-creative.json` with `canvas`, `layers`
 | Symptom | Likely cause |
 |---|---|
 | Broken images in preview | Asset missing from `campaign/assets/` or wrong path in layer/size assets |
-| Export ZIP missing font | `MuseoSans_700.otf` not installed at `~/Library/Fonts/` |
+| Export ZIP missing font (font mode) | `Museo700-Regular.otf` missing from `campaign/assets/fonts/` |
+| Outline export still references fonts | Used font mode instead of **Export HTML/ZIP (SVG outlines)** |
 | Save fails validation | Creative document missing required feed, clock, or layer fields |

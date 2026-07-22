@@ -1,5 +1,6 @@
-// Derive edit/layout box height from fit.maxLines so the selection frame and
-// CSS height match the line budget. Vertical alignment keeps the visual anchor:
+// Derive edit/layout box height from fit.maxLines when height is unset, so the
+// selection frame and CSS height match the line budget. Explicit authored
+// height always wins. Vertical alignment keeps the visual anchor when growing:
 //   flex-start / top  → grow down (top unchanged)
 //   flex-end / bottom → grow up (top moves up)
 //   center            → grow both ways
@@ -50,6 +51,10 @@ export const verticalAlignFromValues = (values: Record<string, unknown> = {}) =>
 /**
  * Apply maxLines budget to a box. Returns new top/height (and localTop when
  * provided) so the alignment edge stays put when the box grows or shrinks.
+ *
+ * Explicit authored `values.height` always wins — maxLines is then only a
+ * text-fit constraint. Expanding chrome from maxLines fought canvas drags on
+ * tight offer-subline variants (e.g. 728x90 offers-3 height: 11 + maxLines: 2).
  */
 export const applyFitBudgetToBox = ({
   top,
@@ -69,6 +74,16 @@ export const applyFitBudgetToBox = ({
     return {
       top,
       height,
+      localTop,
+      budgetApplied: false,
+    };
+  }
+
+  const authored = authoredHeightPx(values.height, NaN);
+  if (Number.isFinite(authored)) {
+    return {
+      top,
+      height: authored,
       localTop,
       budgetApplied: false,
     };

@@ -15,6 +15,12 @@
  *   - layout-family detection (horizontal / vertical / triangular)
  *   - writing `element.style.left|top` (motion `transform` left alone)
  *
+ * ## Transform-neutral placement (do not regress)
+ * Durable `left`/`top` must not bake motion enter poses. `placePlus` measures
+ * glyph ink under a temporary rest pose (`animation`/`transform` cleared) so
+ * fadeUp `enter_dy` / editor playhead transforms cannot shift the committed
+ * position. Fit-time `translateY` on offer-values is intentionally left alone.
+ *
  * Authored subline width stays the fit constraint (ink×1.10 is design-guide only).
  *
  * Pipeline (after text-fit + symbol align):
@@ -273,8 +279,40 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
   }
 
   /**
+   * Run fn while el is at motion rest. Clears animation + transform so Range
+   * ink is not shifted by fadeUp enter_dy / editor playhead frames. Restores
+   * inline styles afterward (CSS keyframes resume on the next frame).
+   */
+  function withNeutralMotion(el, fn) {
+    if (!el || !el.style) return fn();
+    var style = el.style;
+    var prevTransform = style.transform;
+    var prevWebkitTransform = style.webkitTransform;
+    var prevAnimation = style.animation;
+    var prevWebkitAnimation = style.webkitAnimation;
+    var prevTransition = style.transition;
+    style.transform = 'none';
+    style.webkitTransform = 'none';
+    style.animation = 'none';
+    style.webkitAnimation = 'none';
+    style.transition = 'none';
+    // Force style flush before measuring.
+    void el.offsetWidth;
+    try {
+      return fn();
+    } finally {
+      style.transform = prevTransform;
+      style.webkitTransform = prevWebkitTransform;
+      style.animation = prevAnimation;
+      style.webkitAnimation = prevWebkitAnimation;
+      style.transition = prevTransition;
+    }
+  }
+
+  /**
    * Place plus so its glyph ink centre sits at stage (x, y).
    * Never centre the CSS/line box — Museo "+" ink sits high in a tall em-box.
+   * Ink is measured at motion rest so enter transforms cannot bake into left/top.
    */
   function placePlus(plus, x, y) {
     if (!plus || !isVisible(plus)) return;
@@ -284,14 +322,16 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     plus.style.left = (x - pw / 2) + 'px';
     plus.style.top = (y - ph / 2) + 'px';
     if (!parent) return;
-    var ink = textInk(plus, parent);
-    if (!(ink.width > 0 || ink.height > 0)) return;
-    var inkCx = (ink.left + ink.right) / 2;
-    var inkCy = (ink.top + ink.bottom) / 2;
-    var curLeft = cssNumber(plus.style.left, 0);
-    var curTop = cssNumber(plus.style.top, 0);
-    plus.style.left = (curLeft + (x - inkCx)) + 'px';
-    plus.style.top = (curTop + (y - inkCy)) + 'px';
+    withNeutralMotion(plus, function() {
+      var ink = textInk(plus, parent);
+      if (!(ink.width > 0 || ink.height > 0)) return;
+      var inkCx = (ink.left + ink.right) / 2;
+      var inkCy = (ink.top + ink.bottom) / 2;
+      var curLeft = cssNumber(plus.style.left, 0);
+      var curTop = cssNumber(plus.style.top, 0);
+      plus.style.left = (curLeft + (x - inkCx)) + 'px';
+      plus.style.top = (curTop + (y - inkCy)) + 'px';
+    });
   }
 
   /** Horizontal: plus between adjacent *value* inks (X + Y). */

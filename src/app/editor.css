@@ -2489,6 +2489,7 @@ select {
 .inspector-field select,
 .sample-field input,
 .sample-field select,
+.sample-field textarea,
 .clip-toolbar select {
   width: 100%;
   min-height: 32px;
@@ -2498,6 +2499,15 @@ select {
   color: var(--ink);
   outline: none;
   padding: 0 8px;
+}
+
+.sample-field textarea {
+  min-height: 64px;
+  padding: 8px;
+  resize: vertical;
+  font: inherit;
+  line-height: 1.35;
+  white-space: pre-wrap;
 }
 
 .clip-toolbar {

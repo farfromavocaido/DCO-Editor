@@ -90,6 +90,35 @@ const api = async (url, options = {}) => {
   return payload;
 };
 
+const withCampaign = (url, campaignId) => {
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}campaign=${encodeURIComponent(campaignId || 'sse-dco')}`;
+};
+
+const EDITOR_SESSION_KEY = 'sse-dco-editor-session';
+
+const readEditorSession = () => {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = window.localStorage.getItem(EDITOR_SESSION_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+};
+
+const writeEditorSession = (patch = {}) => {
+  if (typeof window === 'undefined') return;
+  try {
+    const next = { ...readEditorSession(), ...patch };
+    window.localStorage.setItem(EDITOR_SESSION_KEY, JSON.stringify(next));
+  } catch {
+    // Ignore quota / private-mode failures; session restore is best-effort.
+  }
+};
+
 const selectedFeedRowFromState = (state) => {
   const draft = state.feedDraft;
   const row = draft.rows[draft.selectedIndex] || draft.rows[0];
@@ -138,6 +167,9 @@ export const useEditorStore = create<any>((set, get) => ({
   feedProfileName: '',
   feedFields: [],
   feedDraft: createFeedDraft([]),
+  campaigns: [],
+  // Always default on both SSR and first client paint — restore from localStorage in init().
+  activeCampaignId: 'sse-dco',
   creativeDocument: null,
   creativeDirty: false,
   selectedLayerId: '',
@@ -163,8 +195,19 @@ export const useEditorStore = create<any>((set, get) => ({
   htmlInspectorOpen: false,
   htmlInspectorLoading: false,
   htmlInspectorPayload: null,
+  /** Inspector listens and focuses the Sample field for this name. */
+  focusFeedFieldRequest: null,
 
   setResizeMode: (mode) => set({ resizeMode: mode === 'scale' ? 'scale' : 'frame' }),
+
+  requestEditFeedField: (fieldName) => {
+    const name = String(fieldName || '').trim();
+    if (!name) return;
+    set({
+      focusFeedFieldRequest: { fieldName: name, token: Date.now() },
+    });
+    get().setStatus(`Editing ${name.replace(/_/g, ' ')}`, 'info');
+  },
   setPercent: (percent, options = {}) => set({
     percent,
     ...(options.pause === false ? {} : { isPlaying: false }),
@@ -544,6 +587,10 @@ export const useEditorStore = create<any>((set, get) => ({
     const state = get();
     const targetId = layerId || state.selectedLayerId;
     if (!targetId || !state.creativeDocument) return;
+    if (targetId === 'bg-image') {
+      get().setStatus('Background layer cannot be deleted', 'warn');
+      return;
+    }
     const next = deleteCreativeLayer(state.creativeDocument, state.size, targetId);
     const lockedLayerIds = new Set(state.lockedLayerIds);
     const hiddenLayerIds = new Set(state.hiddenLayerIds);
@@ -651,8 +698,8 @@ export const useEditorStore = create<any>((set, get) => ({
   },
 
   loadCreativeDocument: async () => {
-    const document = await api('/api/creative');
     const state = get();
+    const document = await api(withCampaign('/api/creative', state.activeCampaignId));
     const activeSize = state.size || Object.keys(document.sizes || {})[0] || '';
     const selectedLayer = document.sizes?.[activeSize]?.layers?.[0];
     set({
@@ -665,6 +712,39 @@ export const useEditorStore = create<any>((set, get) => ({
         : [state.selectedTargetId || state.selectedLayerId || selectedLayer?.id].filter(Boolean),
       selectedClipId: state.selectedClipId || selectedLayer?.clips?.[0]?.id || '',
     });
+  },
+
+  switchCampaign: async (campaignId) => {
+    const state = get();
+    if (!campaignId || campaignId === state.activeCampaignId) return;
+    if (state.creativeDirty || !state.saveFeedDisabled) {
+      const confirmed = window.confirm('You have unsaved changes. Discard them and switch campaigns?');
+      if (!confirmed) return;
+    }
+    set({
+      activeCampaignId: campaignId,
+      creativeDirty: false,
+      saveFeedDisabled: true,
+      history: [],
+      historyIndex: -1,
+      selectedLayerId: '',
+      selectedTargetId: '',
+      selectedTargetIds: [],
+      selectedClipId: '',
+      isolationPath: [],
+    });
+    writeEditorSession({ campaignId });
+    await Promise.all([
+      get().loadFeedSchema(),
+      get().loadCreativeDocument(),
+    ]);
+    const document = get().creativeDocument;
+    const sizes = Object.keys(document?.sizes || {}).sort();
+    set({ sizes });
+    const preferred = sizes.includes(state.size) ? state.size : (sizes.includes('300x600') ? '300x600' : sizes[0]);
+    if (preferred) await get().loadSize(preferred);
+    const name = (get().campaigns || []).find((entry) => entry.id === campaignId)?.name || campaignId;
+    get().setStatus(`Loaded ${name}`);
   },
 
   applyCreativeLayerBaseValue: (size, layerId, field, value) => {
@@ -1244,9 +1324,14 @@ export const useEditorStore = create<any>((set, get) => ({
     get().setStatus('Applied motion to matching family', 'warn');
   },
 
+  loadCampaigns: async () => {
+    const campaigns = await api('/api/campaigns');
+    set({ campaigns: Array.isArray(campaigns) ? campaigns : [] });
+  },
+
   loadFeedSchema: async () => {
-    const payload = await api('/api/feed-schema');
     const state = get();
+    const payload = await api(withCampaign('/api/feed-schema', state.activeCampaignId));
     set({
       feedProfileName: payload.profileName,
       feedFields: payload.fields || [],
@@ -1264,6 +1349,7 @@ export const useEditorStore = create<any>((set, get) => ({
       history: [],
       historyIndex: -1,
     });
+    writeEditorSession({ size });
     const creativeSize = currentSizeCreative(get().creativeDocument, size);
     if (creativeSize?.layers?.length) {
       const existing = creativeSize.layers.find((layer) => layer.id === get().selectedLayerId);
@@ -1283,9 +1369,9 @@ export const useEditorStore = create<any>((set, get) => ({
   saveFeedRows: async () => {
     get().setStatus('Saving sample values');
     const state = get();
-    const payload = await api('/api/feed-schema/rows', {
+    const payload = await api(withCampaign('/api/feed-schema/rows', state.activeCampaignId), {
       method: 'POST',
-      body: JSON.stringify({ rows: state.feedDraft.rows }),
+      body: JSON.stringify({ rows: state.feedDraft.rows, campaign: state.activeCampaignId }),
     });
     const creativeDocument = state.creativeDocument
       ? {
@@ -1310,15 +1396,72 @@ export const useEditorStore = create<any>((set, get) => ({
     get().setStatus('Saved sample values');
   },
 
-  buildHtml: async () => {
-    get().setStatus('Exporting Studio-ready HTML for all sizes');
-    const result = await api('/api/creative/export', { method: 'POST', body: '{}' });
-    const lastLine = result.stdout.trim().split('\n').at(-1) || 'Build complete';
-    get().setStatus(lastLine);
+  exportSlug: () => {
+    const state = get();
+    const fromList = (state.campaigns || []).find((entry) => entry.id === state.activeCampaignId)?.exportSlug;
+    return fromList || 'SSE_DCO';
   },
 
-  exportClientPackage: async ({ includeValidator = true } = {}) => {
-    get().setStatus(includeValidator ? 'Building validated client preview ZIP' : 'Building client preview ZIP');
+  buildHtml: async ({ renderMode = 'font' } = {}) => {
+    const state = get();
+    get().setStatus(renderMode === 'outline'
+      ? 'Exporting outlined SVG HTML for all sizes'
+      : 'Exporting Studio-ready HTML for all sizes');
+    const creativeDocument = state.creativeDocument
+      ? {
+          ...state.creativeDocument,
+          feed: {
+            ...state.creativeDocument.feed,
+            sampleRows: state.feedDraft.rows?.length
+              ? state.feedDraft.rows
+              : state.creativeDocument.feed.sampleRows,
+          },
+        }
+      : null;
+    const response = await fetch(withCampaign('/api/creative/export', state.activeCampaignId), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        campaign: state.activeCampaignId,
+        renderMode,
+        download: true,
+        ...(creativeDocument ? { document: creativeDocument } : {}),
+      }),
+    });
+    if (!response.ok) {
+      let message = response.statusText || 'Failed to export HTML';
+      try {
+        const payload = await response.json();
+        message = payload.error || message;
+      } catch {
+        // keep fallback
+      }
+      throw new Error(message);
+    }
+    const blob = await response.blob();
+    if (!blob.size) throw new Error('HTML export ZIP was empty');
+    const url = window.URL.createObjectURL(blob);
+    const anchor = window.document.createElement('a');
+    const slug = get().exportSlug();
+    const filename = renderMode === 'outline'
+      ? `${slug}_html_outlines.zip`
+      : `${slug}_html.zip`;
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.rel = 'noopener';
+    window.document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+    get().setStatus(`Downloaded ${filename} (also written to output/)`);
+  },
+
+  exportClientPackage: async ({ includeValidator = true, renderMode = 'font' } = {}) => {
+    get().setStatus(
+      renderMode === 'outline'
+        ? 'Building outlined client ZIP'
+        : (includeValidator ? 'Building validated client preview ZIP' : 'Building client preview ZIP'),
+    );
     const state = get();
     const creativeDocument = state.creativeDocument
       ? {
@@ -1331,12 +1474,14 @@ export const useEditorStore = create<any>((set, get) => ({
           },
         }
       : null;
-    const response = await fetch('/api/creative/client-package', {
+    const response = await fetch(withCampaign('/api/creative/client-package', state.activeCampaignId), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
+        campaign: state.activeCampaignId,
         ...(creativeDocument ? { document: creativeDocument } : {}),
-        includeValidator,
+        includeValidator: renderMode === 'font' ? includeValidator : false,
+        renderMode,
       }),
     });
     if (!response.ok) {
@@ -1353,21 +1498,30 @@ export const useEditorStore = create<any>((set, get) => ({
     if (!blob.size) throw new Error('Client preview ZIP was empty');
     const url = window.URL.createObjectURL(blob);
     const anchor = window.document.createElement('a');
+    const slug = get().exportSlug();
     anchor.href = url;
-    anchor.download = includeValidator
-      ? 'SSE_DCO_client_preview_package_validated.zip'
-      : 'SSE_DCO_client_preview_package.zip';
+    anchor.download = renderMode === 'outline'
+      ? `${slug}_client_preview_package_outlines.zip`
+      : (includeValidator
+        ? `${slug}_client_preview_package_validated.zip`
+        : `${slug}_client_preview_package.zip`);
     anchor.rel = 'noopener';
     window.document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
     window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-    get().setStatus(includeValidator ? 'Downloaded validated client preview ZIP' : 'Downloaded client preview ZIP');
+    get().setStatus(renderMode === 'outline'
+      ? 'Downloaded outlined client ZIP'
+      : (includeValidator ? 'Downloaded validated client preview ZIP' : 'Downloaded client preview ZIP'));
   },
 
-  exportBasePackage: async ({ assetMode = 'packaged' } = {}) => {
+  exportBasePackage: async ({ assetMode = 'packaged', renderMode = 'font' } = {}) => {
     const useCdnAssets = assetMode === 'cdn';
-    get().setStatus(useCdnAssets ? 'Building agency CDN ZIP' : 'Building agency base ZIP');
+    get().setStatus(
+      renderMode === 'outline'
+        ? 'Building outlined base ZIP'
+        : (useCdnAssets ? 'Building agency CDN ZIP' : 'Building agency base ZIP'),
+    );
     const state = get();
     const creativeDocument = state.creativeDocument
       ? {
@@ -1380,12 +1534,14 @@ export const useEditorStore = create<any>((set, get) => ({
           },
         }
       : null;
-    const response = await fetch('/api/creative/base-package', {
+    const response = await fetch(withCampaign('/api/creative/base-package', state.activeCampaignId), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
+        campaign: state.activeCampaignId,
         ...(creativeDocument ? { document: creativeDocument } : {}),
         ...(useCdnAssets ? { assetMode: 'cdn' } : {}),
+        renderMode,
       }),
     });
     if (!response.ok) {
@@ -1402,20 +1558,27 @@ export const useEditorStore = create<any>((set, get) => ({
     if (!blob.size) throw new Error('Base ZIP was empty');
     const url = window.URL.createObjectURL(blob);
     const anchor = window.document.createElement('a');
+    const slug = get().exportSlug();
     anchor.href = url;
-    anchor.download = useCdnAssets ? 'SSE_DCO_base_cdn_zip.zip' : 'SSE_DCO_base_zip.zip';
+    anchor.download = useCdnAssets
+      ? `${slug}_base_cdn_zip.zip`
+      : `${slug}_base_zip${renderMode === 'outline' ? '_outlines' : ''}.zip`;
     anchor.rel = 'noopener';
     window.document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
     window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-    get().setStatus(useCdnAssets ? 'Downloaded agency CDN ZIP' : 'Downloaded agency base ZIP');
+    get().setStatus(
+      renderMode === 'outline'
+        ? 'Downloaded outlined base ZIP'
+        : (useCdnAssets ? 'Downloaded agency CDN ZIP' : 'Downloaded agency base ZIP'),
+    );
   },
 
   viewHtml: () => {
     const state = get();
     if (!state.size) return;
-    const url = `/api/creative/${encodeURIComponent(state.size)}/view`;
+    const url = withCampaign(`/api/creative/${encodeURIComponent(state.size)}/view`, state.activeCampaignId);
     if (!state.creativeDocument) {
       window.open(url, '_blank', 'noopener,noreferrer');
       get().setStatus(`Opened exported ${state.size} HTML preview`);
@@ -1453,7 +1616,7 @@ export const useEditorStore = create<any>((set, get) => ({
   fetchHtmlInspectorSource: async () => {
     const state = get();
     if (!state.size) throw new Error('No ad size selected');
-    const url = `/api/creative/${encodeURIComponent(state.size)}/source`;
+    const url = withCampaign(`/api/creative/${encodeURIComponent(state.size)}/source`, state.activeCampaignId);
     if (!state.creativeDocument) {
       return api(url);
     }
@@ -1466,7 +1629,7 @@ export const useEditorStore = create<any>((set, get) => ({
     };
     return api(url, {
       method: 'POST',
-      body: JSON.stringify({ document: creativeDocument }),
+      body: JSON.stringify({ document: creativeDocument, campaign: state.activeCampaignId }),
     });
   },
 
@@ -1517,7 +1680,7 @@ export const useEditorStore = create<any>((set, get) => ({
         sampleRows: state.feedDraft.rows?.length ? state.feedDraft.rows : state.creativeDocument.feed.sampleRows,
       },
     };
-    const payload = await api('/api/creative', {
+    const payload = await api(withCampaign('/api/creative', state.activeCampaignId), {
       method: 'POST',
       body: JSON.stringify(document),
     });
@@ -1532,6 +1695,8 @@ export const useEditorStore = create<any>((set, get) => ({
     get().syncControlsFromFeedRow();
     get().setStatus('Unsaved sample values', 'warn');
   },
+
+  clearFocusFeedFieldRequest: () => set({ focusFeedFieldRequest: null }),
 
   setFeedRowIndex: (index) => {
     set((state) => ({
@@ -1564,6 +1729,8 @@ export const useEditorStore = create<any>((set, get) => ({
     if (!stageEl || !state.creativeDocument) return;
     // Fit against authored boxes → symbol ink-align → gap/plus layout.
     // Layout must not rewrite subline width (that is the fit constraint).
+    // placePlus measures at motion rest, so the playhead (default ~19% / fadeUp
+    // enter) cannot bake enter_dy into durable plus left/top.
     const { sizes, trackings, clipped } = applyTextFitting(stageEl, creativeFitRules(state));
     alignOfferValueSymbols(stageEl);
     layoutOffers(stageEl);
@@ -1571,6 +1738,17 @@ export const useEditorStore = create<any>((set, get) => ({
   },
 
   init: async () => {
+    const session = readEditorSession();
+    await get().loadCampaigns();
+    const campaigns = get().campaigns || [];
+    const campaignIds = new Set(campaigns.map((entry) => entry.id));
+    const campaignId = campaignIds.has(session.campaignId)
+      ? session.campaignId
+      : (campaignIds.has(get().activeCampaignId) ? get().activeCampaignId : 'sse-dco');
+    if (campaignId !== get().activeCampaignId) {
+      set({ activeCampaignId: campaignId });
+    }
+    writeEditorSession({ campaignId });
     await Promise.all([
       get().loadFeedSchema(),
       get().loadCreativeDocument(),
@@ -1578,7 +1756,9 @@ export const useEditorStore = create<any>((set, get) => ({
     const document = get().creativeDocument;
     const sizes = Object.keys(document?.sizes || {}).sort();
     set({ sizes });
-    const preferred = sizes.includes('300x600') ? '300x600' : sizes[0];
+    const preferred = sizes.includes(session.size)
+      ? session.size
+      : (sizes.includes(get().size) ? get().size : (sizes.includes('300x600') ? '300x600' : sizes[0]));
     if (preferred) await get().loadSize(preferred);
     get().setStatus('Ready');
   },

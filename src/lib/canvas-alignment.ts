@@ -68,7 +68,6 @@ export const getTargetCanvasBounds = (
 
   // Legal lines emit authored top/height in CSS. Applying the maxLines budget
   // here rewrote top on every move and fought drag writes.
-  // Offer/headline targets still grow the edit chrome to the line budget.
   const legalLine = /^(terms-prices|unit-rate-prices|terms-solo)$/.test(String(targetId || ''));
   if (wrapper || legalLine) {
     return {
@@ -87,8 +86,9 @@ export const getTargetCanvasBounds = (
     };
   }
 
-  // When fit.maxLines is set, selection/edit chrome uses that line budget as
-  // height and shifts top so vertical alignment keeps its anchor edge.
+  // When height is unset and fit.maxLines is set, grow edit chrome to the line
+  // budget (anchor edge preserved). Explicit authored height is left alone —
+  // see applyFitBudgetToBox.
   const fitted = applyFitBudgetToBox({
     top,
     height,

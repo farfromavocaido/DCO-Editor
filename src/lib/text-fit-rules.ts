@@ -13,7 +13,7 @@
 //     maxLines,             number?     line budget; with shrink, wrap is allowed when > 1
 //     minFontSize,          number?     absolute px floor
 //     minFontSizeRatio,     number?     floor as a fraction of the CSS base size (per variant)
-//     tracking: { minEm },  object?     negative letter-spacing squeeze tried before shrinking
+//     tracking: { minEm },  object?     negative letter-spacing squeeze tried before shrinking (per box)
 //     align: 'bottom',      string?     anchor glyph bottoms when the final size is below base
 //     scopes,               object?     per-variant overrides keyed by scope class (offers-2 ...)
 //   }
@@ -29,15 +29,14 @@ import { HEADLINE_CSS_CLASS, isHeadlineLayer } from './creative-model';
 const OFFER_VALUE_CLASS = 'offer-value';
 const OFFER_SUBLINE_CLASS = 'offer-subline';
 
-/** Pricing values shrink together, squeeze together and stay bottom-anchored. */
+/** Pricing values share a final size, stay bottom-anchored; tracking is per box. */
 const OFFER_VALUE_DEFAULTS = {
   shared: true,
   wrap: false,
   minFontSize: 8,
   minFontSizeRatio: 0.5,
-  // Squeeze letter-spacing before shrinking type (shared across visible values).
-  // Keep this modest — shared groups take the tightest member’s tracking, so a
-  // deep floor (e.g. −0.4em) crushes short prices when one long value overflows.
+  // Squeeze letter-spacing before shrinking type. Applied independently per
+  // visible value so a tight neighbour cannot crush a comfortable one.
   tracking: { minEm: -0.05 },
   align: 'bottom',
 };

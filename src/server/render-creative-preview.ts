@@ -10,7 +10,7 @@ type PreviewOptions = {
 
 export async function renderCreativeSourceHtml(size: string, options: PreviewOptions = {}) {
   const document = options.document || await readCreativeDocument();
-  return renderStudioReadyHtml(document, size, {
+  return await renderStudioReadyHtml(document, size, {
     assetBasePath: options.assetBasePath ?? '/',
     // Same Studio CDN Museo the editor stage loads — fit + symbol metrics match serve.
     fontUrlMap: CDN_FONT_URLS,

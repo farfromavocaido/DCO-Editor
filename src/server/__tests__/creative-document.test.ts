@@ -6,6 +6,24 @@ import {
   validateCreativeDocument,
 } from '../creative-document';
 
+test('rejects unregistered campaign ids', () => {
+  assert.throws(
+    () => validateCreativeDocument({
+      version: 1,
+      campaign: { id: 'not-a-campaign', name: 'Nope' },
+      clock: { durationS: 15, beats: {} },
+      feed: { profileName: 'x', sampleRows: [] },
+      sizes: {
+        '300x250': {
+          canvas: { width: 300, height: 250 },
+          layers: [{ id: 'a', kind: 'text', base: {}, clips: [] }],
+        },
+      },
+    }),
+    /registered campaign/,
+  );
+});
+
 test('loads the checked-in SSE DCO creative document', async () => {
   const document = await readCreativeDocument();
 

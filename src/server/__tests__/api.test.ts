@@ -152,6 +152,21 @@ test('POST /api/creative/export builds all replacement creative sizes', async ()
   assert.match(payload.stdout, /Built 6 sizes with replacement exporter/);
 });
 
+test('POST /api/creative/export?download returns a zip of built HTML', async () => {
+  const response = await creativeExportAllPost(new Request('http://localhost/api/creative/export', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ download: true, campaign: 'sse-hiker-welcome' }),
+  }));
+
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get('content-type') || '', /application\/zip/);
+  assert.match(response.headers.get('content-disposition') || '', /SSE_Hiker_Welcome_html\.zip/);
+  const bytes = Buffer.from(await response.arrayBuffer());
+  assert.equal(bytes.subarray(0, 4).toString('binary'), 'PK\u0003\u0004');
+  assert.ok(bytes.includes(Buffer.from('SSE_Hiker_Welcome_300x250.html')));
+});
+
 test('POST /api/creative/client-package returns a downloadable zip', async () => {
   const response = await clientPackagePost(new Request('http://localhost/api/creative/client-package', {
     method: 'POST',

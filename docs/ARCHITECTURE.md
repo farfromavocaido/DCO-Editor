@@ -1,6 +1,6 @@
 # Editor architecture
 
-The SSE DCO editor is a Next.js app that reads and writes `campaign/sse-dco-creative.json` and exports Studio-ready HTML from the in-app compiler.
+The SSE DCO editor is a Next.js app that reads and writes registered campaign creative JSON files under `campaign/` and exports Studio-ready HTML (font) or fixed-copy SVG-outline packages from the in-app compiler.
 
 ## Boundary diagram
 
@@ -9,15 +9,17 @@ The SSE DCO editor is a Next.js app that reads and writes `campaign/sse-dco-crea
 │  SSE DCO Editor (Next.js)                                   │
 │  ┌─────────────┐    fetch     ┌──────────────────────────┐  │
 │  │ React UI    │ ──────────► │ API routes (Node runtime) │  │
-│  │ + Zustand   │              │ creative-document.ts      │  │
-│  └─────────────┘              │ feed-schema.ts            │  │
-│         │                     │ creative-exporter.ts      │  │
+│  │ + Zustand   │              │ campaign-registry.ts      │  │
+│  │ campaign    │              │ creative-document.ts      │  │
+│  │ switcher    │              │ feed-schema.ts            │  │
+│  └─────────────┘              │ creative-exporter.ts      │  │
+│         │                     │ text-outline.ts           │  │
 │         │  /assets/* proxy    └────────────┬─────────────┘  │
 └─────────┼──────────────────────────────────┼───────────────┘
           │                                  │ fs read/write
           │                     ┌────────────▼───────────────┐
           └────────────────────►│ campaign/                    │
-                                │  sse-dco-creative.json       │
+                                │  *-creative.json             │
                                 │  assets/                     │
                                 │ output/ (generated HTML)     │
                                 └──────────────────────────────┘
@@ -32,13 +34,18 @@ All server paths resolve from `src/server/paths.ts` relative to the file locatio
 | `appRoot` | Repository root |
 | `projectRoot` | `campaign/` |
 | `outputRoot` | `output/` |
-| `creativeDocumentPath` | `campaign/sse-dco-creative.json` |
+| `creativeDocumentPath` | Default `campaign/sse-dco-creative.json` |
+| `creativeDocumentPathFor(id)` | Registered campaign JSON via `campaign-registry.ts` |
 
 ## Server modules
 
+### `campaign-registry.ts`
+
+Maps campaign ids to JSON filenames, display names, and export slugs.
+
 ### `creative-document.ts`
 
-Reads, validates, and writes the version-1 creative JSON document.
+Reads, validates, and writes version-1 creative JSON documents for registered campaign ids.
 
 ### `feed-schema.ts`
 
@@ -46,7 +53,11 @@ Reads/writes feed profile data embedded in the creative document. Validates and 
 
 ### `creative-exporter.ts`
 
-Renders Studio-ready HTML, WIP preview variants, client preview ZIPs, and agency base ZIPs from the creative document.
+Renders Studio-ready HTML, WIP preview variants, client preview ZIPs, and agency base ZIPs from the creative document. Supports `renderMode: 'font' | 'outline'`.
+
+### `text-outline.ts`
+
+Loads Museo and converts fitted text boxes into inline SVG path markup for outline export.
 
 ### `http.ts`
 
@@ -56,7 +67,7 @@ Shared helpers: `serveAsset`, `jsonResponse`, `errorResponse`, path-escape guard
 
 ### State (`store/editor-store.ts`)
 
-Zustand store holds the loaded creative document, feed draft, canvas selection, timeline scrubber, undo/redo for creative edits, and export actions.
+Zustand store holds the active campaign id, loaded creative document, feed draft, canvas selection, timeline scrubber, undo/redo for creative edits, and export actions (`renderMode` font vs outline).
 
 ### Preview (`components/PreviewPane.tsx`)
 
@@ -110,4 +121,4 @@ All handlers use `export const runtime = 'nodejs'` because they touch the filesy
 
 ## Tests
 
-Vitest runs in Node. Suites cover creative compiler/model libs, feed schema validation, exporter output, and live API handlers against `campaign/sse-dco-creative.json`.
+Vitest runs in Node. Suites cover creative compiler/model libs, feed schema validation, exporter output (font + outline), campaign registry, and live API handlers against registered campaign JSON files.

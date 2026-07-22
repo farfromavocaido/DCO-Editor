@@ -19,32 +19,36 @@ Authored **modes** (not a draggable op-order):
 
 Pipeline per element:
 
-1. **White-space** — `normal` when wrapping is allowed, otherwise forced `nowrap`
-   (CSS cannot override the mode).
+1. **White-space** — `pre-line` when wrapping is allowed (keeps authored `\n`),
+   otherwise forced `nowrap` (CSS cannot override the mode).
 2. **Tracking squeeze** — negative `letter-spacing` in small steps, bounded by
-   `tracking.minEm` (offer values: −0.05em). Tried before any size change.
-   Final tracking is shared across visible `.offer-value` members — the
-   tightest member wins, so the floor stays modest. The inspector Typography
-   panel shows the effective tracking next to the auto-fitted font size.
+   `tracking.minEm` (offer values: −0.05em). Tried before any size change, and
+   applied **per box**. A tight value does not force tracking onto a comfortable
+   neighbour. The inspector Typography panel shows the tightest effective
+   tracking for the class next to the auto-fitted font size.
 3. **Shrink** — when allowed: 0.5px steps to a floor of
    `max(minFontSize, base × minFontSizeRatio)`, until width + line budget fit.
 4. **Clip leftover** — if still overflowing at the floor, overflow is hidden and
    the element is marked `data-fit-clipped` (editor shows a small red dot;
    hover for width / max-lines reason).
 
-When `maxLines` is set, the edit/selection box height is derived as
-`fontSize × lineHeight × maxLines`. Vertical alignment keeps the anchor edge:
-top grows down, bottom grows up, centre grows both ways (`src/lib/fit-box.ts`).
+When `maxLines` is set **and height is unset**, the edit/selection box height
+is derived as `fontSize × lineHeight × maxLines`. An explicit authored height
+always wins (maxLines stays a text-fit constraint only) so tight offer boxes
+are not inflated for chrome. Vertical alignment keeps the anchor edge when the
+budget does apply: top grows down, bottom grows up, centre grows both ways
+(`src/lib/fit-box.ts`).
 
 Bottom-aligned flex boxes (`align-items: flex-end`) keep that alignment when
 copy wraps: the last line stays on the baseline and earlier lines stack
 *upward*. Top-aligned boxes grow downward as usual.
 
 Rules with `shared: true` (headlines, offer values, offer sublines) equalize
-the final size *and* tracking across all visible members — if one pricing
-block is squeezed or shrunk, all of them are. Offer values also carry
-`align: "bottom"`: when the shared size ends below the designed size, members
-are translated down so the numerals keep sitting on the designed baseline.
+the final **font size** across all visible members — if one pricing block must
+shrink, all of them do. Tracking stays independent per box (recomputed at the
+shared size). Offer values also carry `align: "bottom"`: when the shared size
+ends below the designed size, members are translated down so the numerals keep
+sitting on the designed baseline.
 
 ## Per-variant overrides
 
@@ -61,14 +65,16 @@ line in offers-2 / offers-3:
 inspector under offers-1 writes there; under offers-2 or offers-3 it writes
 `variantRules[].fit` (same independence pattern as layout `props`). Do not
 rely on CSS `whiteSpace: nowrap` alone to block wrapping — the engine sets
-`white-space: normal` when wrap is allowed.
+`white-space: pre-line` when wrap is allowed.
 
 ## Font loading
 
 Fitting measures the DOM, so it is only correct in the font that finally
-renders. The runtime fits once at bootstrap (fast paint) and refits when
-`document.fonts.ready` resolves (`scheduleFontRefit`); the editor preview does
-the same. Fits are idempotent — every pass resets its inline styles first.
+renders. The runtime fits once at bootstrap (fast paint) and schedules **one**
+refit when `document.fonts.ready` resolves (`scheduleFontRefit` → rAF). It does
+**not** also listen for `loadingdone` (that re-ran layout mid fadeUp enter and
+fought plus placement). The editor preview mirrors the same fonts.ready refit.
+Fits are idempotent — every pass resets its inline styles first.
 
 **The brand font is Museo — `Museo700-Regular.otf`, the slab family — NOT
 Museo Sans.** They are different typefaces with different widths; substituting
@@ -102,7 +108,13 @@ glyph, cluster bounds for gaps) uses Range text ink — never the CSS/line box
 (`offsetHeight` / element `getBoundingClientRect`). Authored boxes are often
 shorter than wrapped copy, and Museo line-boxes hang below the visible mark;
 both skew mid-gap placement. CSS boxes are only for authored envelopes, family
-detection, and writing `left`/`top` (motion `transform` untouched).
+detection, and writing `left`/`top` (motion `transform` left alone after layout).
+
+**Transform-neutral plus placement:** `placePlus` temporarily clears the plus’s
+`animation` / `transform` while measuring glyph ink, then restores them. Durable
+`left`/`top` must not bake fadeUp `enter_dy` (or the editor playhead enter pose).
+This keeps Replay / cached-font loads aligned with cold first paint and with the
+editor stage regardless of scrub percent.
 
 **Authored subline width is the fit constraint** (pink text box in the
 inspector). Value-ink × 1.10 is a design guide when authoring only — the

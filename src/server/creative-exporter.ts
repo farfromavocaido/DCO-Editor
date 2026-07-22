@@ -5,20 +5,16 @@ import path from 'node:path';
 import { compileAnimationClips } from '@/lib/creative-compiler';
 import { structuredRuleCss } from '@/lib/creative-css';
 import { clipsForProfile, headlineTransitionRuntimeBlock } from '@/lib/headline-motion';
-import { HEADLINE_CSS_CLASS, isHeadlineLayer } from '@/lib/creative-model';
 import {
   CDN_FONT_URLS,
   MUSEO_FONT_FILENAME,
 } from '@/lib/brand-font';
-import { layoutOffersRuntime } from '@/lib/offer-layout';
 import {
-  alignOfferValueSymbolsRuntime,
-  offerValueSymbolCss,
-  wrapOfferValueSymbolRuntime,
-} from '@/lib/offer-value-symbols';
-import { beatsForFrameScope } from '@/lib/timing-profiles';
-import { textFitEngineSource } from '@/lib/text-fit';
-import { textFitRulesForSize } from '@/lib/text-fit-rules';
+  findCreativeTarget,
+  HEADLINE_CSS_CLASS,
+  isBackgroundLayer,
+  isHeadlineLayer,
+} from '@/lib/creative-model';
 import {
   CREATIVE_AD_SIZES,
   backgroundFieldsFromRow,
@@ -27,9 +23,25 @@ import {
   imageFieldUrl,
   studioDevBackgroundUrl,
 } from '@/lib/feed-background';
+import { activeScopesFromControls, controlsFromFeedRow } from '@/lib/feed-model';
+import { layoutOffersRuntime } from '@/lib/offer-layout';
+import {
+  alignOfferValueSymbolsRuntime,
+  offerValueSymbolCss,
+  wrapOfferValueSymbolRuntime,
+} from '@/lib/offer-value-symbols';
+import { beatsForFrameScope } from '@/lib/timing-profiles';
+import { textFitEngineSource } from '@/lib/text-fit';
+import { normalizeFitConfig, textFitRulesForSize } from '@/lib/text-fit-rules';
+import { getCampaign } from './campaign-registry';
 import { appRoot, outputRoot, projectRoot } from './paths';
+import { outlineFittedText } from './text-outline';
 
 const DEFAULT_STATE = 'offers-1 tc-solo cta-roundel frames-3 roundel-frame-off roundel-copy-only';
+
+export const exportSlugForDocument = (document: Record<string, unknown> = {}) => (
+  getCampaign(document?.campaign?.id).exportSlug
+);
 
 const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
   '&': '&amp;',
@@ -43,6 +55,8 @@ const escapeAttr = escapeHtml;
 
 const jsString = (value: unknown) => JSON.stringify(value);
 
+type RenderMode = 'font' | 'outline';
+
 type RenderOptions = {
   assetBasePath?: string;
   assetUrlMap?: Record<string, string>;
@@ -52,6 +66,8 @@ type RenderOptions = {
   includePreviewBridge?: boolean;
   includeStudioDynamicContent?: boolean;
   previewValidatorScriptPath?: string;
+  /** `font` keeps Museo + live DOM text. `outline` bakes fixed-copy SVG paths and omits the OTF. */
+  renderMode?: RenderMode;
 };
 
 type PackageEntry = {
@@ -63,10 +79,12 @@ type ClientPreviewPackageOptions = {
   includeValidator?: boolean;
   /** `cdn` matches Studio CDN base zips (fonts/SVGs from s0.2mdn.net). Default `packaged` keeps downloadable ZIPs self-contained. */
   assetMode?: 'packaged' | 'cdn';
+  renderMode?: RenderMode;
 };
 
 type BasePackageOptions = {
   assetMode?: 'packaged' | 'cdn';
+  renderMode?: RenderMode;
 };
 
 const clientFontSourcePath = (filename: string) => (
@@ -431,6 +449,8 @@ const staticRuleForLayer = (
 ${declarations.join('\n')}
     }`;
   }
+  // Frame lives on the shared .bg-image classRule; avoid an empty layer override.
+  if (isBackgroundLayer(layer)) return '';
   const base = layer.base || {};
   const cssClass = base.cssClass || layer.id;
   const initialTransform = firstKeyframe ? formatTransform(firstKeyframe) : null;
@@ -499,6 +519,140 @@ const renderOfferSlot = (layer: Record<string, unknown>) => {
           </div>`;
 };
 
+const sampleRowForDocument = (document: Record<string, unknown>) => (
+  (document.feed?.sampleRows || []).find((row: Record<string, unknown>) => row.Default)
+  || document.feed?.sampleRows?.[0]
+  || {}
+);
+
+const textForLayerFromRow = (layerId: string, row: Record<string, unknown>) => {
+  if (layerId === 'headline-act1') return String(row.heading1_text || '');
+  if (layerId === 'headline-act2') return String(row.heading2_text || '');
+  if (layerId === 'headline-act3') return String(row.heading3_text || '');
+  if (layerId === 'headline-act4') return String(row.heading4_text || '');
+  if (layerId === 'cta') return String(row.cta_text || '');
+  if (layerId === 'terms-prices' || layerId === 'terms-solo') return String(row.tc_terms_text || '');
+  if (layerId === 'unit-rate-prices') return String(row.tc_units_text || '');
+  if (layerId === 'plus-1' || layerId === 'plus-2') return '+';
+  if (layerId === 'roundel-copy') return String(row.roundel_text_text || '');
+  if (layerId === 'roundel-value') return String(row.roundel_value_text || '');
+  return '';
+};
+
+const pxNumber = (value: unknown, fallback = 0) => {
+  const number = Number.parseFloat(String(value ?? ''));
+  return Number.isFinite(number) ? number : fallback;
+};
+
+const outlinedSvgMarkup = async ({
+  document,
+  size,
+  targetId,
+  text,
+  activeScopes,
+  fallbackFit = {},
+}: {
+  document: Record<string, unknown>;
+  size: string;
+  targetId: string;
+  text: string;
+  activeScopes: string[];
+  fallbackFit?: Record<string, unknown>;
+}) => {
+  const target = findCreativeTarget(document, size, targetId, activeScopes);
+  const values = target?.values || target?.base || {};
+  const fit = normalizeFitConfig({ ...(target?.fit || {}), ...fallbackFit });
+  const fontSize = pxNumber(values.fontSize, 12);
+  const width = Math.max(1, pxNumber(values.width, 40));
+  const height = Math.max(1, pxNumber(values.height, fontSize * 1.2));
+  const color = String(values.color || '#FFFFFF');
+  const alignRaw = String(values.textAlign || values.align || 'left').toLowerCase();
+  const textAlign = alignRaw === 'center' || alignRaw === 'right' ? alignRaw : 'left';
+  const outlined = await outlineFittedText({
+    text,
+    fontSize,
+    width,
+    height,
+    color,
+    textAlign,
+    allowShrink: fit.allowShrink !== false && fit.static === undefined,
+    wrap: Boolean(fit.wrap),
+    maxLines: Number(fit.maxLines) || (fit.wrap ? 2 : 1),
+    minFontSize: Number(fit.minFontSize) || Math.max(6, Math.round(fontSize * 0.5)),
+    trackingMinEm: Number(fit.tracking?.minEm),
+  });
+  return outlined.svg;
+};
+
+const renderOutlinedOfferSlot = async (
+  document: Record<string, unknown>,
+  size: string,
+  layer: Record<string, unknown>,
+  row: Record<string, unknown>,
+  activeScopes: string[],
+) => {
+  const cssClass = layer.base?.cssClass || layer.id;
+  const index = String(layer.id).match(/(\d)$/)?.[1] || '1';
+  const valueSvg = await outlinedSvgMarkup({
+    document,
+    size,
+    targetId: `${layer.id}::offer-value`,
+    text: String(row[`offer${index}_value_text`] || ''),
+    activeScopes,
+    fallbackFit: { mode: 'shrink', tracking: { minEm: -0.05 } },
+  });
+  const subSvg = await outlinedSvgMarkup({
+    document,
+    size,
+    targetId: `${layer.id}::offer-subline`,
+    text: String(row[`offer${index}_sub_text`] || ''),
+    activeScopes,
+    fallbackFit: { mode: 'shrink' },
+  });
+  return `          <div class="stage-element ${cssClass}" data-gwd-group="OfferSlot" data-offer-index="${index}" id="offer${index}">
+            <div class="gwd-grp-offer offer-value outlined-text">${valueSvg}</div>
+            <div class="gwd-grp-offer offer-subline outlined-text">${subSvg}</div>
+          </div>`;
+};
+
+const renderOutlinedLayer = async (
+  document: Record<string, unknown>,
+  size: string,
+  layer: Record<string, unknown>,
+  row: Record<string, unknown>,
+  activeScopes: string[],
+  options: RenderOptions = {},
+) => {
+  const cssClass = isHeadlineLayer(layer)
+    ? HEADLINE_CSS_CLASS
+    : (layer.base?.cssClass || layer.id);
+  if (layer.id === 'terms-solo') return '';
+  if (layer.id.startsWith('offer-slot-')) {
+    return renderOutlinedOfferSlot(document, size, layer, row, activeScopes);
+  }
+  if (layer.kind === 'image') {
+    return `          <img alt="" draggable="false" class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}" src="${escapeAttr(assetSrc(layer.asset, options))}">`;
+  }
+  const text = textForLayerFromRow(String(layer.id), row);
+  const svg = await outlinedSvgMarkup({
+    document,
+    size,
+    targetId: String(layer.id),
+    text,
+    activeScopes,
+    fallbackFit: layer.fit || {},
+  });
+  const className = [
+    'stage-element',
+    'outlined-text',
+    /headline/.test(layer.id) ? 'sse-text sse-text-bold' : '',
+    /terms|unit-rate/.test(layer.id) ? 'sse-text sse-bottom-line' : '',
+    cssClass,
+  ].filter(Boolean).join(' ');
+  const tag = layer.id === 'cta' ? 'div' : 'div';
+  return `          <${tag} class="${className}" id="${escapeAttr(layer.id)}" data-layer-id="${escapeAttr(layer.id)}">${svg}</${tag}>`;
+};
+
 const renderLayer = (layer: Record<string, unknown>, options: RenderOptions = {}) => {
   const cssClass = isHeadlineLayer(layer)
     ? HEADLINE_CSS_CLASS
@@ -533,6 +687,54 @@ const renderTermsWrappers = (sizeCreative: Record<string, unknown>) => {
             <p class="gwd-grp-tc sse-text sse-bottom-line ${solo?.base?.cssClass || 'terms-solo'}" data-dco-field="tc_terms_text"></p>
           </div>`;
 };
+
+const renderOutlinedTermsWrappers = async (
+  document: Record<string, unknown>,
+  size: string,
+  row: Record<string, unknown>,
+  activeScopes: string[],
+) => {
+  const sizeCreative = document.sizes[size];
+  const solo = termsLayer(sizeCreative, 'terms-solo');
+  const svg = await outlinedSvgMarkup({
+    document,
+    size,
+    targetId: 'terms-solo',
+    text: String(row.tc_terms_text || ''),
+    activeScopes,
+  });
+  return `          <div class="stage-static tc-solo-group" data-gwd-group="tc_solo" id="TC_Solo">
+            <div class="gwd-grp-tc sse-text sse-bottom-line outlined-text ${solo?.base?.cssClass || 'terms-solo'}">${svg}</div>
+          </div>`;
+};
+
+const outlineRuntimeScript = () => `
+    <script>
+      (function() {
+        function boot() {
+          window.__SSE_DCO_READY__ = true;
+        }
+        if (window.Enabler && Enabler.isInitialized && !Enabler.isInitialized()) {
+          Enabler.addEventListener(studio.events.StudioEvent.INIT, boot);
+        } else {
+          boot();
+        }
+      })();
+    </script>
+`;
+
+const outlinedTextCss = `
+    .outlined-text {
+      overflow: visible;
+    }
+    .outlined-text svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+    }
+`;
 
 const stateClasses = (row: Record<string, unknown>) => {
   const count = Math.min(3, Math.max(1, Number.parseInt(row.offer_count_num, 10) || 1));
@@ -680,14 +882,13 @@ const runtimeScript = (
           if (fontRefitWired) return;
           fontRefitWired = true;
           if (!(document.fonts && document.fonts.ready)) return;
-          // The first fit can only measure fallback metrics while the packaged
-          // font is still in flight; measure again with the real glyphs.
+          // One post-font layout commit only (fonts.ready → rAF). Extra font
+          // load events must not re-run mid fadeUp enter — that fought
+          // transform-neutral placePlus. Bootstrap still fits immediately for
+          // first paint; this pass corrects Museo metrics.
           document.fonts.ready.then(function() {
             window.requestAnimationFrame(refitAfterFonts);
           }).catch(function() {});
-          if (document.fonts.addEventListener) {
-            document.fonts.addEventListener('loadingdone', refitAfterFonts);
-          }
         }
 
         ${alignOfferValueSymbolsRuntime}
@@ -847,7 +1048,8 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
     .join('\n\n');
   return `
 ${localFontFaceCss(options)}
-${packagedFontIsolationCss()}
+${options.renderMode === 'outline' ? '' : packagedFontIsolationCss()}
+${options.renderMode === 'outline' ? outlinedTextCss : ''}
     html, body {
       width: 100%;
       height: 100%;
@@ -876,7 +1078,7 @@ ${packagedFontIsolationCss()}
     }
 ${sizeCreative.manualCss || ''}
 
-${offerValueSymbolCss}
+${options.renderMode === 'outline' ? '' : offerValueSymbolCss}
 
 ${layerCss}
 
@@ -890,51 +1092,79 @@ ${profileAnimationCss}
 `;
 };
 
-const renderBody = (document: Record<string, unknown>, size: string, options: RenderOptions = {}) => {
+const renderBody = async (document: Record<string, unknown>, size: string, options: RenderOptions = {}) => {
   const sizeCreative = document.sizes[size];
   const background = options.includePackagedBackground === false ? '' : assetSrc(sizeCreative.assets.background, options);
+  const row = sampleRowForDocument(document);
+  const stateClass = options.renderMode === 'outline' ? stateClasses(row) : DEFAULT_STATE;
+  if (options.renderMode === 'outline') {
+    const activeScopes = activeScopesFromControls(controlsFromFeedRow(row));
+    const layers = (await Promise.all(
+      sizeCreative.layers
+        .filter((layer: Record<string, unknown>) => layer.id !== 'bg-image')
+        .map((layer: Record<string, unknown>) => (
+          renderOutlinedLayer(document, size, layer, row, activeScopes, options)
+        )),
+    )).filter(Boolean).join('\n');
+    const terms = await renderOutlinedTermsWrappers(document, size, row, activeScopes);
+    return `      <main id="page-content" class="stage page-content ${stateClass}" data-size="${escapeAttr(size)}">
+          <img alt="" draggable="false" class="stage-element bg-image" id="bg-image" src="${escapeAttr(background)}" data-packaged-src="${escapeAttr(background)}">
+${layers}
+${terms}
+      </main>`;
+  }
   const layers = sizeCreative.layers
     .filter((layer: Record<string, unknown>) => layer.id !== 'bg-image')
     .map((layer: Record<string, unknown>) => renderLayer(layer, options))
     .filter(Boolean)
     .join('\n');
-  return `      <main id="page-content" class="stage page-content ${DEFAULT_STATE}" data-size="${escapeAttr(size)}" data-dco-state="offer_count_num,tc_type_enum,cta_type_enum,include_roundel_frame_bool,roundel_value_text">
+  return `      <main id="page-content" class="stage page-content ${stateClass}" data-size="${escapeAttr(size)}" data-dco-state="offer_count_num,tc_type_enum,cta_type_enum,include_roundel_frame_bool,roundel_value_text">
           <img alt="" draggable="false" class="stage-element bg-image" id="bg-image" src="${escapeAttr(background)}" data-packaged-src="${escapeAttr(background)}" data-dco-field="${escapeAttr(backgroundImageFieldName(size))}">
 ${layers}
 ${renderTermsWrappers(sizeCreative)}
       </main>`;
 };
 
-export const renderStudioReadyHtml = (document: Record<string, unknown>, size: string, options: RenderOptions = {}) => {
+export const renderStudioReadyHtml = async (
+  document: Record<string, unknown>,
+  size: string,
+  options: RenderOptions = {},
+) => {
   const sizeCreative = document.sizes?.[size];
   if (!sizeCreative) throw new Error(`Unknown creative size: ${size}`);
-  const studioDynamicContentScript = options.includeStudioDynamicContent
+  const renderMode = options.renderMode || 'font';
+  const studioDynamicContentScript = options.includeStudioDynamicContent && renderMode === 'font'
     ? `\n${renderStudioDynamicContentScript(document)}\n`
     : '';
+  const scripts = renderMode === 'outline'
+    ? outlineRuntimeScript()
+    : runtimeScript(textFitRulesForSize(sizeCreative), options, {
+      layers: sizeCreative.layers,
+      beatsProfiles: {
+        'frames-3': beatsForFrameScope(document, 'frames-3'),
+        'frames-4': beatsForFrameScope(document, 'frames-4'),
+      },
+      durationS: document.clock.durationS,
+    });
+  const body = await renderBody(document, size, { ...options, renderMode });
+  const title = `${escapeHtml(document.campaign?.name || 'SSE DCO')} ${escapeHtml(size)}`;
   return `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
     <meta name="environment" content="dv360">
     <meta name="viewport" content="width=${sizeCreative.canvas.width}, initial-scale=1.0">
-    <title>SSE DCO ${escapeHtml(size)}</title>
-${packagedFontPreloadTags(options)}
+    <title>${title}</title>
+${renderMode === 'outline' ? '' : packagedFontPreloadTags(options)}
     <script src="https://s0.2mdn.net/ads/studio/Enabler.js"></script>${studioDynamicContentScript}
     <style>
-${cssForSize(document, size, options)}
+${cssForSize(document, size, { ...options, renderMode })}
     </style>
-${runtimeScript(textFitRulesForSize(sizeCreative), options, {
-  layers: sizeCreative.layers,
-  beatsProfiles: {
-    'frames-3': beatsForFrameScope(document, 'frames-3'),
-    'frames-4': beatsForFrameScope(document, 'frames-4'),
-  },
-  durationS: document.clock.durationS,
-})}
-${previewValidatorTag(options)}
+${scripts}
+${renderMode === 'outline' ? '' : previewValidatorTag(options)}
   </head>
   <body>
-${renderBody(document, size, options)}
+${body}
   </body>
 </html>
 `;
@@ -950,38 +1180,52 @@ export const renderWipHtml = (html: string, row: Record<string, unknown>) => {
     .replace('    <script src="https://s0.2mdn.net/ads/studio/Enabler.js"></script>', `    <script src="https://s0.2mdn.net/ads/studio/Enabler.js"></script>\n${feedScript}`);
 };
 
-export const buildCreativeHtmlFiles = async (document: Record<string, unknown>, size: string) => {
+export const buildCreativeHtmlFiles = async (
+  document: Record<string, unknown>,
+  size: string,
+  options: { renderMode?: RenderMode } = {},
+) => {
   await fs.mkdir(outputRoot, { recursive: true });
+  const slug = exportSlugForDocument(document);
+  const renderMode = options.renderMode || 'font';
   // Local QA files load the packaged Museo (output/ sits beside campaign/), so
   // they measure and render the same font Studio serves — not whatever happens
-  // to be installed on this machine.
-  const html = renderStudioReadyHtml(document, size, { fontBasePath: '../campaign/assets/fonts/' });
-  const outPath = path.resolve(outputRoot, `SSE_DCO_${size}.html`);
+  // to be installed on this machine. Outline mode skips the font face entirely.
+  const html = await renderStudioReadyHtml(document, size, {
+    fontBasePath: renderMode === 'outline' ? undefined : '../campaign/assets/fonts/',
+    renderMode,
+  });
+  const outPath = path.resolve(outputRoot, `${slug}_${size}.html`);
   await fs.writeFile(outPath, html);
   const variants = { single: 1, dual: 2, triple: 3 };
   const wip: Record<string, string> = {};
-  for (const [variant, offerCount] of Object.entries(variants)) {
-    const row = document.feed.sampleRows.find((sample) => Number(sample.offer_count_num) === offerCount);
-    if (!row) continue;
-    const wipPath = path.resolve(outputRoot, `SSE_DCO_${size}_WIP_${variant}.html`);
-    await fs.writeFile(wipPath, renderWipHtml(html, row));
-    wip[variant] = path.relative(outputRoot, wipPath);
+  if (renderMode === 'font') {
+    for (const [variant, offerCount] of Object.entries(variants)) {
+      const row = document.feed.sampleRows.find((sample) => Number(sample.offer_count_num) === offerCount);
+      if (!row) continue;
+      const wipPath = path.resolve(outputRoot, `${slug}_${size}_WIP_${variant}.html`);
+      await fs.writeFile(wipPath, renderWipHtml(html, row));
+      wip[variant] = path.relative(outputRoot, wipPath);
+    }
   }
   return {
     code: 0,
-    stdout: `Built ${path.relative(outputRoot, outPath)} with replacement exporter\n`,
+    stdout: `Built ${path.relative(outputRoot, outPath)} with replacement exporter (${renderMode})\n`,
     stderr: '',
     outPath: path.relative(outputRoot, outPath),
     wip,
   };
 };
 
-export const buildAllCreativeHtmlFiles = async (document: Record<string, unknown>) => {
+export const buildAllCreativeHtmlFiles = async (
+  document: Record<string, unknown>,
+  options: { renderMode?: RenderMode } = {},
+) => {
   const sizes = Object.keys(document.sizes || {});
   const outputs: Record<string, unknown> = {};
   const stdout = [];
   for (const size of sizes) {
-    const result = await buildCreativeHtmlFiles(document, size);
+    const result = await buildCreativeHtmlFiles(document, size, options);
     outputs[size] = result;
     stdout.push(result.stdout.trim());
   }
@@ -993,14 +1237,42 @@ export const buildAllCreativeHtmlFiles = async (document: Record<string, unknown
   };
 };
 
-const canvasMetaForClient = (document: Record<string, unknown>) => (
-  Object.entries(document.sizes || {}).map(([size, sizeCreative]: [string, Record<string, unknown>]) => ({
+/** Build HTML into output/, then zip those files for browser download. */
+export const buildHtmlExportZip = async (
+  document: Record<string, unknown>,
+  options: { renderMode?: RenderMode } = {},
+) => {
+  const result = await buildAllCreativeHtmlFiles(document, options);
+  const entries: PackageEntry[] = [];
+  for (const sizeResult of Object.values(result.outputs) as Array<{
+    outPath?: string;
+    wip?: Record<string, string>;
+  }>) {
+    if (sizeResult.outPath) {
+      const absolute = path.resolve(outputRoot, sizeResult.outPath);
+      entries.push({ path: sizeResult.outPath, data: await fs.readFile(absolute) });
+    }
+    for (const wipRel of Object.values(sizeResult.wip || {})) {
+      const absolute = path.resolve(outputRoot, wipRel);
+      entries.push({ path: wipRel, data: await fs.readFile(absolute) });
+    }
+  }
+  return {
+    result,
+    zip: createZipBuffer(entries),
+    slug: exportSlugForDocument(document),
+  };
+};
+
+const canvasMetaForClient = (document: Record<string, unknown>) => {
+  const slug = exportSlugForDocument(document);
+  return Object.entries(document.sizes || {}).map(([size, sizeCreative]: [string, Record<string, unknown>]) => ({
     size,
     width: sizeCreative.canvas?.width || 0,
     height: sizeCreative.canvas?.height || 0,
-    src: `ads/html/SSE_DCO_${size}.html`,
-  }))
-);
+    src: `ads/html/${slug}_${size}.html`,
+  }));
+};
 
 const collectClientAssetPaths = (document: Record<string, unknown>) => {
   const assets = new Set<string>();
@@ -1509,6 +1781,7 @@ export const renderClientPreviewValidatorScript = () => `(function() {
 
 export const renderClientPreviewPage = (document: Record<string, unknown>, options: ClientPreviewPackageOptions = {}) => {
   const includeValidator = options.includeValidator !== false;
+  const slug = exportSlugForDocument(document);
   const sizes = canvasMetaForClient(document);
   const initialRow = clientInitialRow(document);
   const initialSize = sizes[0] || { size: '', width: 0, height: 0, src: '' };
@@ -1735,6 +2008,8 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         display: flex;
         align-items: center;
         gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
       }
       .zoom-controls {
         display: flex;
@@ -1795,7 +2070,8 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         color: var(--ink);
         font-weight: 500;
       }
-      .replay-button {
+      .replay-button,
+      .restore-defaults-button {
         border: 1px solid var(--line);
         border-radius: 6px;
         background: #101821;
@@ -1808,7 +2084,9 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         padding: 7px 12px;
       }
       .replay-button:hover,
-      .replay-button:focus-visible {
+      .replay-button:focus-visible,
+      .restore-defaults-button:hover,
+      .restore-defaults-button:focus-visible {
         border-color: var(--teal);
         outline: none;
       }
@@ -1956,6 +2234,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
               <button type="button" class="zoom-button" data-zoom-step="1" aria-label="Zoom in">+</button>
               <span class="zoom-readout" data-zoom-readout>Fit</span>
             </div>
+            <button class="restore-defaults-button" id="restore-defaults" type="button">Restore defaults</button>
             <button class="replay-button" id="replay-ad" type="button">Replay ad</button>
           </div>
         </div>
@@ -1974,7 +2253,9 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
     </main>
     <script>
       (function() {
+        var STORAGE_KEY = ${jsString('sse-dco-client-preview:' + slug)};
         var defaults = ${jsString(initialRow)};
+        var defaultSize = ${jsString(initialSize.size)};
         var sizes = ${jsString(sizes)};
         var controls = document.getElementById('controls');
         var frame = document.querySelector('[data-ad-frame]');
@@ -1982,11 +2263,13 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         var activeSizeLabel = document.querySelector('[data-active-size-label]');
         var activeDimensions = document.querySelector('[data-active-dimensions]');
         var replayButton = document.getElementById('replay-ad');
+        var restoreDefaultsButton = document.getElementById('restore-defaults');
         var previewZoom = 'fit';
+        var persistEnabled = false;
         var ZOOM_LEVELS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
         var backgroundSizes = ${jsString(CREATIVE_AD_SIZES)};
         var backgroundBySize = {};
-        var trackedBackgroundSize = field('Ad_Size');
+        var trackedBackgroundSize = defaultSize || '';
 
         function previewImageFieldUrl(value) {
           if (value && typeof value === 'object' && value.Url !== undefined) {
@@ -1995,12 +2278,16 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           return String(value == null ? '' : value).trim();
         }
 
-        backgroundSizes.forEach(function(size) {
-          var fieldName = 'background_image_url_' + size;
-          backgroundBySize[size] = previewImageFieldUrl(defaults[fieldName])
-            || previewImageFieldUrl(defaults.background_image_url)
-            || '';
-        });
+        function resetBackgroundMapFromDefaults() {
+          backgroundSizes.forEach(function(size) {
+            var fieldName = 'background_image_url_' + size;
+            backgroundBySize[size] = previewImageFieldUrl(defaults[fieldName])
+              || previewImageFieldUrl(defaults.background_image_url)
+              || '';
+          });
+        }
+
+        resetBackgroundMapFromDefaults();
 
         function syncBackgroundControl() {
           var input = document.querySelector('[name="background_image_url"]');
@@ -2013,11 +2300,25 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           return control ? control.value : defaults[name] || '';
         }
 
+        function setControl(name, value) {
+          var control = controls.elements[name];
+          if (!control) return;
+          if (control.type === 'checkbox') {
+            control.checked = value === true || value === 'true' || value === 1 || value === '1';
+            return;
+          }
+          control.value = value == null ? '' : String(value);
+        }
+
         function selectedSizeMeta() {
           var selected = field('Ad_Size');
           return sizes.find(function(item) {
             return item.size === selected;
           }) || sizes[0];
+        }
+
+        function sizeExists(size) {
+          return sizes.some(function(item) { return item.size === size; });
         }
 
         function rowFromControls() {
@@ -2072,6 +2373,95 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           }
         }
 
+        function applyRowToControls(row, size) {
+          var nextSize = sizeExists(size) ? size : (defaultSize || (sizes[0] && sizes[0].size) || '');
+          setControl('Ad_Size', nextSize);
+          trackedBackgroundSize = nextSize;
+          setControl('heading1_text', row.heading1_text);
+          setControl('heading2_text', row.heading2_text);
+          setControl('heading3_text', row.heading3_text);
+          setControl('heading4_text', row.heading4_text);
+          setControl('offer_count_num', row.offer_count_num);
+          setControl('offer1_value_text', row.offer1_value_text);
+          setControl('offer1_sub_text', row.offer1_sub_text);
+          setControl('offer2_value_text', row.offer2_value_text);
+          setControl('offer2_sub_text', row.offer2_sub_text);
+          setControl('offer3_value_text', row.offer3_value_text);
+          setControl('offer3_sub_text', row.offer3_sub_text);
+          setControl('cta_type_enum', row.cta_type_enum);
+          setControl('cta_text', row.cta_text);
+          setControl('include_roundel_frame_bool', row.include_roundel_frame_bool);
+          setControl('roundel_text_text', row.roundel_text_text);
+          setControl('roundel_value_text', row.roundel_value_text);
+          setControl('tc_type_enum', row.tc_type_enum);
+          setControl('tc_terms_text', row.tc_terms_text);
+          setControl('tc_units_text', row.tc_units_text);
+          syncBackgroundControl();
+          syncOfferControls(row);
+          syncHeadlineControls(row);
+        }
+
+        function readStoredState() {
+          try {
+            var raw = window.localStorage.getItem(STORAGE_KEY);
+            if (!raw) return null;
+            var parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== 'object') return null;
+            return parsed;
+          } catch (error) {
+            return null;
+          }
+        }
+
+        function writeStoredState() {
+          if (!persistEnabled) return;
+          try {
+            window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+              size: field('Ad_Size'),
+              zoom: previewZoom,
+              row: rowFromControls(),
+              backgroundBySize: backgroundBySize,
+            }));
+          } catch (error) {}
+        }
+
+        function restoreDefaults() {
+          resetBackgroundMapFromDefaults();
+          applyRowToControls(defaults, defaultSize);
+          previewZoom = 'fit';
+          updateZoomButtons();
+          try {
+            window.localStorage.removeItem(STORAGE_KEY);
+          } catch (error) {}
+          updateAds();
+        }
+
+        function hydrateFromStorageOrDefaults() {
+          var stored = readStoredState();
+          if (stored && stored.row && typeof stored.row === 'object') {
+            if (stored.backgroundBySize && typeof stored.backgroundBySize === 'object') {
+              backgroundSizes.forEach(function(size) {
+                if (Object.prototype.hasOwnProperty.call(stored.backgroundBySize, size)) {
+                  backgroundBySize[size] = previewImageFieldUrl(stored.backgroundBySize[size]);
+                }
+              });
+            } else {
+              backgroundSizes.forEach(function(size) {
+                var fieldName = 'background_image_url_' + size;
+                if (stored.row[fieldName] != null) {
+                  backgroundBySize[size] = previewImageFieldUrl(stored.row[fieldName]);
+                }
+              });
+            }
+            applyRowToControls(stored.row, stored.size || defaultSize);
+            if (stored.zoom === 'fit' || ZOOM_LEVELS.indexOf(Number(stored.zoom)) !== -1) {
+              previewZoom = stored.zoom === 'fit' ? 'fit' : Number(stored.zoom);
+            }
+            return;
+          }
+          applyRowToControls(defaults, defaultSize);
+        }
+
         function sendRow(frame, row) {
           if (!frame.contentWindow) return;
           frame.contentWindow.postMessage({ type: 'SSE_DCO_PREVIEW_STATE', row: row }, '*');
@@ -2116,6 +2506,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           previewZoom = next;
           updateZoomButtons();
           fitAdFrames();
+          writeStoredState();
         }
 
         function nextZoomLevel(current, direction) {
@@ -2161,6 +2552,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           frames.forEach(function(frame) {
             sendRow(frame, row);
           });
+          writeStoredState();
         }
 
         function replayAd() {
@@ -2180,6 +2572,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           frame.addEventListener('load', updateAds);
         });
         if (replayButton) replayButton.addEventListener('click', replayAd);
+        if (restoreDefaultsButton) restoreDefaultsButton.addEventListener('click', restoreDefaults);
         Array.prototype.forEach.call(document.querySelectorAll('[data-zoom-mode]'), function(button) {
           button.addEventListener('click', function() {
             var mode = button.getAttribute('data-zoom-mode');
@@ -2194,8 +2587,10 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           });
         });
         window.addEventListener('resize', fitAdFrames);
+        hydrateFromStorageOrDefaults();
         updateZoomButtons();
         fitAdFrames();
+        persistEnabled = true;
         updateAds();
       })();
     </script>
@@ -2212,30 +2607,35 @@ ${includeValidator ? `    <script>
 };
 
 export const buildClientPreviewPackageEntries = async (document: Record<string, unknown>, options: ClientPreviewPackageOptions = {}) => {
-  const includeValidator = options.includeValidator !== false;
+  const renderMode = options.renderMode || 'font';
+  const includeValidator = options.includeValidator !== false && renderMode === 'font';
   const useCdnAssets = options.assetMode === 'cdn';
+  const slug = exportSlugForDocument(document);
   const assetUrlMap = useCdnAssets ? CDN_ASSET_URLS : undefined;
-  const fontUrlMap = useCdnAssets ? CDN_FONT_URLS : undefined;
+  const fontUrlMap = renderMode === 'outline' ? undefined : (useCdnAssets ? CDN_FONT_URLS : undefined);
   const entries: PackageEntry[] = [];
   const sizes = Object.keys(document.sizes || {});
   for (const size of sizes) {
-    const baseHtml = renderStudioReadyHtml(document, size, {
+    const baseHtml = await renderStudioReadyHtml(document, size, {
       assetBasePath: '../',
       assetUrlMap,
-      fontBasePath: '../assets/fonts/',
+      fontBasePath: renderMode === 'outline' ? undefined : '../assets/fonts/',
       fontUrlMap,
       previewValidatorScriptPath: includeValidator ? '../../preview-validator.js' : undefined,
+      renderMode,
     });
     entries.push({
-      path: `ads/html/SSE_DCO_${size}.html`,
+      path: `ads/html/${slug}_${size}.html`,
       data: baseHtml,
     });
-    for (const variant of clientVariantMatrix()) {
-      const row = rowForClientVariant(document, variant);
-      entries.push({
-        path: `ads/html/SSE_DCO_${size}_${clientVariantSlug(variant)}.html`,
-        data: renderWipHtml(baseHtml, row),
-      });
+    if (renderMode === 'font') {
+      for (const variant of clientVariantMatrix()) {
+        const row = rowForClientVariant(document, variant);
+        entries.push({
+          path: `ads/html/${slug}_${size}_${clientVariantSlug(variant)}.html`,
+          data: renderWipHtml(baseHtml, row),
+        });
+      }
     }
   }
 
@@ -2247,12 +2647,14 @@ export const buildClientPreviewPackageEntries = async (document: Record<string, 
     });
   }
 
-  for (const font of CLIENT_FONT_FILES) {
-    if (fontUrlMap?.[font.filename]) continue;
-    entries.push({
-      path: `ads/assets/fonts/${font.filename}`,
-      data: await fs.readFile(await font.resolveSourcePath()),
-    });
+  if (renderMode === 'font') {
+    for (const font of CLIENT_FONT_FILES) {
+      if (fontUrlMap?.[font.filename]) continue;
+      entries.push({
+        path: `ads/assets/fonts/${font.filename}`,
+        data: await fs.readFile(await font.resolveSourcePath()),
+      });
+    }
   }
 
   for (const brandFile of CLIENT_PREVIEW_BRAND_FILES) {
@@ -2279,23 +2681,25 @@ export const buildClientPreviewPackageEntries = async (document: Record<string, 
 
 export const buildBasePackageEntries = async (document: Record<string, unknown>, options: BasePackageOptions = {}) => {
   const useCdnAssets = options.assetMode === 'cdn';
+  const renderMode = options.renderMode || 'font';
   const assetUrlMap = useCdnAssets ? CDN_ASSET_URLS : undefined;
-  const fontUrlMap = useCdnAssets ? CDN_FONT_URLS : undefined;
+  const fontUrlMap = renderMode === 'outline' ? undefined : (useCdnAssets ? CDN_FONT_URLS : undefined);
   const entries: PackageEntry[] = [];
   const sizes = Object.keys(document.sizes || {});
   for (const size of sizes) {
     entries.push({
       path: `ads/${size}/index.html`,
-      data: renderStudioReadyHtml(document, size, {
+      data: await renderStudioReadyHtml(document, size, {
         assetBasePath: '../',
         assetUrlMap,
         // Fonts with a CDN_FONT_URLS entry use that absolute URL and are not
         // packaged; anything unmapped stays relative under ads/assets/fonts/.
-        fontBasePath: '../assets/fonts/',
+        fontBasePath: renderMode === 'outline' ? undefined : '../assets/fonts/',
         fontUrlMap,
         includePackagedBackground: false,
         includePreviewBridge: false,
-        includeStudioDynamicContent: true,
+        includeStudioDynamicContent: renderMode === 'font',
+        renderMode,
       }),
     });
   }
@@ -2308,12 +2712,14 @@ export const buildBasePackageEntries = async (document: Record<string, unknown>,
     });
   }
 
-  for (const font of CLIENT_FONT_FILES) {
-    if (fontUrlMap?.[font.filename]) continue;
-    entries.push({
-      path: `ads/assets/fonts/${font.filename}`,
-      data: await fs.readFile(await font.resolveSourcePath()),
-    });
+  if (renderMode === 'font') {
+    for (const font of CLIENT_FONT_FILES) {
+      if (fontUrlMap?.[font.filename]) continue;
+      entries.push({
+        path: `ads/assets/fonts/${font.filename}`,
+        data: await fs.readFile(await font.resolveSourcePath()),
+      });
+    }
   }
 
   entries.push({

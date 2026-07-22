@@ -48,6 +48,8 @@ function SegmentedControl({
 export function TopBar() {
   const sizes = useEditorStore((s) => s.sizes);
   const size = useEditorStore((s) => s.size);
+  const campaigns = useEditorStore((s) => s.campaigns);
+  const activeCampaignId = useEditorStore((s) => s.activeCampaignId);
   const offerCount = useEditorStore((s) => s.offerCount);
   const tcMode = useEditorStore((s) => s.tcMode);
   const ctaShape = useEditorStore((s) => s.ctaShape);
@@ -57,6 +59,7 @@ export function TopBar() {
   const creativeDirty = useEditorStore((s) => s.creativeDirty);
   const saveFeedDisabled = useEditorStore((s) => s.saveFeedDisabled);
   const loadSize = useEditorStore((s) => s.loadSize);
+  const switchCampaign = useEditorStore((s) => s.switchCampaign);
   const undo = useEditorStore((s) => s.undo);
   const redo = useEditorStore((s) => s.redo);
   const saveCreativeDocument = useEditorStore((s) => s.saveCreativeDocument);
@@ -95,6 +98,26 @@ export function TopBar() {
       </div>
 
       <div className="control-strip" aria-label="Ad controls">
+        <ToolbarTip tip="Active campaign document" className="field field-compact">
+          <label className="field-inline">
+            <span className="field-label">Campaign</span>
+            <select
+              value={activeCampaignId}
+              aria-label="Campaign"
+              onChange={(event) => {
+                switchCampaign(event.target.value).catch((error) => setStatus(error.message, 'error'));
+              }}
+            >
+              {(campaigns.length
+                ? campaigns
+                : [{ id: 'sse-dco', name: 'SSE DCO' }]
+              ).map((item) => (
+                <option key={item.id} value={item.id}>{item.name}</option>
+              ))}
+            </select>
+          </label>
+        </ToolbarTip>
+
         <ToolbarTip tip="Banner dimensions" className="field field-compact">
           <label className="field-inline">
             <span className="field-label">Size</span>
@@ -202,11 +225,21 @@ export function TopBar() {
                 type="button"
                 role="menuitem"
                 onClick={() => {
-                  buildHtml().catch((error) => setStatus(error.message, 'error'));
+                  buildHtml({ renderMode: 'font' }).catch((error) => setStatus(error.message, 'error'));
                   setMoreOpen(false);
                 }}
               >
-                Export HTML
+                Export HTML (font)
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  buildHtml({ renderMode: 'outline' }).catch((error) => setStatus(error.message, 'error'));
+                  setMoreOpen(false);
+                }}
+              >
+                Export HTML (SVG outlines)
               </button>
               <button
                 type="button"
@@ -247,6 +280,16 @@ export function TopBar() {
                 }}
               >
                 Export client ZIP without validation
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  exportClientPackage({ renderMode: 'outline' }).catch((error) => setStatus(error.message, 'error'));
+                  setMoreOpen(false);
+                }}
+              >
+                Export client ZIP (SVG outlines)
               </button>
               <button
                 type="button"

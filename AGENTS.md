@@ -6,26 +6,31 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # SSE DCO Creative Editor — agent notes
 
-Local Next.js tool for editing `campaign/sse-dco-creative.json` and exporting Studio-ready HTML.
+Local Next.js tool for editing campaign creative JSON documents and exporting Studio-ready HTML (font) or fixed-copy SVG-outline packages.
 
 ## Key paths
 
 | Path | Purpose |
 |---|---|
 | `src/server/paths.ts` | Resolves `campaign/`, `output/` — always file-relative, not cwd |
+| `src/server/campaign-registry.ts` | Registered campaigns (id → JSON file + export slug) |
 | `src/server/creative-document.ts` | Read/write/validate creative JSON |
-| `src/server/creative-exporter.ts` | HTML and ZIP export |
-| `src/lib/text-fit.ts` + `src/lib/text-fit-rules.ts` | The one text-fit engine + rule derivation, shared by preview and exports — see `docs/TEXT_FITTING.md` |
-| `src/store/editor-store.ts` | Zustand state + dirty tracking |
-| `campaign/sse-dco-creative.json` | Source of truth for layers, motion, feed |
-| `campaign/assets/` | Backgrounds, SVGs, images |
+| `src/server/creative-exporter.ts` | HTML and ZIP export (`renderMode: font \| outline`) |
+| `src/server/text-outline.ts` | Museo → SVG path outlining for outline export |
+| `src/lib/text-fit.ts` + `src/lib/text-fit-rules.ts` | The one text-fit engine + rule derivation, shared by preview and font exports — see `docs/TEXT_FITTING.md` |
+| `src/store/editor-store.ts` | Zustand state + dirty tracking + active campaign |
+| `campaign/sse-dco-creative.json` | Default SSE DCO document (layers, motion, feed) |
+| `campaign/*-creative.json` | Parallel campaign documents (hiker / keepyuppy variants) |
+| `campaign/assets/` | Backgrounds, SVGs, images, fonts |
 
 ## Conventions
 
 - API route handlers: `export const runtime = 'nodejs'` (filesystem).
 - Preview assets: `/assets/foo` → `campaign/assets/foo`.
-- Exports: `output/SSE_DCO_{size}.html`.
+- Creative/feed/export APIs take `?campaign=<id>` (default `sse-dco`).
+- Exports: `output/{exportSlug}_{size}.html` (e.g. `SSE_DCO_300x250.html`, `SSE_Hiker_Welcome_300x250.html`).
 - Brand font: Museo (`Museo700-Regular.otf`, the slab family) — never Museo Sans, never aliased. See `docs/TEXT_FITTING.md`.
+- Outline export is fixed-copy only (bakes the active sample row); omit OTF from those packages.
 - App docs: `docs/` in this folder.
 
 ## Commands

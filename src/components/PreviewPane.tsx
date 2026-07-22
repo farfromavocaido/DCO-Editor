@@ -21,9 +21,11 @@ import {
   uniformScaleFromHandle,
 } from '@/lib/canvas-group-scale';
 import {
+  BG_IMAGE_LAYER_ID,
   currentSizeCreative,
   findCreativeTarget,
   HEADLINE_CSS_CLASS,
+  isBackgroundLayer,
   isHeadlineLayer,
   targetIdForLayerChild,
 } from '@/lib/creative-model';
@@ -39,7 +41,13 @@ import {
 } from '@/lib/selection-groups';
 import { zoomLabel, zoomScale } from '@/lib/canvas-zoom';
 import { offerValueSymbolCss } from '@/lib/offer-value-symbols';
-import { assetUrl, fieldValue, previewBackgroundSrc, wrapOfferValueSymbols } from '@/lib/preview-utils';
+import {
+  assetUrl,
+  feedFieldForEditableTarget,
+  fieldValue,
+  previewBackgroundSrc,
+  wrapOfferValueSymbols,
+} from '@/lib/preview-utils';
 import { resizeHandlesForSelection, selectionChromeKind } from '@/lib/selection-chrome';
 import { activeFrameScope, beatsForScopes } from '@/lib/timing-profiles';
 import { activeScopesFromControls } from '@/lib/feed-model';
@@ -53,7 +61,7 @@ import { PlayheadReadout } from '@/components/PlayheadReadout';
 import { AlignControls, AlignmentGuides, ViewportRulersFrame } from '@/components/CanvasWorkspace';
 import { useEditorStore } from '@/store/editor-store';
 const renderLayerRule = (layer: Record<string, unknown>) => {
-  if (isHeadlineLayer(layer)) return '';
+  if (isHeadlineLayer(layer) || isBackgroundLayer(layer)) return '';
   const base = layer.base || {};
   const cssClass = base.cssClass || layer.id;
   const decl = Object.entries(base)
@@ -133,6 +141,7 @@ export function PreviewPane() {
   const toggleLayerVisibility = useEditorStore((s) => s.toggleLayerVisibility);
   const addShapeLayer = useEditorStore((s) => s.addShapeLayer);
   const moveLayerZ = useEditorStore((s) => s.moveLayerZ);
+  const requestEditFeedField = useEditorStore((s) => s.requestEditFeedField);
   const applyPreviewTextFitting = useEditorStore((s) => s.applyPreviewTextFitting);
   const fitClipped = useEditorStore((s) => s.fitClipped);
   const setCanvasZoom = useEditorStore((s) => s.setCanvasZoom);
@@ -214,8 +223,9 @@ export function PreviewPane() {
     const frame = window.requestAnimationFrame(() => {
       applyPreviewTextFitting(stage);
     });
-    // Refit once Museo lands so the preview never keeps fallback-font metrics
-    // (mirrors scheduleFontRefit in the exported runtime).
+    // One post-font layout commit (mirrors export scheduleFontRefit — fonts.ready
+    // only, no loadingdone). placePlus measures at motion rest so playhead enter
+    // pose cannot bake into plus left/top.
     window.document.fonts?.ready?.then(() => {
       if (cancelled || !stageRef.current) return;
       applyPreviewTextFitting(stageRef.current);
@@ -766,13 +776,17 @@ export function PreviewPane() {
     }
 
     if (layer.kind === 'image') {
+      const isBackground = isBackgroundLayer(layer);
       return (
         <img
           key={layer.id}
+          id={isBackground ? BG_IMAGE_LAYER_ID : layer.id}
           alt=""
           draggable={false}
           className={layerClass(layer)}
-          src={assetUrl(layer.asset)}
+          src={isBackground
+            ? previewBackgroundSrc(row, size, sizeCreative.assets.background)
+            : assetUrl(layer.asset)}
           style={frameStyle(layer, layer.id)}
           onPointerDown={(event) => startSelectionDrag(event, layer.id)}
           onContextMenu={(event) => openLayerMenu(event, layer)}
@@ -893,7 +907,9 @@ export function PreviewPane() {
       x: event.clientX,
       y: event.clientY,
       layerId: layer.id,
+      targetId: String(targetId),
       layerLabel: layer.label || layer.id,
+      editField: feedFieldForEditableTarget(layer, String(targetId)),
       locked: lockedLayerIds.has(String(layer.id)),
       hidden: hiddenLayerIds.has(String(layer.id)),
       choices: menuChoicesForTarget(String(targetId)).slice(0, 4),
@@ -978,17 +994,6 @@ export function PreviewPane() {
                 onPointerDown={() => setContextMenu(null)}
               >
             <style className="layout-style">{renderCreativeCss(sizeCreative)}</style>
-            <img
-              alt=""
-              draggable={false}
-              className="stage-element bg-image"
-              src={previewBackgroundSrc(row, size, sizeCreative.assets.background)}
-              style={{ transform: 'none', opacity: 1 }}
-              onPointerDown={(event) => {
-                event.stopPropagation();
-              }}
-            />
-
             {nonOfferLayers.map((layer) => renderLayerNode(layer))}
             {showOffersBlock ? (
               <div
@@ -1117,6 +1122,17 @@ export function PreviewPane() {
           {contextMenu.choices.map((choice) => (
             <button key={choice.id} type="button" onClick={() => { choice.select(); setContextMenu(null); }}>{choice.label}</button>
           ))}
+          {contextMenu.editField ? (
+            <button
+              type="button"
+              onClick={() => {
+                requestEditFeedField(contextMenu.editField);
+                setContextMenu(null);
+              }}
+            >
+              Edit text
+            </button>
+          ) : null}
           <button type="button" onClick={() => { duplicateLayer(contextMenu.layerId); setContextMenu(null); }}>Duplicate layer</button>
           <button type="button" onClick={() => { deleteLayer(contextMenu.layerId); setContextMenu(null); }}>Delete layer</button>
           <button type="button" onClick={() => { toggleLayerLock(contextMenu.layerId); setContextMenu(null); }}>

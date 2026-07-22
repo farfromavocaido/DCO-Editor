@@ -8,6 +8,38 @@ export const fieldValue = (value: unknown) => {
   return String(value);
 };
 
+/**
+ * Resolve the sample/feed field name for a canvas layer or offer child target
+ * (e.g. offer-slot-1::offer-value → offer1_value_text).
+ */
+export const feedFieldForEditableTarget = (
+  layer: Record<string, unknown> | null | undefined,
+  targetId?: string | null,
+) => {
+  const id = String(targetId || layer?.id || '');
+  const offerChild = id.match(/^offer-slot-(\d+)::offer-(value|subline)$/);
+  if (offerChild) {
+    return offerChild[2] === 'value'
+      ? `offer${offerChild[1]}_value_text`
+      : `offer${offerChild[1]}_sub_text`;
+  }
+  if (layer?.binding && typeof layer.binding === 'object' && (layer.binding as { field?: string }).field) {
+    return String((layer.binding as { field: string }).field);
+  }
+  if (id === 'headline-act1') return 'heading1_text';
+  if (id === 'headline-act2') return 'heading2_text';
+  if (id === 'headline-act3') return 'heading3_text';
+  if (id === 'headline-act4') return 'heading4_text';
+  if (id === 'cta') return 'cta_text';
+  if (id === 'terms-prices' || id === 'terms-solo') return 'tc_terms_text';
+  if (id === 'unit-rate-prices') return 'tc_units_text';
+  if (id === 'roundel-copy') return 'roundel_text_text';
+  if (id === 'roundel-value') return 'roundel_value_text';
+  const offerSlot = id.match(/^offer-slot-(\d+)$/);
+  if (offerSlot) return `offer${offerSlot[1]}_value_text`;
+  return '';
+};
+
 /** Wrap trailing % or leading £/€ in offer values for smaller symbol styling. */
 export const wrapOfferValueSymbols = (value: unknown) => wrapOfferValueSymbolsHtml(fieldValue(value));
 

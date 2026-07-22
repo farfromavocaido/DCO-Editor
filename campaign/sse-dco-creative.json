@@ -335,7 +335,7 @@
         "heading1_text": "A different kind of energy",
         "heading2_text": "Our very best electricity plan",
         "heading3_text": "A different kind of energy",
-        "offer_count_num": 2,
+        "offer_count_num": 3,
         "offer1_value_text": "15%",
         "offer1_sub_text": "OFF ELECTRICITY*",
         "offer2_value_text": "30%",
@@ -448,6 +448,18 @@
         "logoWhite": "assets/SVG/SSELogoWhite.svg"
       },
       "layers": [
+        {
+          "id": "bg-image",
+          "label": "Background",
+          "group": "Waves / background",
+          "kind": "image",
+          "zIndex": 0,
+          "base": {
+            "cssClass": "bg-image"
+          },
+          "clips": [],
+          "asset": "assets/bg_320x50.jpg"
+        },
         {
           "id": "greenwave",
           "label": "Greenwave",
@@ -1716,7 +1728,8 @@
             "left": 0,
             "top": 0,
             "width": 320,
-            "height": 50
+            "height": 50,
+            "objectFit": "cover"
           }
         },
         {
@@ -1804,6 +1817,18 @@
         "logoWhite": "assets/SVG/SSELogoWhite.svg"
       },
       "layers": [
+        {
+          "id": "bg-image",
+          "label": "Background",
+          "group": "Waves / background",
+          "kind": "image",
+          "zIndex": 0,
+          "base": {
+            "cssClass": "bg-image"
+          },
+          "clips": [],
+          "asset": "assets/bg_728x90.jpg"
+        },
         {
           "id": "greenwave",
           "label": "Greenwave",
@@ -2148,7 +2173,7 @@
               "label": "Logo Act1 fade",
               "preset": "fade",
               "start": "act1_begin+3",
-              "end": "wave2_in+7",
+              "end": 65.4,
               "params": {
                 "enter_duration_pct": 5
               }
@@ -2742,9 +2767,9 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 241,
+            "left": 244,
             "top": 17,
-            "width": 110,
+            "width": 111,
             "height": 58
           },
           "editable": true
@@ -2758,9 +2783,9 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 367,
+            "left": 371,
             "top": 17,
-            "width": 110,
+            "width": 111,
             "height": 58
           },
           "editable": true
@@ -2774,9 +2799,9 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 493,
+            "left": 501,
             "top": 17,
-            "width": 110,
+            "width": 111,
             "height": 58
           },
           "editable": true
@@ -2790,7 +2815,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 342,
+            "left": 346,
             "top": 26,
             "width": 26,
             "height": 32,
@@ -2807,7 +2832,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 467,
+            "left": 472,
             "top": 26,
             "width": 26,
             "height": 32,
@@ -2826,7 +2851,7 @@
           "props": {
             "left": 0,
             "top": 0,
-            "width": 110,
+            "width": 111,
             "height": 42,
             "fontSize": 46,
             "textAlign": "center"
@@ -2842,9 +2867,9 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 0,
+            "left": -5,
             "top": 40,
-            "width": 106,
+            "width": 121,
             "height": 11,
             "fontSize": 11,
             "textAlign": "center",
@@ -2854,7 +2879,7 @@
           },
           "editable": true,
           "fit": {
-            "maxLines": 2,
+            "maxLines": 1,
             "minFontSize": 12,
             "mode": "shrink"
           }
@@ -3019,7 +3044,7 @@
           },
           "props": {
             "left": 18,
-            "width": 210,
+            "width": 205,
             "textAlign": "left",
             "justifyContent": "flex-start",
             "top": 11,
@@ -3043,7 +3068,8 @@
             "left": 0,
             "top": 0,
             "width": 728,
-            "height": 90
+            "height": 90,
+            "objectFit": "cover"
           }
         },
         {
@@ -3145,6 +3171,18 @@
         "logoWhite": "assets/SVG/SSELogoWhite.svg"
       },
       "layers": [
+        {
+          "id": "bg-image",
+          "label": "Background",
+          "group": "Waves / background",
+          "kind": "image",
+          "zIndex": 0,
+          "base": {
+            "cssClass": "bg-image"
+          },
+          "clips": [],
+          "asset": "assets/bg_image.jpg"
+        },
         {
           "id": "greenwave",
           "label": "Greenwave",
@@ -4345,7 +4383,8 @@
             "left": 0,
             "top": 0,
             "width": 300,
-            "height": 250
+            "height": 250,
+            "objectFit": "cover"
           }
         },
         {
@@ -4422,6 +4461,18 @@
         "logoWhite": "assets/SVG/SSELogoWhite.svg"
       },
       "layers": [
+        {
+          "id": "bg-image",
+          "label": "Background",
+          "group": "Waves / background",
+          "kind": "image",
+          "zIndex": 0,
+          "base": {
+            "cssClass": "bg-image"
+          },
+          "clips": [],
+          "asset": "assets/bg_160x600.jpg"
+        },
         {
           "id": "greenwave",
           "label": "Greenwave",
@@ -5659,7 +5710,8 @@
             "left": 0,
             "top": 0,
             "width": 160,
-            "height": 600
+            "height": 600,
+            "objectFit": "cover"
           }
         },
         {
@@ -5750,6 +5802,18 @@
         "logoWhite": "assets/SVG/SSELogoWhite.svg"
       },
       "layers": [
+        {
+          "id": "bg-image",
+          "label": "Background",
+          "group": "Waves / background",
+          "kind": "image",
+          "zIndex": 0,
+          "base": {
+            "cssClass": "bg-image"
+          },
+          "clips": [],
+          "asset": "assets/bg_300x600.jpg"
+        },
         {
           "id": "greenwave",
           "label": "Greenwave",
@@ -6963,7 +7027,8 @@
             "left": 0,
             "top": 0,
             "width": 300,
-            "height": 600
+            "height": 600,
+            "objectFit": "cover"
           }
         },
         {
@@ -7055,6 +7120,18 @@
         "logoWhite": "assets/SVG/SSELogoWhite.svg"
       },
       "layers": [
+        {
+          "id": "bg-image",
+          "label": "Background",
+          "group": "Waves / background",
+          "kind": "image",
+          "zIndex": 0,
+          "base": {
+            "cssClass": "bg-image"
+          },
+          "clips": [],
+          "asset": "assets/bg_970x250.jpg"
+        },
         {
           "id": "greenwave",
           "label": "Greenwave",
@@ -7399,7 +7476,7 @@
               "label": "Logo Act1 fade",
               "preset": "fade",
               "start": "act1_begin+4",
-              "end": "wave2_in+7",
+              "end": 65.1,
               "params": {
                 "enter_duration_pct": 5
               }
@@ -7884,7 +7961,7 @@
           },
           "props": {
             "left": 411,
-            "top": 113,
+            "top": 117,
             "width": 293,
             "height": 225
           },
@@ -8301,7 +8378,8 @@
             "left": 0,
             "top": 0,
             "width": 970,
-            "height": 250
+            "height": 250,
+            "objectFit": "cover"
           }
         },
         {

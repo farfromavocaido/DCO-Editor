@@ -41,10 +41,12 @@ test('runtime encodes ink-first helpers and per-family plus anchors', () => {
   assert.match(layoutOffersRuntime, /function inkRect\(/);
   assert.match(layoutOffersRuntime, /function textInk\(/);
   assert.match(layoutOffersRuntime, /function clientToLocal\(/);
+  assert.match(layoutOffersRuntime, /function withNeutralMotion\(/);
   assert.match(layoutOffersRuntime, /function plusAnchorHorizontal\(/);
   assert.match(layoutOffersRuntime, /function plusAnchorVertical\(/);
   assert.match(layoutOffersRuntime, /function plusAnchorTriangular\(/);
   assert.match(layoutOffersRuntime, /function placePlus\(/);
+  assert.match(layoutOffersRuntime, /withNeutralMotion\(plus,/);
   // Ink accepts height-only (wrapped sublines); must not require width > 0 alone.
   assert.match(layoutOffersRuntime, /rect\.width > 0 \|\| rect\.height > 0/);
   // Vertical factors subline cluster ink; triangular uses value bottoms only.
@@ -457,4 +459,97 @@ test('placePlus centres glyph ink, not the tall CSS line-box', () => {
   const top = parseFloat(plus.style.top);
   assert.ok(top > 40, `expected ink-centred plus, got top=${top} (box-centre would be ~35)`);
   assert.ok(Math.abs(top - 50) < 8, `plus top=${top}, expected ~50`);
+});
+
+test('placePlus ignores motion enter_dy while measuring glyph ink', () => {
+  const { document } = installDom();
+  const stage = document.createElement('div');
+  Object.defineProperty(stage, 'offsetWidth', { value: 200 });
+  Object.defineProperty(stage, 'offsetHeight', { value: 200 });
+  stage.getBoundingClientRect = () => stubRect(0, 0, 200, 200) as DOMRect;
+
+  const mk = (index: number, left: number) => {
+    const slot = document.createElement('div');
+    slot.setAttribute('data-gwd-group', 'OfferSlot');
+    slot.setAttribute('data-offer-index', String(index));
+    slot.style.cssText = `position:absolute;left:${left}px;top:40px;width:60px;height:50px`;
+    Object.defineProperty(slot, 'offsetWidth', { value: 60 });
+    Object.defineProperty(slot, 'offsetHeight', { value: 50 });
+    Object.defineProperty(slot, 'offsetLeft', { value: left });
+    Object.defineProperty(slot, 'offsetTop', { value: 40 });
+    slot.getBoundingClientRect = () => stubRect(left, 40, 60, 50) as DOMRect;
+    const value = document.createElement('p');
+    value.className = 'offer-value';
+    const run = document.createElement('span');
+    run.className = 'offer-value-run';
+    run.textContent = '5%';
+    run.getBoundingClientRect = () => stubRect(left + 10, 45, 40, 30) as DOMRect;
+    const sub = document.createElement('p');
+    sub.className = 'offer-subline';
+    sub.textContent = 'X';
+    sub.getBoundingClientRect = () => stubRect(left + 10, 80, 40, 10) as DOMRect;
+    value.appendChild(run);
+    slot.appendChild(value);
+    slot.appendChild(sub);
+    return slot;
+  };
+
+  stage.appendChild(mk(1, 20));
+  stage.appendChild(mk(2, 120));
+
+  const plus = document.createElement('p');
+  plus.id = 'plus-1';
+  plus.className = 'plus-1';
+  plus.textContent = '+';
+  // Simulate fadeUp enter_dy held from t=0 (Replay / editor mid-enter).
+  plus.style.cssText = 'position:absolute;left:80px;top:50px;width:30px;height:50px;transform:translateY(-8px)';
+  Object.defineProperty(plus, 'offsetWidth', { value: 30 });
+  Object.defineProperty(plus, 'offsetHeight', { value: 50 });
+  Object.defineProperty(plus, 'offsetParent', { get: () => stage });
+  const enterDy = () => {
+    const t = plus.style.transform || '';
+    if (!t || t === 'none') return 0;
+    const match = /translateY\((-?\d+(?:\.\d+)?)px\)/.exec(t);
+    return match ? Number(match[1]) : 0;
+  };
+  plus.getBoundingClientRect = () => {
+    const top = parseFloat(plus.style.top) || 50;
+    const left = parseFloat(plus.style.left) || 80;
+    return stubRect(left, top + enterDy(), 30, 50) as DOMRect;
+  };
+  stage.appendChild(plus);
+  document.body.appendChild(stage);
+
+  document.createRange = function createRange() {
+    const range = {
+      target: null as Element | null,
+      selectNodeContents(node: Element) { range.target = node; },
+      detach() {},
+      getBoundingClientRect() {
+        const el = range.target as HTMLElement | null;
+        if (!el) return stubRect(0, 0, 0, 0);
+        if (el.id === 'plus-1') {
+          const top = parseFloat(el.style.top) || 50;
+          const left = parseFloat(el.style.left) || 80;
+          const dy = (() => {
+            const t = el.style.transform || '';
+            if (!t || t === 'none') return 0;
+            const match = /translateY\((-?\d+(?:\.\d+)?)px\)/.exec(t);
+            return match ? Number(match[1]) : 0;
+          })();
+          return stubRect(left + 5, top + dy + 2, 20, 16);
+        }
+        return el.getBoundingClientRect();
+      },
+    };
+    return range as unknown as Range;
+  };
+
+  layoutOffers(stage);
+
+  // Without neutralization, enter_dy=-8 would over-correct top downward (~58).
+  // Rest-pose ink centring must still land near 50, and restore the transform.
+  const top = parseFloat(plus.style.top);
+  assert.ok(Math.abs(top - 50) < 8, `plus top=${top}, expected ~50 despite enter_dy`);
+  assert.match(plus.style.transform, /translateY\(-8px\)/, 'motion transform restored after measure');
 });

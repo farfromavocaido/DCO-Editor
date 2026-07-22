@@ -17,12 +17,12 @@
 // Rule shape is documented in text-fit-rules.ts (the only producer of rules).
 //
 // Fit pipeline per element:
-//   1) set white-space (wrap vs nowrap)
+//   1) set white-space (pre-line when wrap, else nowrap)
 //   2) tracking squeeze (offer values)
 //   3) if allowShrink: reduce font-size until width + maxLines fit
 //   4) clip leftover overflow; mark data-fit-clipped when still overflowing
 // Modes come from normalizeFitConfig (text-fit-rules.ts). shared: true
-// equalizes final size/tracking across visible members.
+// equalizes final font size across visible members; tracking stays per-box.
 
 const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
   function computedOf(element) {
@@ -148,8 +148,9 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
     var floor = Math.max(Number(rule.minFontSize) || 1, ratio > 0 ? base * ratio : 0);
     if (floor > base) floor = base;
     var lineRatio = base > 0 ? lineHeightPx(cs, base) / base : 1;
-    // Explicit white-space so CSS nowrap/normal cannot fight the mode.
-    element.style.whiteSpace = rule.wrap ? 'normal' : 'nowrap';
+    // Explicit white-space so CSS cannot fight the mode.
+    // pre-line keeps authored newlines and still wraps at word boundaries.
+    element.style.whiteSpace = rule.wrap ? 'pre-line' : 'nowrap';
     element.style.fontSize = base + 'px';
     var trackingEm = 0;
     if (rule.tracking && overflowsWidth(element)) {
@@ -257,22 +258,39 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
       return fitMember(element, resolved);
     });
     var sizes = fits.map(function (fit) { return fit.size; });
-    var trackings = fits.map(function (fit) { return fit.trackingEm; });
     var clipped = false;
     if (resolved.shared) {
+      // Size stays locked across the group; tracking is recomputed per box at
+      // that shared size so a tight value cannot crush a comfortable neighbour.
       var sharedSize = Math.min.apply(null, sizes);
-      var sharedTracking = Math.min.apply(null, trackings);
       fits.forEach(function (fit) {
-        if (applyFinal(fit, resolved, sharedSize, sharedTracking)) clipped = true;
+        var element = fit.element;
+        element.style.fontSize = sharedSize + 'px';
+        element.style.letterSpacing = '';
+        var trackingEm = 0;
+        if (resolved.tracking && overflowsWidth(element)) {
+          var minEm = Number(resolved.tracking.minEm) || 0;
+          while (trackingEm > minEm && overflowsWidth(element)) {
+            trackingEm = Math.max(minEm, Number((trackingEm - 0.005).toFixed(3)));
+            element.style.letterSpacing = trackingEm + 'em';
+          }
+        }
+        fit.size = sharedSize;
+        fit.trackingEm = trackingEm;
+        if (applyFinal(fit, resolved, sharedSize, trackingEm)) clipped = true;
       });
-      return { size: sharedSize, trackingEm: sharedTracking, clipped: clipped };
+      return {
+        size: sharedSize,
+        trackingEm: Math.min.apply(null, fits.map(function (fit) { return fit.trackingEm; })),
+        clipped: clipped,
+      };
     }
     fits.forEach(function (fit) {
       if (applyFinal(fit, resolved, fit.size, fit.trackingEm)) clipped = true;
     });
     return {
       size: Math.min.apply(null, sizes),
-      trackingEm: Math.min.apply(null, trackings),
+      trackingEm: Math.min.apply(null, fits.map(function (fit) { return fit.trackingEm; })),
       clipped: clipped,
     };
   }

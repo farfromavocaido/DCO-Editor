@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 
-import { readCreativeDocument } from '@/server/creative-document';
-import { buildBasePackageZip } from '@/server/creative-exporter';
+import { resolveCampaignId } from '@/server/campaign-query';
+import { readCreativeDocumentForCampaign } from '@/server/creative-document';
+import { buildBasePackageZip, exportSlugForDocument } from '@/server/creative-exporter';
 
 export const runtime = 'nodejs';
 
@@ -9,17 +10,28 @@ export async function POST(request: Request) {
   try {
     let document = null;
     let assetMode: 'packaged' | 'cdn' = 'packaged';
+    let renderMode: 'font' | 'outline' = 'font';
+    let body: {
+      document?: Record<string, unknown>;
+      assetMode?: string;
+      renderMode?: string;
+      campaign?: string;
+    } = {};
     try {
-      const body = await request.json();
+      body = await request.json();
       document = body?.document || null;
       assetMode = body?.assetMode === 'cdn' ? 'cdn' : 'packaged';
+      renderMode = body?.renderMode === 'outline' ? 'outline' : 'font';
     } catch {
       document = null;
     }
-    const zip = await buildBasePackageZip(document || await readCreativeDocument(), { assetMode });
+    const campaignId = resolveCampaignId(request, body);
+    const creative = document || await readCreativeDocumentForCampaign(campaignId);
+    const zip = await buildBasePackageZip(creative, { assetMode, renderMode });
+    const slug = exportSlugForDocument(creative);
     const filename = assetMode === 'cdn'
-      ? 'SSE_DCO_base_cdn_zip.zip'
-      : 'SSE_DCO_base_zip.zip';
+      ? `${slug}_base_cdn_zip.zip`
+      : `${slug}_base_zip${renderMode === 'outline' ? '_outlines' : ''}.zip`;
     return new NextResponse(zip, {
       headers: {
         'content-type': 'application/zip',

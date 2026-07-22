@@ -119,6 +119,8 @@ export function CreativeInspector() {
   const percent = useEditorStore((s) => s.percent);
   const feedFields = useEditorStore((s) => s.feedFields);
   const feedDraft = useEditorStore((s) => s.feedDraft);
+  const focusFeedFieldRequest = useEditorStore((s) => s.focusFeedFieldRequest);
+  const clearFocusFeedFieldRequest = useEditorStore((s) => s.clearFocusFeedFieldRequest);
   const selectedLayerId = useEditorStore((s) => s.selectedLayerId);
   const selectedTargetId = useEditorStore((s) => s.selectedTargetId);
   const selectedTargetIds = useEditorStore((s) => s.selectedTargetIds);
@@ -210,6 +212,38 @@ export function CreativeInspector() {
     setLayerCode(JSON.stringify(selectedLayer, null, 2));
     setCodeError('');
   }, [selectedLayer?.id, selectedLayer]);
+
+  useEffect(() => {
+    if (!focusFeedFieldRequest?.fieldName) return;
+    const fieldName = focusFeedFieldRequest.fieldName;
+    setOpenSections((current) => {
+      if (current.has('sample')) return current;
+      const next = new Set(current);
+      next.add('sample');
+      return next;
+    });
+    const focus = () => {
+      const node = globalThis.document?.querySelector(`[data-feed-field="${CSS.escape(fieldName)}"]`);
+      if (!(node instanceof HTMLElement)) return false;
+      node.focus();
+      if (node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement) {
+        const length = node.value.length;
+        node.setSelectionRange?.(length, length);
+      }
+      return true;
+    };
+    // Section may mount on the next paint after openSections updates.
+    requestAnimationFrame(() => {
+      if (!focus()) {
+        requestAnimationFrame(() => {
+          focus();
+          clearFocusFeedFieldRequest();
+        });
+        return;
+      }
+      clearFocusFeedFieldRequest();
+    });
+  }, [focusFeedFieldRequest, clearFocusFeedFieldRequest]);
 
   const toggleSection = (id) => setOpenSections((current) => {
     const next = new Set(current);
@@ -655,11 +689,15 @@ export function CreativeInspector() {
           </label>
           {feedFields
             .filter((field) => ['Creative State', 'Offers', 'Copy'].includes(field.group))
-            .map((field) => (
-              <label key={field.name} className="sample-field">
+            .map((field) => {
+              const usesTextarea = field.type === 'multiline'
+                || (field.type === 'string' && ['Copy', 'Offers'].includes(field.group));
+              return (
+              <label key={field.name} className={`sample-field ${usesTextarea ? 'sample-field-multiline' : ''}`}>
                 <span>{field.label}</span>
                 {field.type === 'enum' ? (
                   <select
+                    data-feed-field={field.name}
                     value={String(row[field.name] ?? '')}
                     onChange={(event) => updateSelectedFeedField(field.name, event.target.value)}
                   >
@@ -667,12 +705,27 @@ export function CreativeInspector() {
                   </select>
                 ) : field.type === 'boolean' ? (
                   <input
+                    data-feed-field={field.name}
                     type="checkbox"
                     checked={Boolean(row[field.name])}
                     onChange={(event) => updateSelectedFeedField(field.name, event.target.checked)}
                   />
+                ) : usesTextarea ? (
+                  <textarea
+                    data-feed-field={field.name}
+                    rows={field.type === 'multiline' || /heading|tc_|sub_text/.test(field.name) ? 3 : 2}
+                    value={fieldInputValue(row, field)}
+                    onChange={(event) => {
+                      try {
+                        updateSelectedFeedField(field.name, event.target.value);
+                      } catch (error) {
+                        setStatus(error instanceof Error ? error.message : String(error), 'error');
+                      }
+                    }}
+                  />
                 ) : (
                   <input
+                    data-feed-field={field.name}
                     value={fieldInputValue(row, field)}
                     onFocus={(event) => event.currentTarget.select()}
                     onChange={(event) => {
@@ -685,7 +738,8 @@ export function CreativeInspector() {
                   />
                 )}
               </label>
-            ))}
+              );
+            })}
         </InspectorSection>
 
         <InspectorSection

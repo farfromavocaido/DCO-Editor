@@ -65,6 +65,10 @@ When a field is missing or empty at render time, behaviour depends on context:
 | **Headline 4 display** | When offer roundel frame is off and `heading4_text` is empty/whitespace → display `heading3_text` instead (`headlineAct4DisplayText()`). |
 | **Roundel layout** | When roundel frame is on and `roundel_value_text` is non-empty → `roundel-split`; otherwise `roundel-copy-only`. |
 
+## Client preview persistence
+
+The client / GitHub `preview-page.html` stores selected ad size, control values (including per-size backgrounds), and zoom under `localStorage` key `sse-dco-client-preview:{exportSlug}` so a refresh keeps the working session. **Restore defaults** removes that key and re-applies the baked-in `clientInitialRow()` sample values.
+
 ## Copy validation (client preview only)
 
 Optional overflow checks run in the client preview package (toggle in localStorage). They apply to visible DOM targets per size, not at feed save time.

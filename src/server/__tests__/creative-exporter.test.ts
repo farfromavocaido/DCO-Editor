@@ -43,7 +43,7 @@ const expectedStatePatternForRow = (row: Record<string, unknown>) => {
 
 test('exports custom Studio-ready HTML without GWD custom elements', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '970x250');
+  const html = await renderStudioReadyHtml(document, '970x250');
 
   assert.match(html, /https:\/\/s0\.2mdn\.net\/ads\/studio\/Enabler\.js/);
   assert.match(html, /Enabler\.exit\('Main Exit'/);
@@ -55,7 +55,7 @@ test('exports custom Studio-ready HTML without GWD custom elements', async () =>
 
 test('exports click handling without the legacy dynamic URL field', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '300x600');
+  const html = await renderStudioReadyHtml(document, '300x600');
 
   assert.match(html, /Enabler\.exit\('Main Exit'\)/);
   assert.doesNotMatch(html, legacyFieldPattern(['Exit', 'URL']));
@@ -65,7 +65,7 @@ test('exports click handling without the legacy dynamic URL field', async () => 
 
 test('exports production HTML with referenced dynamic fields, not baked feed rows', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '300x250');
+  const html = await renderStudioReadyHtml(document, '300x250');
 
   assert.match(html, /data-dco-field="heading1_text"/);
   assert.match(html, /data-dco-field="offer1_value_text"/);
@@ -81,7 +81,7 @@ test('exports production HTML with referenced dynamic fields, not baked feed row
 
 test('exports ad html that accepts client preview post messages', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '728x90', { assetBasePath: '../' });
+  const html = await renderStudioReadyHtml(document, '728x90', { assetBasePath: '../' });
 
   assert.match(html, /window\.addEventListener\('message'/);
   assert.match(html, /SSE_DCO_PREVIEW_STATE/);
@@ -91,7 +91,7 @@ test('exports ad html that accepts client preview post messages', async () => {
 
 test('preview ad html skips empty Enabler bootstrap so iframe postMessage text persists', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '160x600', { assetBasePath: '../' });
+  const html = await renderStudioReadyHtml(document, '160x600', { assetBasePath: '../' });
 
   assert.match(html, /function hasBootstrapRow\(row\)/);
   assert.match(html, /if \(!hasBootstrapRow\(row\)\) return;/);
@@ -101,7 +101,7 @@ test('preview ad html skips empty Enabler bootstrap so iframe postMessage text p
 
 test('preview ad html falls back to packaged background when feed URL is blank', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '160x600', { assetBasePath: '../' });
+  const html = await renderStudioReadyHtml(document, '160x600', { assetBasePath: '../' });
 
   assert.match(html, /data-packaged-src="\.\.\/assets\/bg_160x600\.jpg"/);
   assert.match(html, /getAttribute\('data-packaged-src'\)/);
@@ -118,7 +118,7 @@ test('client preview page normalizes blank background feed objects to empty stri
 
 test('studio export still waits for Enabler init before bootstrap', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '160x600', {
+  const html = await renderStudioReadyHtml(document, '160x600', {
     includePreviewBridge: false,
     includeStudioDynamicContent: true,
   });
@@ -129,7 +129,7 @@ test('studio export still waits for Enabler init before bootstrap', async () => 
 
 test('exports WIP HTML with baked preview row and state classes', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '300x250');
+  const html = await renderStudioReadyHtml(document, '300x250');
   const row = {
     ...document.feed.sampleRows[0],
     include_roundel_frame_bool: true,
@@ -362,6 +362,11 @@ test('renders the client preview page as one self-contained document shell', asy
   assert.match(html, /resize', fitAdFrames/);
   assert.match(html, /function loadActiveAd/);
   assert.match(html, /function replayAd/);
+  assert.match(html, /function restoreDefaults/);
+  assert.match(html, /function hydrateFromStorageOrDefaults/);
+  assert.match(html, /sse-dco-client-preview:/);
+  assert.match(html, /id="restore-defaults"/);
+  assert.match(html, /Restore defaults/);
   assert.match(html, /function previewScale/);
   assert.match(html, /window\.__SSE_DCO_CLIENT_PREVIEW__/);
   assert.match(html, /<script src="preview-validator\.js"><\/script>/);
@@ -394,7 +399,7 @@ test('creates a zip archive from client package entries', () => {
 
 test('exports legacy static first-frame state and GWD skeleton text reset', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '300x600');
+  const html = await renderStudioReadyHtml(document, '300x600');
 
   assert.match(html, /p,\s*h1,\s*h2,\s*h3\s*\{\s*margin:\s*0px;/);
   assert.match(html, /#headline-act1\s*\{[\s\S]*?transform:\s*translate3d\(320px, 0px, 0px\)(?:\s+scale3d\([^)]+\))?;[\s\S]*?opacity:\s*0;/);
@@ -405,7 +410,7 @@ test('exports legacy static first-frame state and GWD skeleton text reset', asyn
 
 test('exports the shared text-fit engine and fits after binding offer texts', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '160x600');
+  const html = await renderStudioReadyHtml(document, '160x600');
 
   assert.match(html, /function createTextFitEngine\(/);
   assert.match(html, /textFitEngine\.applyRules\(/);
@@ -424,7 +429,7 @@ test('exports the shared text-fit engine and fits after binding offer texts', as
 
 test('the serialized fit engine in exported HTML is executable', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '320x50');
+  const html = await renderStudioReadyHtml(document, '320x50');
 
   const source = html.match(/var textFitEngine = (\(function createTextFitEngine[\s\S]*?)\(window\);/)?.[1];
   assert.ok(source, 'serialized engine source not found in exported HTML');
@@ -470,7 +475,7 @@ test('the serialized fit engine in exported HTML is executable', async () => {
 test('local QA exports embed the packaged Museo so they measure what Studio serves', async () => {
   const document = await readCreativeDocument();
   // Exactly the options buildCreativeHtmlFiles passes for output/SSE_DCO_*.html.
-  const html = renderStudioReadyHtml(document, '320x50', { fontBasePath: '../campaign/assets/fonts/' });
+  const html = await renderStudioReadyHtml(document, '320x50', { fontBasePath: '../campaign/assets/fonts/' });
 
   assert.match(html, /@font-face/);
   assert.match(html, /font-family: "Museo";[\s\S]*?url\("\.\.\/campaign\/assets\/fonts\/Museo700-Regular\.otf"\) format\("opentype"\)/);
@@ -480,16 +485,17 @@ test('local QA exports embed the packaged Museo so they measure what Studio serv
 
 test('refits text once fonts finish loading', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '320x50');
+  const html = await renderStudioReadyHtml(document, '320x50');
 
   assert.match(html, /document\.fonts\.ready/);
   assert.match(html, /scheduleFontRefit\(\)/);
-  assert.match(html, /loadingdone/);
+  // Single post-font commit — do not re-bind on every font load event mid-enter.
+  assert.doesNotMatch(html, /addEventListener\(\s*['"]loadingdone['"]/);
 });
 
 test('exports uniform bottom-aligned tracking rules for pricing blocks', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '320x50');
+  const html = await renderStudioReadyHtml(document, '320x50');
 
   assert.match(html, /"cssClass":"offer-value","shared":true/);
   assert.match(html, /"tracking":\{"minEm":-0\.05\}/);
@@ -506,7 +512,7 @@ test('exports creative text fit rules for dynamic headline binding', async () =>
     maxLines: 2,
   };
 
-  const html = renderStudioReadyHtml(document, '300x250');
+  const html = await renderStudioReadyHtml(document, '300x250');
 
   assert.match(html, /var textFitRules = .*"cssClass":"sse-headline"/);
   assert.match(html, /"minFontSize":22/);
@@ -516,7 +522,7 @@ test('exports creative text fit rules for dynamic headline binding', async () =>
 
 test('exports text fitting that measures text content height', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '728x90');
+  const html = await renderStudioReadyHtml(document, '728x90');
 
   assert.match(html, /function contentHeight\(element\)/);
   assert.match(html, /doc\.createRange\(\)/);
@@ -525,7 +531,7 @@ test('exports text fitting that measures text content height', async () => {
 
 test('does not apply text-fit clipping to the CTA shape container', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '300x600');
+  const html = await renderStudioReadyHtml(document, '300x600');
 
   assert.doesNotMatch(html, /"cssClass":"cta"/);
   assert.doesNotMatch(html, /"cssClass":"cta","mode":"shrink"/);
@@ -533,7 +539,7 @@ test('does not apply text-fit clipping to the CTA shape container', async () => 
 
 test('uses sensible default text-fit minimums based on designed font size', async () => {
   const document = await readCreativeDocument();
-  const html = renderStudioReadyHtml(document, '300x250');
+  const html = await renderStudioReadyHtml(document, '300x250');
 
   const rulesJson = html.match(/var textFitRules = (\[.*\]);/)?.[1];
   assert.ok(rulesJson, 'textFitRules missing from runtime');

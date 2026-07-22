@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 
-import { readCreativeDocument } from '@/server/creative-document';
-import { buildClientPreviewZip } from '@/server/creative-exporter';
+import { resolveCampaignId } from '@/server/campaign-query';
+import { readCreativeDocumentForCampaign } from '@/server/creative-document';
+import { buildClientPreviewZip, exportSlugForDocument } from '@/server/creative-exporter';
 
 export const runtime = 'nodejs';
 
@@ -9,17 +10,29 @@ export async function POST(request: Request) {
   try {
     let document = null;
     let includeValidator = true;
+    let renderMode: 'font' | 'outline' = 'font';
+    let body: {
+      document?: Record<string, unknown>;
+      includeValidator?: boolean;
+      renderMode?: string;
+      campaign?: string;
+    } = {};
     try {
-      const body = await request.json();
+      body = await request.json();
       document = body?.document || null;
       includeValidator = body?.includeValidator !== false;
+      renderMode = body?.renderMode === 'outline' ? 'outline' : 'font';
     } catch {
       document = null;
     }
-    const zip = await buildClientPreviewZip(document || await readCreativeDocument(), { includeValidator });
-    const filename = includeValidator
-      ? 'SSE_DCO_client_preview_package_validated.zip'
-      : 'SSE_DCO_client_preview_package.zip';
+    const campaignId = resolveCampaignId(request, body);
+    const creative = document || await readCreativeDocumentForCampaign(campaignId);
+    const zip = await buildClientPreviewZip(creative, { includeValidator, renderMode });
+    const slug = exportSlugForDocument(creative);
+    const suffix = renderMode === 'outline' ? '_outlines' : '';
+    const filename = includeValidator && renderMode === 'font'
+      ? `${slug}_client_preview_package_validated.zip`
+      : `${slug}_client_preview_package${suffix}.zip`;
     return new NextResponse(zip, {
       headers: {
         'content-type': 'application/zip',

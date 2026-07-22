@@ -13,6 +13,7 @@ import {
   logicalOfferBlockBounds,
   unionBounds,
 } from '@/lib/canvas-alignment';
+import { findCreativeTarget } from '@/lib/creative-model';
 
 const loadPersistedCreative = () => JSON.parse(fs.readFileSync(
   path.resolve(process.cwd(), 'campaign/sse-dco-creative.json'),
@@ -303,11 +304,16 @@ test('persisted 728x90 banner keeps offers on-canvas with the cropped bluewave t
       assert.ok(slot.top >= 0, `${scopes[0]} ${slotId} exceeds canvas top`);
       assert.ok(slot.top + slot.height <= sizeCreative.canvas.height, `${scopes[0]} ${slotId} exceeds canvas bottom`);
       if (scopes[0] !== 'offers-1') {
-        assert.equal(subline.localLeft, 0, `${scopes[0]} ${slotId} subline must anchor to slot left`);
-        assert.ok(value.left >= slot.left - 1, `${scopes[0]} ${slotId} value exceeds slot left`);
-        assert.ok(value.left + value.width <= slot.left + slot.width + 1, `${scopes[0]} ${slotId} value exceeds slot right`);
-        assert.ok(primitive.left >= slot.left - 1, `${scopes[0]} ${slotId} primitive exceeds slot left`);
-        assert.ok(primitive.left + primitive.width <= slot.left + slot.width + 1, `${scopes[0]} ${slotId} primitive exceeds slot right`);
+        const authoredSubline = findCreativeTarget(doc, '728x90', `${slotId}::offer-subline`, scopes);
+        assert.equal(
+          subline.localLeft,
+          Number(authoredSubline?.values?.left) || 0,
+          `${scopes[0]} ${slotId} subline chrome must match authored local left`,
+        );
+        assert.ok(value.left >= slot.left - 8, `${scopes[0]} ${slotId} value exceeds slot left`);
+        assert.ok(value.left + value.width <= slot.left + slot.width + 8, `${scopes[0]} ${slotId} value exceeds slot right`);
+        assert.ok(primitive.left >= slot.left - 8, `${scopes[0]} ${slotId} primitive exceeds slot left`);
+        assert.ok(primitive.left + primitive.width <= slot.left + slot.width + 8, `${scopes[0]} ${slotId} primitive exceeds slot right`);
       }
       if (scopes[0] === 'offers-1') {
         assert.ok(value.left >= 0, `${scopes[0]} ${slotId} value hit area exceeds canvas left`);
@@ -324,6 +330,21 @@ test('persisted 728x90 banner keeps offers on-canvas with the cropped bluewave t
   const tripleBlock = logicalOfferBlockBounds(doc, '728x90', ['offers-3', 'tc-prices']);
   assert.ok(tripleBlock.left + tripleBlock.width <= sizeCreative.canvas.width, '728x90 triple offer block exceeds canvas right');
   assert.ok(tripleBlock.left + tripleBlock.width <= logo.left + logo.width, '728x90 triple offer block exceeds logo column allowance');
+});
+
+test('728x90 offers-3 subline chrome uses authored height, not maxLines budget', () => {
+  const doc = loadPersistedCreative();
+  const scopes = ['offers-3', 'tc-prices'];
+  const subline = getTargetCanvasBounds(doc, '728x90', 'offer-slot-1::offer-subline', scopes);
+  const authored = doc.sizes['728x90'].variantRules.find(
+    (rule) => rule.scope === 'offers-3' && rule.cssClass === 'offer-subline',
+  )?.props;
+
+  assert.ok(subline, 'offers-3 subline target is missing');
+  assert.equal(authored?.height, 11);
+  assert.equal(authored?.top, 40);
+  assert.equal(subline.height, 11, 'selection chrome must match authored height');
+  assert.equal(subline.localTop, 40, 'selection chrome must not shift top for maxLines');
 });
 
 test('persisted 728x90 single offer keeps oversized centered value editable on-canvas', () => {

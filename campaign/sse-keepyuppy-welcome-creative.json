@@ -445,7 +445,8 @@
         "greenwave": "assets/SVG/greenwave-wider.svg",
         "bluewave": "assets/SVG/bluewave-wider.svg",
         "logoBlue": "assets/SVG/SSELogoBlue.svg",
-        "logoWhite": "assets/SVG/SSELogoWhite.svg"
+        "logoWhite": "assets/SVG/SSELogoWhite.svg",
+        "plus": "assets/SVG/sse-plus.svg"
       },
       "layers": [
         {
@@ -542,7 +543,7 @@
               "end": "act4_in",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
+                "enter_distance_px": 20,
                 "enter_duration_pct": 4
               },
               "profiles": [
@@ -687,7 +688,7 @@
               "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_distance_px": 60,
+                "enter_distance_px": 20,
                 "enter_duration_pct": 4
               },
               "profiles": [
@@ -736,7 +737,7 @@
               "start": "act1_in",
               "end": "bn_h2_in",
               "params": {
-                "enter_distance_px": 60,
+                "enter_distance_px": 20,
                 "enter_duration_pct": 3
               }
             }
@@ -880,20 +881,15 @@
           "id": "plus-1",
           "label": "Plus 1",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 10,
           "base": {
             "left": 144,
             "top": 12,
-            "width": 16,
-            "height": 26,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "22px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "26px",
-            "cssClass": "plus-1"
+            "width": 13,
+            "height": 13,
+            "cssClass": "plus-1",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -908,7 +904,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-2",
@@ -943,20 +940,15 @@
           "id": "plus-2",
           "label": "Plus 2",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 12,
           "base": {
             "left": 200,
             "top": 14,
-            "width": 14,
-            "height": 22,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "18px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "22px",
-            "cssClass": "plus-2"
+            "width": 13,
+            "height": 13,
+            "cssClass": "plus-2",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -971,7 +963,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-3",
@@ -1139,7 +1132,7 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
+                "enter_distance_px": 20,
                 "enter_duration_pct": 4
               },
               "profiles": [
@@ -1154,7 +1147,7 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
+                "enter_distance_px": 20,
                 "enter_duration_pct": 4
               },
               "profiles": [
@@ -1213,10 +1206,9 @@
           "props": {
             "left": 169,
             "top": 20,
-            "width": 12,
-            "height": 12,
-            "fontSize": 17,
-            "lineHeight": "12px"
+            "width": 13,
+            "height": 13,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -1324,9 +1316,9 @@
           "props": {
             "left": 208,
             "top": 11,
-            "width": 14,
-            "height": 21,
-            "fontSize": 16
+            "width": 13,
+            "height": 13,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -1341,9 +1333,9 @@
           "props": {
             "left": 272,
             "top": 14,
-            "fontSize": 16,
-            "height": 21,
-            "width": 14
+            "height": 13,
+            "width": 13,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -1814,7 +1806,8 @@
         "greenwave": "assets/SVG/greenwave-wider.svg",
         "bluewave": "assets/SVG/bluewave.svg",
         "logoBlue": "assets/SVG/SSELogoBlue.svg",
-        "logoWhite": "assets/SVG/SSELogoWhite.svg"
+        "logoWhite": "assets/SVG/SSELogoWhite.svg",
+        "plus": "assets/SVG/sse-plus.svg"
       },
       "layers": [
         {
@@ -1910,7 +1903,7 @@
               "end": "act4_in",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
+                "enter_distance_px": 20,
                 "enter_duration_pct": 5
               },
               "profiles": [
@@ -2053,7 +2046,7 @@
               "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_distance_px": 60,
+                "enter_distance_px": 20,
                 "enter_duration_pct": 5
               },
               "profiles": [
@@ -2068,7 +2061,7 @@
               "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_distance_px": 60,
+                "enter_distance_px": 20,
                 "enter_duration_pct": 5
               },
               "profiles": [
@@ -2100,7 +2093,7 @@
               "start": "act1_in",
               "end": "bn_h2_in",
               "params": {
-                "enter_distance_px": 60,
+                "enter_distance_px": 20,
                 "enter_duration_pct": 3
               }
             }
@@ -2242,20 +2235,15 @@
           "id": "plus-1",
           "label": "Plus 1",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 10,
           "base": {
             "left": 385,
             "top": 26,
-            "width": 28,
-            "height": 36,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "38px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "36px",
-            "cssClass": "plus-1"
+            "width": 22,
+            "height": 22,
+            "cssClass": "plus-1",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -2270,7 +2258,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-2",
@@ -2305,20 +2294,15 @@
           "id": "plus-2",
           "label": "Plus 2",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 12,
           "base": {
             "left": 490,
             "top": 26,
-            "width": 28,
-            "height": 36,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "36px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "34px",
-            "cssClass": "plus-2"
+            "width": 22,
+            "height": 22,
+            "cssClass": "plus-2",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -2333,7 +2317,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-3",
@@ -2425,7 +2410,7 @@
               "id": "unit-rate-prices-fade",
               "label": "Unit Rate Prices fade",
               "preset": "fade",
-              "start": "bn_offers_in",
+              "start": "act1_out",
               "end": "offers_exit-2",
               "params": {
                 "enter_duration_pct": 2,
@@ -2463,7 +2448,7 @@
               "id": "terms-solo-fade",
               "label": "Terms Solo fade",
               "preset": "fade",
-              "start": "bn_offers_in",
+              "start": "terms_in",
               "end": "offers_exit-2",
               "params": {
                 "enter_duration_pct": 2,
@@ -2494,7 +2479,7 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
+                "enter_distance_px": 20,
                 "enter_duration_pct": 5
               },
               "profiles": [
@@ -2509,7 +2494,7 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
+                "enter_distance_px": 20,
                 "enter_duration_pct": 5
               },
               "profiles": [
@@ -2709,9 +2694,9 @@
           "props": {
             "left": 420,
             "top": 24,
-            "width": 28,
-            "height": 35,
-            "fontSize": 41
+            "width": 25,
+            "height": 25,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -2817,9 +2802,9 @@
           "props": {
             "left": 342,
             "top": 26,
-            "width": 26,
-            "height": 32,
-            "fontSize": 36
+            "width": 22,
+            "height": 22,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -2834,9 +2819,9 @@
           "props": {
             "left": 467,
             "top": 26,
-            "width": 26,
-            "height": 32,
-            "fontSize": 36
+            "width": 22,
+            "height": 22,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -3168,7 +3153,8 @@
         "greenwave": "assets/SVG/greenwave.svg",
         "bluewave": "assets/SVG/bluewave.svg",
         "logoBlue": "assets/SVG/SSELogoBlue.svg",
-        "logoWhite": "assets/SVG/SSELogoWhite.svg"
+        "logoWhite": "assets/SVG/SSELogoWhite.svg",
+        "plus": "assets/SVG/sse-plus.svg"
       },
       "layers": [
         {
@@ -3262,7 +3248,8 @@
               "start": "roundel_in",
               "end": "act4_in",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -3400,7 +3387,8 @@
               "start": "act2_in",
               "end": "offers_exit",
               "params": {
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-3"
@@ -3413,7 +3401,8 @@
               "start": "act2_in",
               "end": "offers_exit",
               "params": {
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -3441,7 +3430,8 @@
               "start": "act1_in",
               "end": "act1_out",
               "params": {
-                "enter_duration_pct": 3
+                "enter_duration_pct": 3,
+                "enter_distance_px": 20
               }
             }
           ]
@@ -3579,20 +3569,15 @@
           "id": "plus-1",
           "label": "Plus 1",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 10,
           "base": {
             "left": 98,
             "top": 78,
-            "width": 24,
-            "height": 40,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "43px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "40px",
-            "cssClass": "plus-1"
+            "width": 26,
+            "height": 26,
+            "cssClass": "plus-1",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -3607,7 +3592,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-2",
@@ -3642,20 +3628,15 @@
           "id": "plus-2",
           "label": "Plus 2",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 12,
           "base": {
             "left": 136,
             "top": 127,
-            "width": 22,
-            "height": 36,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "43px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "40px",
-            "cssClass": "plus-2"
+            "width": 26,
+            "height": 26,
+            "cssClass": "plus-2",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -3670,7 +3651,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-3",
@@ -3830,7 +3812,8 @@
               "start": "act4_in",
               "end": "act3_exit-1",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-3"
@@ -3843,7 +3826,8 @@
               "start": "act4_in",
               "end": "act3_exit-1",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -3992,12 +3976,9 @@
           "props": {
             "left": 139,
             "top": 96,
-            "width": 22,
-            "height": 36,
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
+            "width": 26,
+            "height": 26,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -4458,7 +4439,8 @@
         "greenwave": "assets/SVG/greenwave.svg",
         "bluewave": "assets/SVG/bluewave.svg",
         "logoBlue": "assets/SVG/SSELogoBlue.svg",
-        "logoWhite": "assets/SVG/SSELogoWhite.svg"
+        "logoWhite": "assets/SVG/SSELogoWhite.svg",
+        "plus": "assets/SVG/sse-plus.svg"
       },
       "layers": [
         {
@@ -4556,7 +4538,8 @@
               "start": "roundel_in",
               "end": "act4_in",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -4698,7 +4681,8 @@
               "start": "act2_in",
               "end": "offers_exit",
               "params": {
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-3"
@@ -4711,7 +4695,8 @@
               "start": "act2_in",
               "end": "offers_exit",
               "params": {
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -4745,7 +4730,8 @@
               "start": "act1_in",
               "end": "act1_out",
               "params": {
-                "enter_duration_pct": 3
+                "enter_duration_pct": 3,
+                "enter_distance_px": 20
               }
             }
           ],
@@ -4887,20 +4873,15 @@
           "id": "plus-1",
           "label": "Plus 1",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 10,
           "base": {
             "left": 68,
             "top": 452,
-            "width": 24,
-            "height": 34,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "34px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "34px",
-            "cssClass": "plus-1"
+            "width": 21,
+            "height": 21,
+            "cssClass": "plus-1",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -4915,7 +4896,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-2",
@@ -4950,20 +4932,15 @@
           "id": "plus-2",
           "label": "Plus 2",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 12,
           "base": {
             "left": 68,
             "top": 540,
-            "width": 24,
-            "height": 34,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "34px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "34px",
-            "cssClass": "plus-2"
+            "width": 21,
+            "height": 21,
+            "cssClass": "plus-2",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -4978,7 +4955,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-3",
@@ -5138,7 +5116,8 @@
               "start": "act4_in",
               "end": "act3_exit-1",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-3"
@@ -5151,7 +5130,8 @@
               "start": "act4_in",
               "end": "act3_exit-1",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -5208,9 +5188,9 @@
           "props": {
             "left": 60,
             "top": 296,
-            "width": 42,
-            "height": 60,
-            "fontSize": 58
+            "width": 35,
+            "height": 35,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -5308,9 +5288,9 @@
           "props": {
             "left": 67,
             "top": 244,
-            "width": 27,
-            "height": 38,
-            "fontSize": 36
+            "width": 22,
+            "height": 22,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -5325,9 +5305,9 @@
           "props": {
             "left": 67,
             "top": 349,
-            "width": 27,
-            "height": 38,
-            "fontSize": 36
+            "width": 22,
+            "height": 22,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -5785,7 +5765,8 @@
         "greenwave": "assets/SVG/greenwave.svg",
         "bluewave": "assets/SVG/bluewave.svg",
         "logoBlue": "assets/SVG/SSELogoBlue.svg",
-        "logoWhite": "assets/SVG/SSELogoWhite.svg"
+        "logoWhite": "assets/SVG/SSELogoWhite.svg",
+        "plus": "assets/SVG/sse-plus.svg"
       },
       "layers": [
         {
@@ -5883,7 +5864,8 @@
               "start": "roundel_in",
               "end": "act4_in",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -6025,7 +6007,8 @@
               "start": "act2_in",
               "end": "offers_exit",
               "params": {
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-3"
@@ -6038,7 +6021,8 @@
               "start": "act2_in",
               "end": "offers_exit",
               "params": {
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -6070,7 +6054,8 @@
               "start": "act1_in",
               "end": "act1_out",
               "params": {
-                "enter_duration_pct": 3
+                "enter_duration_pct": 3,
+                "enter_distance_px": 20
               }
             }
           ],
@@ -6212,20 +6197,15 @@
           "id": "plus-1",
           "label": "Plus 1",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 9,
           "base": {
             "left": 138,
             "top": 389,
-            "width": 24,
-            "height": 40,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "43px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "40px",
-            "cssClass": "plus-1"
+            "width": 26,
+            "height": 26,
+            "cssClass": "plus-1",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -6240,7 +6220,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-2",
@@ -6275,20 +6256,15 @@
           "id": "plus-2",
           "label": "Plus 2",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 11,
           "base": {
             "left": 13,
             "top": 532,
-            "width": 31,
-            "height": 51,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "43px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "40px",
-            "cssClass": "plus-2"
+            "width": 26,
+            "height": 26,
+            "cssClass": "plus-2",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -6303,7 +6279,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-3",
@@ -6463,7 +6440,8 @@
               "start": "act4_in",
               "end": "act3_exit-1",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-3"
@@ -6476,7 +6454,8 @@
               "start": "act4_in",
               "end": "act3_exit-1",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -6533,9 +6512,9 @@
           "props": {
             "left": 132,
             "top": 282,
-            "width": 37,
-            "height": 58,
-            "fontSize": 55
+            "width": 33,
+            "height": 33,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -6638,8 +6617,9 @@
           "props": {
             "left": 134,
             "top": 281,
-            "width": 31,
-            "height": 51
+            "width": 26,
+            "height": 26,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -7103,7 +7083,8 @@
         "greenwave": "assets/SVG/greenwave.svg",
         "bluewave": "assets/SVG/bluewave.svg",
         "logoBlue": "assets/SVG/SSELogoBlue.svg",
-        "logoWhite": "assets/SVG/SSELogoWhite.svg"
+        "logoWhite": "assets/SVG/SSELogoWhite.svg",
+        "plus": "assets/SVG/sse-plus.svg"
       },
       "layers": [
         {
@@ -7199,7 +7180,7 @@
               "end": "act4_in",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
+                "enter_distance_px": 35,
                 "enter_duration_pct": 5
               },
               "profiles": [
@@ -7342,7 +7323,7 @@
               "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_distance_px": 60,
+                "enter_distance_px": 35,
                 "enter_duration_pct": 5
               },
               "profiles": [
@@ -7357,7 +7338,7 @@
               "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_distance_px": 60,
+                "enter_distance_px": 35,
                 "enter_duration_pct": 5
               },
               "profiles": [
@@ -7389,7 +7370,7 @@
               "start": "act1_in",
               "end": "act1_out",
               "params": {
-                "enter_distance_px": 60,
+                "enter_distance_px": 35,
                 "enter_duration_pct": 3
               }
             }
@@ -7531,20 +7512,15 @@
           "id": "plus-1",
           "label": "Plus 1",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 10,
           "base": {
             "left": 470,
             "top": 60,
-            "width": 30,
-            "height": 50,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "52px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "50px",
-            "cssClass": "plus-1"
+            "width": 31,
+            "height": 31,
+            "cssClass": "plus-1",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -7559,7 +7535,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-2",
@@ -7594,20 +7571,15 @@
           "id": "plus-2",
           "label": "Plus 2",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 12,
           "base": {
             "left": 597,
             "top": 65,
-            "width": 30,
-            "height": 50,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "46px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "46px",
-            "cssClass": "plus-2"
+            "width": 27,
+            "height": 27,
+            "cssClass": "plus-2",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -7622,7 +7594,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-3",
@@ -7783,7 +7756,7 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
+                "enter_distance_px": 35,
                 "enter_duration_pct": 5
               },
               "profiles": [
@@ -7798,7 +7771,7 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
+                "enter_distance_px": 35,
                 "enter_duration_pct": 5
               },
               "profiles": [
@@ -7855,8 +7828,9 @@
           "props": {
             "left": 478,
             "top": 94,
-            "width": 37,
-            "height": 62
+            "width": 31,
+            "height": 31,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -7964,8 +7938,9 @@
           "props": {
             "left": 532,
             "top": 75,
-            "width": 51,
-            "height": 85
+            "width": 31,
+            "height": 31,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -7980,8 +7955,9 @@
           "props": {
             "left": 1077,
             "top": -104,
-            "width": 51,
-            "height": 85
+            "width": 27,
+            "height": 27,
+            "objectFit": "contain"
           },
           "editable": true
         },

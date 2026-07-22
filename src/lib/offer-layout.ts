@@ -235,7 +235,40 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
       valueBottom: box.top + ink.bottom,
       valueCenterY: box.top + (ink.top + ink.bottom) / 2,
       valueCenterX: box.left + (ink.left + ink.right) / 2,
+      // null when no visible subline copy — callers must fall back.
+      sublineTop: sub ? (box.top + sub.top) : null,
+      // Authored/CSS box top (stable if Range ink is short/low).
+      sublineBoxTop: subline && isVisible(subline)
+        ? (box.top + cssNumber(window.getComputedStyle(subline).top, subline.offsetTop || 0))
+        : null,
     };
+  }
+
+  /** Stage size key from data-size, authored style, or layout box. */
+  function resolveSizeKey(scope) {
+    if (!scope) return '';
+    if (scope.getAttribute) {
+      var ds = scope.getAttribute('data-size');
+      if (ds) return ds;
+    }
+    if (scope.querySelector) {
+      var marked = scope.querySelector('[data-size]');
+      if (marked) {
+        var markedSize = marked.getAttribute('data-size');
+        if (markedSize) return markedSize;
+      }
+    }
+    // Prefer explicit style width/height (editor stage) over client box —
+    // transforms/zoom can make offset metrics less obvious.
+    if (scope.style) {
+      var sw = cssNumber(scope.style.width, 0);
+      var sh = cssNumber(scope.style.height, 0);
+      if (sw > 0 && sh > 0) return Math.round(sw) + 'x' + Math.round(sh);
+    }
+    var w = scope.clientWidth || scope.offsetWidth || 0;
+    var h = scope.clientHeight || scope.offsetHeight || 0;
+    if (w > 0 && h > 0) return Math.round(w) + 'x' + Math.round(h);
+    return '';
   }
 
   function detectFamily(slots) {
@@ -310,11 +343,14 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
   }
 
   /**
-   * Place plus so its glyph ink centre sits at stage (x, y).
-   * Never centre the CSS/line box — Museo "+" ink sits high in a tall em-box.
+   * Place plus relative to stage (x, y).
+   * - alignY 'center' (default): ink centre on (x, y)
+   * - alignY 'top': ink top on y, ink centre on x
+   * SVG plus images fill a square box — use the element rect as ink.
+   * Legacy text pluses still use Range ink (Museo + sits high in the em-box).
    * Ink is measured at motion rest so enter transforms cannot bake into left/top.
    */
-  function placePlus(plus, x, y) {
+  function placePlus(plus, x, y, alignY) {
     if (!plus || !isVisible(plus)) return;
     var parent = plus.offsetParent || plus.parentElement;
     var pw = plus.offsetWidth || cssNumber(window.getComputedStyle(plus).width, 16);
@@ -323,14 +359,19 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     plus.style.top = (y - ph / 2) + 'px';
     if (!parent) return;
     withNeutralMotion(plus, function() {
-      var ink = textInk(plus, parent);
+      var isImg = plus.tagName === 'IMG' || plus.tagName === 'img';
+      var ink = isImg ? localRect(plus, parent) : textInk(plus, parent);
       if (!(ink.width > 0 || ink.height > 0)) return;
       var inkCx = (ink.left + ink.right) / 2;
       var inkCy = (ink.top + ink.bottom) / 2;
       var curLeft = cssNumber(plus.style.left, 0);
       var curTop = cssNumber(plus.style.top, 0);
       plus.style.left = (curLeft + (x - inkCx)) + 'px';
-      plus.style.top = (curTop + (y - inkCy)) + 'px';
+      if (alignY === 'top') {
+        plus.style.top = (curTop + (y - ink.top)) + 'px';
+      } else {
+        plus.style.top = (curTop + (y - inkCy)) + 'px';
+      }
     });
   }
 
@@ -354,13 +395,28 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
   }
 
   /**
-   * Triangular: ignore top-row sublines — halfway from top-row value bottoms
-   * to the bottom value’s top; X between the top pair’s value inks.
+   * Triangular: X between the top pair’s value inks.
+   * Default Y = lower of the two top-row value bottoms (plus top-aligned).
+   * On MPU / 970×250: plus top meets top-row subline caps (SVG fills its box).
    */
-  function plusAnchorTriangular(topA, topB, bottomCluster) {
+  function plusAnchorTriangular(topA, topB, _bottomCluster, alignToSublineTop) {
+    var valueY = Math.max(topA.valueBottom, topB.valueBottom);
+    var y = valueY;
+    if (alignToSublineTop) {
+      var tops = [];
+      if (topA.sublineTop != null) tops.push(topA.sublineTop);
+      if (topB.sublineTop != null) tops.push(topB.sublineTop);
+      if (topA.sublineBoxTop != null) tops.push(topA.sublineBoxTop);
+      if (topB.sublineBoxTop != null) tops.push(topB.sublineBoxTop);
+      if (tops.length) {
+        // Prefer subline caps when they raise the plus; never drop below
+        // the value-bottom junction (stacked sublines sit lower).
+        y = Math.min(valueY, Math.min.apply(null, tops));
+      }
+    }
     return {
       x: (topA.valueRight + topB.valueLeft) / 2,
-      y: (Math.max(topA.valueBottom, topB.valueBottom) + bottomCluster.valueTop) / 2,
+      y: y,
     };
   }
 
@@ -432,7 +488,7 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     }
   }
 
-  function distributeTriangular(slots, pluses) {
+  function distributeTriangular(slots, pluses, sizeKey) {
     var boxes = slots.map(function(slot) {
       return { slot: slot, box: boxOf(slot), cluster: clusterForSlot(slot) };
     });
@@ -479,8 +535,16 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     bottom.slot.style.left = (topCentroidX - bottom.cluster.width / 2 - bottom.cluster.insetLeft) + 'px';
     bottom = { slot: bottom.slot, box: boxOf(bottom.slot), cluster: clusterForSlot(bottom.slot) };
 
-    var anchor = plusAnchorTriangular(topRow[0].cluster, topRow[1].cluster, bottom.cluster);
-    placePlus(pluses[0], anchor.x, anchor.y);
+    // MPU + 970×250: raise plus so glyph top meets top-row subline tops.
+    // 300×600 (and anything else triangular) keeps value-bottom alignment.
+    var alignToSublineTop = sizeKey === '300x250' || sizeKey === '970x250';
+    var anchor = plusAnchorTriangular(
+      topRow[0].cluster,
+      topRow[1].cluster,
+      bottom.cluster,
+      alignToSublineTop,
+    );
+    placePlus(pluses[0], anchor.x, anchor.y, 'top');
   }
 
   return function layoutOffers(root) {
@@ -490,6 +554,7 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
       scope = document;
     }
     if (!scope || !scope.querySelectorAll) return;
+    var sizeKey = resolveSizeKey(scope);
 
     var slotNodes = scope.querySelectorAll('[data-gwd-group="OfferSlot"]');
     var slots = [];
@@ -535,7 +600,7 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     var family = detectFamily(slots);
     if (family === 'horizontal') distributeHorizontal(slots, pluses);
     else if (family === 'vertical') distributeVertical(slots, pluses);
-    else if (family === 'triangular') distributeTriangular(slots, pluses);
+    else if (family === 'triangular') distributeTriangular(slots, pluses, sizeKey);
   };
 })`;
 

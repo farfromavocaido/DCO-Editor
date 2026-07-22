@@ -12,10 +12,15 @@
 
 ### Changed
 
+- CDN / GitHub Pages packages inline `sse-plus.svg` from the campaign file (data URI) so preview and Studio CDN never depend on a missing SVG path; font refit still runs once even without `document.fonts`.
+- 728×90 legal lines now hand off like other sizes: unit rates enter at `act1_out` (was `bn_offers_in`, which left a gap after T&Cs on frames-4).
+- Headline enter slowed to 4%; frames-4 `act1_in` delayed to 12.5 so copy starts after the green wave is mostly swept in; offer micro-stagger shifted to match; light hold rebalance (`act2_in` 32.5, `act4_in` 76).
+- Offer pluses are SVG images (`campaign/assets/SVG/sse-plus.svg`) instead of Museo "+" text, so the mark fills its box with no font vertical offset. Triangular layout still top-aligns to value bottoms by default; MPU / `970x250` rise to top-row subline caps.
 - T&C / unit-rate layers across all campaigns now use opacity-only `fade` (no enter/exit vertical travel); prior `settled_dy` offsets were baked into authored `top` so hold position stays the same. Enter window remains 2% with ease-out.
 - Late legal exits (`terms-solo`, `unit-rate-prices`) use a 1% fade-out and end at `offers_exit-2`, so they are fully gone when offer blocks begin their exit fade.
 - SSE logo handoff: on `300x250` / `300x600` / `970x250`, blue logo box matches white and the blue→white crossfade spans the blue wave sweep; on `320x50` blue fade-out is centered on blue-wave start; on `160x600` / `728x90` blue fade-out aligns with offer-block exit; white fade-in on those non-swap sizes is centered on blue-wave end.
 - Removed `offers-3` blue-only logo geometry overrides (`970x250`, `160x600`) that pulled the blue logo off the white box during the crossfade.
+- Headline acts share one `enter_duration_pct` across acts (now 4%) so frames-4 sequences no longer snap Act 1 in quickly then crawl later acts (which were falling back to the 7% `slideInRight` default).
 - DCO layout commit: `placePlus` measures glyph ink at motion rest (ignores fadeUp `enter_dy` / editor playhead transforms), and export runtime refits once on `document.fonts.ready` only (no `loadingdone` mid-enter rewrite). Fixes Replay / cached-font plus drift vs cold load.
 - Fit-budget chrome no longer overrides an explicit authored `height` when `maxLines` is set (fixes offers-3 value/subline canvas drag on tight boxes like 728×90).
 - **Export HTML** downloads a ZIP of the built files (still writes to `output/` as well); pass `download: false` on the API for the previous JSON-only response.

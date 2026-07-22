@@ -9,12 +9,12 @@
     "beats": {
       "start": 0,
       "act1_begin": 11,
-      "act1_in": 12,
-      "offer2_in": 16.3,
-      "offer3_in": 17.4,
-      "plus1_in": 17.6,
-      "plus2_in": 17.6,
-      "terms_in": 17.6,
+      "act1_in": 12.5,
+      "offer2_in": 17.8,
+      "offer3_in": 18.9,
+      "plus1_in": 19.1,
+      "plus2_in": 19.1,
+      "terms_in": 19.1,
       "act2_in": 43,
       "act1_out": 44,
       "offers_exit": 66,
@@ -33,18 +33,18 @@
       "bn_cta_in": 78,
       "tc_exit": 69,
       "act4_in": 69,
-      "offer1_in": 15.2
+      "offer1_in": 16.7
     },
     "profiles": {
       "frames-3": {
         "start": 0,
         "act1_begin": 11,
-        "act1_in": 12,
-        "offer2_in": 16.3,
-        "offer3_in": 17.4,
-        "plus1_in": 17.6,
-        "plus2_in": 17.6,
-        "terms_in": 17.6,
+        "act1_in": 12.5,
+        "offer2_in": 17.8,
+        "offer3_in": 18.9,
+        "plus1_in": 19.1,
+        "plus2_in": 19.1,
+        "terms_in": 19.1,
         "act2_in": 43,
         "act1_out": 44,
         "offers_exit": 66,
@@ -63,20 +63,20 @@
         "bn_cta_in": 76,
         "tc_exit": 66.5,
         "act4_in": 65.1,
-        "offer1_in": 15.2,
+        "offer1_in": 16.7,
         "roundel_in": 65
       },
       "frames-4": {
         "start": 0,
         "act1_begin": 6,
-        "act1_in": 11,
-        "offer2_in": 15.3,
-        "offer3_in": 16.4,
-        "plus1_in": 16.6,
-        "plus2_in": 16.6,
-        "terms_in": 16.6,
-        "act2_in": 33.3,
-        "act1_out": 33.3,
+        "act1_in": 12.5,
+        "offer2_in": 17.8,
+        "offer3_in": 18.9,
+        "plus1_in": 19.1,
+        "plus2_in": 19.1,
+        "terms_in": 19.1,
+        "act2_in": 32.5,
+        "act1_out": 32.5,
         "offers_exit": 57.7,
         "wave2_in": 54.7,
         "swap": 56.7,
@@ -92,12 +92,12 @@
         "bn_white_in": 74,
         "bn_cta_in": 78,
         "tc_exit": 60.1,
-        "act4_in": 77.7,
+        "act4_in": 76,
+        "offer1_in": 16.7,
         "act2_out": 45,
         "act3_in": 45,
         "act3_out": 55,
-        "roundel_in": 56.7,
-        "offer1_in": 14.2
+        "roundel_in": 56.7
       }
     }
   },
@@ -340,16 +340,16 @@
         "offer1_sub_text": "OFF ELECTRICITY*",
         "offer2_value_text": "30%",
         "offer2_sub_text": "OFF GAS*",
-        "offer3_value_text": "€125",
+        "offer3_value_text": "\u20ac125",
         "offer3_sub_text": "OFF YOUR FIRST BILL*",
         "tc_type_enum": "tcs_units",
         "tc_terms_text": "*T&Cs apply",
         "tc_units_text": "Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat",
         "cta_type_enum": "rectangle",
         "cta_text": "Switch today",
-        "include_roundel_frame_bool": false,
+        "include_roundel_frame_bool": true,
         "roundel_text_text": "Save up to",
-        "roundel_value_text": "€1,080",
+        "roundel_value_text": "\u20ac1,080",
         "heading4_text": "A different kind of energy",
         "background_image_url_160x600": {
           "Url": ""
@@ -445,7 +445,8 @@
         "greenwave": "assets/SVG/greenwave-wider.svg",
         "bluewave": "assets/SVG/bluewave-wider.svg",
         "logoBlue": "assets/SVG/SSELogoBlue.svg",
-        "logoWhite": "assets/SVG/SSELogoWhite.svg"
+        "logoWhite": "assets/SVG/SSELogoWhite.svg",
+        "plus": "assets/SVG/sse-plus.svg"
       },
       "layers": [
         {
@@ -542,7 +543,7 @@
               "end": "act4_in",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
+                "enter_distance_px": 20,
                 "enter_duration_pct": 4
               },
               "profiles": [
@@ -687,7 +688,7 @@
               "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_distance_px": 60,
+                "enter_distance_px": 20,
                 "enter_duration_pct": 4
               },
               "profiles": [
@@ -736,8 +737,8 @@
               "start": "act1_in",
               "end": "bn_h2_in",
               "params": {
-                "enter_distance_px": 60,
-                "enter_duration_pct": 3
+                "enter_distance_px": 20,
+                "enter_duration_pct": 4
               }
             }
           ],
@@ -880,20 +881,15 @@
           "id": "plus-1",
           "label": "Plus 1",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 10,
           "base": {
             "left": 144,
             "top": 12,
-            "width": 16,
-            "height": 26,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "22px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "26px",
-            "cssClass": "plus-1"
+            "width": 13,
+            "height": 13,
+            "cssClass": "plus-1",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -908,7 +904,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-2",
@@ -943,20 +940,15 @@
           "id": "plus-2",
           "label": "Plus 2",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 12,
           "base": {
             "left": 200,
             "top": 14,
-            "width": 14,
-            "height": 22,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "18px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "22px",
-            "cssClass": "plus-2"
+            "width": 13,
+            "height": 13,
+            "cssClass": "plus-2",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -971,7 +963,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-3",
@@ -1139,7 +1132,7 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
+                "enter_distance_px": 20,
                 "enter_duration_pct": 4
               },
               "profiles": [
@@ -1154,7 +1147,7 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
+                "enter_distance_px": 20,
                 "enter_duration_pct": 4
               },
               "profiles": [
@@ -1213,10 +1206,9 @@
           "props": {
             "left": 169,
             "top": 20,
-            "width": 12,
-            "height": 12,
-            "fontSize": 17,
-            "lineHeight": "12px"
+            "width": 13,
+            "height": 13,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -1324,9 +1316,9 @@
           "props": {
             "left": 208,
             "top": 11,
-            "width": 14,
-            "height": 21,
-            "fontSize": 16
+            "width": 13,
+            "height": 13,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -1341,9 +1333,9 @@
           "props": {
             "left": 272,
             "top": 14,
-            "fontSize": 16,
-            "height": 21,
-            "width": 14
+            "height": 13,
+            "width": 13,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -1802,7 +1794,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .terms-prices,\n    .terms-solo,\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C wrappers (far-left tiny zone) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n\n    /* Act 4 only: white over blue wave on 320×50 */\n    #headline-act4 {\n      color: rgb(255, 255, 255);\n      top: 9px;\n    }\n"
+      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .terms-prices,\n    .terms-solo,\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* \u2500\u2500 T&C wrappers (far-left tiny zone) \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n\n    /* Act 4 only: white over blue wave on 320\u00d750 */\n    #headline-act4 {\n      color: rgb(255, 255, 255);\n      top: 9px;\n    }\n"
     },
     "728x90": {
       "canvas": {
@@ -1814,7 +1806,8 @@
         "greenwave": "assets/SVG/greenwave-wider.svg",
         "bluewave": "assets/SVG/bluewave.svg",
         "logoBlue": "assets/SVG/SSELogoBlue.svg",
-        "logoWhite": "assets/SVG/SSELogoWhite.svg"
+        "logoWhite": "assets/SVG/SSELogoWhite.svg",
+        "plus": "assets/SVG/sse-plus.svg"
       },
       "layers": [
         {
@@ -1910,8 +1903,8 @@
               "end": "act4_in",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
-                "enter_duration_pct": 5
+                "enter_distance_px": 20,
+                "enter_duration_pct": 4
               },
               "profiles": [
                 "frames-4"
@@ -2053,8 +2046,8 @@
               "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_distance_px": 60,
-                "enter_duration_pct": 5
+                "enter_distance_px": 20,
+                "enter_duration_pct": 4
               },
               "profiles": [
                 "frames-3"
@@ -2068,8 +2061,8 @@
               "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_distance_px": 60,
-                "enter_duration_pct": 5
+                "enter_distance_px": 20,
+                "enter_duration_pct": 4
               },
               "profiles": [
                 "frames-4"
@@ -2100,8 +2093,8 @@
               "start": "act1_in",
               "end": "bn_h2_in",
               "params": {
-                "enter_distance_px": 60,
-                "enter_duration_pct": 3
+                "enter_distance_px": 20,
+                "enter_duration_pct": 4
               }
             }
           ],
@@ -2242,20 +2235,15 @@
           "id": "plus-1",
           "label": "Plus 1",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 10,
           "base": {
             "left": 385,
             "top": 26,
-            "width": 28,
-            "height": 36,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "38px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "36px",
-            "cssClass": "plus-1"
+            "width": 22,
+            "height": 22,
+            "cssClass": "plus-1",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -2270,7 +2258,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-2",
@@ -2305,20 +2294,15 @@
           "id": "plus-2",
           "label": "Plus 2",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 12,
           "base": {
             "left": 490,
             "top": 26,
-            "width": 28,
-            "height": 36,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "36px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "34px",
-            "cssClass": "plus-2"
+            "width": 22,
+            "height": 22,
+            "cssClass": "plus-2",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -2333,7 +2317,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-3",
@@ -2425,7 +2410,7 @@
               "id": "unit-rate-prices-fade",
               "label": "Unit Rate Prices fade",
               "preset": "fade",
-              "start": "bn_offers_in",
+              "start": "act1_out",
               "end": "offers_exit-2",
               "params": {
                 "enter_duration_pct": 2,
@@ -2463,7 +2448,7 @@
               "id": "terms-solo-fade",
               "label": "Terms Solo fade",
               "preset": "fade",
-              "start": "bn_offers_in",
+              "start": "terms_in",
               "end": "offers_exit-2",
               "params": {
                 "enter_duration_pct": 2,
@@ -2494,8 +2479,8 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
-                "enter_duration_pct": 5
+                "enter_distance_px": 20,
+                "enter_duration_pct": 4
               },
               "profiles": [
                 "frames-3"
@@ -2509,8 +2494,8 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
-                "enter_duration_pct": 5
+                "enter_distance_px": 20,
+                "enter_duration_pct": 4
               },
               "profiles": [
                 "frames-4"
@@ -2691,7 +2676,7 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 409,
+            "left": 389,
             "top": 10,
             "width": 172,
             "height": 68
@@ -2707,11 +2692,11 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 420,
+            "left": 400,
             "top": 24,
-            "width": 28,
-            "height": 35,
-            "fontSize": 41
+            "width": 25,
+            "height": 25,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -2767,7 +2752,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 244,
+            "left": 234,
             "top": 17,
             "width": 111,
             "height": 58
@@ -2783,7 +2768,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 371,
+            "left": 361,
             "top": 17,
             "width": 111,
             "height": 58
@@ -2799,7 +2784,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 501,
+            "left": 491,
             "top": 17,
             "width": 111,
             "height": 58
@@ -2815,11 +2800,11 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 346,
+            "left": 336,
             "top": 26,
-            "width": 26,
-            "height": 32,
-            "fontSize": 36
+            "width": 22,
+            "height": 22,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -2832,11 +2817,11 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 472,
+            "left": 462,
             "top": 26,
-            "width": 26,
-            "height": 32,
-            "fontSize": 36
+            "width": 22,
+            "height": 22,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -3156,7 +3141,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .cta {\n      padding: 0px 16px;\n      box-sizing: border-box;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n\n    /* Act 4 only: lower headline placement on 728×90 */\n    #headline-act4 {\n      top: 17px;\n    }\n"
+      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .cta {\n      padding: 0px 16px;\n      box-sizing: border-box;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n\n    /* Act 4 only: lower headline placement on 728\u00d790 */\n    #headline-act4 {\n      top: 17px;\n    }\n"
     },
     "300x250": {
       "canvas": {
@@ -3168,7 +3153,8 @@
         "greenwave": "assets/SVG/greenwave.svg",
         "bluewave": "assets/SVG/bluewave.svg",
         "logoBlue": "assets/SVG/SSELogoBlue.svg",
-        "logoWhite": "assets/SVG/SSELogoWhite.svg"
+        "logoWhite": "assets/SVG/SSELogoWhite.svg",
+        "plus": "assets/SVG/sse-plus.svg"
       },
       "layers": [
         {
@@ -3262,7 +3248,9 @@
               "start": "roundel_in",
               "end": "act4_in",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -3400,7 +3388,9 @@
               "start": "act2_in",
               "end": "offers_exit",
               "params": {
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-3"
@@ -3413,7 +3403,9 @@
               "start": "act2_in",
               "end": "offers_exit",
               "params": {
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -3441,7 +3433,8 @@
               "start": "act1_in",
               "end": "act1_out",
               "params": {
-                "enter_duration_pct": 3
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               }
             }
           ]
@@ -3579,20 +3572,15 @@
           "id": "plus-1",
           "label": "Plus 1",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 10,
           "base": {
             "left": 98,
             "top": 78,
-            "width": 24,
-            "height": 40,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "43px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "40px",
-            "cssClass": "plus-1"
+            "width": 26,
+            "height": 26,
+            "cssClass": "plus-1",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -3607,7 +3595,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-2",
@@ -3642,20 +3631,15 @@
           "id": "plus-2",
           "label": "Plus 2",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 12,
           "base": {
             "left": 136,
             "top": 127,
-            "width": 22,
-            "height": 36,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "43px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "40px",
-            "cssClass": "plus-2"
+            "width": 26,
+            "height": 26,
+            "cssClass": "plus-2",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -3670,7 +3654,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-3",
@@ -3749,9 +3734,9 @@
             "textAlign": "left",
             "cssClass": "unit-rate-prices",
             "left": 10,
-            "top": 219,
-            "width": 127,
-            "height": 25,
+            "top": 215,
+            "width": 135,
+            "height": 29,
             "fontSize": 10
           },
           "binding": {
@@ -3774,7 +3759,7 @@
           "fit": {
             "mode": "shrink",
             "maxLines": 2,
-            "minFontSize": 8,
+            "minFontSize": 10,
             "align": "bottom"
           }
         },
@@ -3830,7 +3815,9 @@
               "start": "act4_in",
               "end": "act3_exit-1",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-3"
@@ -3843,7 +3830,9 @@
               "start": "act4_in",
               "end": "act3_exit-1",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -3992,12 +3981,9 @@
           "props": {
             "left": 139,
             "top": 96,
-            "width": 22,
-            "height": 36,
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
+            "width": 26,
+            "height": 26,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -4027,18 +4013,18 @@
             "offer_count_num": 3
           },
           "props": {
-            "top": 44,
+            "top": 43,
             "fontSize": 12,
             "left": 8,
             "width": 110,
-            "height": 4,
+            "height": 16,
             "whiteSpace": "nowrap"
           },
           "editable": true,
           "fit": {
             "mode": "shrink",
             "minFontSize": 10,
-            "maxLines": 3
+            "maxLines": 1
           }
         },
         {
@@ -4446,7 +4432,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C wrappers ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* \u2500\u2500 T&C wrappers \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     },
     "160x600": {
       "canvas": {
@@ -4458,7 +4444,8 @@
         "greenwave": "assets/SVG/greenwave.svg",
         "bluewave": "assets/SVG/bluewave.svg",
         "logoBlue": "assets/SVG/SSELogoBlue.svg",
-        "logoWhite": "assets/SVG/SSELogoWhite.svg"
+        "logoWhite": "assets/SVG/SSELogoWhite.svg",
+        "plus": "assets/SVG/sse-plus.svg"
       },
       "layers": [
         {
@@ -4556,7 +4543,9 @@
               "start": "roundel_in",
               "end": "act4_in",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -4698,7 +4687,9 @@
               "start": "act2_in",
               "end": "offers_exit",
               "params": {
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-3"
@@ -4711,7 +4702,9 @@
               "start": "act2_in",
               "end": "offers_exit",
               "params": {
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -4745,7 +4738,8 @@
               "start": "act1_in",
               "end": "act1_out",
               "params": {
-                "enter_duration_pct": 3
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               }
             }
           ],
@@ -4887,20 +4881,15 @@
           "id": "plus-1",
           "label": "Plus 1",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 10,
           "base": {
             "left": 68,
             "top": 452,
-            "width": 24,
-            "height": 34,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "34px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "34px",
-            "cssClass": "plus-1"
+            "width": 21,
+            "height": 21,
+            "cssClass": "plus-1",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -4915,7 +4904,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-2",
@@ -4950,20 +4940,15 @@
           "id": "plus-2",
           "label": "Plus 2",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 12,
           "base": {
             "left": 68,
             "top": 540,
-            "width": 24,
-            "height": 34,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "34px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "34px",
-            "cssClass": "plus-2"
+            "width": 21,
+            "height": 21,
+            "cssClass": "plus-2",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -4978,7 +4963,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-3",
@@ -5057,9 +5043,9 @@
             "textAlign": "left",
             "cssClass": "unit-rate-prices",
             "left": 8,
-            "top": 569,
+            "top": 563,
             "width": 126,
-            "height": 23,
+            "height": 29,
             "fontSize": 10
           },
           "binding": {
@@ -5138,7 +5124,9 @@
               "start": "act4_in",
               "end": "act3_exit-1",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-3"
@@ -5151,7 +5139,9 @@
               "start": "act4_in",
               "end": "act3_exit-1",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -5208,9 +5198,9 @@
           "props": {
             "left": 60,
             "top": 296,
-            "width": 42,
-            "height": 60,
-            "fontSize": 58
+            "width": 35,
+            "height": 35,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -5308,9 +5298,9 @@
           "props": {
             "left": 67,
             "top": 244,
-            "width": 27,
-            "height": 38,
-            "fontSize": 36
+            "width": 22,
+            "height": 22,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -5325,9 +5315,9 @@
           "props": {
             "left": 67,
             "top": 349,
-            "width": 27,
-            "height": 38,
-            "fontSize": 36
+            "width": 22,
+            "height": 22,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -5741,8 +5731,8 @@
             "textTransform": "uppercase"
           },
           "fit": {
-            "mode": "wrap",
-            "maxLines": 2
+            "mode": "shrink",
+            "maxLines": 1
           }
         },
         {
@@ -5773,7 +5763,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 18px;\n      box-sizing: border-box;\n    }\n\n    /* ── T&C wrappers (bottom-left, flush like the reference) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 18px;\n      box-sizing: border-box;\n    }\n\n    /* \u2500\u2500 T&C wrappers (bottom-left, flush like the reference) \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     },
     "300x600": {
       "canvas": {
@@ -5785,7 +5775,8 @@
         "greenwave": "assets/SVG/greenwave.svg",
         "bluewave": "assets/SVG/bluewave.svg",
         "logoBlue": "assets/SVG/SSELogoBlue.svg",
-        "logoWhite": "assets/SVG/SSELogoWhite.svg"
+        "logoWhite": "assets/SVG/SSELogoWhite.svg",
+        "plus": "assets/SVG/sse-plus.svg"
       },
       "layers": [
         {
@@ -5883,7 +5874,9 @@
               "start": "roundel_in",
               "end": "act4_in",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -6025,7 +6018,9 @@
               "start": "act2_in",
               "end": "offers_exit",
               "params": {
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-3"
@@ -6038,7 +6033,9 @@
               "start": "act2_in",
               "end": "offers_exit",
               "params": {
-                "exit_dy": 20
+                "exit_dy": 20,
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -6070,7 +6067,8 @@
               "start": "act1_in",
               "end": "act1_out",
               "params": {
-                "enter_duration_pct": 3
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               }
             }
           ],
@@ -6212,20 +6210,15 @@
           "id": "plus-1",
           "label": "Plus 1",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 9,
           "base": {
             "left": 138,
             "top": 389,
-            "width": 24,
-            "height": 40,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "43px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "40px",
-            "cssClass": "plus-1"
+            "width": 26,
+            "height": 26,
+            "cssClass": "plus-1",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -6240,7 +6233,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-2",
@@ -6275,20 +6269,15 @@
           "id": "plus-2",
           "label": "Plus 2",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 11,
           "base": {
             "left": 13,
             "top": 532,
-            "width": 31,
-            "height": 51,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "43px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "40px",
-            "cssClass": "plus-2"
+            "width": 26,
+            "height": 26,
+            "cssClass": "plus-2",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -6303,7 +6292,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-3",
@@ -6463,7 +6453,9 @@
               "start": "act4_in",
               "end": "act3_exit-1",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-3"
@@ -6476,7 +6468,9 @@
               "start": "act4_in",
               "end": "act3_exit-1",
               "params": {
-                "exit_dy": 10
+                "exit_dy": 10,
+                "enter_duration_pct": 4,
+                "enter_distance_px": 20
               },
               "profiles": [
                 "frames-4"
@@ -6533,9 +6527,9 @@
           "props": {
             "left": 132,
             "top": 282,
-            "width": 37,
-            "height": 58,
-            "fontSize": 55
+            "width": 33,
+            "height": 33,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -6638,8 +6632,9 @@
           "props": {
             "left": 134,
             "top": 281,
-            "width": 31,
-            "height": 51
+            "width": 26,
+            "height": 26,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -7091,7 +7086,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 26px;\n      box-sizing: border-box;\n    }\n\n    /* ── T&C wrappers (bottom-left) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 26px;\n      box-sizing: border-box;\n    }\n\n    /* \u2500\u2500 T&C wrappers (bottom-left) \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     },
     "970x250": {
       "canvas": {
@@ -7103,7 +7098,8 @@
         "greenwave": "assets/SVG/greenwave.svg",
         "bluewave": "assets/SVG/bluewave.svg",
         "logoBlue": "assets/SVG/SSELogoBlue.svg",
-        "logoWhite": "assets/SVG/SSELogoWhite.svg"
+        "logoWhite": "assets/SVG/SSELogoWhite.svg",
+        "plus": "assets/SVG/sse-plus.svg"
       },
       "layers": [
         {
@@ -7199,8 +7195,8 @@
               "end": "act4_in",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
-                "enter_duration_pct": 5
+                "enter_distance_px": 35,
+                "enter_duration_pct": 4
               },
               "profiles": [
                 "frames-4"
@@ -7342,8 +7338,8 @@
               "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_distance_px": 60,
-                "enter_duration_pct": 5
+                "enter_distance_px": 35,
+                "enter_duration_pct": 4
               },
               "profiles": [
                 "frames-3"
@@ -7357,8 +7353,8 @@
               "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_distance_px": 60,
-                "enter_duration_pct": 5
+                "enter_distance_px": 35,
+                "enter_duration_pct": 4
               },
               "profiles": [
                 "frames-4"
@@ -7389,8 +7385,8 @@
               "start": "act1_in",
               "end": "act1_out",
               "params": {
-                "enter_distance_px": 60,
-                "enter_duration_pct": 3
+                "enter_distance_px": 35,
+                "enter_duration_pct": 4
               }
             }
           ],
@@ -7531,20 +7527,15 @@
           "id": "plus-1",
           "label": "Plus 1",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 10,
           "base": {
             "left": 470,
             "top": 60,
-            "width": 30,
-            "height": 50,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "52px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "50px",
-            "cssClass": "plus-1"
+            "width": 31,
+            "height": 31,
+            "cssClass": "plus-1",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -7559,7 +7550,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-2",
@@ -7594,20 +7586,15 @@
           "id": "plus-2",
           "label": "Plus 2",
           "group": "Offers",
-          "kind": "text",
+          "kind": "image",
           "zIndex": 12,
           "base": {
             "left": 597,
             "top": 65,
-            "width": 30,
-            "height": 50,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": "46px",
-            "color": "rgb(255, 255, 255)",
-            "textAlign": "center",
-            "lineHeight": "46px",
-            "cssClass": "plus-2"
+            "width": 27,
+            "height": 27,
+            "cssClass": "plus-2",
+            "objectFit": "contain"
           },
           "clips": [
             {
@@ -7622,7 +7609,8 @@
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
-          ]
+          ],
+          "asset": "assets/SVG/sse-plus.svg"
         },
         {
           "id": "offer-slot-3",
@@ -7783,8 +7771,8 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
-                "enter_duration_pct": 5
+                "enter_distance_px": 35,
+                "enter_duration_pct": 4
               },
               "profiles": [
                 "frames-3"
@@ -7798,8 +7786,8 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_distance_px": 60,
-                "enter_duration_pct": 5
+                "enter_distance_px": 35,
+                "enter_duration_pct": 4
               },
               "profiles": [
                 "frames-4"
@@ -7855,8 +7843,9 @@
           "props": {
             "left": 478,
             "top": 94,
-            "width": 37,
-            "height": 62
+            "width": 31,
+            "height": 31,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -7900,8 +7889,8 @@
           },
           "editable": true,
           "fit": {
-            "maxLines": 2,
-            "minFontSize": 14,
+            "maxLines": 1,
+            "minFontSize": "",
             "mode": "shrink"
           }
         },
@@ -7964,8 +7953,9 @@
           "props": {
             "left": 532,
             "top": 75,
-            "width": 51,
-            "height": 85
+            "width": 31,
+            "height": 31,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -7980,8 +7970,9 @@
           "props": {
             "left": 1077,
             "top": -104,
-            "width": 51,
-            "height": 85
+            "width": 27,
+            "height": 27,
+            "objectFit": "contain"
           },
           "editable": true
         },
@@ -8026,8 +8017,8 @@
           "editable": true,
           "fit": {
             "mode": "shrink",
-            "minFontSize": 14,
-            "maxLines": 2
+            "minFontSize": "",
+            "maxLines": 1
           }
         },
         {
@@ -8422,7 +8413,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C wrappers (bottom-left) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 30px;\n      box-sizing: border-box;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* \u2500\u2500 T&C wrappers (bottom-left) \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 30px;\n      box-sizing: border-box;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     }
   }
 }

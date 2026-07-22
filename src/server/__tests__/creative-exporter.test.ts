@@ -287,6 +287,7 @@ test('builds a CDN-linked base agency package without packaged static assets', a
   for (const url of CDN_SVG_URLS) {
     assert.ok(html.includes(url), `Expected CDN SVG URL ${url}`);
   }
+  assert.match(html, /id="plus-1"[^>]*src="data:image\/svg\+xml/);
   assert.ok(html.includes(CDN_MUSEO_URL), 'Expected Museo CDN URL');
   assert.match(html, new RegExp(
     `font-family: "Museo";[\\s\\S]*?url\\("${CDN_MUSEO_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"\\) format\\("opentype"\\)`,
@@ -343,6 +344,10 @@ test('builds a CDN-linked client preview package for GitHub Pages parity', async
   for (const url of CDN_SVG_URLS) {
     assert.ok(html.includes(url), `Expected CDN SVG URL ${url}`);
   }
+  // Plus mark is inlined (not on the wave/logo CDN folder) so Pages/Studio CDN
+  // packages never depend on a missing relative SVG file.
+  assert.match(html, /id="plus-1"[^>]*src="data:image\/svg\+xml/);
+  assert.doesNotMatch(html, /id="plus-1"[^>]*src="[^"]*sse-plus\.svg"/);
   assert.ok(!html.includes(CDN_MUSEO_SANS_URL), 'the Museo Sans CDN file must never back the Museo family');
   assert.doesNotMatch(html, /MuseoSans_700\.otf/);
   assert.doesNotMatch(html, /url\("\.\.\/assets\/fonts\/Museo700-Regular\.otf"\)/);
@@ -402,10 +407,10 @@ test('exports legacy static first-frame state and GWD skeleton text reset', asyn
   const html = await renderStudioReadyHtml(document, '300x600');
 
   assert.match(html, /p,\s*h1,\s*h2,\s*h3\s*\{\s*margin:\s*0px;/);
-  assert.match(html, /#headline-act1\s*\{[\s\S]*?transform:\s*translate3d\(320px, 0px, 0px\)(?:\s+scale3d\([^)]+\))?;[\s\S]*?opacity:\s*0;/);
+  assert.match(html, /#headline-act1\s*\{[\s\S]*?transform:\s*translate3d\(20px, 0px, 0px\)(?:\s+scale3d\([^)]+\))?;[\s\S]*?opacity:\s*0;/);
   assert.match(html, /\.offer-slot-1\s*\{[\s\S]*?transform:\s*translate3d\(60px, 0px, 0px\)(?:\s+scale3d\([^)]+\))?;[\s\S]*?opacity:\s*0;/);
-  assert.match(html, /\.plus-1\s*\{[\s\S]*?font-size:\s*43px;[\s\S]*?transform:\s*translate3d\(0px, -10px, 0px\)(?:\s+scale3d\([^)]+\))?;/);
-  assert.doesNotMatch(html, /font-size:\s*43pxpx/);
+  assert.match(html, /id="plus-1"[^>]*src="[^"]*assets\/SVG\/sse-plus\.svg"/);
+  assert.match(html, /\.plus-1\s*\{[\s\S]*?transform:\s*translate3d\(0px, -10px, 0px\)(?:\s+scale3d\([^)]+\))?;/);
 });
 
 test('exports the shared text-fit engine and fits after binding offer texts', async () => {

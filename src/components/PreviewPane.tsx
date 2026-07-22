@@ -808,8 +808,7 @@ export function PreviewPane() {
           : layer.id === 'headline-act3' ? fieldValue(row.heading3_text)
             : layer.id === 'headline-act4' ? headlineAct4DisplayText(row, includeRoundelFrame)
             : layer.id === 'cta' ? fieldValue(row.cta_text)
-              : layer.id.startsWith('plus-') ? '+'
-                : '';
+              : '';
     return (
       <Tag
         key={layer.id}
@@ -988,6 +987,7 @@ export function PreviewPane() {
               <div
                 ref={stageRef}
                 className={stageClassName}
+                data-size={size}
                 style={{ width: sizeCreative.canvas.width, height: sizeCreative.canvas.height, transform: `scale(${scale})` }}
                 onPointerDownCapture={handleStagePointerDownCapture}
                 onDoubleClickCapture={handleStageDoubleClickCapture}

@@ -58,7 +58,8 @@ test('resolves frames-4 timing from the profile beats', () => {
 });
 
 test('provides the initial four-act beat preset', () => {
-  assert.equal(FOUR_ACT_BEATS.act2_in, 33.3);
+  assert.equal(FOUR_ACT_BEATS.act1_in, 12.5);
+  assert.equal(FOUR_ACT_BEATS.act2_in, 32.5);
   assert.equal(FOUR_ACT_BEATS.act3_out, 55);
   assert.equal(FOUR_ACT_BEATS.roundel_in, 56.7);
   assert.equal(FOUR_ACT_BEATS.cta_in, 80);
@@ -96,8 +97,8 @@ test('keeps offer micro-stagger ordered with pluses landing together', () => {
   assert.ok(FOUR_ACT_BEATS.offer2_in < FOUR_ACT_BEATS.offer3_in);
   assert.ok(FOUR_ACT_BEATS.offer3_in < FOUR_ACT_BEATS.plus1_in);
   assert.equal(FOUR_ACT_BEATS.plus1_in, FOUR_ACT_BEATS.plus2_in);
-  // Headline (act1_in + ~3%) should settle before offer1 starts.
-  assert.ok(FOUR_ACT_BEATS.act1_in + 3 <= FOUR_ACT_BEATS.offer1_in + 0.01);
+  // Headline (act1_in + enter 4%) should settle before offer1 starts.
+  assert.ok(FOUR_ACT_BEATS.act1_in + 4 <= FOUR_ACT_BEATS.offer1_in + 0.01);
 });
 
 test('campaign clock profiles keep the same offer/plus choreography', async () => {
@@ -129,6 +130,21 @@ test('campaign clock profiles keep the same offer/plus choreography', async () =
     }
     const headline = (sizeCreative.layers || []).find((layer) => layer.id === 'headline-act1');
     const headlineEnter = Number(headline?.clips?.[0]?.params?.enter_duration_pct);
-    assert.ok(headlineEnter > 0 && headlineEnter <= 4, `${sizeName}: headline should settle before offers`);
+    assert.equal(headlineEnter, 4, `${sizeName}: headline enter_duration_pct should be 4`);
+    const headlineEnters = (sizeCreative.layers || [])
+      .filter((layer) => String(layer.id || '').startsWith('headline-act'))
+      .flatMap((layer) => (layer.clips || [])
+        .filter((clip) => clip.preset === 'slideInRight')
+        .map((clip) => Number(clip.params?.enter_duration_pct)));
+    assert.ok(headlineEnters.length > 0, `${sizeName}: expected headline slide clips`);
+    assert.ok(
+      headlineEnters.every((value) => value === headlineEnter),
+      `${sizeName}: headline enter durations must match across acts (got ${headlineEnters.join(', ')})`,
+    );
   }
+
+  const frames4 = beatsForScopes(creative, ['offers-3', 'frames-4']);
+  // Headline starts once greenwave is mostly on (~75%+ of a 6–7% sweep from start+7).
+  assert.ok(frames4.act1_in >= 12, 'frames-4: act1_in after greenwave mid-sweep');
+  assert.ok(frames4.act1_in + 4 <= frames4.offer1_in + 0.01, 'frames-4: enter=4 settles before offer1');
 });

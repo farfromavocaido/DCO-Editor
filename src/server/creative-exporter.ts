@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { readFileSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -123,6 +124,12 @@ const CLIENT_FONT_FILES = [
   createClientFontEntry(MUSEO_FONT_FILENAME, ['Museo'], 700),
 ];
 
+/** Offer plus — always read from campaign asset so CDN inline cannot drift. */
+const SSE_PLUS_ASSET = 'assets/SVG/sse-plus.svg';
+const SSE_PLUS_DATA_URI = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+  readFileSync(path.resolve(projectRoot, SSE_PLUS_ASSET), 'utf8'),
+)}`;
+
 const CDN_ASSET_URLS: Record<string, string> = {
   'assets/SVG/SSELogoBlue.svg': 'https://s0.2mdn.net/creatives/assets/5627651/SSELogoBlue.svg',
   'assets/SVG/SSELogoWhite.svg': 'https://s0.2mdn.net/creatives/assets/5627651/SSELogoWhite.svg',
@@ -130,6 +137,8 @@ const CDN_ASSET_URLS: Record<string, string> = {
   'assets/SVG/bluewave.svg': 'https://s0.2mdn.net/creatives/assets/5627651/bluewave.svg',
   'assets/SVG/greenwave-wider.svg': 'https://s0.2mdn.net/creatives/assets/5627651/greenwave-wider.svg',
   'assets/SVG/greenwave.svg': 'https://s0.2mdn.net/creatives/assets/5627651/greenwave.svg',
+  // Data URI — CDN/Pages packages need no extra Studio SVG upload.
+  [SSE_PLUS_ASSET]: SSE_PLUS_DATA_URI,
 };
 
 const clientVariantMatrix = () => {
@@ -533,7 +542,6 @@ const textForLayerFromRow = (layerId: string, row: Record<string, unknown>) => {
   if (layerId === 'cta') return String(row.cta_text || '');
   if (layerId === 'terms-prices' || layerId === 'terms-solo') return String(row.tc_terms_text || '');
   if (layerId === 'unit-rate-prices') return String(row.tc_units_text || '');
-  if (layerId === 'plus-1' || layerId === 'plus-2') return '+';
   if (layerId === 'roundel-copy') return String(row.roundel_text_text || '');
   if (layerId === 'roundel-value') return String(row.roundel_value_text || '');
   return '';
@@ -671,8 +679,7 @@ const renderLayer = (layer: Record<string, unknown>, options: RenderOptions = {}
   ].filter(Boolean).join(' ');
   const dcoField = dcoFieldForLayer(layer);
   const dcoAttr = dcoField ? ` data-dco-field="${escapeAttr(dcoField)}"` : '';
-  const text = layer.id === 'plus-1' || layer.id === 'plus-2' ? '+' : '';
-  return `          <${tag} class="${className}" id="${escapeAttr(layer.id)}" data-layer-id="${escapeAttr(layer.id)}"${dcoAttr}>${escapeHtml(text)}</${tag}>`;
+  return `          <${tag} class="${className}" id="${escapeAttr(layer.id)}" data-layer-id="${escapeAttr(layer.id)}"${dcoAttr}></${tag}>`;
 };
 
 const termsLayer = (sizeCreative: Record<string, unknown>, id: string) => (
@@ -881,14 +888,19 @@ const runtimeScript = (
         function scheduleFontRefit() {
           if (fontRefitWired) return;
           fontRefitWired = true;
-          if (!(document.fonts && document.fonts.ready)) return;
           // One post-font layout commit only (fonts.ready → rAF). Extra font
           // load events must not re-run mid fadeUp enter — that fought
           // transform-neutral placePlus. Bootstrap still fits immediately for
           // first paint; this pass corrects Museo metrics.
-          document.fonts.ready.then(function() {
+          var run = function() {
             window.requestAnimationFrame(refitAfterFonts);
-          }).catch(function() {});
+          };
+          if (!(document.fonts && document.fonts.ready)) {
+            // Rare hosts without Font Loading API — still settle after first paint.
+            run();
+            return;
+          }
+          document.fonts.ready.then(run).catch(run);
         }
 
         ${alignOfferValueSymbolsRuntime}

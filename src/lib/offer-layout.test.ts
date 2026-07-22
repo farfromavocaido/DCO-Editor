@@ -49,9 +49,16 @@ test('runtime encodes ink-first helpers and per-family plus anchors', () => {
   assert.match(layoutOffersRuntime, /withNeutralMotion\(plus,/);
   // Ink accepts height-only (wrapped sublines); must not require width > 0 alone.
   assert.match(layoutOffersRuntime, /rect\.width > 0 \|\| rect\.height > 0/);
-  // Vertical factors subline cluster ink; triangular uses value bottoms only.
+  // Vertical factors subline cluster ink; triangular top-aligns to value bottoms
+  // (MPU / 970×250 raise toward top-row subline caps). SVG pluses use box ink.
   assert.match(layoutOffersRuntime, /upperCluster\.clusterBottom \+ lowerCluster\.valueTop/);
   assert.match(layoutOffersRuntime, /Math\.max\(topA\.valueBottom, topB\.valueBottom\)/);
+  assert.match(layoutOffersRuntime, /sublineTop/);
+  assert.match(layoutOffersRuntime, /sublineBoxTop/);
+  assert.match(layoutOffersRuntime, /sizeKey === '300x250' \|\| sizeKey === '970x250'/);
+  assert.match(layoutOffersRuntime, /placePlus\(pluses\[0\], anchor\.x, anchor\.y, 'top'\)/);
+  assert.match(layoutOffersRuntime, /alignY === 'top'/);
+  assert.match(layoutOffersRuntime, /tagName === 'IMG'/);
   assert.equal(OFFER_SUBLINE_INK_WIDTH_RATIO, 1.1);
   assert.doesNotMatch(layoutOffersRuntime, /SUBLINE_INK_RATIO/);
   assert.match(layoutOffersRuntime, new RegExp(String(OFFER_LAYOUT_MAX_GAP_RATIO).replace('.', '\\.')));

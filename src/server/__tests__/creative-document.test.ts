@@ -77,7 +77,8 @@ test('preserves per-size layer, variant, and timeline data for 970x250', async (
   assert.equal(logo.kind, 'image');
   assert.equal(logo.base.left, 796);
   assert.equal(logo.clips[0].preset, 'fade');
-  assert.equal(logo.clips[0].start, 'wave2_in+7');
+  // White logo enters with the blue-wave sweep (full crossfade on swap sizes).
+  assert.equal(logo.clips[0].start, 'wave2_in');
   assert.equal(logo.clips[0].end, 'end');
 
   assert.ok(size.variantRules.some((rule) => (

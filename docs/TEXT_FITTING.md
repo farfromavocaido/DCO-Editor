@@ -127,7 +127,7 @@ you set.
 | side-by-side | subline to the right and starts above the value box bottom | keep authored width/**top** (baseline via flex-end in a real height box); runtime only re-anchors **left** to value-ink right so drag still works |
 | horizontal | 2+ slots, wider Δx | equal ink-cluster gaps; plus at value-ink midpoint (glyph-centred) |
 | vertical | 2+ slots, taller Δy | equal gaps; plus Y = upper **cluster ink** bottom → next value ink top |
-| triangular | two top-row + one centred below | equalize top pair; centre bottom under top centroid; plus Y ignores top sublines (value bottoms → bottom value top) |
+| triangular | two top-row + one centred below | equalize top pair; centre bottom under top centroid; plus is SVG (`assets/SVG/sse-plus.svg`) filling a square box — top-aligned to max(top-row value bottoms) by default; on `300x250` / `970x250` plus top meets top-row subline caps (`300x600` unchanged); X in the gap between top value inks |
 
 Plus anchors are named helpers (`plusAnchorHorizontal` / `Vertical` /
 `Triangular`) so family rules stay explicit and shared through `placePlus`.

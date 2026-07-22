@@ -10,8 +10,10 @@ import {
   CDN_FONT_URLS,
   MUSEO_FONT_FILENAME,
 } from '@/lib/brand-font';
+import { layoutOffersRuntime } from '@/lib/offer-layout';
 import {
   alignOfferValueSymbolsRuntime,
+  offerValueSymbolCss,
   wrapOfferValueSymbolRuntime,
 } from '@/lib/offer-value-symbols';
 import { beatsForFrameScope } from '@/lib/timing-profiles';
@@ -670,7 +672,8 @@ const runtimeScript = (
         function refitAfterFonts() {
           if (!root) return;
           fitBoundText();
-          alignOfferValueSymbols();
+          alignOfferValueSymbols(root);
+          layoutOffers(root);
         }
 
         function scheduleFontRefit() {
@@ -688,6 +691,7 @@ const runtimeScript = (
         }
 
         ${alignOfferValueSymbolsRuntime}
+        ${layoutOffersRuntime}
 
         function wireExit() {
           root.addEventListener('click', function() {
@@ -742,7 +746,8 @@ const runtimeScript = (
           applyBackgroundImage(data);
           bindOfferTexts(data);
           fitBoundText();
-          alignOfferValueSymbols();
+          alignOfferValueSymbols(root);
+          layoutOffers(root);
           wireExit();
           scheduleFontRefit();
           window.__SSE_DCO_READY__ = true;
@@ -870,6 +875,8 @@ ${packagedFontIsolationCss()}
       box-sizing: border-box;
     }
 ${sizeCreative.manualCss || ''}
+
+${offerValueSymbolCss}
 
 ${layerCss}
 

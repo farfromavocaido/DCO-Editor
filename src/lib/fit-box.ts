@@ -5,8 +5,18 @@
 //   center            → grow both ways
 
 const numberValue = (value: unknown, fallback = NaN) => {
+  // Empty string must not become 0 — Number("") === 0 and that made flex-end
+  // + maxLines treat "unset height" as a zero box and yank top up by the full budget.
+  if (value === '' || value === null || value === undefined) return fallback;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+/** Authored box height: empty / non-positive → unset (use line-box fallback). */
+export const authoredHeightPx = (value: unknown, fallback = NaN) => {
+  if (value === '' || value === null || value === undefined) return fallback;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 };
 
 /** Line box height in px from authored fontSize + lineHeight (ratio or px). */
@@ -93,9 +103,8 @@ export const propsWithFitBudget = (
   props: Record<string, unknown> = {},
   fit: Record<string, unknown> | null | undefined = {},
 ) => {
-  const authoredHeight = numberValue(props.height, NaN);
   const fallbackHeight = lineBoxPx(props) || 16;
-  const height = Number.isFinite(authoredHeight) ? authoredHeight : fallbackHeight;
+  const height = authoredHeightPx(props.height, fallbackHeight);
   const top = numberValue(props.top, 0);
   const next = applyFitBudgetToBox({
     top,

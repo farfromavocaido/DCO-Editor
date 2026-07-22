@@ -22,7 +22,10 @@ Pipeline per element:
 1. **White-space** — `normal` when wrapping is allowed, otherwise forced `nowrap`
    (CSS cannot override the mode).
 2. **Tracking squeeze** — negative `letter-spacing` in small steps, bounded by
-   `tracking.minEm` (offer values: −0.02em). Tried before any size change.
+   `tracking.minEm` (offer values: −0.05em). Tried before any size change.
+   Final tracking is shared across visible `.offer-value` members — the
+   tightest member wins, so the floor stays modest. The inspector Typography
+   panel shows the effective tracking next to the auto-fitted font size.
 3. **Shrink** — when allowed: 0.5px steps to a floor of
    `max(minFontSize, base × minFontSizeRatio)`, until width + line budget fit.
 4. **Clip leftover** — if still overflowing at the floor, overflow is hidden and
@@ -78,18 +81,52 @@ packaged/self-contained with the OTF under `campaign/assets/fonts`. Never map
 the Museo family to `MuseoSans_700.otf`. Ad stacks are
 `Museo, Arial, sans-serif`.
 
-Offer-value `%` / `£` / `€` are wrapped in `.sym-pct` (0.6em). After text-fit,
+Offer-value copy is wrapped in `.offer-value-run` (one inline flex child) with
+`%` / `£` / `€` in `.sym-pct` (0.6em). The run keeps digit+symbol on a shared
+alphabetic baseline even when `.offer-value` uses `display:flex` +
+`align-items:flex-end` (inspector bottom-align). After text-fit,
 `alignOfferValueSymbols` (editor + export, same ES5 body) nudges each symbol so
-its **glyph ink bottom** matches the digits’ ink bottom on the shared alphabetic
-baseline (`canvas` `actualBoundingBoxDescent`). Do not align
-`getBoundingClientRect` bottoms — digit line/em boxes hang below Museo ink and
-that approach drops the symbol too low.
+its **glyph ink bottom** matches the digits’ ink bottom
+(`canvas` `actualBoundingBoxDescent`). Do not align `getBoundingClientRect`
+bottoms — digit line/em boxes hang below Museo ink and that approach drops the
+symbol too low.
+
+## Offer layout (post-fit)
+
+`src/lib/offer-layout.ts` runs after symbol align (editor + export, same ES5
+body). Pipeline: fit against **authored** boxes → symbol align → distribute
+slots/pluses (and side-by-side re-anchor).
+
+**Ink-first invariant:** every content measurement (value run, subline copy, `+`
+glyph, cluster bounds for gaps) uses Range text ink — never the CSS/line box
+(`offsetHeight` / element `getBoundingClientRect`). Authored boxes are often
+shorter than wrapped copy, and Museo line-boxes hang below the visible mark;
+both skew mid-gap placement. CSS boxes are only for authored envelopes, family
+detection, and writing `left`/`top` (motion `transform` untouched).
+
+**Authored subline width is the fit constraint** (pink text box in the
+inspector). Value-ink × 1.10 is a design guide when authoring only — the
+runtime must not overwrite subline width, or copy wraps to a narrower box than
+you set.
+
+| Family | How detected | Behaviour |
+|---|---|---|
+| stacked subline | subline mostly below value | leave authored width/left/top alone |
+| side-by-side | subline to the right and starts above the value box bottom | keep authored width/**top** (baseline via flex-end in a real height box); runtime only re-anchors **left** to value-ink right so drag still works |
+| horizontal | 2+ slots, wider Δx | equal ink-cluster gaps; plus at value-ink midpoint (glyph-centred) |
+| vertical | 2+ slots, taller Δy | equal gaps; plus Y = upper **cluster ink** bottom → next value ink top |
+| triangular | two top-row + one centred below | equalize top pair; centre bottom under top centroid; plus Y ignores top sublines (value bottoms → bottom value top) |
+
+Plus anchors are named helpers (`plusAnchorHorizontal` / `Vertical` /
+`Triangular`) so family rules stay explicit and shared through `placePlus`.
 
 ## Tests
 
 - `src/lib/text-fit.test.ts` — engine behaviour (tracking, groups, wrap,
   grow-down, bottom alignment, scope overrides, refit idempotence).
 - `src/lib/text-fit-rules.test.ts` — rule derivation from the creative JSON.
+- `src/lib/offer-layout.test.ts` — ink-first plus placement (overflowing
+  subline box, glyph vs line-box), side-by-side ink lock, runtime shape.
 - `src/server/__tests__/creative-exporter.test.ts` — the exported runtime:
   engine inlined and executable, texts bound before fitting, font refit wired,
   Museo-only packaging in every export flavour.

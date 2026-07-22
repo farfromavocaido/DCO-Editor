@@ -35,7 +35,10 @@ const OFFER_VALUE_DEFAULTS = {
   wrap: false,
   minFontSize: 8,
   minFontSizeRatio: 0.5,
-  tracking: { minEm: -0.02 },
+  // Squeeze letter-spacing before shrinking type (shared across visible values).
+  // Keep this modest — shared groups take the tightest member’s tracking, so a
+  // deep floor (e.g. −0.4em) crushes short prices when one long value overflows.
+  tracking: { minEm: -0.05 },
   align: 'bottom',
 };
 

@@ -1,12 +1,17 @@
 /** CSS class used for scaled offer-value unit symbols (% £ €). */
 export const OFFER_VALUE_SYMBOL_CLASS = 'sym-pct';
 
+/**
+ * Inline wrapper around the whole value run (digits + symbol).
+ * Keeps glyph pairing on a shared alphabetic baseline even when `.offer-value`
+ * is a flex box with `align-items: flex-end` / centre — flex only pins this
+ * one child; it must not split digit and symbol into separate flex items.
+ */
+export const OFFER_VALUE_RUN_CLASS = 'offer-value-run';
+
 const PREFIX_SYMBOLS = ['£', '€'] as const;
 
-/** Wrap trailing % or leading £/€ in offer values for smaller symbol styling. */
-export const wrapOfferValueSymbolsHtml = (text: string) => {
-  const trimmed = text.trim();
-  if (!trimmed) return trimmed;
+const wrapInnerSymbols = (trimmed: string) => {
   if (trimmed.endsWith('%')) {
     return `${trimmed.slice(0, -1)}<span class="${OFFER_VALUE_SYMBOL_CLASS}">%</span>`;
   }
@@ -17,20 +22,36 @@ export const wrapOfferValueSymbolsHtml = (text: string) => {
   return trimmed;
 };
 
+/** Wrap offer values in an inline run; scale trailing % or leading £/€. */
+export const wrapOfferValueSymbolsHtml = (text: string) => {
+  const trimmed = text.trim();
+  if (!trimmed) return trimmed;
+  return `<span class="${OFFER_VALUE_RUN_CLASS}">${wrapInnerSymbols(trimmed)}</span>`;
+};
+
+/** Shared CSS so the run stays one flex child / one inline glyph stream. */
+export const offerValueSymbolCss = `
+    .offer-value .${OFFER_VALUE_RUN_CLASS} {
+      white-space: nowrap;
+    }
+`.trim();
+
 /** Browser runtime used by exported Studio HTML. */
 export const wrapOfferValueSymbolRuntime = `
         function wrapOfferValueSymbol(element) {
           if (!element) return;
           var text = (element.textContent || '').trim();
           if (!text) return;
+          var inner = text;
           if (text.endsWith('%')) {
-            element.innerHTML = text.slice(0, -1) + '<span class="sym-pct">%</span>';
-            return;
+            inner = text.slice(0, -1) + '<span class="sym-pct">%</span>';
+          } else {
+            var first = text.charAt(0);
+            if (first === '\\u00A3' || first === '\\u20AC') {
+              inner = '<span class="sym-pct">' + first + '</span>' + text.slice(1);
+            }
           }
-          var first = text.charAt(0);
-          if (first === '\\u00A3' || first === '\\u20AC') {
-            element.innerHTML = '<span class="sym-pct">' + first + '</span>' + text.slice(1);
-          }
+          element.innerHTML = '<span class="offer-value-run">' + inner + '</span>';
         }
 `.trim();
 
@@ -40,6 +61,9 @@ export const wrapOfferValueSymbolRuntime = `
 // IMPORTANT: do NOT align getBoundingClientRect bottoms of the digit text node
 // vs the symbol span — those are line/em boxes. On Museo the digit box hangs
 // well below the glyph ink, so box-bottom matching drops %/£/€ too low.
+//
+// Digits + symbol live inside `.offer-value-run` so flex align on `.offer-value`
+// cannot pull them onto different flex baselines.
 const ALIGN_OFFER_VALUE_SYMBOLS_SOURCE = `(function createAlignOfferValueSymbols() {
   return function alignOfferValueSymbols(root) {
     var scope = root || document;
@@ -50,18 +74,20 @@ const ALIGN_OFFER_VALUE_SYMBOLS_SOURCE = `(function createAlignOfferValueSymbols
 
     var symbols = scope.querySelectorAll('.offer-value .sym-pct');
     Array.prototype.forEach.call(symbols, function(symbol) {
-      var parent = symbol.parentElement;
-      if (!parent) return;
-      var valueStyle = window.getComputedStyle(parent);
+      var run = symbol.parentElement;
+      if (!run) return;
+      var valueRoot = run.closest ? run.closest('.offer-value') : null;
+      var measureHost = valueRoot || run;
+      var valueStyle = window.getComputedStyle(measureHost);
       var symbolStyle = window.getComputedStyle(symbol);
 
-      // Digits live as text in the parent; measure a lining figure at that size.
+      // Digits live as text in the run; measure a lining figure at value size.
       ctx.font = valueStyle.fontWeight + ' ' + valueStyle.fontSize + ' ' + valueStyle.fontFamily;
       var digit = ctx.measureText('5');
       ctx.font = symbolStyle.fontWeight + ' ' + symbolStyle.fontSize + ' ' + symbolStyle.fontFamily;
       var glyph = ctx.measureText(symbol.textContent || '');
 
-      // With vertical-align:baseline, both share the alphabetic baseline.
+      // With vertical-align:baseline inside the run, both share the alphabetic baseline.
       // Nudge so glyph ink bottom == digit ink bottom.
       var delta = digit.actualBoundingBoxDescent - glyph.actualBoundingBoxDescent;
       if (!isFinite(delta)) return;

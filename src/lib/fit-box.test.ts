@@ -75,3 +75,24 @@ test('propsWithFitBudget rewrites height and top for CSS emission', () => {
   assert.equal(props.top, 50 - (40 - 12));
   assert.equal(verticalAlignFromValues(props), 'bottom');
 });
+
+test('propsWithFitBudget treats empty height as unset (not zero)', () => {
+  // Regression: Number("") === 0 made flex-end grow from a zero box and
+  // yank top up by the full maxLines budget (320x50 offer-subline).
+  const props = propsWithFitBudget(
+    {
+      top: 30,
+      height: '',
+      fontSize: 9,
+      lineHeight: 1.1,
+      alignItems: 'flex-end',
+    },
+    { mode: 'shrink', maxLines: 2 },
+  );
+  const lineBox = 9 * 1.1;
+  const budget = lineBox * 2;
+  assert.equal(props.height, budget);
+  // Seed height = one line box, not 0 → top only moves by one extra line.
+  assert.equal(props.top, 30 - (budget - lineBox));
+  assert.notEqual(props.top, 30 - budget);
+});

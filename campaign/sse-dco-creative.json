@@ -335,14 +335,14 @@
         "heading1_text": "A different kind of energy",
         "heading2_text": "Our very best electricity plan",
         "heading3_text": "A different kind of energy",
-        "offer_count_num": 3,
+        "offer_count_num": 2,
         "offer1_value_text": "15%",
-        "offer1_sub_text": "OFF ELECTRICITY and gas*",
+        "offer1_sub_text": "OFF ELECTRICITY*",
         "offer2_value_text": "30%",
         "offer2_sub_text": "OFF GAS*",
         "offer3_value_text": "€125",
         "offer3_sub_text": "OFF YOUR FIRST BILL*",
-        "tc_type_enum": "tcs_only",
+        "tc_type_enum": "tcs_units",
         "tc_terms_text": "*T&Cs apply",
         "tc_units_text": "Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat",
         "cta_type_enum": "rectangle",
@@ -539,7 +539,9 @@
             }
           ],
           "fit": {
-            "mode": "wrap"
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 13
           }
         },
         {
@@ -697,7 +699,9 @@
             }
           ],
           "fit": {
-            "mode": "wrap"
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 13
           }
         },
         {
@@ -726,7 +730,9 @@
             }
           ],
           "fit": {
-            "mode": "wrap"
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 13
           }
         },
         {
@@ -1145,7 +1151,9 @@
             }
           ],
           "fit": {
-            "mode": "wrap"
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 13
           }
         }
       ],
@@ -1159,8 +1167,8 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 147,
-            "top": 6,
+            "left": 124,
+            "top": 7,
             "width": 74,
             "height": 37
           },
@@ -1175,8 +1183,8 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 222,
-            "top": 6,
+            "left": 191,
+            "top": 7,
             "width": 74,
             "height": 35
           },
@@ -1191,8 +1199,8 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 192,
-            "top": 19,
+            "left": 169,
+            "top": 20,
             "width": 12,
             "height": 12,
             "fontSize": 17,
@@ -1232,7 +1240,7 @@
             "left": -21,
             "top": 25,
             "width": 64,
-            "height": 16,
+            "height": 15,
             "fontSize": 7,
             "textAlign": "center",
             "justifyContent": "center",
@@ -1254,7 +1262,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 78,
+            "left": 113,
             "top": 9,
             "width": 76,
             "height": 28
@@ -1270,7 +1278,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 147,
+            "left": 182,
             "top": 9,
             "width": 76,
             "height": 30
@@ -1286,7 +1294,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 217,
+            "left": 233,
             "top": 9,
             "width": 76,
             "height": 33
@@ -1302,9 +1310,9 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 172,
+            "left": 208,
             "top": 11,
-            "width": 13,
+            "width": 14,
             "height": 21,
             "fontSize": 16
           },
@@ -1319,11 +1327,11 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 237,
+            "left": 272,
             "top": 14,
             "fontSize": 16,
             "height": 21,
-            "width": 13
+            "width": 14
           },
           "editable": true
         },
@@ -1361,8 +1369,8 @@
             "left": 29,
             "top": 24,
             "fontSize": 6,
-            "width": 65,
-            "height": 15,
+            "width": 66,
+            "height": 14,
             "textAlign": "center",
             "justifyContent": "center",
             "display": "flex",
@@ -1665,10 +1673,10 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 9,
-            "top": 5,
-            "width": 122,
-            "height": 34,
+            "left": 7,
+            "top": 7,
+            "width": 113,
+            "height": 30,
             "fontSize": 15,
             "lineHeight": 1,
             "display": "flex",
@@ -1715,8 +1723,8 @@
           "cssClass": "sse-headline",
           "properties": {
             "lineHeight": 1,
-            "left": 9,
-            "top": 6,
+            "left": 8,
+            "top": 3,
             "width": 131,
             "fontSize": 16,
             "height": 34,
@@ -1744,7 +1752,7 @@
           "cssClass": "offer-subline",
           "properties": {
             "left": 61,
-            "top": 40,
+            "top": 27,
             "width": 65,
             "height": "",
             "fontSize": 9,
@@ -2377,7 +2385,7 @@
             "justifyContent": "flex-start",
             "textAlign": "left",
             "cssClass": "unit-rate-prices",
-            "left": 16,
+            "left": 20,
             "top": 69,
             "width": 696,
             "height": 19,
@@ -2414,7 +2422,7 @@
           "kind": "text",
           "zIndex": 16,
           "base": {
-            "left": 15,
+            "left": -5,
             "top": 67,
             "width": 214,
             "height": 18,
@@ -2642,7 +2650,7 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 254,
+            "left": 261,
             "top": 10,
             "width": 172,
             "height": 68
@@ -2658,7 +2666,7 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 432,
+            "left": 409,
             "top": 10,
             "width": 172,
             "height": 68
@@ -2674,7 +2682,7 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 413,
+            "left": 420,
             "top": 24,
             "width": 28,
             "height": 35,
@@ -3074,9 +3082,9 @@
         {
           "cssClass": "offer-subline",
           "properties": {
-            "left": 107,
-            "top": 26,
-            "width": 121,
+            "left": 106,
+            "top": 19,
+            "width": 173,
             "height": 39,
             "fontSize": 17,
             "lineHeight": 1.1,
@@ -3981,14 +3989,19 @@
             "offer_count_num": 3
           },
           "props": {
-            "top": 46,
+            "top": 44,
             "fontSize": 12,
-            "left": 10,
-            "width": 107,
-            "height": 11,
+            "left": 8,
+            "width": 110,
+            "height": 4,
             "whiteSpace": "nowrap"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 10,
+            "maxLines": 3
+          }
         },
         {
           "id": "cta-rect|cta",
@@ -5195,7 +5208,7 @@
           },
           "props": {
             "left": 1,
-            "top": 181,
+            "top": 173,
             "width": 158,
             "height": 217
           },
@@ -5211,7 +5224,7 @@
           },
           "props": {
             "left": 1,
-            "top": 295,
+            "top": 287,
             "width": 158,
             "height": 90
           },
@@ -5227,7 +5240,7 @@
           },
           "props": {
             "left": 1,
-            "top": 402,
+            "top": 394,
             "width": 158,
             "height": 79
           },
@@ -5243,7 +5256,7 @@
           },
           "props": {
             "left": 67,
-            "top": 252,
+            "top": 244,
             "width": 27,
             "height": 38,
             "fontSize": 36
@@ -5260,7 +5273,7 @@
           },
           "props": {
             "left": 67,
-            "top": 357,
+            "top": 349,
             "width": 27,
             "height": 38,
             "fontSize": 36
@@ -5311,7 +5324,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "top": 519,
+            "top": 509,
             "left": 20
           },
           "editable": true
@@ -6437,7 +6450,7 @@
           },
           "props": {
             "left": 75,
-            "top": 170,
+            "top": 160,
             "width": 150,
             "height": 245
           },
@@ -6453,7 +6466,7 @@
           },
           "props": {
             "left": 75,
-            "top": 342,
+            "top": 302,
             "width": 150,
             "height": 150
           },
@@ -6469,7 +6482,7 @@
           },
           "props": {
             "left": 132,
-            "top": 292,
+            "top": 282,
             "width": 37,
             "height": 58,
             "fontSize": 55
@@ -7745,8 +7758,8 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 323,
-            "top": 63,
+            "left": 343,
+            "top": 76,
             "width": 224,
             "height": 211
           },
@@ -7761,8 +7774,8 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 549,
-            "top": 64,
+            "left": 499,
+            "top": 77,
             "width": 224,
             "height": 174
           },
@@ -7777,8 +7790,8 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 528,
-            "top": 81,
+            "left": 478,
+            "top": 94,
             "width": 37,
             "height": 62
           },

@@ -38,6 +38,7 @@ import {
   targetMatchesSelection,
 } from '@/lib/selection-groups';
 import { zoomLabel, zoomScale } from '@/lib/canvas-zoom';
+import { offerValueSymbolCss } from '@/lib/offer-value-symbols';
 import { assetUrl, fieldValue, previewBackgroundSrc, wrapOfferValueSymbols } from '@/lib/preview-utils';
 import { resizeHandlesForSelection, selectionChromeKind } from '@/lib/selection-chrome';
 import { activeFrameScope, beatsForScopes } from '@/lib/timing-profiles';
@@ -69,6 +70,7 @@ const renderLayerRule = (layer: Record<string, unknown>) => {
 const renderCreativeCss = (sizeCreative: Record<string, unknown>) => [
   '    p, h1, h2, h3 { margin: 0px; }',
   sizeCreative.manualCss || '',
+  offerValueSymbolCss,
   ...(sizeCreative.layers || []).map(renderLayerRule),
   structuredRuleCss(sizeCreative),
   '    .stage-element, .stage-static { cursor: move; }',

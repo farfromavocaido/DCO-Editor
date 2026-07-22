@@ -10,6 +10,7 @@ import {
   selectFeedDraftVariant,
   updateFeedDraftField,
 } from '@/lib/feed-model';
+import { layoutOffers } from '@/lib/offer-layout';
 import { alignOfferValueSymbols } from '@/lib/offer-value-symbols';
 import { applyTextFitting } from '@/lib/text-fit';
 import { textFitRulesForSize } from '@/lib/text-fit-rules';
@@ -147,6 +148,7 @@ export const useEditorStore = create<any>((set, get) => ({
   isolatedGroupId: '',
   selectedClipId: '',
   fitResults: new Map(),
+  fitTrackings: new Map(),
   fitClipped: new Map(),
   scale: 1,
   canvasZoom: 'auto',
@@ -1560,11 +1562,12 @@ export const useEditorStore = create<any>((set, get) => ({
   applyPreviewTextFitting: (stageEl) => {
     const state = get();
     if (!stageEl || !state.creativeDocument) return;
-    const { sizes, clipped } = applyTextFitting(stageEl, creativeFitRules(state));
-    // After fit sizes settle, bottom-align reduced %/£/€ to the digit run
-    // (same routine the exported runtime runs).
+    // Fit against authored boxes → symbol ink-align → gap/plus layout.
+    // Layout must not rewrite subline width (that is the fit constraint).
+    const { sizes, trackings, clipped } = applyTextFitting(stageEl, creativeFitRules(state));
     alignOfferValueSymbols(stageEl);
-    set({ fitResults: sizes, fitClipped: clipped });
+    layoutOffers(stageEl);
+    set({ fitResults: sizes, fitTrackings: trackings, fitClipped: clipped });
   },
 
   init: async () => {

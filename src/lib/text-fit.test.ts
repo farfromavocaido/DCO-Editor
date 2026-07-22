@@ -370,7 +370,7 @@ test('static truncate mode is applied without shrinking', () => {
   assert.equal(style.textOverflow, 'ellipsis');
   assert.equal(style.fontSize, '');
   // Width overflow in truncate mode still counts as clipped.
-  assert.deepEqual(results, [{ cssClass: 'target', size: 40, clipped: true }]);
+  assert.deepEqual(results, [{ cssClass: 'target', size: 40, trackingEm: 0, clipped: true }]);
 });
 
 test('empty elements are skipped entirely', () => {
@@ -384,7 +384,7 @@ test('empty elements are skipped entirely', () => {
   assert.equal((element.style as Record<string, string>).fontSize, undefined);
 });
 
-test('applyTextFitting returns size and clipped maps per css class', () => {
+test('applyTextFitting returns size, tracking, and clipped maps per css class', () => {
   const element = makeElement({ fontSize: 40, fitsAt: (size) => size <= 34 });
 
   const results = applyTextFitting(makeRoot([element]), [
@@ -392,7 +392,9 @@ test('applyTextFitting returns size and clipped maps per css class', () => {
   ], { win: fakeWindow });
 
   assert.ok(results.sizes instanceof Map);
+  assert.ok(results.trackings instanceof Map);
   assert.ok(results.clipped instanceof Map);
   assert.equal(results.sizes.get('target'), 34);
+  assert.equal(results.trackings.get('target'), 0);
   assert.equal(results.clipped.get('target'), false);
 });

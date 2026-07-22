@@ -79,6 +79,16 @@ Preview asset URLs are `/assets/...` — served by the Next route, mapped to `ca
   Shared bottom-left margin; unit-rate width = canvas − 2×left; shrink floor
   `max(8, 75% of T&Cs fontSize)`; `maxLines: 2`. `terms-solo` still uses
   `tc-solo-group`.
+- Offer values: tracking squeeze to −0.05em (shared) before shrink; `%`/`£`/`€`
+  live inside `.offer-value-run` so flex bottom-align cannot split the glyph
+  pair. After fit + symbol align, `layoutOffers` (`src/lib/offer-layout.ts`)
+  equalizes gaps between ink clusters (horizontal / vertical / triangular),
+  re-centres with a max-gap guard, and places pluses at value-ink midpoints.
+  Ink-first: clusters, plus anchors, and side-by-side bottoms all use Range
+  text ink (not CSS/line boxes). Triangular plus Y ignores top-row sublines
+  (value bottoms → bottom value top); vertical factors the upper subline
+  (cluster ink bottom → next value top); pluses are glyph-centred via
+  `placePlus`. Authored subline width stays the fit constraint.
 - Headline skip-hold (duplicate consecutive copy) lives in
   `src/lib/headline-motion.ts`: the previous act holds through the skipped act’s
   authored exit, then always fades out. If the skipped act has `base.color`

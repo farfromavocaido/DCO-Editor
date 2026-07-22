@@ -250,7 +250,7 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
       var anyClipped = elements.some(function (element) {
         return element.getAttribute('data-fit-clipped') === 'true';
       });
-      return { size: Math.min.apply(null, staticSizes), clipped: anyClipped };
+      return { size: Math.min.apply(null, staticSizes), trackingEm: 0, clipped: anyClipped };
     }
 
     var fits = elements.map(function (element) {
@@ -265,12 +265,16 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
       fits.forEach(function (fit) {
         if (applyFinal(fit, resolved, sharedSize, sharedTracking)) clipped = true;
       });
-      return { size: sharedSize, clipped: clipped };
+      return { size: sharedSize, trackingEm: sharedTracking, clipped: clipped };
     }
     fits.forEach(function (fit) {
       if (applyFinal(fit, resolved, fit.size, fit.trackingEm)) clipped = true;
     });
-    return { size: Math.min.apply(null, sizes), clipped: clipped };
+    return {
+      size: Math.min.apply(null, sizes),
+      trackingEm: Math.min.apply(null, trackings),
+      clipped: clipped,
+    };
   }
 
   function applyRules(root, rules) {
@@ -281,6 +285,7 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
         results.push({
           cssClass: rule.cssClass,
           size: result.size,
+          trackingEm: Number(result.trackingEm) || 0,
           clipped: Boolean(result.clipped),
         });
       }
@@ -297,15 +302,17 @@ export const textFitEngineSource = () => TEXT_FIT_ENGINE_SOURCE;
 /** The evaluated engine factory — the editor runs the exact exported source. */
 export const createTextFitEngine = new Function(`"use strict"; return ${TEXT_FIT_ENGINE_SOURCE};`)();
 
-/** Editor-preview entry point; returns { sizes, clipped } Maps by cssClass. */
+/** Editor-preview entry point; returns { sizes, trackings, clipped } Maps by cssClass. */
 export const applyTextFitting = (root, rules = [], options = {}) => {
   const win = options.win || (typeof window !== 'undefined' ? window : null);
   const sizes = new Map();
+  const trackings = new Map();
   const clipped = new Map();
-  if (!win || !root) return { sizes, clipped };
+  if (!win || !root) return { sizes, trackings, clipped };
   createTextFitEngine(win).applyRules(root, rules).forEach((result) => {
     sizes.set(result.cssClass, result.size);
+    trackings.set(result.cssClass, Number(result.trackingEm) || 0);
     clipped.set(result.cssClass, Boolean(result.clipped));
   });
-  return { sizes, clipped };
+  return { sizes, trackings, clipped };
 };

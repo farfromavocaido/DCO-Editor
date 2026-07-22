@@ -9,7 +9,7 @@ import { currentSizeCreative, isHeadlineLayer } from '@/lib/creative-model';
 import { activeScopesFromControls, fieldInputValue, rowLabel } from '@/lib/feed-model';
 import { beatsForScopes } from '@/lib/timing-profiles';
 import { deriveSelectedTarget, OFFERS_BLOCK_ID } from '@/lib/selection-groups';
-import { fitSizeStatus } from '@/lib/selection-chrome';
+import { fitSizeStatus, fitTrackingStatus } from '@/lib/selection-chrome';
 import { useEditorStore } from '@/store/editor-store';
 import { EditorIcon } from '@/components/EditorIcon';
 import HeadlineOfferLayoutSection from '@/components/HeadlineOfferLayoutSection';
@@ -124,6 +124,7 @@ export function CreativeInspector() {
   const selectedTargetIds = useEditorStore((s) => s.selectedTargetIds);
   const isolationPath = useEditorStore((s) => s.isolationPath);
   const fitResults = useEditorStore((s) => s.fitResults);
+  const fitTrackings = useEditorStore((s) => s.fitTrackings);
   const resizeMode = useEditorStore((s) => s.resizeMode);
   const offerCount = useEditorStore((s) => s.offerCount);
   const tcMode = useEditorStore((s) => s.tcMode);
@@ -254,7 +255,11 @@ export function CreativeInspector() {
       : updateLayerFit(selectedLayer.id, field, value)
   );
   const fittedFontSize = activeCssClass ? fitResults.get(activeCssClass) : undefined;
+  const fittedTracking = activeCssClass && fitTrackings?.has?.(activeCssClass)
+    ? fitTrackings.get(activeCssClass)
+    : undefined;
   const fitStatus = fitSizeStatus(selectedTarget.values?.fontSize, fittedFontSize);
+  const trackingStatus = fitTrackingStatus(fittedTracking);
   const sourceKind = selectedTarget.writeSource?.kind || '';
   const sourceLabel = sourceKind === 'variantRule'
     ? `${selectedTarget.writeSource.scope} override`
@@ -423,6 +428,13 @@ export function CreativeInspector() {
                 <span>{fitStatus.state === 'scaled'
                   ? `${fitStatus.fitted}px rendered from ${fitStatus.requested}px`
                   : `${fitStatus.requested}px rendered as stated`}</span>
+                {trackingStatus.state !== 'unknown' ? (
+                  <span className={`fit-tracking fit-tracking-${trackingStatus.state}`}>
+                    {trackingStatus.state === 'squeezed'
+                      ? `Tracking ${trackingStatus.label} (fit squeeze)`
+                      : `Tracking ${trackingStatus.label} (no squeeze)`}
+                  </span>
+                ) : null}
               </div>
             ) : null}
             <div className="inspector-grid">

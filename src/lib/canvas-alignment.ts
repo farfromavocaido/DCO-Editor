@@ -12,6 +12,8 @@ import { activeOfferMemberIds } from '@/lib/offer-interaction-model';
 export const DEFAULT_SNAP_THRESHOLD = 5;
 
 const numberValue = (value: unknown, fallback = 0) => {
+  // Number("") === 0; treat blank as unset so empty height falls back correctly.
+  if (value === '' || value === null || value === undefined) return fallback;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
 };

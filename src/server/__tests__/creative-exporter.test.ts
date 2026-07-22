@@ -413,9 +413,10 @@ test('exports the shared text-fit engine and fits after binding offer texts', as
   assert.match(html, /first === '\\u00A3' \|\| first === '\\u20AC'/);
   assert.match(
     html,
-    /bindOfferTexts\(data\);\s+fitBoundText\(\);\s+alignOfferValueSymbols\(\);/,
-    'texts must be bound before fitting, symbols aligned after',
+    /bindOfferTexts\(data\);\s+fitBoundText\(\);\s+alignOfferValueSymbols\(root\);\s+layoutOffers\(root\);/,
+    'texts must be bound before fitting; symbols + layout after',
   );
+  assert.match(html, /var layoutOffers =/);
   assert.doesNotMatch(html, /OFFER_VALUE_MIN_PX/);
   assert.doesNotMatch(html, /function fitOfferValues/);
   assert.doesNotMatch(html, /function equalizeSublines/);
@@ -462,7 +463,7 @@ test('the serialized fit engine in exported HTML is executable', async () => {
     [{ cssClass: 'probe', minFontSize: 8 }],
   );
 
-  assert.deepEqual(results, [{ cssClass: 'probe', size: 30, clipped: false }]);
+  assert.deepEqual(results, [{ cssClass: 'probe', size: 30, trackingEm: 0, clipped: false }]);
   assert.equal(style.fontSize, '30px');
 });
 
@@ -491,7 +492,7 @@ test('exports uniform bottom-aligned tracking rules for pricing blocks', async (
   const html = renderStudioReadyHtml(document, '320x50');
 
   assert.match(html, /"cssClass":"offer-value","shared":true/);
-  assert.match(html, /"tracking":\{"minEm":-0\.02\}/);
+  assert.match(html, /"tracking":\{"minEm":-0\.05\}/);
   assert.match(html, /"align":"bottom"/);
   assert.match(html, /"minFontSizeRatio":0\.5/);
   assert.match(html, /"cssClass":"offer-subline","shared":true/);

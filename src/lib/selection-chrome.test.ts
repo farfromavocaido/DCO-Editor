@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 
 import {
   fitSizeStatus,
+  fitTrackingStatus,
+  formatTrackingEm,
   resizeHandlesForSelection,
   selectionChromeKind,
 } from './selection-chrome';
@@ -34,4 +36,13 @@ test('fitSizeStatus flags automatic runtime font scaling', () => {
     requested: 66,
     state: 'stated',
   });
+});
+
+test('fitTrackingStatus reports fit squeeze in em', () => {
+  assert.equal(formatTrackingEm(-0.05), '-0.05em');
+  assert.equal(formatTrackingEm(0), '0em');
+  assert.equal(fitTrackingStatus(-0.05).state, 'squeezed');
+  assert.equal(fitTrackingStatus(-0.05).label, '-0.05em');
+  assert.equal(fitTrackingStatus(0).state, 'stated');
+  assert.equal(fitTrackingStatus(undefined).state, 'unknown');
 });

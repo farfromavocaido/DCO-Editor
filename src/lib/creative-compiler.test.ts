@@ -2,9 +2,11 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 
 import {
+  applyTimingFunction,
   compileAnimationClips,
   frameAtPercent,
   resolveTimeRef,
+  sampleCubicBezier,
 } from './creative-compiler';
 
 test('resolves beat references with numeric offsets', () => {
@@ -189,4 +191,47 @@ test('matches legacy gwd-tl pattern defaults for timing and easing', () => {
   assert.equal(pop[1].easing, 'ease-out');
   assert.equal(pop[3].easing, 'ease-in-out');
   assert.equal(pop[4].scale, 1.15);
+});
+
+test('sampleCubicBezier matches linear and ease-out endpoints', () => {
+  assert.equal(sampleCubicBezier(0, 0, 0, 1, 1), 0);
+  assert.equal(sampleCubicBezier(1, 0, 0, 1, 1), 1);
+  assert.equal(sampleCubicBezier(0.5, 0, 0, 1, 1), 0.5);
+  // CSS ease-out: ahead of linear mid-segment (more progress early).
+  const eased = applyTimingFunction(0.5, 'ease-out');
+  assert.ok(eased > 0.5 && eased < 1, `ease-out mid should be > 0.5, got ${eased}`);
+  assert.equal(applyTimingFunction(0, 'ease-out'), 0);
+  assert.equal(applyTimingFunction(1, 'ease-out'), 1);
+});
+
+test('frameAtPercent applies keyframe easing for editor play/scrub', () => {
+  const linear = [
+    { at: 0, translate: [0, 0] as [number, number], opacity: 1, easing: 'linear' },
+    { at: 10, translate: [100, 0] as [number, number], opacity: 1 },
+  ];
+  assert.equal(frameAtPercent(linear, 5).translate[0], 50);
+
+  const easeOut = [
+    { at: 0, translate: [0, 0] as [number, number], opacity: 1, easing: 'ease-out' },
+    { at: 10, translate: [100, 0] as [number, number], opacity: 1 },
+  ];
+  const mid = frameAtPercent(easeOut, 5).translate[0];
+  assert.ok(mid > 50 && mid < 100, `ease-out scrub mid should outpace linear, got ${mid}`);
+
+  const wave = compileAnimationClips([
+    {
+      id: 'greenwave-waveSweep',
+      preset: 'waveSweep',
+      start: 'wave1_in',
+      end: 'end',
+      params: { start_x: 0, end_x: -100, hold_y: 0, sweep_duration_pct: 10 },
+    },
+  ], { wave1_in: 10, end: 100 });
+  assert.equal(wave.find((kf) => kf.at === 10)?.easing, 'ease-out');
+  const linearMidX = -50;
+  const easedMidX = frameAtPercent(wave, 15).translate[0];
+  assert.ok(
+    easedMidX < linearMidX,
+    `waveSweep ease-out should travel further by mid-sweep (more negative), got ${easedMidX}`,
+  );
 });

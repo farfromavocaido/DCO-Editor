@@ -13,10 +13,12 @@
 
 ### Fixed
 
+- Editor play/scrub now applies keyframe CSS timing functions (`ease-out`, `cubic-bezier(...)`, etc.) in `frameAtPercent`, matching export `animation-timing-function`.
 - Dev server allows HMR when the editor is opened via `127.0.0.1` (`allowedDevOrigins` in `next.config.ts`).
 
 ### Changed
 
+- MPU (`300x250`) offer enter mid-ground 48px / ~2.5–2.85%; headlines back to 4% enter (default ease-out); wave sweeps stay on CSS `ease-out`.
 - Offer layout content edges use canvas glyph metrics (`actualBoundingBoxAscent` / `Descent`) so vertical pluses centre on true Museo ink (not Range line-boxes with half-leading); still after `fonts.ready` and before `.motion-ready`.
 - SVG plus placement uses the CSS layout box (not transformed `getBoundingClientRect`), so fadeUp `enter_dy` cannot push pluses down in export/preview; keeps the `.motion-ready` font/layout clock gate for cold/warm timeline parity.
 - Exported ads hold CSS animations until `document.fonts.ready` + offer layout settle (`.motion-ready`), so cold first paint matches warm Replay.

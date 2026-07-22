@@ -251,6 +251,72 @@ const lerpColor = (from: string, to: string, t: number) => {
   return `rgb(${Math.round(lerp(a[0], b[0], t))}, ${Math.round(lerp(a[1], b[1], t))}, ${Math.round(lerp(a[2], b[2], t))})`;
 };
 
+/** CSS named easings → cubic-bezier control points (matches browser presets). */
+const NAMED_CUBIC_BEZIERS: Record<string, [number, number, number, number]> = {
+  linear: [0, 0, 1, 1],
+  ease: [0.25, 0.1, 0.25, 1],
+  'ease-in': [0.42, 0, 1, 1],
+  'ease-out': [0, 0, 0.58, 1],
+  'ease-in-out': [0.42, 0, 0.58, 1],
+};
+
+const parseCubicBezier = (value: string): [number, number, number, number] | null => {
+  const named = NAMED_CUBIC_BEZIERS[String(value || '').trim().toLowerCase()];
+  if (named) return named;
+  const match = String(value || '').match(
+    /^cubic-bezier\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*,\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)$/i,
+  );
+  if (!match) return null;
+  return [Number(match[1]), Number(match[2]), Number(match[3]), Number(match[4])];
+};
+
+/**
+ * Sample a CSS cubic-bezier(x1,y1,x2,y2) at progress p in [0,1].
+ * Solves X(t)=p then returns Y(t) — same model browsers use for timing functions.
+ */
+export const sampleCubicBezier = (p: number, x1: number, y1: number, x2: number, y2: number) => {
+  const t = Math.min(1, Math.max(0, p));
+  if (t <= 0) return 0;
+  if (t >= 1) return 1;
+
+  const sampleCurveX = (guess: number) => {
+    // X(t) = 3(1-t)^2 t x1 + 3(1-t) t^2 x2 + t^3
+    const inv = 1 - guess;
+    return 3 * inv * inv * guess * x1 + 3 * inv * guess * guess * x2 + guess * guess * guess;
+  };
+  const sampleCurveY = (guess: number) => {
+    const inv = 1 - guess;
+    return 3 * inv * inv * guess * y1 + 3 * inv * guess * guess * y2 + guess * guess * guess;
+  };
+  const sampleCurveDerivativeX = (guess: number) => {
+    const inv = 1 - guess;
+    return 3 * inv * inv * x1
+      + 6 * inv * guess * (x2 - x1)
+      + 3 * guess * guess * (1 - x2);
+  };
+
+  // Newton–Raphson for X(t) = tTarget, then Y(t).
+  let guess = t;
+  for (let i = 0; i < 8; i += 1) {
+    const x = sampleCurveX(guess) - t;
+    const d = sampleCurveDerivativeX(guess);
+    if (Math.abs(d) < 1e-6) break;
+    guess -= x / d;
+    if (guess < 0) guess = 0;
+    if (guess > 1) guess = 1;
+  }
+  return sampleCurveY(guess);
+};
+
+/** Apply a CSS timing-function name or cubic-bezier(...) to a linear 0–1 ratio. */
+export const applyTimingFunction = (ratio: number, easing?: string) => {
+  const t = Math.min(1, Math.max(0, ratio));
+  if (!easing || easing === 'linear') return t;
+  const bezier = parseCubicBezier(easing);
+  if (!bezier) return t;
+  return sampleCubicBezier(t, bezier[0], bezier[1], bezier[2], bezier[3]);
+};
+
 export const frameAtPercent = (keyframes: CreativeKeyframe[] = [], percent = 0) => {
   if (!keyframes.length) return { translate: [0, 0], scale: 1, opacity: 1 };
   let prev = keyframes[0];
@@ -262,8 +328,11 @@ export const frameAtPercent = (keyframes: CreativeKeyframe[] = [], percent = 0) 
       break;
     }
   }
-  const span = Math.max(1, next.at - prev.at);
-  const ratio = prev.at === next.at ? 0 : (percent - prev.at) / span;
+  const span = Math.max(1e-6, next.at - prev.at);
+  const linearRatio = prev.at === next.at ? 0 : (percent - prev.at) / span;
+  // CSS: timing-function on a keyframe eases the segment *to the next* keyframe.
+  // That matches export `animation-timing-function` on the from-frame.
+  const ratio = applyTimingFunction(linearRatio, prev.easing);
   // Carry forward when a keyframe omits a channel (defensive; compile fills these).
   const prevTranslate = prev.translate || [0, 0];
   const nextTranslate = next.translate || prevTranslate;

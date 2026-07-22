@@ -4,11 +4,12 @@
  * Authored as ES5 so the editor evaluates the exact function exported ads inline.
  *
  * ## Ink-first invariant (do not regress)
- * All *content* geometry — value runs, sublines, "+" glyphs, cluster bounds used
- * for gaps/plus anchors — is measured with Range text ink (`inkRect`), not
- * `getBoundingClientRect` / `offsetHeight` of the CSS box. Authored boxes are
- * often shorter than wrapped copy (overflow paints outside) and Museo line-boxes
- * hang well below the visible mark; both skew mid-gap plus placement.
+ * All *content* geometry — value runs, sublines, cluster bounds used for
+ * gaps/plus anchors — uses canvas `actualBoundingBoxAscent/Descent` (true
+ * Museo glyph ink) with the DOM Range only to locate the line + alphabetic
+ * baseline. Plain Range rects are line-box-ish and put vertical pluses too
+ * high (half-leading above big digits). Fall back to Range → CSS box when
+ * canvas metrics are unavailable. Never use `offsetHeight` of the authored box.
  *
  * CSS boxes (`boxOf` / computed left/top/width/height) are used only for:
  *   - authored slot envelopes (where the block may sit)
@@ -94,9 +95,28 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     return clientToLocal(el.getBoundingClientRect(), ancestor);
   }
 
+  var _inkCtx = null;
+  var _inkCtxFailed = false;
+
+  function inkMeasureCtx() {
+    if (_inkCtxFailed) return null;
+    if (_inkCtx) return _inkCtx;
+    if (typeof document === 'undefined' || !document.createElement) {
+      _inkCtxFailed = true;
+      return null;
+    }
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext && canvas.getContext('2d');
+    if (!ctx || ctx.measureText('5').actualBoundingBoxAscent === undefined) {
+      _inkCtxFailed = true;
+      return null;
+    }
+    _inkCtx = ctx;
+    return _inkCtx;
+  }
+
   /**
-   * Text / glyph ink of el in ancestor space via Range.
-   * Falls back to the CSS box only when Range yields nothing.
+   * Line-box-ish rect via Range (fallback / horizontal span).
    * Accepts height-only rects (wrapped lines can be narrow).
    */
   function inkRect(el, ancestor) {
@@ -117,11 +137,69 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     return localRect(el, ancestor);
   }
 
-  /** Prefer ink; if empty, CSS box. */
+  /** Prefer Range ink; if empty, CSS box. */
   function textInk(el, ancestor) {
     var ink = inkRect(el, ancestor);
     if (ink.width > 0 || ink.height > 0) return ink;
     return localRect(el, ancestor);
+  }
+
+  /**
+   * True glyph ink in ancestor space (canvas actualBoundingBox* + Range line).
+   * Baseline = Range line top + half-leading + fontBoundingBoxAscent when
+   * available — strips CSS half-leading that made vertical pluses sit high.
+   * Value runs measure digit samples so %/€ symbol size does not skew ascent.
+   */
+  function glyphInk(el, ancestor) {
+    var fallback = textInk(el, ancestor);
+    if (!el || !ancestor) return fallback;
+    var ctx = inkMeasureCtx();
+    if (!ctx) return fallback;
+    var sample = String(el.textContent || '').replace(/\s+/g, ' ').trim();
+    if (!sample) return fallback;
+    var cs = window.getComputedStyle(el);
+    ctx.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+    var measureSample = sample;
+    if (el.classList && el.classList.contains('offer-value-run')) {
+      var digits = sample.replace(/[^\d.]/g, '');
+      if (digits) measureSample = digits;
+    }
+    var metrics = ctx.measureText(measureSample);
+    var ascent = metrics.actualBoundingBoxAscent;
+    var descent = metrics.actualBoundingBoxDescent;
+    if (!isFinite(ascent) || !isFinite(descent)) return fallback;
+
+    var doc = el.ownerDocument;
+    if (!(doc && doc.createRange)) return fallback;
+    var range = doc.createRange();
+    var line;
+    try {
+      range.selectNodeContents(el);
+      line = range.getBoundingClientRect();
+    } finally {
+      if (range.detach) range.detach();
+    }
+    if (!(line && (line.width > 0 || line.height > 0))) return fallback;
+
+    var fontAscent = metrics.fontBoundingBoxAscent;
+    var fontDescent = metrics.fontBoundingBoxDescent;
+    var baseline;
+    if (isFinite(fontAscent) && isFinite(fontDescent) && (fontAscent + fontDescent) > 0.5) {
+      var leading = line.height - (fontAscent + fontDescent);
+      if (!(leading > 0)) leading = 0;
+      baseline = line.top + leading / 2 + fontAscent;
+    } else {
+      var inkH = ascent + descent;
+      baseline = line.top + (line.height - inkH) / 2 + ascent;
+    }
+    var inkTop = baseline - ascent;
+    var inkBottom = baseline + descent;
+    return clientToLocal({
+      left: line.left,
+      top: inkTop,
+      width: Math.max(line.width, 1),
+      height: Math.max(inkBottom - inkTop, 1),
+    }, ancestor);
   }
 
   function unionRect(a, b) {
@@ -179,7 +257,7 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
   }
 
   function layoutSideBySide(slot, run, subline) {
-    var ink = textInk(run, slot);
+    var ink = glyphInk(run, slot);
     if (!(ink.width > 0 || ink.height > 0)) return;
     // Horizontal only: keep the subline on the value’s right edge as copy
     // width changes. Do NOT rewrite top — authored Y (flex-end in a real
@@ -204,17 +282,18 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
 
   /**
    * Per-slot content cluster in stage space.
-   * value* = offer-value-run ink; cluster* = value ∪ subline text ink.
+   * value* / subline* = canvas glyph ink (not CSS box, not Range line-box);
+   * cluster* = value ∪ subline glyph ink (gap equalization + plus anchors).
    */
   function clusterForSlot(slot) {
     var value = slot.querySelector('.offer-value');
     var subline = slot.querySelector('.offer-subline');
     var run = value ? (value.querySelector('.offer-value-run') || value) : null;
     var box = boxOf(slot);
-    var ink = run ? textInk(run, slot) : emptyRect();
+    var ink = run ? glyphInk(run, slot) : emptyRect();
     var sub = null;
     if (subline && isVisible(subline) && (subline.textContent || '').trim()) {
-      sub = textInk(subline, slot);
+      sub = glyphInk(subline, slot);
     }
     var bounds = unionRect(ink, sub);
     if (!(bounds.width > 0 || bounds.height > 0)) {
@@ -237,8 +316,9 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
       valueBottom: box.top + ink.bottom,
       valueCenterY: box.top + (ink.top + ink.bottom) / 2,
       valueCenterX: box.left + (ink.left + ink.right) / 2,
-      // null when no visible subline copy — callers must fall back.
+      // null when no visible subline copy — vertical plus falls back to valueBottom.
       sublineTop: sub ? (box.top + sub.top) : null,
+      sublineBottom: sub ? (box.top + sub.bottom) : null,
       // Authored/CSS box top (stable if Range ink is short/low).
       sublineBoxTop: subline && isVisible(subline)
         ? (box.top + cssNumber(window.getComputedStyle(subline).top, subline.offsetTop || 0))
@@ -398,13 +478,17 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
   }
 
   /**
-   * Vertical: plus in the gap below the upper offer’s full cluster ink
-   * (value ∪ subline text) and above the next value ink top.
+   * Vertical: plus centred in the gap below the upper subline’s glyph-ink
+   * bottom (fallback: value glyph bottom when no subline) and above the next
+   * value glyph top. Edges come from canvas actualBoundingBox* (see glyphInk).
    */
   function plusAnchorVertical(upperCluster, lowerCluster, blockCx) {
+    var upperBottom = upperCluster.sublineBottom != null
+      ? upperCluster.sublineBottom
+      : upperCluster.valueBottom;
     return {
       x: blockCx,
-      y: (upperCluster.clusterBottom + lowerCluster.valueTop) / 2,
+      y: (upperBottom + lowerCluster.valueTop) / 2,
     };
   }
 

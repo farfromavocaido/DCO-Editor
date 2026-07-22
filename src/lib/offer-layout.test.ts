@@ -40,6 +40,9 @@ const installDom = () => {
 test('runtime encodes ink-first helpers and per-family plus anchors', () => {
   assert.match(layoutOffersRuntime, /function inkRect\(/);
   assert.match(layoutOffersRuntime, /function textInk\(/);
+  assert.match(layoutOffersRuntime, /function glyphInk\(/);
+  assert.match(layoutOffersRuntime, /actualBoundingBoxAscent/);
+  assert.match(layoutOffersRuntime, /fontBoundingBoxAscent/);
   assert.match(layoutOffersRuntime, /function clientToLocal\(/);
   assert.match(layoutOffersRuntime, /function withNeutralMotion\(/);
   // SVG pluses place from the layout box (skip transformed getBoundingClientRect).
@@ -54,7 +57,9 @@ test('runtime encodes ink-first helpers and per-family plus anchors', () => {
   assert.match(layoutOffersRuntime, /rect\.width > 0 \|\| rect\.height > 0/);
   // Vertical factors subline cluster ink; triangular top-aligns to value bottoms
   // (MPU / 970×250 raise toward top-row subline caps). SVG pluses use box ink.
-  assert.match(layoutOffersRuntime, /upperCluster\.clusterBottom \+ lowerCluster\.valueTop/);
+  assert.match(layoutOffersRuntime, /sublineBottom/);
+  assert.match(layoutOffersRuntime, /upperBottom \+ lowerCluster\.valueTop/);
+  assert.doesNotMatch(layoutOffersRuntime, /upperCluster\.clusterBottom \+ lowerCluster\.valueTop/);
   assert.match(layoutOffersRuntime, /Math\.max\(topA\.valueBottom, topB\.valueBottom\)/);
   assert.match(layoutOffersRuntime, /sublineTop/);
   assert.match(layoutOffersRuntime, /sublineBoxTop/);
@@ -378,15 +383,98 @@ test('vertical plus mid-gap uses overflowing subline text ink, not the short CSS
 
   layoutOffers(stage);
 
-  // After distribute, remasure: upper clusterBottom from subline INK (290), not CSS (256).
-  // Lower valueTop ≈ 360. Mid = 325. placePlus centres glyph ink (top+14) on mid
-  // → style.top ≈ 325 - 14 = 311 (seed then nudge).
+  // After distribute, remeasure: upper edge = subline INK bottom (290), not CSS
+  // box (256) and not a loose cluster union. Lower valueTop ≈ 360. Mid = 325.
+  // placePlus centres glyph ink (top+14) on mid → style.top ≈ 325 - 14 = 311.
   const plusTop = parseFloat(plus.style.top);
   assert.ok(Number.isFinite(plusTop), 'plus top rewritten');
   // Must be well below the CSS-box midpoint (~(256+360)/2=308 with glyph nudge)
   // and near the ink-based mid (~325) after glyph centring.
   assert.ok(plusTop > 300, `plus too high (CSS-box path?): top=${plusTop}`);
   assert.ok(plusTop < 330, `plus too low: top=${plusTop}`);
+});
+
+test('vertical SVG plus centres on subline-ink → next-value-ink midpoint', () => {
+  const { document } = installDom();
+  const stage = document.createElement('div');
+  Object.defineProperty(stage, 'offsetWidth', { value: 160 });
+  Object.defineProperty(stage, 'offsetHeight', { value: 600 });
+  stage.getBoundingClientRect = () => stubRect(0, 0, 160, 600) as DOMRect;
+
+  const makeSlot = (index: number, top: number, valueInk: ReturnType<typeof stubRect>, subInk: ReturnType<typeof stubRect>) => {
+    const slot = document.createElement('div');
+    slot.setAttribute('data-gwd-group', 'OfferSlot');
+    slot.setAttribute('data-offer-index', String(index));
+    slot.style.cssText = `position:absolute;left:10px;top:${top}px;width:140px;height:100px`;
+    Object.defineProperty(slot, 'offsetWidth', { value: 140 });
+    Object.defineProperty(slot, 'offsetHeight', { value: 100 });
+    Object.defineProperty(slot, 'offsetLeft', { value: 10 });
+    Object.defineProperty(slot, 'offsetTop', { value: top });
+    slot.getBoundingClientRect = () => stubRect(10, top, 140, 100) as DOMRect;
+    const value = document.createElement('p');
+    value.className = 'offer-value';
+    const run = document.createElement('span');
+    run.className = 'offer-value-run';
+    run.textContent = `${index}5%`;
+    run.getBoundingClientRect = () => valueInk as DOMRect;
+    const subline = document.createElement('p');
+    subline.className = 'offer-subline';
+    subline.textContent = 'OFF';
+    subline.style.cssText = 'left:0;top:50px;width:140px;height:40px';
+    (subline as HTMLElement & { __ink: typeof subInk }).__ink = subInk;
+    subline.getBoundingClientRect = () => stubRect(10, top + 50, 140, 40) as DOMRect;
+    value.appendChild(run);
+    slot.appendChild(value);
+    slot.appendChild(subline);
+    return slot;
+  };
+
+  // Upper: value 20→50, subline ink 60→80 (CSS box taller). Lower: value 120→150.
+  stage.appendChild(makeSlot(1, 10, stubRect(30, 20, 60, 30), stubRect(30, 60, 80, 20)));
+  stage.appendChild(makeSlot(2, 110, stubRect(30, 120, 60, 30), stubRect(30, 160, 80, 16)));
+
+  const plus = document.createElement('img');
+  plus.id = 'plus-1';
+  plus.className = 'plus-1';
+  plus.setAttribute('src', 'data:image/svg+xml,plus');
+  plus.style.cssText = 'position:absolute;left:70px;top:90px;width:20px;height:20px';
+  Object.defineProperty(plus, 'offsetWidth', { value: 20 });
+  Object.defineProperty(plus, 'offsetHeight', { value: 20 });
+  Object.defineProperty(plus, 'offsetParent', { get: () => stage });
+  plus.getBoundingClientRect = () => {
+    const top = parseFloat(plus.style.top) || 90;
+    const left = parseFloat(plus.style.left) || 70;
+    return stubRect(left, top - 10, 20, 20) as DOMRect;
+  };
+  stage.appendChild(plus);
+  document.body.appendChild(stage);
+
+  document.createRange = function createRange() {
+    const range = {
+      target: null as Element | null,
+      selectNodeContents(node: Element) { range.target = node; },
+      detach() {},
+      getBoundingClientRect() {
+        const el = range.target as HTMLElement | null;
+        if (!el) return stubRect(0, 0, 0, 0);
+        if (el.classList?.contains('offer-subline')) {
+          return (el as HTMLElement & { __ink?: ReturnType<typeof stubRect> }).__ink
+            || el.getBoundingClientRect();
+        }
+        return el.getBoundingClientRect();
+      },
+    };
+    return range as unknown as Range;
+  };
+
+  layoutOffers(stage);
+
+  // After vertical gap equalization, slots shift but relative ink is stable:
+  // upperBottom = style.top + sublineInk.bottomRel, valueTop similarly.
+  // Ink path lands ~102; CSS-box subline bottom would land ~112.
+  const top = parseFloat(plus.style.top);
+  assert.ok(Math.abs(top - 102) < 3, `vertical SVG plus top=${top}, expected ~102 (subline ink mid)`);
+  assert.ok(top < 108, `looks like CSS-box subline bottom was used: top=${top}`);
 });
 
 test('placePlus centres glyph ink, not the tall CSS line-box', () => {

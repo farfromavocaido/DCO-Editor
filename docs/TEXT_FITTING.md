@@ -112,12 +112,12 @@ symbol too low.
 body). Pipeline: fit against **authored** boxes → symbol align → distribute
 slots/pluses (and side-by-side re-anchor).
 
-**Ink-first invariant:** every content measurement (value run, subline copy, `+`
-glyph, cluster bounds for gaps) uses Range text ink — never the CSS/line box
-(`offsetHeight` / element `getBoundingClientRect`). Authored boxes are often
-shorter than wrapped copy, and Museo line-boxes hang below the visible mark;
-both skew mid-gap placement. CSS boxes are only for authored envelopes, family
-detection, and writing `left`/`top` (motion `transform` left alone after layout).
+**Ink-first invariant:** content edges for offer layout use canvas
+`actualBoundingBoxAscent` / `Descent` (true Museo glyph ink). The DOM Range
+only locates the line so half-leading can be stripped from the alphabetic
+baseline — raw Range rects are line-box-ish and bias vertical pluses upward.
+Falls back to Range → CSS box when canvas metrics are missing. CSS boxes are
+only for authored envelopes, family detection, and writing `left`/`top`.
 
 **Transform-neutral plus placement:** SVG plus *images* are placed from the CSS
 layout box (never `getBoundingClientRect`) so CSS fadeUp `enter_dy` cannot bake
@@ -135,7 +135,7 @@ you set.
 | stacked subline | subline mostly below value | leave authored width/left/top alone |
 | side-by-side | subline to the right and starts above the value box bottom | keep authored width/**top** (baseline via flex-end in a real height box); runtime only re-anchors **left** to value-ink right so drag still works |
 | horizontal | 2+ slots, wider Δx | equal ink-cluster gaps; plus at value-ink midpoint (glyph-centred) |
-| vertical | 2+ slots, taller Δy | equal gaps; plus Y = upper **cluster ink** bottom → next value ink top |
+| vertical | 2+ slots, taller Δy | equal gaps; plus Y = midpoint of upper **subline glyph-ink** bottom (else value glyph bottom) → next value glyph top; SVG box-centred; measured after fonts settle / before motion starts |
 | triangular | two top-row + one centred below | equalize top pair; centre bottom under top centroid; plus is SVG (`assets/SVG/sse-plus.svg`) filling a square box — top-aligned to max(top-row value bottoms) by default; on `300x250` / `970x250` plus top meets top-row subline caps (`300x600` unchanged); X in the gap between top value inks |
 
 Plus anchors are named helpers (`plusAnchorHorizontal` / `Vertical` /

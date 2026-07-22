@@ -17,6 +17,7 @@
 
 ### Changed
 
+- Offer layout content edges use canvas glyph metrics (`actualBoundingBoxAscent` / `Descent`) so vertical pluses centre on true Museo ink (not Range line-boxes with half-leading); still after `fonts.ready` and before `.motion-ready`.
 - SVG plus placement uses the CSS layout box (not transformed `getBoundingClientRect`), so fadeUp `enter_dy` cannot push pluses down in export/preview; keeps the `.motion-ready` font/layout clock gate for cold/warm timeline parity.
 - Exported ads hold CSS animations until `document.fonts.ready` + offer layout settle (`.motion-ready`), so cold first paint matches warm Replay.
 - CDN / GitHub Pages packages inline `sse-plus.svg` from the campaign file (data URI) so preview and Studio CDN never depend on a missing SVG path; font refit still runs once even without `document.fonts`.

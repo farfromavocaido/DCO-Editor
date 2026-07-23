@@ -36,6 +36,9 @@ wheels/
 # stale pre-flattening build dir (repo was flattened to root)
 /editor-app/
 
+# isolated Codex feature worktrees
+/.worktrees/
+
 # misc
 .DS_Store
 *.pem

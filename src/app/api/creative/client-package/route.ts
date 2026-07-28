@@ -16,6 +16,7 @@ export async function POST(request: Request) {
       includeValidator?: boolean;
       renderMode?: string;
       campaign?: string;
+      presentationSnapshots?: Record<string, unknown>;
     } = {};
     try {
       body = await request.json();
@@ -27,7 +28,13 @@ export async function POST(request: Request) {
     }
     const campaignId = resolveCampaignId(request, body);
     const creative = document || await readCreativeDocumentForCampaign(campaignId);
-    const zip = await buildClientPreviewZip(creative, { includeValidator, renderMode });
+    const zip = await buildClientPreviewZip(creative, {
+      includeValidator,
+      renderMode,
+      ...(renderMode === 'outline' && body.presentationSnapshots
+        ? { presentationSnapshots: body.presentationSnapshots }
+        : {}),
+    });
     const slug = exportSlugForDocument(creative);
     const suffix = renderMode === 'outline' ? '_outlines' : '';
     const filename = includeValidator && renderMode === 'font'

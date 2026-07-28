@@ -1,0 +1,42 @@
+- generic [active] [ref=f1e1]:
+  - main [ref=f1e2]:
+    - generic [ref=f1e3]:
+      - generic "Display Creative Studio" [ref=f1e4]:
+        - strong [ref=f1e6]: Display Creative
+        - generic [ref=f1e7]: Studio
+      - navigation "Creative context" [ref=f1e8]:
+        - generic [ref=f1e9]:
+          - generic [ref=f1e10]: Campaign
+          - combobox "Campaign" [ref=f1e11]:
+            - option "SSE DCO" [selected]
+            - option "Hiker Welcome Credit"
+            - option "Keepy Uppy Welcome Credit"
+            - option "Keepy Uppy Top Discount"
+        - generic [ref=f1e12]:
+          - generic [ref=f1e13]: Format
+          - combobox "Format" [ref=f1e14]
+        - generic [ref=f1e15]:
+          - generic [ref=f1e16]: Content
+          - combobox "Content" [ref=f1e17]
+        - button "Creative state" [ref=f1e19]:
+          - generic [ref=f1e20]:
+            - generic [ref=f1e21]: State
+            - text: 1 offer · Round
+        - generic [ref=f1e24]:
+          - generic [ref=f1e25]: Timing
+          - combobox "Timing" [ref=f1e26]:
+            - option "Three acts" [selected]
+            - option "Four acts"
+      - generic [ref=f1e27]:
+        - group "Canvas mode" [ref=f1e28]:
+          - button "Edit" [ref=f1e29]
+          - button "Preview" [ref=f1e30]
+          - button "QA" [pressed] [ref=f1e31]
+        - button "Undo" [disabled] [ref=f1e32]
+        - button "Redo" [disabled] [ref=f1e36]
+        - button "Save creative" [disabled] [ref=f1e40]:
+          - generic [ref=f1e44]: Saved
+        - generic "Loading" [ref=f1e45]
+    - paragraph [ref=f1e48]: Loading
+  - button "Open Next.js Dev Tools" [ref=f1e54] [cursor=pointer]
+  - alert [ref=f1e58]

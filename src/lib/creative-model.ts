@@ -173,14 +173,6 @@ export const termsWrapperBounds = (
   };
 };
 
-const findActiveVariantRule = (
-  sizeCreative: Record<string, unknown>,
-  identity: { layerId?: string; cssClass?: string },
-  activeScopes: string[] = [],
-) => (
-  activeVariantRulesForIdentity(sizeCreative, identity, activeScopes).at(-1) || null
-);
-
 const ruleMatchesIdentity = (
   rule: Record<string, unknown>,
   identity: { layerId?: string; cssClass?: string },
@@ -191,18 +183,31 @@ const ruleMatchesIdentity = (
   )
 );
 
+/**
+ * Active variant rules in document order (same as structuredRuleCss emission).
+ * Later rules win for both merged values and writeSource — matching equal-specificity
+ * CSS cascade. Scope-list order must NOT drive this: e.g. `cta-rect` after `offers-0`
+ * in activeScopes would otherwise steal CTA edits from the visible offers-0 rule.
+ */
 const activeVariantRulesForIdentity = (
   sizeCreative: Record<string, unknown>,
   identity: { layerId?: string; cssClass?: string },
   activeScopes: string[] = [],
-) => (
-  activeScopes.flatMap((scope) => (
-    (sizeCreative?.variantRules || []).filter((rule: Record<string, unknown>) => (
-      String(rule.scope || '') === String(scope)
+) => {
+  const active = new Set((activeScopes || []).map(String));
+  return (sizeCreative?.variantRules || []).filter((rule: Record<string, unknown>) => (
+    active.has(String(rule.scope || ''))
     && !propsOnlyHideVisibility(rule.props)
-      && ruleMatchesIdentity(rule, identity)
-    ))
-  ))
+    && ruleMatchesIdentity(rule, identity)
+  ));
+};
+
+const findActiveVariantRule = (
+  sizeCreative: Record<string, unknown>,
+  identity: { layerId?: string; cssClass?: string },
+  activeScopes: string[] = [],
+) => (
+  activeVariantRulesForIdentity(sizeCreative, identity, activeScopes).at(-1) || null
 );
 
 const mergedActiveVariantProps = (
@@ -1000,7 +1005,7 @@ export const headlineOfferVariantRule = (
   sizeCreative: Record<string, unknown> | null,
   offerCount: number,
 ) => {
-  if (!sizeCreative || offerCount < 1 || offerCount > 3) return null;
+  if (!sizeCreative || offerCount < 0 || offerCount > 3) return null;
   return (sizeCreative.variantRules || []).find(
     (rule: Record<string, unknown>) => rule.id === `${headlineOfferScope(offerCount)}|${HEADLINE_CSS_CLASS}`,
   ) || null;

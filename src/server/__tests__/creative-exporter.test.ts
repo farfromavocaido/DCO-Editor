@@ -28,8 +28,9 @@ const truthyFeedBool = (value: unknown) => value === true
   || ['true', '1', 'yes', 'on'].includes(String(value || '').trim().toLowerCase());
 
 const expectedStatePatternForRow = (row: Record<string, unknown>) => {
-  const offerCount = Number(row.offer_count_num) || 1;
-  const tcScope = row.tc_type_enum === 'tcs_units' ? 'tc-prices' : 'tc-solo';
+  const parsed = Number.parseInt(String(row.offer_count_num ?? ''), 10);
+  const offerCount = Number.isFinite(parsed) ? Math.min(3, Math.max(0, parsed)) : 1;
+  const tcScope = offerCount === 0 || row.tc_type_enum !== 'tcs_units' ? 'tc-solo' : 'tc-prices';
   const includeRoundel = truthyFeedBool(row.include_roundel_frame_bool);
   const ctaScope = includeRoundel || ['rectangle', 'rect'].includes(String(row.cta_type_enum || ''))
     ? 'cta-rect'
@@ -87,6 +88,24 @@ test('exports ad html that accepts client preview post messages', async () => {
   assert.match(html, /SSE_DCO_PREVIEW_STATE/);
   assert.match(html, /applyRuntimeState\(event\.data\.row\)/);
   assert.match(html, /src="\.\.\/assets\/bg_728x90\.jpg"/);
+});
+
+test('exports offers-0 runtime and scoped wave timing overrides', async () => {
+  const document = await readCreativeDocument();
+  const html = await renderStudioReadyHtml(document, '300x250');
+  const preview = renderClientPreviewPage(document, { includeValidator: false });
+  const zeroRow = document.feed.sampleRows.find((row) => Number(row.offer_count_num) === 0);
+  assert.ok(zeroRow, 'expected a zero-offers sample row');
+
+  assert.match(html, /offers-0/);
+  assert.match(html, /\.offers-0 \.bluewave/);
+  assert.match(html, /if \(explicit === 0 \|\| \(explicit >= 1 && explicit <= 3\)\) return explicit;/);
+  assert.match(html, /'offers-0', 'offers-1', 'offers-2', 'offers-3'/);
+  assert.match(preview, /<option value="0">0<\/option>/);
+  assert.match(
+    renderWipHtml(html, zeroRow),
+    expectedStatePatternForRow(zeroRow),
+  );
 });
 
 test('preview ad html skips empty Enabler bootstrap so iframe postMessage text persists', async () => {
@@ -254,7 +273,7 @@ test('builds a base agency package with one production html file per size', asyn
   assert.doesNotMatch(html, /SSE_DCO_PREVIEW_STATE/);
   assert.doesNotMatch(html, /triple_elec15_gas30_bill100/);
   assert.match(mapping, /heading1_text\ttext/);
-  assert.match(mapping, /offer_count_num\tinteger\t1-3/);
+  assert.match(mapping, /offer_count_num\tinteger\t0-3/);
   assert.match(mapping, /tc_type_enum\tenum\ttcs_only \| tcs_units/);
   assert.match(mapping, /cta_type_enum\tenum\troundel \| rectangle/);
   assert.match(mapping, /background_image_url_300x250\timage/);
@@ -297,6 +316,47 @@ test('builds a CDN-linked base agency package without packaged static assets', a
   assert.doesNotMatch(html, /MuseoSans_700\.otf/);
   assert.doesNotMatch(html, /src="\.\.\/assets\/SVG\//);
   assert.match(html, /id="bg-image" src="" data-packaged-src="" data-dco-field="background_image_url_728x90"/);
+  assert.match(html, /Enabler\.setDevDynamicContent\(devDynamicContent\)/);
+});
+
+test('builds a canonical agency zip with inlined SVGs, CDN font, and feed-only backgrounds', async () => {
+  const document = await readCreativeDocument();
+  const entries = await buildBasePackageEntries(document, { assetMode: 'canonical-agency' });
+  const names = entries.map((entry) => entry.path).sort();
+  const html = entries
+    .filter((entry) => entry.path.endsWith('/index.html'))
+    .map((entry) => String(entry.data || ''))
+    .join('\n');
+  const html728 = String(entries.find((entry) => entry.path === 'ads/728x90/index.html')?.data || '');
+
+  assert.ok(names.includes('mapping.txt'));
+  assert.ok(names.includes('ads/728x90/index.html'), 'agency Studio layout');
+  assert.ok(names.includes('ads/300x600/index.html'));
+  assert.ok(!names.includes('728x90.html'), 'not flat canonical layout');
+  assert.ok(!names.some((name) => name.includes('/SVG/') || name.includes('assets/SVG/')), 'SVGs are inlined');
+  assert.ok(!names.some((name) => /^ads\/assets\/bg_.*\.jpe?g$/i.test(name)), 'no packaged backgrounds');
+  assert.ok(!names.includes('ads/assets/fonts/Museo700-Regular.otf'), 'Museo loads from CDN');
+  assert.ok(!names.includes('assets/fonts/Museo700-Regular.otf'));
+
+  for (const url of CDN_SVG_URLS) {
+    assert.ok(!html.includes(url), `canonical agency must not use CDN SVG ${url}`);
+  }
+  assert.doesNotMatch(html, /_hiker\.jpg/, 'must not fall back to Studio hiker CDN backgrounds');
+  assert.match(html, /id="logo-act1"[^>]*src="data:image\/svg\+xml/);
+  assert.match(html, /id="plus-1"[^>]*src="data:image\/svg\+xml/);
+  assert.doesNotMatch(html, /src="(?:\.\.\/)?assets\/SVG\//);
+
+  assert.ok(html.includes(CDN_MUSEO_URL), 'Expected Museo CDN URL');
+  assert.match(html, new RegExp(
+    `font-family: "Museo";[\\s\\S]*?url\\("${CDN_MUSEO_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"\\) format\\("opentype"\\)`,
+  ));
+  assert.ok(!html.includes(CDN_MUSEO_SANS_URL));
+
+  assert.match(
+    html728,
+    /id="bg-image" src="" data-packaged-src="" data-dco-field="background_image_url_728x90"/,
+  );
+  assert.match(html728, /background_image_url_728x90\.Url = ""/);
   assert.match(html, /Enabler\.setDevDynamicContent\(devDynamicContent\)/);
 });
 

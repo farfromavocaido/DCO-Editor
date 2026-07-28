@@ -14,18 +14,20 @@ function SegmentedControl({
   options,
   onChange,
   tip,
+  disabled = false,
 }: {
   label: string;
   value: string | number;
   options: { value: string; label: string; tip?: string }[];
   onChange: (value: string) => void;
   tip?: string;
+  disabled?: boolean;
 }) {
   return (
     <ToolbarTip tip={tip || label} className="field field-compact">
-      <div className="field-inline">
+      <div className={`field-inline${disabled ? ' is-disabled' : ''}`}>
         <span className="field-label">{label}</span>
-        <div className="segmented segmented-compact" role="group" aria-label={label}>
+        <div className="segmented segmented-compact" role="group" aria-label={label} aria-disabled={disabled || undefined}>
           {options.map((option) => (
             <button
               key={option.value}
@@ -34,6 +36,7 @@ function SegmentedControl({
               aria-pressed={String(option.value) === String(value)}
               aria-label={option.tip || option.label}
               data-tip={option.tip || option.label}
+              disabled={disabled}
               onClick={() => onChange(option.value)}
             >
               {option.label}
@@ -140,6 +143,9 @@ export function TopBar() {
           tip="Number of offers shown in the ad"
           value={offerCount}
           options={[
+            ...(activeCampaignId === 'sse-dco'
+              ? [{ value: '0', label: '0', tip: 'No offers (brand / awareness)' }]
+              : []),
             { value: '1', label: '1', tip: 'Single offer' },
             { value: '2', label: '2', tip: 'Dual offers' },
             { value: '3', label: '3', tip: 'Triple offers' },
@@ -148,8 +154,11 @@ export function TopBar() {
         />
         <SegmentedControl
           label="T&Cs"
-          tip="Terms and conditions layout"
-          value={tcMode}
+          tip={Number(offerCount) === 0
+            ? 'T&Cs are hidden for the zero-offers variant'
+            : 'Terms and conditions layout'}
+          value={Number(offerCount) === 0 ? 'tcs_only' : tcMode}
+          disabled={Number(offerCount) === 0}
           options={[
             { value: 'tcs_only', label: 'Solo', tip: 'T&Cs only' },
             { value: 'tcs_units', label: 'Prices', tip: 'T&Cs with unit rates' },
@@ -222,6 +231,17 @@ export function TopBar() {
               >
                 Export Canonical Zip
               </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="toolbar-menu-primary"
+                onClick={() => {
+                  exportBasePackage({ assetMode: 'canonical-agency' }).catch((error) => setStatus(error.message, 'error'));
+                  setMoreOpen(false);
+                }}
+              >
+                Export Canonical Agency Zip
+              </button>
               <div className="toolbar-menu-separator" role="separator" />
               <button
                 type="button"
@@ -252,6 +272,17 @@ export function TopBar() {
                 }}
               >
                 Export HTML (SVG outlines)
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  buildHtml({ renderMode: 'outline', delivery: 'static' })
+                    .catch((error) => setStatus(error.message, 'error'));
+                  setMoreOpen(false);
+                }}
+              >
+                Export for Static
               </button>
               <button
                 type="button"

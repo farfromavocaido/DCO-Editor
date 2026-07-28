@@ -32,6 +32,10 @@ test('selectionHierarchy omits offers block for single layouts', () => {
   ]);
 });
 
+test('offerBlockLayerIds returns empty for zero offers', () => {
+  assert.deepEqual(offerBlockLayerIds(0), []);
+});
+
 test('dragTargetIdsForSelection returns all offer block layers for group selection', () => {
   assert.deepEqual(dragTargetIdsForSelection(OFFERS_BLOCK_ID, [OFFERS_BLOCK_ID], 3), [
     'offer-slot-1',

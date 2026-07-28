@@ -4,6 +4,11 @@
 
 ### Added
 
+- **Zero-offers DCO variant (`offers-0`)** on SSE DCO: TopBar Offers control gains `0` (sse-dco only). Hides offer slots, green wave, blue logo, and T&Cs; blue wave + white logo enter from the start; headlines render white with blank-aware equal screentime before CTA; per-size CTA repositioning via `offers-0|cta` rules. Existing `offers-1/2/3` unchanged.
+- **offers-0 editable rest geometry**: `offers-0|bluewave` and `offers-0|logo-act3` variantRules so wave/logo rest can be tuned without affecting offers 1–3; editor variant merge/write now follows document order (CSS cascade) so `offers-0|cta` wins over `cta-rect` for drag/align.
+- **Outline presentation snapshot**: editor outline/static exports capture the live preview after fit → symbol align → `layoutOffers` (all sizes) and bake those metrics into SVG paths — Animate-style “what you see is what you get.” Includes 0.6em `%`/`£`/`€`, final letter-spacing, bottom-align `translateY`, shared equalization, and plus/slot positions. API accepts optional `presentationSnapshots`; without them, `outline-bake` approximates via Museo metrics.
+- **Export for Static** (`renderMode: 'outline'`, `delivery: 'static'`): lean fixed-copy ZIP (`{slug}_html_static.zip`) with outlined text, inlined logo/wave/plus SVGs, flat `assets/<basename>.jpg` backgrounds, no Enabler/DV360 shell, and inactive layers pruned for the baked sample row. Sits alongside Studio **Export HTML (SVG outlines)**.
+- **Export Canonical Agency Zip** (`assetMode: 'canonical-agency'`): agency `ads/{size}/index.html` layout, Museo CDN, SVGs inlined, backgrounds feed-only (no packaged JPEGs, no hiker CDN sample).
 - **Export Canonical Zip** (`assetMode: 'embed'`): root `{size}.html` + `assets/` backgrounds, SVGs inlined, Museo from CDN only (no wave/logo/hiker CDN links); highlighted primary action in the More menu.
 - Client / GitHub preview page persists selected size, form values, per-size backgrounds, and zoom in `localStorage` across refresh; **Restore defaults** resets to the baked-in sample row.
 - Parallel campaign documents beside the existing SSE DCO creative JSON (`sse-hiker-welcome`, `sse-keepyuppy-welcome`, `sse-keepyuppy-discount`), with a TopBar campaign switcher that isolates load/save/export per document.
@@ -13,11 +18,21 @@
 
 ### Fixed
 
+- Offer plus Y parity: `layoutOffers` clears offer-slot motion for ink measure (editor scrub matches export rest); `300x600` offers-3 plus centres in the top→bottom gap (no digit-centred horizontal fallback); triangular detection allows slight bottom-slot slack; `glyphInk` unscales Range lines before applying canvas metrics so editor stage zoom no longer drifts plus Y vs HTML.
 - Editor play/scrub now applies keyframe CSS timing functions (`ease-out`, `cubic-bezier(...)`, etc.) in `frameAtPercent`, matching export `animation-timing-function`.
 - Dev server allows HMR when the editor is opened via `127.0.0.1` (`allowedDevOrigins` in `next.config.ts`).
 
 ### Changed
 
+- Hiker Welcome + Keepy Uppy Welcome/Discount: offer-slot enters now start with `act1_in` (stagger preserved), `enter_duration_pct` 5, and a softer ease-out (`cubic-bezier(0.25, 0.5, 0.35, 1)`). SSE DCO baseline unchanged.
+- **Export HTML (SVG outlines)** (and other outline renders without an explicit asset map) inline logo/wave/plus SVGs as data URIs, matching canonical embed packages; outline client/base ZIPs no longer ship duplicate `assets/SVG/` files. Outline HTML ZIPs also ship background JPEGs under `assets/` so relative paths resolve when opened from the download.
+- Outline text paths pre-quantize glyph coordinates before `opentype.js` `toSVG`, avoiding `d="…LNaN…"` from Museo float crumbs (e.g. `W`, `R`, `p`, `€`, `0`).
+- Outline HTML runtime now adds `.motion-ready` (same animation gate as font exports), so the 15s CSS clock actually starts instead of staying paused forever.
+- Outline fill color follows font-mode CSS: headlines/offers/legal default to brand navy (`rgb(0, 41, 117)`) when no color is authored; CTA/roundel keep their white fills. Outlined SVGs use content-tight height + `height: auto` so flex hosts (CTA) vertically center the label.
+- Outline typography parity: bake authored unitless `lineHeight` (was hardcoded `1.05`); keep outlined SVG at intrinsic size (no `width:100%` shrink) and zero CTA padding so 15px CTA copy is not scaled to ~10.8px inside `padding: 0 18px`.
+- Outline path bake uses the CSS line-box model (ascender + half-leading), so tight offer values (`lineHeight: 0.85`) no longer hang into absolutely positioned sublines; offer `.outlined-text` clips overflow like font-mode text.
+- Hiker Welcome Credit, Keepy Uppy Welcome Credit, and Keepy Uppy Top Discount rebuilt as exact SSE DCO structural clones (clock, layout, motion, presets); only campaign identity, sample-row feed values, and packaged `assets/` backgrounds differ.
+- Keepy Uppy Welcome Credit now shares Hiker Welcome Credit layout/positioning (variantRules + layer bases); Keepy Uppy sample copy and packaged backgrounds unchanged; Top Discount left as-is.
 - MPU (`300x250`) offer enter mid-ground 48px / ~2.5–2.85%; headlines back to 4% enter (default ease-out); wave sweeps stay on CSS `ease-out`.
 - Offer layout content edges use canvas glyph metrics (`actualBoundingBoxAscent` / `Descent`) so vertical pluses centre on true Museo ink (not Range line-boxes with half-leading); still after `fonts.ready` and before `.motion-ready`.
 - SVG plus placement uses the CSS layout box (not transformed `getBoundingClientRect`), so fadeUp `enter_dy` cannot push pluses down in export/preview; keeps the `.motion-ready` font/layout clock gate for cold/warm timeline parity.

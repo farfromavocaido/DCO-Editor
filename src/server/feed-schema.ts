@@ -13,7 +13,7 @@ export const FEED_SCHEMA_FIELDS = [
   { name: 'heading2_text', label: 'Heading 2', type: 'multiline', group: 'Copy', description: 'Act 2 headline copy; line breaks are preserved when the layer wraps.' },
   { name: 'heading3_text', label: 'Heading 3', type: 'multiline', group: 'Copy', description: 'Act 3 headline copy over the offer roundel (when enabled); line breaks are preserved when the layer wraps.' },
   { name: 'heading4_text', label: 'Heading 4', type: 'multiline', group: 'Copy', description: 'Act 4 headline copy over the CTA/endframe; line breaks are preserved when the layer wraps.' },
-  { name: 'offer_count_num', label: 'Offer count', type: 'integer', group: 'Creative State', description: 'Number of visible offer slots.', min: 1, max: 3 },
+  { name: 'offer_count_num', label: 'Offer count', type: 'integer', group: 'Creative State', description: 'Number of visible offer slots (0 = no offers / brand variant).', min: 0, max: 3 },
   { name: 'offer1_value_text', label: 'Offer 1 value', type: 'string', group: 'Offers', description: 'Primary value in offer slot 1.' },
   { name: 'offer1_sub_text', label: 'Offer 1 subline', type: 'string', group: 'Offers', description: 'Subline in offer slot 1.' },
   { name: 'offer2_value_text', label: 'Offer 2 value', type: 'string', group: 'Offers', description: 'Primary value in offer slot 2.' },

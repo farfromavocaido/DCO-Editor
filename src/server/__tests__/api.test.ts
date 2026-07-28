@@ -269,3 +269,26 @@ test('POST /api/creative/base-package can return a canonical zip', async () => {
   assert.ok(!bytes.includes(Buffer.from('assets/fonts/Museo700-Regular.otf')));
   assert.ok(!bytes.includes(Buffer.from(CDN_MUSEO_SANS_URL)));
 });
+
+test('POST /api/creative/base-package can return a canonical agency zip', async () => {
+  const response = await basePackagePost(new Request('http://localhost/api/creative/base-package', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ assetMode: 'canonical-agency' }),
+  }));
+
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get('content-type') || '', /application\/zip/);
+  assert.match(response.headers.get('content-disposition') || '', /SSE_DCO_canonical_agency_zip\.zip/);
+  const bytes = Buffer.from(await response.arrayBuffer());
+  assert.ok(bytes.includes(Buffer.from('mapping.txt')));
+  assert.ok(bytes.includes(Buffer.from('ads/728x90/index.html')));
+  assert.ok(bytes.includes(Buffer.from('data:image/svg+xml')));
+  assert.ok(bytes.includes(Buffer.from(CDN_MUSEO_URL)));
+  assert.ok(!bytes.includes(Buffer.from('728x90.html')));
+  assert.ok(!bytes.includes(Buffer.from('assets/bg_728x90.jpg')));
+  assert.ok(!bytes.includes(Buffer.from('ads/assets/SVG/SSELogoBlue.svg')));
+  assert.ok(!bytes.includes(Buffer.from(CDN_LOGO_URL)));
+  assert.ok(!bytes.includes(Buffer.from('_hiker.jpg')));
+  assert.ok(!bytes.includes(Buffer.from('ads/assets/fonts/Museo700-Regular.otf')));
+});

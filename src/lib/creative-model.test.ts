@@ -591,7 +591,7 @@ test('copies headline layout between offer counts and can reset to baseline', ()
   );
 });
 
-test('merges active variant rules in active scope order and writes to the highest priority rule', () => {
+test('merges active variant rules in document order and writes to the last matching rule', () => {
   const doc = {
     version: 1,
     sizes: {
@@ -641,6 +641,63 @@ test('merges active variant rules in active scope order and writes to the highes
   const next = updateCreativeTargetValue(doc, '300x250', 'headline-act3', ['offers-2', 'frames-4'], 'top', 22);
   assert.equal(next.sizes['300x250'].variantRules[0].props.top, undefined);
   assert.equal(next.sizes['300x250'].variantRules[1].props.top, 22);
+});
+
+test('offers-0 CTA variant wins over cta-rect for values and writes', () => {
+  const doc = {
+    version: 1,
+    sizes: {
+      '300x250': {
+        layers: [
+          {
+            id: 'cta',
+            label: 'Cta',
+            kind: 'text',
+            base: {
+              left: 49,
+              top: 100,
+              width: 80,
+              height: 80,
+              backgroundColor: 'rgb(0, 41, 117)',
+              cssClass: 'cta',
+            },
+            clips: [],
+          },
+        ],
+        classRules: [],
+        variantRules: [
+          {
+            id: 'cta-rect|cta',
+            scope: 'cta-rect',
+            layerId: 'cta',
+            cssClass: 'cta',
+            props: { left: 90, top: 112, width: 120, height: 36 },
+            editable: true,
+          },
+          {
+            id: 'offers-0|cta',
+            scope: 'offers-0',
+            layerId: 'cta',
+            cssClass: 'cta',
+            props: { left: 18, top: 107, backgroundColor: 'rgb(0, 229, 165)' },
+            editable: true,
+          },
+        ],
+      },
+    },
+  };
+
+  const scopes = ['offers-0', 'tc-solo', 'cta-rect', 'frames-3'];
+  const target = findCreativeTarget(doc, '300x250', 'cta', scopes);
+  assert.equal(target.values.left, 18);
+  assert.equal(target.values.top, 107);
+  assert.equal(target.values.width, 120);
+  assert.equal(target.values.backgroundColor, 'rgb(0, 229, 165)');
+  assert.equal(target.writeSource.ruleId, 'offers-0|cta');
+
+  const next = updateCreativeTargetValue(doc, '300x250', 'cta', scopes, 'top', 99);
+  assert.equal(next.sizes['300x250'].variantRules[0].props.top, 112);
+  assert.equal(next.sizes['300x250'].variantRules[1].props.top, 99);
 });
 
 test('keeps the optional roundel frame as a simple editable circle layer', () => {

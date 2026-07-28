@@ -22,6 +22,8 @@
  * `getBoundingClientRect`, because CSS animations override inline
  * `transform:none` and would bake fadeUp `enter_dy` into top. Legacy text
  * pluses still neutralize via temporary `animation:none` + measure Range ink.
+ * Offer-slot scrub/CSS motion transforms are cleared for the whole layout
+ * pass so `glyphInk` anchors match export’s pre-`.motion-ready` rest pose.
  * Fit-time `translateY` on offer-values is intentionally left alone.
  *
  * Authored subline width stays the fit constraint (ink×1.10 is design-guide only).
@@ -149,6 +151,12 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
    * Baseline = Range line top + half-leading + fontBoundingBoxAscent when
    * available — strips CSS half-leading that made vertical pluses sit high.
    * Value runs measure digit samples so %/€ symbol size does not skew ascent.
+   *
+   * IMPORTANT: unscale the Range line into ancestor-local CSS px before
+   * combining with canvas metrics. Canvas ascent/descent are CSS-px (from
+   * font-size), while getBoundingClientRect is screen-px — under the editor
+   * stage scale() transform, mixing them inflated ink bottoms and drove
+   * plus Y wrong (300x600 too low, MPU raise too high).
    */
   function glyphInk(el, ancestor) {
     var fallback = textInk(el, ancestor);
@@ -181,25 +189,31 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     }
     if (!(line && (line.width > 0 || line.height > 0))) return fallback;
 
+    // Local CSS px first — matches canvas metrics and stage zoom.
+    var localLine = clientToLocal(line, ancestor);
+    if (!(localLine.width > 0 || localLine.height > 0)) return fallback;
+
     var fontAscent = metrics.fontBoundingBoxAscent;
     var fontDescent = metrics.fontBoundingBoxDescent;
     var baseline;
     if (isFinite(fontAscent) && isFinite(fontDescent) && (fontAscent + fontDescent) > 0.5) {
-      var leading = line.height - (fontAscent + fontDescent);
+      var leading = localLine.height - (fontAscent + fontDescent);
       if (!(leading > 0)) leading = 0;
-      baseline = line.top + leading / 2 + fontAscent;
+      baseline = localLine.top + leading / 2 + fontAscent;
     } else {
       var inkH = ascent + descent;
-      baseline = line.top + (line.height - inkH) / 2 + ascent;
+      baseline = localLine.top + (localLine.height - inkH) / 2 + ascent;
     }
     var inkTop = baseline - ascent;
     var inkBottom = baseline + descent;
-    return clientToLocal({
-      left: line.left,
+    return {
+      left: localLine.left,
       top: inkTop,
-      width: Math.max(line.width, 1),
+      width: Math.max(localLine.width, 1),
       height: Math.max(inkBottom - inkTop, 1),
-    }, ancestor);
+      right: localLine.left + Math.max(localLine.width, 1),
+      bottom: inkTop + Math.max(inkBottom - inkTop, 1),
+    };
   }
 
   function unionRect(a, b) {
@@ -376,7 +390,10 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
       if (bottom && bottom.top > topRow[0].top + rowTol) {
         var left = Math.min(topRow[0].left, topRow[1].left);
         var right = Math.max(topRow[0].right, topRow[1].right);
-        if (bottom.cx >= left && bottom.cx <= right) return 'triangular';
+        // Allow a little horizontal slack — strict cx-in-span used to miss
+        // offers-3 triangles and fall through to horizontal (digit-centred plus).
+        var slack = Math.max(8, (right - left) * 0.08);
+        if (bottom.cx >= left - slack && bottom.cx <= right + slack) return 'triangular';
       }
     }
     var lefts = boxes.map(function(b) { return b.left; });
@@ -394,11 +411,11 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
   }
 
   /**
-   * Run fn while el is at motion rest (legacy text pluses). CSS animations
-   * override plain inline transform:none, so we must clear the animation with
-   * !important for the measure. Callers should prefer layout while the stage
-   * clock is still held (.motion-ready not set) so restoring the animation
-   * does not desync a running timeline.
+   * Run fn while el is at motion rest. CSS animations override plain inline
+   * transform:none, so we clear animation with !important for the measure.
+   * Callers should prefer layout while the stage clock is still held
+   * (.motion-ready not set) so restoring the animation does not desync a
+   * running timeline. Does not touch child fit-time translateY.
    */
   function withNeutralMotion(el, fn) {
     if (!el || !el.style) return fn();
@@ -427,6 +444,48 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
       style.animation = prevAnimation;
       style.webkitAnimation = prevWebkitAnimation;
       style.transition = prevTransition;
+    }
+  }
+
+  /** Neutralize motion on many nodes (offer slots) for one layout pass. */
+  function withNeutralMotionAll(els, fn) {
+    if (!els || !els.length) return fn();
+    var saved = [];
+    for (var i = 0; i < els.length; i += 1) {
+      var el = els[i];
+      if (!el || !el.style) continue;
+      var style = el.style;
+      saved.push({
+        el: el,
+        transform: style.transform,
+        webkitTransform: style.webkitTransform,
+        animation: style.animation,
+        webkitAnimation: style.webkitAnimation,
+        transition: style.transition,
+      });
+      style.setProperty('animation', 'none', 'important');
+      style.setProperty('-webkit-animation', 'none', 'important');
+      style.setProperty('transform', 'none', 'important');
+      style.setProperty('-webkit-transform', 'none', 'important');
+      style.transition = 'none';
+    }
+    if (saved.length) void saved[0].el.offsetWidth;
+    try {
+      return fn();
+    } finally {
+      for (var r = 0; r < saved.length; r += 1) {
+        var item = saved[r];
+        var s = item.el.style;
+        s.removeProperty('animation');
+        s.removeProperty('-webkit-animation');
+        s.removeProperty('transform');
+        s.removeProperty('-webkit-transform');
+        s.transform = item.transform;
+        s.webkitTransform = item.webkitTransform;
+        s.animation = item.animation;
+        s.webkitAnimation = item.webkitAnimation;
+        s.transition = item.transition;
+      }
     }
   }
 
@@ -494,13 +553,26 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
 
   /**
    * Triangular: X between the top pair’s value inks.
-   * Default Y = lower of the two top-row value bottoms (plus top-aligned).
-   * On MPU / 970×250: plus top meets top-row subline caps (SVG fills its box).
+   * mode:
+   *   - 'sublineTop' (MPU / 970×250): plus top meets top-row subline caps
+   *   - 'midGap' (300×600): centre in the gap below top-row sublines → bottom value
+   *   - 'valueBottom' (default): plus top at max(top-row value bottoms)
    */
-  function plusAnchorTriangular(topA, topB, _bottomCluster, alignToSublineTop) {
+  function plusAnchorTriangular(topA, topB, bottomCluster, mode) {
+    var x = (topA.valueRight + topB.valueLeft) / 2;
+    if (mode === 'midGap' && bottomCluster) {
+      var upperBottomA = topA.sublineBottom != null ? topA.sublineBottom : topA.valueBottom;
+      var upperBottomB = topB.sublineBottom != null ? topB.sublineBottom : topB.valueBottom;
+      var upperBottom = Math.max(upperBottomA, upperBottomB);
+      return {
+        x: x,
+        y: (upperBottom + bottomCluster.valueTop) / 2,
+        alignY: 'center',
+      };
+    }
     var valueY = Math.max(topA.valueBottom, topB.valueBottom);
     var y = valueY;
-    if (alignToSublineTop) {
+    if (mode === 'sublineTop') {
       var tops = [];
       if (topA.sublineTop != null) tops.push(topA.sublineTop);
       if (topB.sublineTop != null) tops.push(topB.sublineTop);
@@ -512,10 +584,7 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
         y = Math.min(valueY, Math.min.apply(null, tops));
       }
     }
-    return {
-      x: (topA.valueRight + topB.valueLeft) / 2,
-      y: y,
-    };
+    return { x: x, y: y, alignY: 'top' };
   }
 
   function remeasureSorted(slots, axis) {
@@ -597,8 +666,23 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     for (var i = 0; i < byTop.length; i += 1) {
       if (!topRow.length || Math.abs(byTop[i].box.top - byTop[0].box.top) <= rowTol) {
         topRow.push(byTop[i]);
-      } else {
+      } else if (!bottom) {
         bottom = byTop[i];
+      }
+    }
+    // Three-slot triangle: never fall back to horizontal (that centres the plus
+    // on the digit band). If rowTol swallowed the bottom or skipped it, force
+    // the two highest as the top row and the lowest as the base.
+    if ((topRow.length !== 2 || !bottom) && byTop.length === 3) {
+      var hiA = byTop[0];
+      var hiB = byTop[1];
+      var lo = byTop[2];
+      if (
+        lo.box.top > hiA.box.top + rowTol
+        && Math.abs(hiB.box.top - hiA.box.top) <= rowTol * 1.5
+      ) {
+        topRow = [hiA, hiB];
+        bottom = lo;
       }
     }
     if (topRow.length !== 2 || !bottom) {
@@ -633,16 +717,19 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     bottom.slot.style.left = (topCentroidX - bottom.cluster.width / 2 - bottom.cluster.insetLeft) + 'px';
     bottom = { slot: bottom.slot, box: boxOf(bottom.slot), cluster: clusterForSlot(bottom.slot) };
 
-    // MPU + 970×250: raise plus so glyph top meets top-row subline tops.
-    // 300×600 (and anything else triangular) keeps value-bottom alignment.
-    var alignToSublineTop = sizeKey === '300x250' || sizeKey === '970x250';
+    // MPU / 970×250: raise plus top to top-row subline caps.
+    // 300×600: centre in the gap under top-row sublines (matches editor).
+    // Else: plus top at max(top-row value bottoms).
+    var mode = 'valueBottom';
+    if (sizeKey === '300x250' || sizeKey === '970x250') mode = 'sublineTop';
+    else if (sizeKey === '300x600') mode = 'midGap';
     var anchor = plusAnchorTriangular(
       topRow[0].cluster,
       topRow[1].cluster,
       bottom.cluster,
-      alignToSublineTop,
+      mode,
     );
-    placePlus(pluses[0], anchor.x, anchor.y, 'top');
+    placePlus(pluses[0], anchor.x, anchor.y, anchor.alignY || 'top');
   }
 
   return function layoutOffers(root) {
@@ -695,10 +782,14 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
       layoutSlotChildren(slots[s]);
     }
 
-    var family = detectFamily(slots);
-    if (family === 'horizontal') distributeHorizontal(slots, pluses);
-    else if (family === 'vertical') distributeVertical(slots, pluses);
-    else if (family === 'triangular') distributeTriangular(slots, pluses, sizeKey);
+    // Match export pre-motion rest: clear slot scrub/CSS motion for ink measure.
+    // Fit translateY on .offer-value children is preserved (not on the slot).
+    withNeutralMotionAll(slots, function() {
+      var family = detectFamily(slots);
+      if (family === 'horizontal') distributeHorizontal(slots, pluses);
+      else if (family === 'vertical') distributeVertical(slots, pluses);
+      else if (family === 'triangular') distributeTriangular(slots, pluses, sizeKey);
+    });
   };
 })`;
 

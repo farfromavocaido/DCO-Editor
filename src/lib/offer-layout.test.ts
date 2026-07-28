@@ -43,6 +43,8 @@ test('runtime encodes ink-first helpers and per-family plus anchors', () => {
   assert.match(layoutOffersRuntime, /function glyphInk\(/);
   assert.match(layoutOffersRuntime, /actualBoundingBoxAscent/);
   assert.match(layoutOffersRuntime, /fontBoundingBoxAscent/);
+  // Unscale Range → local CSS px before combining canvas metrics (stage zoom).
+  assert.match(layoutOffersRuntime, /var localLine = clientToLocal\(line, ancestor\)/);
   assert.match(layoutOffersRuntime, /function clientToLocal\(/);
   assert.match(layoutOffersRuntime, /function withNeutralMotion\(/);
   // SVG pluses place from the layout box (skip transformed getBoundingClientRect).
@@ -55,8 +57,8 @@ test('runtime encodes ink-first helpers and per-family plus anchors', () => {
   assert.match(layoutOffersRuntime, /withNeutralMotion\(plus,/);
   // Ink accepts height-only (wrapped sublines); must not require width > 0 alone.
   assert.match(layoutOffersRuntime, /rect\.width > 0 \|\| rect\.height > 0/);
-  // Vertical factors subline cluster ink; triangular top-aligns to value bottoms
-  // (MPU / 970×250 raise toward top-row subline caps). SVG pluses use box ink.
+  // Vertical factors subline cluster ink; triangular modes: sublineTop / midGap /
+  // valueBottom. SVG pluses use box ink. Slot motion neutralized for measure.
   assert.match(layoutOffersRuntime, /sublineBottom/);
   assert.match(layoutOffersRuntime, /upperBottom \+ lowerCluster\.valueTop/);
   assert.doesNotMatch(layoutOffersRuntime, /upperCluster\.clusterBottom \+ lowerCluster\.valueTop/);
@@ -64,7 +66,10 @@ test('runtime encodes ink-first helpers and per-family plus anchors', () => {
   assert.match(layoutOffersRuntime, /sublineTop/);
   assert.match(layoutOffersRuntime, /sublineBoxTop/);
   assert.match(layoutOffersRuntime, /sizeKey === '300x250' \|\| sizeKey === '970x250'/);
-  assert.match(layoutOffersRuntime, /placePlus\(pluses\[0\], anchor\.x, anchor\.y, 'top'\)/);
+  assert.match(layoutOffersRuntime, /sizeKey === '300x600'/);
+  assert.match(layoutOffersRuntime, /mode === 'midGap'/);
+  assert.match(layoutOffersRuntime, /withNeutralMotionAll\(slots,/);
+  assert.match(layoutOffersRuntime, /placePlus\(pluses\[0\], anchor\.x, anchor\.y, anchor\.alignY/);
   assert.match(layoutOffersRuntime, /alignY === 'top'/);
   assert.match(layoutOffersRuntime, /tagName === 'IMG'/);
   assert.equal(OFFER_SUBLINE_INK_WIDTH_RATIO, 1.1);
@@ -727,4 +732,286 @@ test('SVG plus images place from the layout box, ignoring animated enter_dy', ()
   // Transformed getBoundingClientRect path would over-correct downward to ~25.
   const top = parseFloat(plus.style.top);
   assert.ok(Math.abs(top - 15) < 2, `SVG plus top=${top}, expected 15 (box place); transformed ink would be ~25`);
+});
+
+const installTriangularStage = (opts: {
+  size: string;
+  width: number;
+  height: number;
+  slotMotionY?: number;
+}) => {
+  const { document } = installDom();
+  const stage = document.createElement('div');
+  stage.setAttribute('data-size', opts.size);
+  stage.style.cssText = `position:relative;width:${opts.width}px;height:${opts.height}px`;
+  Object.defineProperty(stage, 'offsetWidth', { value: opts.width });
+  Object.defineProperty(stage, 'offsetHeight', { value: opts.height });
+  stage.getBoundingClientRect = () => stubRect(0, 0, opts.width, opts.height) as DOMRect;
+
+  const motionY = opts.slotMotionY || 0;
+  const liveMotionY = (slot: HTMLElement) => {
+    const t = slot.style.transform || '';
+    // withNeutralMotionAll sets transform:none !important → treat as rest.
+    if (!t || t === 'none') return 0;
+    const match = /translate3d\(\s*[^,]+,\s*(-?\d+(?:\.\d+)?)px/.exec(t);
+    return match ? Number(match[1]) : 0;
+  };
+  const mkSlot = (
+    index: number,
+    left: number,
+    top: number,
+    width: number,
+    height: number,
+    valueTop: number,
+    valueBottom: number,
+    subTop: number,
+    subBottom: number,
+  ) => {
+    const slot = document.createElement('div');
+    slot.setAttribute('data-gwd-group', 'OfferSlot');
+    slot.setAttribute('data-offer-index', String(index));
+    slot.style.cssText = `position:absolute;left:${left}px;top:${top}px;width:${width}px;height:${height}px`;
+    if (motionY) slot.style.transform = `translate3d(0px, ${motionY}px, 0px)`;
+    Object.defineProperty(slot, 'offsetWidth', { value: width });
+    Object.defineProperty(slot, 'offsetHeight', { value: height });
+    Object.defineProperty(slot, 'offsetLeft', { value: left });
+    Object.defineProperty(slot, 'offsetTop', { value: top });
+    slot.getBoundingClientRect = () => stubRect(left, top + liveMotionY(slot), width, height) as DOMRect;
+
+    const value = document.createElement('p');
+    value.className = 'offer-value';
+    value.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:64px';
+    const run = document.createElement('span');
+    run.className = 'offer-value-run';
+    run.textContent = `${index}5%`;
+    run.getBoundingClientRect = () => stubRect(
+      left + 20,
+      top + liveMotionY(slot) + valueTop,
+      80,
+      valueBottom - valueTop,
+    ) as DOMRect;
+
+    const sub = document.createElement('p');
+    sub.className = 'offer-subline';
+    sub.textContent = 'OFF';
+    sub.style.cssText = 'position:absolute;left:0;top:64px;width:100%;height:38px';
+    Object.defineProperty(sub, 'offsetTop', { value: 64 });
+    sub.getBoundingClientRect = () => stubRect(
+      left + 10,
+      top + liveMotionY(slot) + subTop,
+      100,
+      subBottom - subTop,
+    ) as DOMRect;
+
+    value.appendChild(run);
+    slot.appendChild(value);
+    slot.appendChild(sub);
+    return slot;
+  };
+
+  // Top pair at y=198, bottom at y=326 — classic offers-3 triangle.
+  stage.appendChild(mkSlot(1, 6, 198, 140, 229, 0, 64, 64, 90));
+  stage.appendChild(mkSlot(2, 152, 198, 140, 140, 0, 64, 64, 90));
+  stage.appendChild(mkSlot(3, 76, 326, 140, 127, 0, 64, 64, 90));
+
+  const plus = document.createElement('img');
+  plus.id = 'plus-1';
+  plus.className = 'plus-1';
+  plus.setAttribute('src', 'data:image/svg+xml,plus');
+  plus.style.cssText = 'position:absolute;left:134px;top:281px;width:26px;height:26px';
+  Object.defineProperty(plus, 'offsetWidth', { value: 26 });
+  Object.defineProperty(plus, 'offsetHeight', { value: 26 });
+  Object.defineProperty(plus, 'offsetParent', { get: () => stage });
+  stage.appendChild(plus);
+  document.body.appendChild(stage);
+
+  document.createRange = function createRange() {
+    const range = {
+      target: null as Element | null,
+      selectNodeContents(node: Element) { range.target = node; },
+      detach() {},
+      getBoundingClientRect() {
+        const el = range.target as HTMLElement | null;
+        return el ? el.getBoundingClientRect() : stubRect(0, 0, 0, 0);
+      },
+    };
+    return range as unknown as Range;
+  };
+
+  return { stage, plus };
+};
+
+test('slot scrub transform does not change triangular plus top (rest-pose measure)', () => {
+  const rest = installTriangularStage({ size: '300x250', width: 300, height: 250 });
+  layoutOffers(rest.stage);
+  const restTop = parseFloat(rest.plus.style.top);
+
+  const scrubbed = installTriangularStage({
+    size: '300x250',
+    width: 300,
+    height: 250,
+    slotMotionY: -12,
+  });
+  layoutOffers(scrubbed.stage);
+  const scrubTop = parseFloat(scrubbed.plus.style.top);
+
+  assert.ok(Number.isFinite(restTop), `rest plus top=${restTop}`);
+  assert.equal(
+    scrubTop,
+    restTop,
+    `scrub plus top=${scrubTop} should match rest top=${restTop}`,
+  );
+  // Slot motion must be restored after the layout pass.
+  const slot1 = scrubbed.stage.querySelector('[data-offer-index="1"]') as HTMLElement;
+  assert.match(slot1.style.transform || '', /translate3d\(0px, -12px, 0px\)/);
+});
+
+test('300x600 triangular plus centres in the gap below top-row sublines', () => {
+  const { stage, plus } = installTriangularStage({
+    size: '300x600',
+    width: 300,
+    height: 600,
+  });
+  layoutOffers(stage);
+
+  // Top-row value centres ≈ 198+32 = 230 → digit-centred horizontal would put
+  // plus top ≈ 230 - 13 = 217. Mid-gap: sublineBottom max≈198+90=288,
+  // bottom valueTop≈326 → centre Y≈307 → plus top≈307-13=294.
+  const top = parseFloat(plus.style.top);
+  const valueCenterTop = 230 - 13;
+  assert.ok(top > valueCenterTop + 20, `plus top=${top} should sit below digit-centre (~${valueCenterTop})`);
+  assert.ok(top > 270 && top < 320, `plus top=${top}, expected mid-gap ~294`);
+});
+
+test('stage zoom does not shift triangular plus Y (glyphInk local metrics)', () => {
+  // Editor stage uses transform:scale(); canvas font metrics are CSS-px.
+  // Mixing scaled Range rects with unscaled ascent used to inflate bottoms.
+  const stubCanvasMetrics = () => {
+    const proto = globalThis.HTMLCanvasElement?.prototype;
+    if (!proto) return () => {};
+    const prev = proto.getContext;
+    proto.getContext = function getContext() {
+      return {
+        font: '',
+        measureText() {
+          return {
+            actualBoundingBoxAscent: 48,
+            actualBoundingBoxDescent: 12,
+            fontBoundingBoxAscent: 52,
+            fontBoundingBoxDescent: 14,
+            width: 40,
+          };
+        },
+      } as unknown as CanvasRenderingContext2D;
+    };
+    return () => { proto.getContext = prev; };
+  };
+
+  const restoreCanvas = stubCanvasMetrics();
+  try {
+    const at1 = installTriangularStage({ size: '300x600', width: 300, height: 600 });
+    // 1× client rects (export / 100% zoom)
+    layoutOffers(at1.stage);
+    const top1 = parseFloat(at1.plus.style.top);
+
+    const atZoom = installTriangularStage({ size: '300x600', width: 300, height: 600 });
+    const scale = 0.7;
+    // Scale every getBoundingClientRect on the stage tree (editor zoom).
+    const scaleRect = (el: Element) => {
+      const prev = (el as HTMLElement).getBoundingClientRect.bind(el);
+      (el as HTMLElement).getBoundingClientRect = () => {
+        const r = prev();
+        return stubRect(r.left * scale, r.top * scale, r.width * scale, r.height * scale) as DOMRect;
+      };
+      for (const child of el.children) scaleRect(child);
+    };
+    scaleRect(atZoom.stage);
+    layoutOffers(atZoom.stage);
+    const topZoom = parseFloat(atZoom.plus.style.top);
+
+    assert.ok(Number.isFinite(top1), `1× plus top=${top1}`);
+    assert.ok(
+      Math.abs(topZoom - top1) < 1.5,
+      `zoomed plus top=${topZoom} should match 1× top=${top1}`,
+    );
+  } finally {
+    restoreCanvas();
+  }
+});
+
+test('triangular three-slot layout does not fall back to horizontal digit-centred plus', () => {
+  // Bottom slot slightly outside the strict top-row x-span (old detectFamily miss).
+  const { document } = installDom();
+  const stage = document.createElement('div');
+  stage.setAttribute('data-size', '300x600');
+  stage.style.cssText = 'position:relative;width:300px;height:600px';
+  Object.defineProperty(stage, 'offsetWidth', { value: 300 });
+  Object.defineProperty(stage, 'offsetHeight', { value: 600 });
+  stage.getBoundingClientRect = () => stubRect(0, 0, 300, 600) as DOMRect;
+
+  const mk = (index: number, left: number, top: number, w: number, h: number) => {
+    const slot = document.createElement('div');
+    slot.setAttribute('data-gwd-group', 'OfferSlot');
+    slot.setAttribute('data-offer-index', String(index));
+    slot.style.cssText = `position:absolute;left:${left}px;top:${top}px;width:${w}px;height:${h}px`;
+    Object.defineProperty(slot, 'offsetWidth', { value: w });
+    Object.defineProperty(slot, 'offsetHeight', { value: h });
+    Object.defineProperty(slot, 'offsetLeft', { value: left });
+    Object.defineProperty(slot, 'offsetTop', { value: top });
+    slot.getBoundingClientRect = () => stubRect(left, top, w, h) as DOMRect;
+    const value = document.createElement('p');
+    value.className = 'offer-value';
+    const run = document.createElement('span');
+    run.className = 'offer-value-run';
+    run.textContent = '15%';
+    run.getBoundingClientRect = () => stubRect(left + 20, top + 10, 60, 40) as DOMRect;
+    const sub = document.createElement('p');
+    sub.className = 'offer-subline';
+    sub.textContent = 'OFF';
+    sub.style.cssText = 'position:absolute;left:0;top:64px';
+    Object.defineProperty(sub, 'offsetTop', { value: 64 });
+    sub.getBoundingClientRect = () => stubRect(left + 10, top + 55, 80, 20) as DOMRect;
+    value.appendChild(run);
+    slot.appendChild(value);
+    slot.appendChild(sub);
+    return slot;
+  };
+
+  // Bottom centred but slightly wider than the top pair span.
+  stage.appendChild(mk(1, 20, 198, 120, 200));
+  stage.appendChild(mk(2, 160, 198, 120, 140));
+  stage.appendChild(mk(3, 10, 340, 280, 120));
+
+  const plus = document.createElement('img');
+  plus.id = 'plus-1';
+  plus.className = 'plus-1';
+  plus.style.cssText = 'position:absolute;left:134px;top:281px;width:26px;height:26px';
+  Object.defineProperty(plus, 'offsetWidth', { value: 26 });
+  Object.defineProperty(plus, 'offsetHeight', { value: 26 });
+  Object.defineProperty(plus, 'offsetParent', { get: () => stage });
+  stage.appendChild(plus);
+  document.body.appendChild(stage);
+
+  document.createRange = function createRange() {
+    const range = {
+      target: null as Element | null,
+      selectNodeContents(node: Element) { range.target = node; },
+      detach() {},
+      getBoundingClientRect() {
+        const el = range.target as HTMLElement | null;
+        return el ? el.getBoundingClientRect() : stubRect(0, 0, 0, 0);
+      },
+    };
+    return range as unknown as Range;
+  };
+
+  layoutOffers(stage);
+
+  // Horizontal would put all three on one row (bottom.top collapses toward 198).
+  const bottom = stage.querySelector('[data-offer-index="3"]') as HTMLElement;
+  const bottomTop = parseFloat(bottom.style.top || '340') || bottom.offsetTop;
+  assert.ok(bottomTop > 280, `bottom slot top=${bottomTop} should stay in the lower row`);
+
+  const plusTop = parseFloat(plus.style.top);
+  assert.ok(plusTop > 240, `plus top=${plusTop} should not be digit-centred (~200)`);
 });

@@ -1,0 +1,465 @@
+- generic [active] [ref=f1e1]:
+  - main [ref=f1e2]:
+    - generic [ref=f1e3]:
+      - generic "Display Creative Studio" [ref=f1e4]:
+        - strong [ref=f1e6]: Display Creative
+        - generic [ref=f1e7]: Studio
+      - navigation "Creative context" [ref=f1e8]:
+        - generic [ref=f1e9]:
+          - generic [ref=f1e10]: Campaign
+          - combobox "Campaign" [ref=f1e11]:
+            - option "SSE DCO" [selected]
+            - option "Hiker Welcome Credit"
+            - option "Keepy Uppy Welcome Credit"
+            - option "Keepy Uppy Top Discount"
+        - generic [ref=f1e12]:
+          - generic [ref=f1e13]: Format
+          - combobox "Format" [ref=f1e14]:
+            - option "160x600"
+            - option "300x250"
+            - option "300x600" [selected]
+            - option "320x50"
+            - option "728x90"
+            - option "970x250"
+        - generic [ref=f1e15]:
+          - generic [ref=f1e16]: Content
+          - combobox "Content" [ref=f1e17]:
+            - option "1 · A different kind of energy" [selected]
+        - button "Creative state" [ref=f1e19]:
+          - generic [ref=f1e20]:
+            - generic [ref=f1e21]: State
+            - text: 3 offers · Rect
+        - generic [ref=f1e24]:
+          - generic [ref=f1e25]: Timing
+          - combobox "Timing" [ref=f1e26]:
+            - option "Three acts"
+            - option "Four acts" [selected]
+      - generic [ref=f1e27]:
+        - group "Canvas mode" [ref=f1e28]:
+          - button "Edit" [ref=f1e29]
+          - button "Preview" [ref=f1e30]
+          - button "QA" [pressed] [ref=f1e31]
+        - button "Undo" [disabled] [ref=f1e32]
+        - button "Redo" [disabled] [ref=f1e36]
+        - button "Save creative" [disabled] [ref=f1e40]:
+          - generic [ref=f1e44]: Saved
+        - generic "Ready" [ref=f1e59]
+    - generic [ref=f1e60]:
+      - complementary "Objects and properties" [ref=f1e61]:
+        - generic [ref=f1e62]:
+          - generic [ref=f1e63]:
+            - generic [ref=f1e64]:
+              - generic [ref=f1e65]: 300x600 / Waves / background
+              - strong [ref=f1e66]: Background
+              - generic [ref=f1e67]: Shared class
+            - generic [ref=f1e68]:
+              - button "Hide selection" [ref=f1e69]
+              - button "Lock selection" [ref=f1e73]
+              - button "Duplicate selection" [ref=f1e77]
+              - button "Delete selection" [ref=f1e81]
+          - generic [ref=f1e84]:
+            - generic [ref=f1e85]:
+              - textbox "Search objects" [ref=f1e90]:
+                - /placeholder: Find objects
+                - text: cta
+              - group "Object view" [ref=f1e91]:
+                - button "structure" [pressed] [ref=f1e92]
+                - button "depth" [ref=f1e97]
+                - button "focus" [ref=f1e101]
+              - generic "Object filters" [ref=f1e105]:
+                - button "Text" [ref=f1e106]
+                - button "Images" [ref=f1e107]
+                - button "Shapes" [ref=f1e108]
+                - button "Hidden" [ref=f1e109]
+                - button "Locked" [ref=f1e110]
+                - button "Animated" [ref=f1e111]
+                - button "Overrides" [ref=f1e112]
+            - tree [ref=f1e113]:
+              - generic [ref=f1e114]:
+                - button "CTA 1" [expanded] [ref=f1e115]:
+                  - generic [ref=f1e118]: CTA
+                  - generic [ref=f1e119]: "1"
+                - generic [ref=f1e121]:
+                  - button "Cta ●" [ref=f1e122]:
+                    - generic [ref=f1e125]: Cta
+                    - generic "Active override" [ref=f1e130]: ●
+                  - generic [ref=f1e131]:
+                    - button "Hide Cta" [ref=f1e132]
+                    - button "Lock Cta" [ref=f1e136]
+        - separator "Resize objects and properties" [ref=f1e140]
+        - generic [ref=f1e141]:
+          - generic [ref=f1e142]:
+            - strong [ref=f1e143]: Properties
+            - generic [ref=f1e144]: Shared class
+          - generic [ref=f1e145]:
+            - generic [ref=f1e147]:
+              - generic [ref=f1e148]: Editing
+              - strong [ref=f1e149]: Shared class
+            - generic [ref=f1e150]:
+              - button "Position & size 0, 0" [expanded] [ref=f1e151]:
+                - strong [ref=f1e154]: Position & size
+                - generic [ref=f1e155]: 0, 0
+              - generic [ref=f1e156]:
+                - generic [ref=f1e157]:
+                  - generic [ref=f1e158]:
+                    - generic [ref=f1e159]: Left
+                    - textbox "Left" [ref=f1e160]: "0"
+                  - generic [ref=f1e161]:
+                    - generic [ref=f1e162]: Top
+                    - textbox "Top" [ref=f1e163]: "0"
+                  - generic [ref=f1e164]:
+                    - generic [ref=f1e165]: Width
+                    - textbox "Width" [ref=f1e166]: "300"
+                  - generic [ref=f1e167]:
+                    - generic [ref=f1e168]: Height
+                    - textbox "Height" [ref=f1e169]: "600"
+                - group "Resize behaviour" [ref=f1e170]:
+                  - button "Frame" [pressed] [ref=f1e171]
+                  - button "Scale" [ref=f1e172]
+                - generic [ref=f1e173]:
+                  - button "Align left" [ref=f1e174]
+                  - button "Align centre" [ref=f1e175]
+                  - button "Align right" [ref=f1e176]
+                  - button "Align top" [ref=f1e177]
+                  - button "Align middle" [ref=f1e178]
+                  - button "Align bottom" [ref=f1e179]
+            - button "Content Authored" [ref=f1e181]:
+              - strong [ref=f1e184]: Content
+              - generic [ref=f1e185]: Authored
+            - button "Appearance image" [expanded] [ref=f1e187]:
+              - strong [ref=f1e190]: Appearance
+              - generic [ref=f1e191]: image
+            - button "Text behaviour Not text" [ref=f1e194]:
+              - strong [ref=f1e197]: Text behaviour
+              - generic [ref=f1e198]: Not text
+            - button "Data No binding" [ref=f1e200]:
+              - strong [ref=f1e203]: Data
+              - generic [ref=f1e204]: No binding
+            - generic [ref=f1e205]:
+              - button "Animation No motion" [expanded] [ref=f1e206]:
+                - strong [ref=f1e209]: Animation
+                - generic [ref=f1e210]: No motion
+              - generic [ref=f1e211]:
+                - generic [ref=f1e212]:
+                  - generic [ref=f1e213]: Add motion at 19%
+                  - button "Fade in" [ref=f1e214]
+                  - button "Fade out" [ref=f1e215]
+                  - button "Slide from right" [ref=f1e216]
+                  - button "Fade up" [ref=f1e217]
+                - paragraph [ref=f1e218]: Add an entrance, exit or emphasis at the playhead.
+            - button "Advanced bg-image" [ref=f1e220]:
+              - strong [ref=f1e223]: Advanced
+              - generic [ref=f1e224]: bg-image
+        - separator "Resize authoring sidebar" [ref=f1e225]
+      - region "Canvas" [ref=f1e226]:
+        - generic [ref=f1e227]:
+          - generic [ref=f1e228]:
+            - generic [ref=f1e229]: Background
+            - strong [ref=f1e230]: 300x600 · shared
+          - generic [ref=f1e231]:
+            - group "Resize mode" [ref=f1e232]:
+              - button "Frame" [pressed] [ref=f1e233]
+              - button "Scale" [ref=f1e234]
+            - generic "Arrange selection" [ref=f1e235]:
+              - button "L" [ref=f1e236]
+              - button "↔" [ref=f1e237]
+              - button "R" [ref=f1e238]
+              - button "T" [ref=f1e239]
+              - button "↕" [ref=f1e240]
+              - button "B" [ref=f1e241]
+            - generic [ref=f1e242]:
+              - button "Lock selection" [ref=f1e243]
+              - button "Hide selection" [ref=f1e247]
+              - button "Duplicate selection" [ref=f1e251]
+              - button "Delete selection" [ref=f1e255]
+          - generic [ref=f1e258]:
+            - group "Canvas chrome" [ref=f1e259]:
+              - button "Edit" [ref=f1e260]
+              - button "Preview" [ref=f1e261]
+              - button "QA" [pressed] [ref=f1e262]
+            - generic "Canvas zoom" [ref=f1e263]:
+              - button "Zoom out" [ref=f1e264]: −
+              - button "Fit canvas" [pressed] [ref=f1e265]: Fit
+              - button "100% zoom" [ref=f1e266]: "100"
+              - button "Zoom in" [ref=f1e267]: +
+            - generic [ref=f1e268]: Auto
+        - generic [ref=f1e269]:
+          - generic [ref=f1e270]:
+            - text: Align to left edge of canvas Centre horizontally on canvas Align to right edge of canvas Align to top edge of canvas Centre vertically on canvas Align to bottom edge of canvas Even horizontal spacing between selected items Even vertical spacing between selected items Zoom out Fit banner to viewport 100% zoom 200% zoom Zoom in
+            - generic [ref=f1e272]:
+              - generic "Drag onto canvas to add a vertical guide" [ref=f1e274]:
+                - generic: "0"
+                - generic: "50"
+                - generic: "100"
+                - generic: "150"
+                - generic: "200"
+                - generic: "250"
+                - generic: "300"
+              - generic "Drag onto canvas to add a horizontal guide" [ref=f1e275]:
+                - generic: "0"
+                - generic: "50"
+                - generic: "100"
+                - generic: "150"
+                - generic: "200"
+                - generic: "250"
+                - generic: "300"
+                - generic: "350"
+                - generic: "400"
+                - generic: "450"
+                - generic: "500"
+                - generic: "550"
+                - generic: "600"
+              - generic [ref=f1e279]:
+                - paragraph [ref=f1e280]: A different kind of energy
+                - paragraph: A different kind of energy
+                - paragraph: Our very best electricity plan
+                - paragraph: A different kind of energy
+                - generic: Switch today
+                - paragraph: Save up to
+                - paragraph: €1,080
+                - paragraph: "*T&Cs apply"
+                - paragraph: "Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat"
+                - generic:
+                  - generic [ref=f1e281]:
+                    - paragraph [ref=f1e282]:
+                      - generic [ref=f1e283]: 15%
+                    - paragraph [ref=f1e284]: OFF ELECTRICITY*
+                  - generic [ref=f1e285]:
+                    - paragraph [ref=f1e286]:
+                      - generic [ref=f1e287]: 30%
+                    - paragraph [ref=f1e288]: OFF GAS*
+                  - generic [ref=f1e289]:
+                    - paragraph [ref=f1e290]:
+                      - generic [ref=f1e291]: €125
+                    - paragraph [ref=f1e292]: OFF YOUR FIRST BILL*
+                - generic: Current
+                - generic "Selected Background":
+                  - generic: Background
+                  - button "Resize nw" [ref=f1e293]
+                  - button "Resize ne" [ref=f1e294]
+                  - button "Resize se" [ref=f1e295]
+                  - button "Resize sw" [ref=f1e296]
+          - complementary "Canvas warnings" [ref=f1e297]:
+            - generic [ref=f1e298]:
+              - generic [ref=f1e299]: QA
+              - strong [ref=f1e300]: Needs attention
+            - paragraph [ref=f1e301]:
+              - text: Text in
+              - code [ref=f1e303]: .roundel-value
+              - text: is clipped.
+      - region "Timeline" [ref=f1e304]:
+        - separator "Resize timeline" [ref=f1e305]
+        - generic [ref=f1e306]:
+          - generic "Playback controls" [ref=f1e307]:
+            - button "Go to start" [ref=f1e308]: │◀
+            - button "Previous beat" [ref=f1e309]: ‹
+            - button "Play" [ref=f1e310]
+            - button "Next beat" [ref=f1e313]: ›
+            - button "Go to end" [ref=f1e314]: ▶│
+          - generic [ref=f1e315]:
+            - generic [ref=f1e316]: Frames
+            - textbox "Current time" [ref=f1e317]: "86"
+            - generic [ref=f1e318]: f
+          - group "Timeline view" [ref=f1e319]:
+            - button "Groups" [ref=f1e320]
+            - button "Depth" [pressed] [ref=f1e321]
+            - button "Focus" [ref=f1e322]
+          - group "Time display" [ref=f1e323]:
+            - button "Percent" [ref=f1e324]
+            - button "Seconds" [ref=f1e325]
+            - button "Frames" [pressed] [ref=f1e326]
+          - button "Add motion at playhead" [ref=f1e328]: + Motion at 86f
+          - button "Collapse timeline" [ref=f1e329]: Collapse
+        - generic [ref=f1e330]:
+          - generic [ref=f1e331]:
+            - generic [ref=f1e332]:
+              - strong [ref=f1e333]: Composition
+              - generic [ref=f1e334]: Four acts
+            - button "Terms Solo 1 clip" [ref=f1e335]:
+              - generic [ref=f1e336]: Terms Solo
+              - generic [ref=f1e337]: 1 clip
+            - button "Unit Rate Prices 1 clip" [ref=f1e338]:
+              - generic [ref=f1e339]: Unit Rate Prices
+              - generic [ref=f1e340]: 1 clip
+            - button "Terms Prices 1 clip" [ref=f1e341]:
+              - generic [ref=f1e342]: Terms Prices
+              - generic [ref=f1e343]: 1 clip
+            - button "Offer Slot 3 1 clip" [ref=f1e344]:
+              - generic [ref=f1e345]: Offer Slot 3
+              - generic [ref=f1e346]: 1 clip
+            - button "Plus 2 1 clip" [ref=f1e347]:
+              - generic [ref=f1e348]: Plus 2
+              - generic [ref=f1e349]: 1 clip
+            - button "Offer Slot 2 1 clip" [ref=f1e350]:
+              - generic [ref=f1e351]: Offer Slot 2
+              - generic [ref=f1e352]: 1 clip
+            - button "Plus 1 1 clip" [ref=f1e353]:
+              - generic [ref=f1e354]: Plus 1
+              - generic [ref=f1e355]: 1 clip
+            - button "Offer Slot 1 1 clip" [ref=f1e356]:
+              - generic [ref=f1e357]: Offer Slot 1
+              - generic [ref=f1e358]: 1 clip
+            - button "Roundel Value 1 clip" [ref=f1e359]:
+              - generic [ref=f1e360]: Roundel Value
+              - generic [ref=f1e361]: 1 clip
+            - button "Logo Act3 1 clip" [ref=f1e362]:
+              - generic [ref=f1e363]: Logo Act3
+              - generic [ref=f1e364]: 1 clip
+            - button "Roundel Text 1 clip" [ref=f1e365]:
+              - generic [ref=f1e366]: Roundel Text
+              - generic [ref=f1e367]: 1 clip
+            - button "Logo Act1 1 clip" [ref=f1e368]:
+              - generic [ref=f1e369]: Logo Act1
+              - generic [ref=f1e370]: 1 clip
+            - button "Roundel Frame 1 clip" [ref=f1e371]:
+              - generic [ref=f1e372]: Roundel Frame
+              - generic [ref=f1e373]: 1 clip
+            - button "Cta 1 clip" [ref=f1e374]:
+              - generic [ref=f1e375]: Cta
+              - generic [ref=f1e376]: 1 clip
+            - button "Headline Act3 1 clip" [ref=f1e377]:
+              - generic [ref=f1e378]: Headline Act3
+              - generic [ref=f1e379]: 1 clip
+            - button "Headline Act2 1 clip" [ref=f1e380]:
+              - generic [ref=f1e381]: Headline Act2
+              - generic [ref=f1e382]: 1 clip
+            - button "Headline Act1 1 clip" [ref=f1e383]:
+              - generic [ref=f1e384]: Headline Act1
+              - generic [ref=f1e385]: 1 clip
+            - button "Headline Act4 1 clip" [ref=f1e386]:
+              - generic [ref=f1e387]: Headline Act4
+              - generic [ref=f1e388]: 1 clip
+            - button "Bluewave 1 clip" [ref=f1e389]:
+              - generic [ref=f1e390]: Bluewave
+              - generic [ref=f1e391]: 1 clip
+            - button "Background No motion" [ref=f1e392]:
+              - generic [ref=f1e393]: Background
+              - generic [ref=f1e394]: No motion
+            - button "Greenwave 1 clip" [ref=f1e395]:
+              - generic [ref=f1e396]: Greenwave
+              - generic [ref=f1e397]: 1 clip
+          - generic [ref=f1e398]:
+            - generic [ref=f1e399]:
+              - generic [ref=f1e400]: 0f
+              - generic [ref=f1e401]: 90f
+              - generic [ref=f1e402]: 180f
+              - generic [ref=f1e403]: 270f
+              - generic [ref=f1e404]: 360f
+              - generic [ref=f1e405]: 450f
+            - button "start 1" [ref=f1e406]:
+              - generic [ref=f1e407]: start
+              - generic [ref=f1e408]: "1"
+            - button "act1 begin 1" [ref=f1e409]:
+              - generic [ref=f1e410]: act1 begin
+              - generic [ref=f1e411]: "1"
+            - button "act1 in 1" [ref=f1e412]:
+              - generic [ref=f1e413]: act1 in
+              - generic [ref=f1e414]: "1"
+            - button "offer1 in 1" [ref=f1e415]:
+              - generic [ref=f1e416]: offer1 in
+              - generic [ref=f1e417]: "1"
+            - button "offer2 in 1" [ref=f1e418]:
+              - generic [ref=f1e419]: offer2 in
+              - generic [ref=f1e420]: "1"
+            - button "offer3 in 1" [ref=f1e421]:
+              - generic [ref=f1e422]: offer3 in
+              - generic [ref=f1e423]: "1"
+            - button "plus1 in 1" [ref=f1e424]:
+              - generic [ref=f1e425]: plus1 in
+              - generic [ref=f1e426]: "1"
+            - button "plus2 in 1" [ref=f1e427]:
+              - generic [ref=f1e428]: plus2 in
+              - generic [ref=f1e429]: "1"
+            - button "terms in 2" [ref=f1e430]:
+              - generic [ref=f1e431]: terms in
+              - generic [ref=f1e432]: "2"
+            - button "act2 in 2" [ref=f1e433]:
+              - generic [ref=f1e434]: act2 in
+              - generic [ref=f1e435]: "2"
+            - button "act1 out 3" [ref=f1e436]:
+              - generic [ref=f1e437]: act1 out
+              - generic [ref=f1e438]: "3"
+            - button "bn h2 in 0" [ref=f1e439]:
+              - generic [ref=f1e440]: bn h2 in
+              - generic [ref=f1e441]: "0"
+            - button "act2 out 0" [ref=f1e442]:
+              - generic [ref=f1e443]: act2 out
+              - generic [ref=f1e444]: "0"
+            - button "act3 in 0" [ref=f1e445]:
+              - generic [ref=f1e446]: act3 in
+              - generic [ref=f1e447]: "0"
+            - button "bn offers in 0" [ref=f1e448]:
+              - generic [ref=f1e449]: bn offers in
+              - generic [ref=f1e450]: "0"
+            - button "wave2 in 3" [ref=f1e451]:
+              - generic [ref=f1e452]: wave2 in
+              - generic [ref=f1e453]: "3"
+            - button "act3 out 0" [ref=f1e454]:
+              - generic [ref=f1e455]: act3 out
+              - generic [ref=f1e456]: "0"
+            - button "swap 0" [ref=f1e457]:
+              - generic [ref=f1e458]: swap
+              - generic [ref=f1e459]: "0"
+            - button "roundel in 4" [ref=f1e460]:
+              - generic [ref=f1e461]: roundel in
+              - generic [ref=f1e462]: "4"
+            - button "offers exit 9" [ref=f1e463]:
+              - generic [ref=f1e464]: offers exit
+              - generic [ref=f1e465]: "9"
+            - button "tc exit 0" [ref=f1e466]:
+              - generic [ref=f1e467]: tc exit
+              - generic [ref=f1e468]: "0"
+            - button "bn blue in 0" [ref=f1e469]:
+              - generic [ref=f1e470]: bn blue in
+              - generic [ref=f1e471]: "0"
+            - button "bn white in 0" [ref=f1e472]:
+              - generic [ref=f1e473]: bn white in
+              - generic [ref=f1e474]: "0"
+            - button "cta in 4" [ref=f1e475]:
+              - generic [ref=f1e476]: cta in
+              - generic [ref=f1e477]: "4"
+            - button "act4 in 3" [ref=f1e478]:
+              - generic [ref=f1e479]: act4 in
+              - generic [ref=f1e480]: "3"
+            - button "bn cta in 0" [ref=f1e481]:
+              - generic [ref=f1e482]: bn cta in
+              - generic [ref=f1e483]: "0"
+            - button "cta pulse start 0" [ref=f1e484]:
+              - generic [ref=f1e485]: cta pulse start
+              - generic [ref=f1e486]: "0"
+            - button "cta pulse peak 0" [ref=f1e487]:
+              - generic [ref=f1e488]: cta pulse peak
+              - generic [ref=f1e489]: "0"
+            - button "cta pulse end 0" [ref=f1e490]:
+              - generic [ref=f1e491]: cta pulse end
+              - generic [ref=f1e492]: "0"
+            - button "act3 exit 3" [ref=f1e493]:
+              - generic [ref=f1e494]: act3 exit
+              - generic [ref=f1e495]: "3"
+            - button "end 3" [ref=f1e496]:
+              - generic [ref=f1e497]: end
+              - generic [ref=f1e498]: "3"
+            - generic: 86f
+            - generic [ref=f1e499]:
+              - button "⌁ Terms Solo fade" [ref=f1e501]
+              - button "⌁ Unit Rate Prices fade" [ref=f1e506]
+              - button "⌁ Terms Prices fade" [ref=f1e511]
+              - button "⌁ Offer Slot 3 slideInRight" [ref=f1e516]
+              - button "⌁ Plus 2 fadeUp" [ref=f1e521]
+              - button "⌁ Offer Slot 2 slideInRight" [ref=f1e526]
+              - button "⌁ Plus 1 fadeUp" [ref=f1e531]
+              - button "⌁ Offer Slot 1 slideInRight" [ref=f1e536]
+              - button "⌁ Roundel Value popPulse" [ref=f1e541]
+              - button "⌁ Logo Act3 fade" [ref=f1e546]
+              - button "⌁ Roundel Text popPulse" [ref=f1e551]
+              - button "⌁ Logo Act1 fade" [ref=f1e556]
+              - button "⌁ Roundel Frame popPulse" [ref=f1e561]
+              - button "⌁ Cta popPulse" [ref=f1e566]
+              - button "⌁ Headline Act3 slideInRight" [ref=f1e571]
+              - button "⌁ Headline Act2 slideInRight" [ref=f1e576]
+              - button "⌁ Headline Act1 slideInRight" [ref=f1e581]
+              - button "⌁ Headline Act4 slideInRight" [ref=f1e586]
+              - button "⌁ Bluewave waveSweep" [ref=f1e591]
+              - button "⌁ Greenwave waveSweep" [ref=f1e597]
+  - button "Open Next.js Dev Tools" [ref=f1e54] [cursor=pointer]
+  - alert [ref=f1e58]

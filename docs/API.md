@@ -22,7 +22,14 @@ Validates and writes the request body to the selected campaign JSON file. Campai
 
 ### `POST /api/creative/export`
 
-Builds HTML for all sizes into `output/`. Optional body: `{ document, renderMode: 'font' | 'outline', download }`. Outline mode bakes fixed-copy SVG text paths and skips Museo packaging. When `download: true`, also returns a ZIP attachment of those HTML files.
+Builds HTML for all sizes into `output/`. Optional body: `{ document, renderMode: 'font' | 'outline', delivery: 'studio' | 'static', download, presentationSnapshots }`.
+
+- `renderMode: 'outline'` bakes fixed-copy SVG text paths, inlines logo/wave/plus SVGs as data URIs, stages background JPEGs, and skips Museo packaging.
+- `presentationSnapshots` (outline): per-size editor capture after fit/symbol-align/layout (`fontSize`, `letterSpacingEm`, `alignOffsetY`, plus/slot positions). Editor exports always send this; without it the server approximates via Museo metrics.
+- `delivery: 'static'` (outline only) strips Enabler/DV360 shell, prunes inactive layers for the baked sample row, and flattens backgrounds to `assets/<basename>.jpg`. Download filename: `{slug}_html_static.zip`.
+- Default `delivery: 'studio'` keeps the Studio-shaped outline ZIP (`{slug}_html_outlines.zip`) with nested `assets/…` paths.
+
+When `download: true`, returns a ZIP attachment of the HTML files plus staged backgrounds (outline modes).
 
 ### `POST /api/creative/{size}/export`
 
@@ -59,8 +66,9 @@ Returns the agency base upload ZIP. Optional body: `{ document, assetMode, rende
 | `packaged` (default) | `ads/{size}/index.html` | Local OTF in ZIP | Files in ZIP | Feed-only (not packaged) |
 | `cdn` | `ads/{size}/index.html` | Studio CDN Museo | Studio CDN (+ plus data URI) | Feed-only (hiker CDN sample fallback) |
 | `embed` (canonical) | `{size}.html` + `assets/` at zip root | Studio CDN Museo only | Inlined data URIs | Relative `assets/bg_*.jpg` (no asset CDNs) |
+| `canonical-agency` | `ads/{size}/index.html` | Studio CDN Museo only | Inlined data URIs | Feed-only (empty; no packaged JPEGs, no hiker sample) |
 
-Canonical download filename: `{slug}_canonical_zip.zip`.
+Download filenames: `{slug}_canonical_zip.zip`, `{slug}_canonical_agency_zip.zip`, `{slug}_base_cdn_zip.zip`, `{slug}_base_zip.zip`.
 
 ## Feed schema
 

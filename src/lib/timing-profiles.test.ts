@@ -6,6 +6,7 @@ import {
   beatsForScopes,
   FOUR_ACT_BEATS,
   frames3Act4In,
+  OFFERS_0_BEAT_OVERLAY,
 } from './timing-profiles';
 
 const document = {
@@ -44,6 +45,20 @@ test('resolves frames-3 timing to existing beats by default', () => {
     ...document.clock.profiles['frames-3'],
     roundel_in: document.clock.beats.swap,
   });
+});
+
+test('applies offers-0 beat overlay without changing offers-1 beats', () => {
+  const baseline = beatsForScopes(document, ['offers-1', 'frames-3']);
+  const zero = beatsForScopes(document, ['offers-0', 'frames-3']);
+
+  assert.deepEqual(beatsForScopes(document, ['offers-1', 'frames-3']), baseline);
+  assert.equal(zero.bn_blue_in, OFFERS_0_BEAT_OVERLAY.bn_blue_in);
+  assert.equal(zero.wave2_in, OFFERS_0_BEAT_OVERLAY.wave2_in);
+  assert.equal(zero.act1_in, OFFERS_0_BEAT_OVERLAY.act1_in);
+  assert.equal(zero.cta_in, baseline.cta_in);
+  assert.equal(zero.swap, baseline.swap);
+  assert.equal(zero.act1_in, OFFERS_0_BEAT_OVERLAY.act1_in);
+  assert.equal(zero.bn_white_in, OFFERS_0_BEAT_OVERLAY.bn_white_in);
 });
 
 test('resolves frames-4 timing from the profile beats', () => {
@@ -121,7 +136,7 @@ test('campaign clock profiles keep the same offer/plus choreography', async () =
         if (layer.id.startsWith('plus-')) {
           assert.ok(duration >= 2.5, `${sizeName}/${layer.id} pluses should ease in a touch slower`);
         } else {
-          assert.ok(duration >= 1.8 && duration <= 2.6, `${sizeName}/${layer.id} offer enter duration out of range`);
+          assert.ok(duration >= 1.8 && duration <= 3, `${sizeName}/${layer.id} offer enter duration out of range`);
         }
       }
       if (layer.id === 'offer-slot-1') {

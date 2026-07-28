@@ -82,7 +82,8 @@ Cold first impression therefore matches warm Replay: pluses and offers share
 one timeline after correct Museo metrics. The runtime does **not** listen for
 `loadingdone` (that re-ran layout mid fadeUp). `placePlus` pauses the plus
 playhead while measuring (never `animation: none`, which restarts clips).
-The editor preview still refits on `fonts.ready` against the scrub playhead.
+The editor preview still refits on `fonts.ready`; `layoutOffers` clears offer
+slot motion transforms for that measure pass so scrub pose matches export rest.
 Fits are idempotent — every pass resets its inline styles first.
 
 **The brand font is Museo — `Museo700-Regular.otf`, the slab family — NOT
@@ -116,14 +117,20 @@ slots/pluses (and side-by-side re-anchor).
 `actualBoundingBoxAscent` / `Descent` (true Museo glyph ink). The DOM Range
 only locates the line so half-leading can be stripped from the alphabetic
 baseline — raw Range rects are line-box-ish and bias vertical pluses upward.
-Falls back to Range → CSS box when canvas metrics are missing. CSS boxes are
-only for authored envelopes, family detection, and writing `left`/`top`.
+Range lines are unscaled into ancestor-local CSS px *before* combining with
+canvas metrics (editor stage `transform: scale` must not mix screen-px with
+font-size px). Falls back to Range → CSS box when canvas metrics are missing.
+CSS boxes are only for authored envelopes, family detection, and writing
+`left`/`top`.
 
 **Transform-neutral plus placement:** SVG plus *images* are placed from the CSS
 layout box (never `getBoundingClientRect`) so CSS fadeUp `enter_dy` cannot bake
 into durable `top` — animated transforms override plain inline `transform:none`.
 Legacy text pluses still neutralize via temporary `animation:none` + Range ink.
-Combined with the `.motion-ready` clock gate, cold first paint matches warm Replay.
+Offer slots clear scrub/CSS motion for the whole `layoutOffers` pass so
+`glyphInk` anchors match export’s pre-`.motion-ready` rest (fit `translateY` on
+`.offer-value` is kept). Combined with the `.motion-ready` clock gate, cold
+first paint matches warm Replay.
 
 **Authored subline width is the fit constraint** (pink text box in the
 inspector). Value-ink × 1.10 is a design guide when authoring only — the
@@ -136,10 +143,39 @@ you set.
 | side-by-side | subline to the right and starts above the value box bottom | keep authored width/**top** (baseline via flex-end in a real height box); runtime only re-anchors **left** to value-ink right so drag still works |
 | horizontal | 2+ slots, wider Δx | equal ink-cluster gaps; plus at value-ink midpoint (glyph-centred) |
 | vertical | 2+ slots, taller Δy | equal gaps; plus Y = midpoint of upper **subline glyph-ink** bottom (else value glyph bottom) → next value glyph top; SVG box-centred; measured after fonts settle / before motion starts |
-| triangular | two top-row + one centred below | equalize top pair; centre bottom under top centroid; plus is SVG (`assets/SVG/sse-plus.svg`) filling a square box — top-aligned to max(top-row value bottoms) by default; on `300x250` / `970x250` plus top meets top-row subline caps (`300x600` unchanged); X in the gap between top value inks |
+| triangular | two top-row + one centred below | equalize top pair; centre bottom under top centroid; plus is SVG (`assets/SVG/sse-plus.svg`) — on `300x250` / `970x250` top-aligned to top-row subline caps; on `300x600` centred in the gap below top-row sublines → bottom value top; else top-aligned to max(top-row value bottoms); X in the gap between top value inks |
 
 Plus anchors are named helpers (`plusAnchorHorizontal` / `Vertical` /
 `Triangular`) so family rules stay explicit and shared through `placePlus`.
+
+## Outline export (font → SVG paths)
+
+Fixed-copy outline / static HTML is an **Adobe Animate-style snapshot**: what the
+editor preview shows for the active sample row is what gets baked. Editor
+exports walk every size, run fit → symbol align → `layoutOffers`, capture
+presentation metrics (`src/lib/outline-snapshot.ts`), and POST them with the
+export. The outliner then **locks** those numbers — it does not re-fit at serve
+time.
+
+When no snapshot is provided (API/tests/CLI), `src/server/outline-bake.ts`
+approximates the same pipeline with Museo opentype metrics (shared size,
+authored letter-spacing → tracking squeeze, bottom-align, 0.6em symbols).
+
+Pipeline:
+
+1. Prefer snapshot `fontSize` / `letterSpacingEm` / `alignOffsetY` / plus·slot
+   positions; else resolve target metrics + metric fit (including shared
+   equalization across visible offer values/sublines).
+2. Offer values: bake `%` / `£` / `€` at **0.6em** with ink-bottom align
+   (opentype glyph `yMin`, same intent as `alignOfferValueSymbols`).
+3. Line box = `fontSize × lineHeight` (or raw px if `lineHeight > 4`).
+4. **CSS half-leading baseline** for line `i`:
+   `y = ascender + (lineBox − content) / 2 + i × lineBox`
+   where `content = ascender − descender` at the fitted size.
+5. Emit a content-tight SVG (`height = lines × lineBox`). Bottom-align uses an
+   SVG group `translate(0, alignOffsetY)`. Offer `.outlined-text` clips overflow.
+6. CTA: zero host padding; SVG at intrinsic size (no `width: 100%` scale-down).
+7. Snapshot plus/slot `left`/`top` write as inline styles over class CSS.
 
 ## Tests
 
@@ -148,6 +184,8 @@ Plus anchors are named helpers (`plusAnchorHorizontal` / `Vertical` /
 - `src/lib/text-fit-rules.test.ts` — rule derivation from the creative JSON.
 - `src/lib/offer-layout.test.ts` — ink-first plus placement (overflowing
   subline box, glyph vs line-box), side-by-side ink lock, runtime shape.
+- `src/server/__tests__/text-outline.test.ts` — path bake, half-leading,
+  authored lineHeight, static delivery shell.
 - `src/server/__tests__/creative-exporter.test.ts` — the exported runtime:
   engine inlined and executable, texts bound before fitting, font refit wired,
   Museo-only packaging in every export flavour.

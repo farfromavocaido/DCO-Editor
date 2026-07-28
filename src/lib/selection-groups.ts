@@ -34,7 +34,9 @@ export const slotLayerIdForTarget = (targetId: string) => {
 };
 
 export const offerBlockLayerIds = (offerCount: number) => {
-  const count = Math.max(1, Math.min(3, Number(offerCount) || 1));
+  const parsed = Number(offerCount);
+  const count = Number.isFinite(parsed) ? Math.max(0, Math.min(3, parsed)) : 1;
+  if (count === 0) return [];
   const ids = [];
   for (let index = 1; index <= count; index += 1) {
     ids.push(`offer-slot-${index}`);
@@ -104,7 +106,8 @@ export const selectionHierarchy = (
     return selectionPathForTarget(document, size, deepestTargetId, activeScopes, offerCount);
   }
 
-  const count = Math.max(1, Math.min(3, Number(offerCount) || 1));
+  const parsedCount = Number(offerCount);
+  const count = Number.isFinite(parsedCount) ? Math.max(0, Math.min(3, parsedCount)) : 1;
   if (deepestTargetId === OFFERS_BLOCK_ID) {
     return count >= 2 ? [OFFERS_BLOCK_ID] : [];
   }

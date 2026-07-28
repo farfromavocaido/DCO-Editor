@@ -55,7 +55,25 @@ export const beatsForFrameScope = (
   };
 };
 
+/** Zero-offers: blue wave + white logo from start; headlines no longer wait on greenwave. */
+export const OFFERS_0_BEAT_OVERLAY = {
+  bn_blue_in: 0,
+  wave2_in: 0,
+  bn_white_in: 6,
+  act1_begin: 4,
+  act1_in: 7,
+};
+
+export const applyOffers0BeatOverlay = (beats: Record<string, number> = {}) => ({
+  ...beats,
+  ...OFFERS_0_BEAT_OVERLAY,
+});
+
 export const beatsForScopes = (
   document: Record<string, unknown> | null,
   activeScopes: string[] = [],
-) => beatsForFrameScope(document, activeFrameScope(activeScopes));
+) => {
+  const beats = beatsForFrameScope(document, activeFrameScope(activeScopes));
+  if (activeScopes.includes('offers-0')) return applyOffers0BeatOverlay(beats);
+  return beats;
+};

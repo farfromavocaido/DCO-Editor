@@ -60,6 +60,41 @@ export const hasHeadlineSkips = (
   profile === 'frames-4',
 ).size > 0;
 
+/** Eligible headline acts for the active frame profile (act 3 only with roundel). */
+export const eligibleHeadlineActs = (includeRoundelFrame = false) => (
+  includeRoundelFrame ? [1, 2, 3, 4] : [1, 2, 4]
+);
+
+export const isZeroOffersRow = (row: Record<string, unknown> = {}) => {
+  const parsed = Number.parseInt(String(row.offer_count_num ?? ''), 10);
+  return Number.isFinite(parsed) && parsed === 0;
+};
+
+/**
+ * Policy B for offers-0: blank acts are omitted; remaining acts share
+ * [act1_in, cta_in) evenly. A blank endframe (act 4) does not stretch earlier
+ * headlines into the CTA window.
+ */
+export const equalHeadlineWindowsForZeroOffers = (
+  headings: string[],
+  includeRoundelFrame = false,
+  beats: Record<string, number> = {},
+) => {
+  const eligible = eligibleHeadlineActs(includeRoundelFrame);
+  const activeActs = eligible.filter((act) => Boolean(headings[act - 1]));
+  const windowStart = Number(beats.act1_in ?? 0);
+  const windowEnd = Number(beats.cta_in ?? beats.bn_cta_in ?? 100);
+  const span = Math.max(0.01, windowEnd - windowStart);
+  const slice = activeActs.length ? span / activeActs.length : span;
+  const windows = new Map();
+  activeActs.forEach((act, index) => {
+    const start = Number((windowStart + slice * index).toFixed(4));
+    const end = Number((windowStart + slice * (index + 1)).toFixed(4));
+    windows.set(act, { start, end });
+  });
+  return { activeActs, windows, windowStart, windowEnd };
+};
+
 const hiddenKeyframes = (): CreativeKeyframe[] => ([
   { at: 0, translate: [0, 0], opacity: 0 },
   { at: 100, translate: [0, 0], opacity: 0 },
@@ -169,6 +204,28 @@ const layerInkColor = (layer: Record<string, unknown> | undefined) => {
   return typeof color === 'string' && color.trim() ? color.trim() : null;
 };
 
+const rebuildSlideWindow = (
+  window: HeadlineWindow,
+  start: number,
+  end: number,
+  sourceClips: AnimationClip[] = [],
+  beats: Record<string, number> = {},
+) => {
+  const source = sourceClips[0] || {};
+  const params = { ...(source.params || {}) };
+  const clip = {
+    id: `${window.layerId}-equal-split`,
+    preset: source.preset || 'slideInRight',
+    start,
+    end,
+    params,
+  };
+  window.start = start;
+  window.end = end;
+  window.hidden = false;
+  window.keyframes = compileAnimationClips([clip], beats);
+};
+
 export const buildHeadlineMotionPlan = (
   layers: Array<Record<string, unknown>> = [],
   row: Record<string, unknown> = {},
@@ -177,7 +234,10 @@ export const buildHeadlineMotionPlan = (
 ) => {
   const includeRoundelFrame = profile === 'frames-4';
   const headings = headlineTextsFromRow(row);
-  const skipped = skippedHeadlineActs(headings, includeRoundelFrame);
+  const zeroOffers = isZeroOffersRow(row);
+  const skipped = zeroOffers
+    ? new Set()
+    : skippedHeadlineActs(headings, includeRoundelFrame);
   const headlineLayers = HEADLINE_LAYER_IDS
     .map((id) => layers.find((layer) => layer.id === id))
     .filter(Boolean);
@@ -202,8 +262,36 @@ export const buildHeadlineMotionPlan = (
       enterDurationPct: Number.isFinite(enterDurationPct) && enterDurationPct > 0
         ? enterDurationPct
         : DEFAULT_SKIP_FADE_PCT,
+      _clips: clips,
     };
   });
+
+  if (zeroOffers) {
+    const { activeActs, windows: equalWindows } = equalHeadlineWindowsForZeroOffers(
+      headings,
+      includeRoundelFrame,
+      beats,
+    );
+    const eligible = new Set(eligibleHeadlineActs(includeRoundelFrame));
+    for (const window of windows) {
+      if (!eligible.has(window.act) || !activeActs.includes(window.act)) {
+        window.hidden = true;
+        window.keyframes = hiddenKeyframes();
+        continue;
+      }
+      const slot = equalWindows.get(window.act);
+      if (!slot) {
+        window.hidden = true;
+        window.keyframes = hiddenKeyframes();
+        continue;
+      }
+      rebuildSlideWindow(window, slot.start, slot.end, window._clips, beats);
+    }
+    for (const window of windows) delete window._clips;
+    return windows;
+  }
+
+  for (const window of windows) delete window._clips;
 
   for (let act = 2; act <= 4; act += 1) {
     if (act === 3 && !includeRoundelFrame) continue;
@@ -454,14 +542,35 @@ export const headlineTransitionRuntimeBlock = (
           return skipped;
         }
 
+        function __isZeroOffers(data) {
+          var parsed = parseInt(data && data.offer_count_num, 10);
+          return isFinite(parsed) && parsed === 0;
+        }
+
+        function __eligibleHeadlineActs(includeRoundel) {
+          return includeRoundel ? [1, 2, 3, 4] : [1, 2, 4];
+        }
+
+        function __applyOffers0BeatOverlay(beats) {
+          var next = Object.assign({}, beats || {});
+          next.bn_blue_in = 0;
+          next.wave2_in = 0;
+          next.bn_white_in = 6;
+          next.act1_begin = 4;
+          next.act1_in = 7;
+          return next;
+        }
+
         function __buildHeadlineMotionPlan(data, profile) {
-          var beats = __headlineMotionBeats[profile] || {};
+          var baseBeats = __headlineMotionBeats[profile] || {};
+          var zeroOffers = __isZeroOffers(data);
+          var beats = zeroOffers ? __applyOffers0BeatOverlay(baseBeats) : baseBeats;
           var includeRoundel = profile === 'frames-4';
           var headings = [];
           for (var index = 1; index <= 4; index += 1) {
             headings.push(__normalizeHeadlineText(data['heading' + index + '_text']));
           }
-          var skipped = __skippedHeadlineActs(headings, includeRoundel);
+          var skipped = zeroOffers ? {} : __skippedHeadlineActs(headings, includeRoundel);
           var windows = __headlineMotionLayers.map(function(layer, index) {
             var act = index + 1;
             var clips = (layer.clips[profile] || []);
@@ -479,9 +588,42 @@ export const headlineTransitionRuntimeBlock = (
               end: authoredEnd,
               hidden: act === 3 && !includeRoundel,
               color: layer.color || null,
-              enterDurationPct: isFinite(enterDuration) && enterDuration > 0 ? enterDuration : 2
+              enterDurationPct: isFinite(enterDuration) && enterDuration > 0 ? enterDuration : 2,
+              clips: clips
             };
           });
+          if (zeroOffers) {
+            var eligible = __eligibleHeadlineActs(includeRoundel);
+            var activeActs = eligible.filter(function(act) { return headings[act - 1]; });
+            var windowStart = Number(beats.act1_in || 0);
+            var windowEnd = Number(beats.cta_in != null ? beats.cta_in : (beats.bn_cta_in || 100));
+            var span = Math.max(0.01, windowEnd - windowStart);
+            var slice = activeActs.length ? span / activeActs.length : span;
+            var activeSet = {};
+            activeActs.forEach(function(act) { activeSet[act] = true; });
+            windows.forEach(function(window) {
+              if (!activeSet[window.act]) {
+                window.hidden = true;
+                window.keyframes = [{ at: 0, translate: [0, 0], opacity: 0 }, { at: 100, translate: [0, 0], opacity: 0 }];
+                return;
+              }
+              var order = activeActs.indexOf(window.act);
+              var start = Number((windowStart + slice * order).toFixed(4));
+              var end = Number((windowStart + slice * (order + 1)).toFixed(4));
+              var source = (window.clips && window.clips[0]) || {};
+              var rebuilt = [{
+                preset: source.preset || 'slideInRight',
+                start: start,
+                end: end,
+                params: source.params || {}
+              }];
+              window.start = start;
+              window.end = end;
+              window.hidden = false;
+              window.keyframes = __compileHeadlineClips(rebuilt, beats);
+            });
+            return windows;
+          }
           for (var skippedAct = 2; skippedAct <= 4; skippedAct += 1) {
             if (skippedAct === 3 && !includeRoundel) continue;
             if (!skipped[skippedAct]) continue;
@@ -510,9 +652,10 @@ export const headlineTransitionRuntimeBlock = (
         function applyHeadlineTransitionSkips(data, includeRoundel) {
           var profile = includeRoundel ? 'frames-4' : 'frames-3';
           var plan = __buildHeadlineMotionPlan(data, profile);
+          var zeroOffers = __isZeroOffers(data);
           var hasSkips = plan.some(function(item) { return item.hidden; });
           var style = document.getElementById('sse-headline-skip-styles');
-          if (!hasSkips) {
+          if (!hasSkips && !zeroOffers) {
             if (style) style.textContent = '';
             return;
           }

@@ -24,19 +24,25 @@ import {
   imageFieldUrl,
   studioDevBackgroundUrl,
 } from '@/lib/feed-background';
-import { activeScopesFromControls, controlsFromFeedRow } from '@/lib/feed-model';
+import { activeScopesFromControls, clampOfferCount, controlsFromFeedRow } from '@/lib/feed-model';
+import { visibilityForLayer } from '@/lib/offer-interaction-model';
 import { layoutOffersRuntime } from '@/lib/offer-layout';
 import {
   alignOfferValueSymbolsRuntime,
   offerValueSymbolCss,
   wrapOfferValueSymbolRuntime,
 } from '@/lib/offer-value-symbols';
-import { beatsForFrameScope } from '@/lib/timing-profiles';
+import { applyOffers0BeatOverlay, beatsForFrameScope } from '@/lib/timing-profiles';
 import { textFitEngineSource } from '@/lib/text-fit';
-import { normalizeFitConfig, textFitRulesForSize } from '@/lib/text-fit-rules';
+import { textFitRulesForSize } from '@/lib/text-fit-rules';
+import type { PresentationSnapshots, SizePresentationSnapshot } from '@/lib/outline-snapshot';
 import { getCampaign } from './campaign-registry';
+import {
+  bakeOutlinedOfferSlotSvgs,
+  bakeOutlinedText,
+  positionStyleAttr,
+} from './outline-bake';
 import { appRoot, outputRoot, projectRoot } from './paths';
-import { outlineFittedText } from './text-outline';
 
 const DEFAULT_STATE = 'offers-1 tc-solo cta-roundel frames-3 roundel-frame-off roundel-copy-only';
 
@@ -57,6 +63,8 @@ const escapeAttr = escapeHtml;
 const jsString = (value: unknown) => JSON.stringify(value);
 
 type RenderMode = 'font' | 'outline';
+/** `studio` keeps Enabler/DV360 shell. `static` is lean fixed-copy HTML (outline-only). */
+export type DeliveryMode = 'studio' | 'static';
 
 type RenderOptions = {
   assetBasePath?: string;
@@ -75,6 +83,20 @@ type RenderOptions = {
   previewValidatorScriptPath?: string;
   /** `font` keeps Museo + live DOM text. `outline` bakes fixed-copy SVG paths and omits the OTF. */
   renderMode?: RenderMode;
+  /** Outline shell: Studio Enabler vs lean static. Ignored for font mode. */
+  delivery?: DeliveryMode;
+  /**
+   * Per-size editor presentation snapshot (fit size/tracking/align, plus/slot
+   * positions). When set, outline bake is a pure snapshot — no second fit.
+   */
+  presentationSnapshot?: SizePresentationSnapshot | null;
+};
+
+type HtmlExportOptions = {
+  renderMode?: RenderMode;
+  delivery?: DeliveryMode;
+  /** Editor snapshots keyed by size (`300x250`, …). */
+  presentationSnapshots?: PresentationSnapshots;
 };
 
 type PackageEntry = {
@@ -83,13 +105,14 @@ type PackageEntry = {
 };
 
 /** How agency/client packages resolve fonts and static assets. */
-export type PackageAssetMode = 'packaged' | 'cdn' | 'embed';
+export type PackageAssetMode = 'packaged' | 'cdn' | 'embed' | 'canonical-agency';
 
 type ClientPreviewPackageOptions = {
   includeValidator?: boolean;
   /** `cdn` matches Studio CDN base zips (fonts/SVGs from s0.2mdn.net). Default `packaged` keeps downloadable ZIPs self-contained. */
   assetMode?: PackageAssetMode;
   renderMode?: RenderMode;
+  presentationSnapshots?: PresentationSnapshots;
 };
 
 type BasePackageOptions = {
@@ -98,9 +121,12 @@ type BasePackageOptions = {
    * `cdn` — Museo + wave/logo SVGs from Studio CDN; plus inlined; no bg JPEGs.
    * `embed` (canonical) — `{size}.html` + `assets/` at zip root; SVGs inlined;
    *   Museo from CDN only; backgrounds as relative file refs (no other asset CDNs).
+   * `canonical-agency` — agency `ads/{size}/index.html`; Museo CDN; SVGs inlined;
+   *   backgrounds feed-only (empty src, no packaged JPEGs, no hiker CDN sample).
    */
   assetMode?: PackageAssetMode;
   renderMode?: RenderMode;
+  presentationSnapshots?: PresentationSnapshots;
 };
 
 const clientFontSourcePath = (filename: string) => (
@@ -175,10 +201,35 @@ const buildEmbedSvgAssetUrlMap = (document: Record<string, unknown>) => {
   return map;
 };
 
-const clientVariantMatrix = () => {
+/** Flatten nested bg paths to `assets/<basename>` for static export packages. */
+const flatAssetEntryPath = (assetPath: string) => `assets/${path.basename(assetPath)}`;
+
+const buildFlatBackgroundAssetUrlMap = (document: Record<string, unknown>) => {
+  const map: Record<string, string> = {};
+  for (const assetPath of collectClientAssetPaths(document)) {
+    if (!isSvgAssetPath(assetPath)) {
+      map[assetPath] = flatAssetEntryPath(assetPath);
+    }
+  }
+  return map;
+};
+
+const isStaticDelivery = (options: RenderOptions = {}) => (
+  options.renderMode === 'outline' && options.delivery === 'static'
+);
+
+const documentHasZeroOffers = (document: Record<string, unknown> = {}) => (
+  (document.feed?.sampleRows || []).some((sample: Record<string, unknown>) => (
+    Number(sample.offer_count_num) === 0
+  ))
+);
+
+const clientVariantMatrix = (document: Record<string, unknown> = {}) => {
+  const offerCounts = documentHasZeroOffers(document) ? [0, 1, 2, 3] : [1, 2, 3];
   const rows = [];
-  for (const offerCount of [1, 2, 3]) {
-    for (const tcMode of ['tcs_only', 'tcs_units']) {
+  for (const offerCount of offerCounts) {
+    const tcModes = offerCount === 0 ? ['tcs_only'] : ['tcs_only', 'tcs_units'];
+    for (const tcMode of tcModes) {
       for (const ctaShape of ['roundel', 'rectangle']) {
         rows.push({ offerCount, tcMode, ctaShape });
       }
@@ -333,7 +384,7 @@ const dynamicFieldMapping = () => [
   ['heading2_text', 'text', '', 'Headline 2 copy'],
   ['heading3_text', 'text', '', 'Act 3 headline copy over the offer roundel'],
   ['heading4_text', 'text', '', 'Act 4 headline copy over the CTA/endframe'],
-  ['offer_count_num', 'integer', '1-3', 'Visible offer count'],
+  ['offer_count_num', 'integer', '0-3', 'Visible offer count (0 = no offers)'],
   ['offer1_value_text', 'text', '', 'Offer 1 value'],
   ['offer1_sub_text', 'text', '', 'Offer 1 subline'],
   ['offer2_value_text', 'text', '', 'Offer 2 value'],
@@ -584,11 +635,6 @@ const textForLayerFromRow = (layerId: string, row: Record<string, unknown>) => {
   return '';
 };
 
-const pxNumber = (value: unknown, fallback = 0) => {
-  const number = Number.parseFloat(String(value ?? ''));
-  return Number.isFinite(number) ? number : fallback;
-};
-
 const outlinedSvgMarkup = async ({
   document,
   size,
@@ -596,6 +642,7 @@ const outlinedSvgMarkup = async ({
   text,
   activeScopes,
   fallbackFit = {},
+  snapshot = null,
 }: {
   document: Record<string, unknown>;
   size: string;
@@ -603,60 +650,37 @@ const outlinedSvgMarkup = async ({
   text: string;
   activeScopes: string[];
   fallbackFit?: Record<string, unknown>;
+  snapshot?: SizePresentationSnapshot | null;
 }) => {
-  const target = findCreativeTarget(document, size, targetId, activeScopes);
-  const values = target?.values || target?.base || {};
-  const fit = normalizeFitConfig({ ...(target?.fit || {}), ...fallbackFit });
-  const fontSize = pxNumber(values.fontSize, 12);
-  const width = Math.max(1, pxNumber(values.width, 40));
-  const height = Math.max(1, pxNumber(values.height, fontSize * 1.2));
-  const color = String(values.color || '#FFFFFF');
-  const alignRaw = String(values.textAlign || values.align || 'left').toLowerCase();
-  const textAlign = alignRaw === 'center' || alignRaw === 'right' ? alignRaw : 'left';
-  const outlined = await outlineFittedText({
+  const outlined = await bakeOutlinedText({
+    document,
+    size,
+    targetId,
     text,
-    fontSize,
-    width,
-    height,
-    color,
-    textAlign,
-    allowShrink: fit.allowShrink !== false && fit.static === undefined,
-    wrap: Boolean(fit.wrap),
-    maxLines: Number(fit.maxLines) || (fit.wrap ? 2 : 1),
-    minFontSize: Number(fit.minFontSize) || Math.max(6, Math.round(fontSize * 0.5)),
-    trackingMinEm: Number(fit.tracking?.minEm),
+    activeScopes,
+    fallbackFit,
+    snapshot,
   });
   return outlined.svg;
 };
 
-const renderOutlinedOfferSlot = async (
-  document: Record<string, unknown>,
-  size: string,
+const renderOutlinedOfferSlot = (
   layer: Record<string, unknown>,
-  row: Record<string, unknown>,
-  activeScopes: string[],
+  baked: { valueSvg: string; subSvg: string },
+  snapshot: SizePresentationSnapshot | null | undefined,
 ) => {
   const cssClass = layer.base?.cssClass || layer.id;
   const index = String(layer.id).match(/(\d)$/)?.[1] || '1';
-  const valueSvg = await outlinedSvgMarkup({
-    document,
-    size,
-    targetId: `${layer.id}::offer-value`,
-    text: String(row[`offer${index}_value_text`] || ''),
-    activeScopes,
-    fallbackFit: { mode: 'shrink', tracking: { minEm: -0.05 } },
-  });
-  const subSvg = await outlinedSvgMarkup({
-    document,
-    size,
-    targetId: `${layer.id}::offer-subline`,
-    text: String(row[`offer${index}_sub_text`] || ''),
-    activeScopes,
-    fallbackFit: { mode: 'shrink' },
-  });
-  return `          <div class="stage-element ${cssClass}" data-gwd-group="OfferSlot" data-offer-index="${index}" id="offer${index}">
-            <div class="gwd-grp-offer offer-value outlined-text">${valueSvg}</div>
-            <div class="gwd-grp-offer offer-subline outlined-text">${subSvg}</div>
+  const slotStyle = positionStyleAttr(
+    snapshot,
+    String(layer.id),
+    `offer-slot-${index}`,
+    `offer${index}`,
+  );
+  // Keep data-gwd-group / gwd-grp-* — manualCss and structured rules key off them.
+  return `          <div class="stage-element ${cssClass}" data-gwd-group="OfferSlot" id="offer${index}"${slotStyle}>
+            <div class="gwd-grp-offer offer-value outlined-text">${baked.valueSvg}</div>
+            <div class="gwd-grp-offer offer-subline outlined-text">${baked.subSvg}</div>
           </div>`;
 };
 
@@ -667,16 +691,25 @@ const renderOutlinedLayer = async (
   row: Record<string, unknown>,
   activeScopes: string[],
   options: RenderOptions = {},
+  offerBakes: Record<string, { valueSvg: string; subSvg: string }> = {},
 ) => {
   const cssClass = isHeadlineLayer(layer)
     ? HEADLINE_CSS_CLASS
     : (layer.base?.cssClass || layer.id);
   if (layer.id === 'terms-solo') return '';
-  if (layer.id.startsWith('offer-slot-')) {
-    return renderOutlinedOfferSlot(document, size, layer, row, activeScopes);
+  if (
+    isStaticDelivery(options)
+    && visibilityForLayer(document, size, String(layer.id), activeScopes) === 'hidden'
+  ) {
+    return '';
   }
+  if (layer.id.startsWith('offer-slot-')) {
+    const baked = offerBakes[String(layer.id)] || { valueSvg: '', subSvg: '' };
+    return renderOutlinedOfferSlot(layer, baked, options.presentationSnapshot);
+  }
+  const positionAttr = positionStyleAttr(options.presentationSnapshot, String(layer.id));
   if (layer.kind === 'image') {
-    return `          <img alt="" draggable="false" class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}" src="${escapeAttr(assetSrc(layer.asset, options))}">`;
+    return `          <img alt="" draggable="false" class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}" src="${escapeAttr(assetSrc(layer.asset, options))}"${positionAttr}>`;
   }
   const text = textForLayerFromRow(String(layer.id), row);
   const svg = await outlinedSvgMarkup({
@@ -686,6 +719,7 @@ const renderOutlinedLayer = async (
     text,
     activeScopes,
     fallbackFit: layer.fit || {},
+    snapshot: options.presentationSnapshot,
   });
   const className = [
     'stage-element',
@@ -694,8 +728,8 @@ const renderOutlinedLayer = async (
     /terms|unit-rate/.test(layer.id) ? 'sse-text sse-bottom-line' : '',
     cssClass,
   ].filter(Boolean).join(' ');
-  const tag = layer.id === 'cta' ? 'div' : 'div';
-  return `          <${tag} class="${className}" id="${escapeAttr(layer.id)}" data-layer-id="${escapeAttr(layer.id)}">${svg}</${tag}>`;
+  const layerIdAttr = isStaticDelivery(options) ? '' : ` data-layer-id="${escapeAttr(layer.id)}"`;
+  return `          <div class="${className}" id="${escapeAttr(layer.id)}"${layerIdAttr}${positionAttr}>${svg}</div>`;
 };
 
 const renderLayer = (layer: Record<string, unknown>, options: RenderOptions = {}) => {
@@ -737,7 +771,14 @@ const renderOutlinedTermsWrappers = async (
   size: string,
   row: Record<string, unknown>,
   activeScopes: string[],
+  options: RenderOptions = {},
 ) => {
+  if (
+    isStaticDelivery(options)
+    && visibilityForLayer(document, size, 'terms-solo', activeScopes) === 'hidden'
+  ) {
+    return '';
+  }
   const sizeCreative = document.sizes[size];
   const solo = termsLayer(sizeCreative, 'terms-solo');
   const svg = await outlinedSvgMarkup({
@@ -746,43 +787,127 @@ const renderOutlinedTermsWrappers = async (
     targetId: 'terms-solo',
     text: String(row.tc_terms_text || ''),
     activeScopes,
+    snapshot: options.presentationSnapshot,
   });
   return `          <div class="stage-static tc-solo-group" data-gwd-group="tc_solo" id="TC_Solo">
             <div class="gwd-grp-tc sse-text sse-bottom-line outlined-text ${solo?.base?.cssClass || 'terms-solo'}">${svg}</div>
           </div>`;
 };
 
-const outlineRuntimeScript = () => `
+const outlineRuntimeScript = (delivery: DeliveryMode = 'studio') => {
+  if (delivery === 'static') {
+    return `
     <script>
       (function() {
-        function boot() {
-          window.__SSE_DCO_READY__ = true;
+        var MOTION_START_TIMEOUT_MS = 3000;
+        var motionReleased = false;
+        function releaseMotionClock() {
+          if (motionReleased) return;
+          var root = document.getElementById('page-content');
+          if (!root) return;
+          motionReleased = true;
+          root.classList.add('motion-ready');
         }
-        if (window.Enabler && Enabler.isInitialized && !Enabler.isInitialized()) {
-          Enabler.addEventListener(studio.events.StudioEvent.INIT, boot);
+        function boot() {
+          window.requestAnimationFrame(function() {
+            window.requestAnimationFrame(releaseMotionClock);
+          });
+          window.setTimeout(releaseMotionClock, MOTION_START_TIMEOUT_MS);
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', boot);
         } else {
           boot();
         }
       })();
     </script>
 `;
+  }
+  return `
+    <script>
+      (function() {
+        // Same .motion-ready gate as font exports (CSS pauses animations until
+        // the class is present). Outline has no Museo load to wait on — release
+        // on the next frames so first paint stays at 0%, then the clock runs.
+        var MOTION_START_TIMEOUT_MS = 3000;
+        var motionReleased = false;
+
+        function releaseMotionClock() {
+          if (motionReleased) return;
+          var root = document.getElementById('page-content');
+          if (!root) return;
+          motionReleased = true;
+          root.classList.add('motion-ready');
+        }
+
+        function wireExit() {
+          var root = document.getElementById('page-content');
+          if (!root) return;
+          root.addEventListener('click', function() {
+            if (typeof Enabler !== 'undefined' && Enabler.exit) {
+              Enabler.exit('Main Exit');
+            }
+          }, { once: true });
+        }
+
+        function boot() {
+          wireExit();
+          window.requestAnimationFrame(function() {
+            window.requestAnimationFrame(releaseMotionClock);
+          });
+          window.setTimeout(releaseMotionClock, MOTION_START_TIMEOUT_MS);
+          window.__SSE_DCO_READY__ = true;
+        }
+
+        if (typeof Enabler !== 'undefined' && Enabler.addEventListener && typeof studio !== 'undefined' && studio.events) {
+          if (Enabler.isInitialized && Enabler.isInitialized()) {
+            boot();
+          } else {
+            Enabler.addEventListener(studio.events.StudioEvent.INIT, boot);
+          }
+        } else if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', boot);
+        } else {
+          boot();
+        }
+      })();
+    </script>
+`;
+};
 
 const outlinedTextCss = `
     .outlined-text {
       overflow: visible;
     }
+    /* Intrinsic SVG size = baked CSS line boxes (true font-size + half-leading).
+       Do not stretch with width:100% — that scaled paths down inside padded CTA
+       content boxes (~15px → ~10.8px when padding:0 18px). Flex hosts still centre. */
     .outlined-text svg {
       display: block;
-      width: 100%;
-      height: 100%;
+      width: auto;
+      height: auto;
+      max-width: none;
+      max-height: none;
       overflow: visible;
       pointer-events: none;
+      flex: 0 0 auto;
+    }
+    /* Font-mode CTA padding is for live text wrap inside the box. Outlined SVG
+       is already baked to the full authored width — zero padding so glyphs stay
+       at designed size. */
+    .cta.outlined-text {
+      padding: 0;
+    }
+    /* Offer value/subline boxes are tight (lineHeight 0.85). Clip like CSS text
+       so residual ink cannot paint into the sibling subline. */
+    [data-gwd-group="OfferSlot"] .outlined-text {
+      overflow: hidden;
     }
 `;
 
 const stateClasses = (row: Record<string, unknown>) => {
-  const count = Math.min(3, Math.max(1, Number.parseInt(row.offer_count_num, 10) || 1));
-  const tc = row.tc_type_enum === 'tcs_units' ? 'tc-prices' : 'tc-solo';
+  const count = clampOfferCount(row.offer_count_num);
+  const tc = count === 0 || row.tc_type_enum !== 'tcs_units' ? 'tc-solo' : 'tc-prices';
   const includeRoundel = row.include_roundel_frame_bool === true
     || row.include_roundel_frame === true
     || ['true', '1', 'yes', 'on'].includes(String(row.include_roundel_frame_bool || row.include_roundel_frame || '').trim().toLowerCase());
@@ -865,7 +990,7 @@ const runtimeScript = (
 
         function deriveOfferCount(data) {
           var explicit = parseInt(data.offer_count_num, 10);
-          if (explicit >= 1 && explicit <= 3) return explicit;
+          if (explicit === 0 || (explicit >= 1 && explicit <= 3)) return explicit;
           return [data.offer1_value_text, data.offer2_value_text, data.offer3_value_text].filter(function(value) {
             return value && value.trim();
           }).length || 1;
@@ -982,15 +1107,16 @@ const runtimeScript = (
           var includeRoundel = booleanValue(data.include_roundel_frame_bool)
             || booleanValue(data.include_roundel_frame);
           root.classList.remove(
-            'offers-1', 'offers-2', 'offers-3',
+            'offers-0', 'offers-1', 'offers-2', 'offers-3',
             'tc-solo', 'tc-prices',
             'cta-roundel', 'cta-rect',
             'frames-3', 'frames-4',
             'roundel-frame-off', 'roundel-frame-on',
             'roundel-copy-only', 'roundel-split'
           );
-          root.classList.add('offers-' + deriveOfferCount(data));
-          root.classList.add(data.tc_type_enum === 'tcs_units' ? 'tc-prices' : 'tc-solo');
+          var offerCount = deriveOfferCount(data);
+          root.classList.add('offers-' + offerCount);
+          root.classList.add(offerCount === 0 || data.tc_type_enum !== 'tcs_units' ? 'tc-solo' : 'tc-prices');
           root.classList.add(includeRoundel || data.cta_type_enum === 'rectangle' || data.cta_type_enum === 'rect' ? 'cta-rect' : 'cta-roundel');
           root.classList.add(includeRoundel ? 'frames-4' : 'frames-3');
           root.classList.add(includeRoundel ? 'roundel-frame-on' : 'roundel-frame-off');
@@ -1082,8 +1208,16 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
     .map((layer) => animationCssForLayer(layer, defaultBeats, duration))
     .filter(Boolean)
     .join('\n\n');
-  const profileAnimationCss = ['frames-4']
-    .filter((scope) => document.clock?.profiles?.[scope])
+  // Static frames-3 bakes skip unused frames-4 profile CSS; frames-4 still needs
+  // the default rules plus `.frames-4` overrides.
+  const bakedFrameScope = isStaticDelivery(options)
+    ? (stateClasses(sampleRowForDocument(document)).includes('frames-4') ? 'frames-4' : 'frames-3')
+    : null;
+  const profileScopes = ['frames-4'].filter((scope) => (
+    document.clock?.profiles?.[scope]
+    && (!bakedFrameScope || bakedFrameScope === scope)
+  ));
+  const profileAnimationCss = profileScopes
     .flatMap((scope) => {
       const beats = beatsForFrameScope(document, scope);
       return sizeCreative.layers
@@ -1095,8 +1229,7 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
         .filter(Boolean);
     })
     .join('\n\n');
-  const profileStaticCss = ['frames-4']
-    .filter((scope) => document.clock?.profiles?.[scope])
+  const profileStaticCss = profileScopes
     .flatMap((scope) => {
       const beats = beatsForFrameScope(document, scope);
       return sizeCreative.layers
@@ -1106,6 +1239,31 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
         }))
         .filter(Boolean);
     })
+    .join('\n\n');
+  // Zero-offers remaps blue-wave / logo / early headline beats; emit scoped
+  // animation overrides so exported HTML matches editor preview.
+  const offers0Scopes = documentHasZeroOffers(document)
+    ? [
+      { suffix: 'offers-0', selectorPrefix: '.offers-0 ', profile: 'frames-3', beats: applyOffers0BeatOverlay(beatsForFrameScope(document, 'frames-3')) },
+      { suffix: 'offers-0-frames-4', selectorPrefix: '.offers-0.frames-4 ', profile: 'frames-4', beats: applyOffers0BeatOverlay(beatsForFrameScope(document, 'frames-4')) },
+    ].filter((item) => !bakedFrameScope || bakedFrameScope === item.profile)
+    : [];
+  const offers0AnimationCss = offers0Scopes
+    .flatMap((item) => sizeCreative.layers
+      .map((layer) => animationCssForLayer(layer, item.beats, duration, {
+        suffix: item.suffix,
+        selectorPrefix: item.selectorPrefix,
+        profile: item.profile,
+      }))
+      .filter(Boolean))
+    .join('\n\n');
+  const offers0StaticCss = offers0Scopes
+    .flatMap((item) => sizeCreative.layers
+      .map((layer) => staticRuleForLayer(layer, item.beats, {
+        profile: item.profile,
+        selectorPrefix: item.selectorPrefix,
+      }))
+      .filter(Boolean))
     .join('\n\n');
   return `
 ${localFontFaceCss(options)}
@@ -1156,6 +1314,10 @@ ${defaultAnimationCss}
 ${profileStaticCss}
 
 ${profileAnimationCss}
+
+${offers0StaticCss}
+
+${offers0AnimationCss}
 `;
 };
 
@@ -1166,16 +1328,26 @@ const renderBody = async (document: Record<string, unknown>, size: string, optio
   const stateClass = options.renderMode === 'outline' ? stateClasses(row) : DEFAULT_STATE;
   if (options.renderMode === 'outline') {
     const activeScopes = activeScopesFromControls(controlsFromFeedRow(row));
+    const offerBakes = await bakeOutlinedOfferSlotSvgs({
+      document,
+      size,
+      row,
+      activeScopes,
+      snapshot: options.presentationSnapshot,
+    });
     const layers = (await Promise.all(
       sizeCreative.layers
         .filter((layer: Record<string, unknown>) => layer.id !== 'bg-image')
         .map((layer: Record<string, unknown>) => (
-          renderOutlinedLayer(document, size, layer, row, activeScopes, options)
+          renderOutlinedLayer(document, size, layer, row, activeScopes, options, offerBakes)
         )),
     )).filter(Boolean).join('\n');
-    const terms = await renderOutlinedTermsWrappers(document, size, row, activeScopes);
+    const terms = await renderOutlinedTermsWrappers(document, size, row, activeScopes, options);
+    const packagedSrcAttr = isStaticDelivery(options)
+      ? ''
+      : ` data-packaged-src="${escapeAttr(background)}"`;
     return `      <main id="page-content" class="stage page-content ${stateClass}" data-size="${escapeAttr(size)}">
-          <img alt="" draggable="false" class="stage-element bg-image" id="bg-image" src="${escapeAttr(background)}" data-packaged-src="${escapeAttr(background)}">
+          <img alt="" draggable="false" class="stage-element bg-image" id="bg-image" src="${escapeAttr(background)}"${packagedSrcAttr}>
 ${layers}
 ${terms}
       </main>`;
@@ -1200,14 +1372,31 @@ export const renderStudioReadyHtml = async (
   const sizeCreative = document.sizes?.[size];
   if (!sizeCreative) throw new Error(`Unknown creative size: ${size}`);
   const renderMode = options.renderMode || 'font';
+  const delivery: DeliveryMode = options.delivery === 'static' ? 'static' : 'studio';
+  // Outline exports are fixed-copy / self-contained: inline logo/wave/plus SVGs
+  // as data URIs (same as canonical embed) unless the caller already mapped assets
+  // (CDN packages keep their explicit URL map). Static also flattens bg paths.
+  const defaultOutlineAssetMap = renderMode === 'outline'
+    ? {
+      ...buildEmbedSvgAssetUrlMap(document),
+      ...(delivery === 'static' ? buildFlatBackgroundAssetUrlMap(document) : {}),
+    }
+    : undefined;
+  const resolvedOptions: RenderOptions = {
+    ...options,
+    renderMode,
+    delivery: renderMode === 'outline' ? delivery : 'studio',
+    assetUrlMap: options.assetUrlMap ?? defaultOutlineAssetMap,
+    presentationSnapshot: options.presentationSnapshot ?? null,
+  };
   const studioDynamicContentScript = options.includeStudioDynamicContent && renderMode === 'font'
     ? `\n${renderStudioDynamicContentScript(document, {}, {
       backgroundUrlForSize: options.studioBackgroundUrlForSize,
     })}\n`
     : '';
   const scripts = renderMode === 'outline'
-    ? outlineRuntimeScript()
-    : runtimeScript(textFitRulesForSize(sizeCreative), options, {
+    ? outlineRuntimeScript(resolvedOptions.delivery)
+    : runtimeScript(textFitRulesForSize(sizeCreative), resolvedOptions, {
       layers: sizeCreative.layers,
       beatsProfiles: {
         'frames-3': beatsForFrameScope(document, 'frames-3'),
@@ -1215,22 +1404,25 @@ export const renderStudioReadyHtml = async (
       },
       durationS: document.clock.durationS,
     });
-  const body = await renderBody(document, size, { ...options, renderMode });
+  const body = await renderBody(document, size, resolvedOptions);
   const title = `${escapeHtml(document.campaign?.name || 'SSE DCO')} ${escapeHtml(size)}`;
+  const isStatic = isStaticDelivery(resolvedOptions);
+  const environmentMeta = isStatic ? '' : '    <meta name="environment" content="dv360">\n';
+  const enablerTag = isStatic
+    ? ''
+    : `    <script src="https://s0.2mdn.net/ads/studio/Enabler.js"></script>${studioDynamicContentScript}\n`;
   return `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
-    <meta name="environment" content="dv360">
-    <meta name="viewport" content="width=${sizeCreative.canvas.width}, initial-scale=1.0">
+${environmentMeta}    <meta name="viewport" content="width=${sizeCreative.canvas.width}, initial-scale=1.0">
     <title>${title}</title>
-${renderMode === 'outline' ? '' : packagedFontPreloadTags(options)}
-    <script src="https://s0.2mdn.net/ads/studio/Enabler.js"></script>${studioDynamicContentScript}
-    <style>
-${cssForSize(document, size, { ...options, renderMode })}
+${renderMode === 'outline' ? '' : packagedFontPreloadTags(resolvedOptions)}
+${enablerTag}    <style>
+${cssForSize(document, size, resolvedOptions)}
     </style>
 ${scripts}
-${renderMode === 'outline' ? '' : previewValidatorTag(options)}
+${renderMode === 'outline' ? '' : previewValidatorTag(resolvedOptions)}
   </head>
   <body>
 ${body}
@@ -1252,17 +1444,21 @@ export const renderWipHtml = (html: string, row: Record<string, unknown>) => {
 export const buildCreativeHtmlFiles = async (
   document: Record<string, unknown>,
   size: string,
-  options: { renderMode?: RenderMode } = {},
+  options: HtmlExportOptions = {},
 ) => {
   await fs.mkdir(outputRoot, { recursive: true });
   const slug = exportSlugForDocument(document);
   const renderMode = options.renderMode || 'font';
+  const delivery: DeliveryMode = options.delivery === 'static' ? 'static' : 'studio';
   // Local QA files load the packaged Museo (output/ sits beside campaign/), so
   // they measure and render the same font Studio serves — not whatever happens
-  // to be installed on this machine. Outline mode skips the font face entirely.
+  // to be installed on this machine. Outline mode skips the font face entirely
+  // (SVGs are inlined inside renderStudioReadyHtml).
   const html = await renderStudioReadyHtml(document, size, {
     fontBasePath: renderMode === 'outline' ? undefined : '../campaign/assets/fonts/',
     renderMode,
+    delivery: renderMode === 'outline' ? delivery : 'studio',
+    presentationSnapshot: options.presentationSnapshots?.[size] || null,
   });
   const outPath = path.resolve(outputRoot, `${slug}_${size}.html`);
   await fs.writeFile(outPath, html);
@@ -1277,39 +1473,72 @@ export const buildCreativeHtmlFiles = async (
       wip[variant] = path.relative(outputRoot, wipPath);
     }
   }
+  const modeLabel = renderMode === 'outline' && delivery === 'static'
+    ? 'outline/static'
+    : renderMode;
   return {
     code: 0,
-    stdout: `Built ${path.relative(outputRoot, outPath)} with replacement exporter (${renderMode})\n`,
+    stdout: `Built ${path.relative(outputRoot, outPath)} with replacement exporter (${modeLabel})\n`,
     stderr: '',
     outPath: path.relative(outputRoot, outPath),
     wip,
   };
 };
 
+/** Non-SVG assets referenced by the creative (backgrounds). SVGs are inlined in outline mode. */
+const collectOutlineHtmlSidecarAssets = (document: Record<string, unknown>) => (
+  collectClientAssetPaths(document).filter((assetPath) => !isSvgAssetPath(assetPath))
+);
+
+/**
+ * Copy background JPEGs into output/ so outline HTML relative `assets/…` paths resolve.
+ * Static delivery flattens to `assets/<basename>`; studio outline keeps nested paths.
+ */
+const stageOutlineHtmlSidecarAssets = async (
+  document: Record<string, unknown>,
+  delivery: DeliveryMode = 'studio',
+) => {
+  const staged: string[] = [];
+  for (const assetPath of collectOutlineHtmlSidecarAssets(document)) {
+    const source = path.resolve(projectRoot, assetPath);
+    const entryPath = delivery === 'static' ? flatAssetEntryPath(assetPath) : assetPath;
+    const destination = path.resolve(outputRoot, entryPath);
+    await fs.mkdir(path.dirname(destination), { recursive: true });
+    await fs.copyFile(source, destination);
+    staged.push(entryPath);
+  }
+  return staged;
+};
+
 export const buildAllCreativeHtmlFiles = async (
   document: Record<string, unknown>,
-  options: { renderMode?: RenderMode } = {},
+  options: HtmlExportOptions = {},
 ) => {
   const sizes = Object.keys(document.sizes || {});
   const outputs: Record<string, unknown> = {};
   const stdout = [];
+  const delivery: DeliveryMode = options.delivery === 'static' ? 'static' : 'studio';
   for (const size of sizes) {
     const result = await buildCreativeHtmlFiles(document, size, options);
     outputs[size] = result;
     stdout.push(result.stdout.trim());
   }
+  const sidecarAssets = options.renderMode === 'outline'
+    ? await stageOutlineHtmlSidecarAssets(document, delivery)
+    : [];
   return {
     code: 0,
     stdout: `${stdout.join('\n')}\nBuilt ${sizes.length} sizes with replacement exporter\n`,
     stderr: '',
     outputs,
+    sidecarAssets,
   };
 };
 
 /** Build HTML into output/, then zip those files for browser download. */
 export const buildHtmlExportZip = async (
   document: Record<string, unknown>,
-  options: { renderMode?: RenderMode } = {},
+  options: HtmlExportOptions = {},
 ) => {
   const result = await buildAllCreativeHtmlFiles(document, options);
   const entries: PackageEntry[] = [];
@@ -1325,6 +1554,14 @@ export const buildHtmlExportZip = async (
       const absolute = path.resolve(outputRoot, wipRel);
       entries.push({ path: wipRel, data: await fs.readFile(absolute) });
     }
+  }
+  // Outline HTML keeps relative `assets/…` background refs; ship those files in the ZIP
+  // (SVGs are already data URIs). Font-mode HTML export stays HTML-only.
+  for (const assetPath of result.sidecarAssets || []) {
+    entries.push({
+      path: assetPath,
+      data: await fs.readFile(path.resolve(outputRoot, assetPath)),
+    });
   }
   return {
     result,
@@ -1442,7 +1679,11 @@ export const renderClientPreviewValidatorScript = () => `(function() {
       heading2_text: fieldValue(controls, 'heading2_text'),
       heading3_text: fieldValue(controls, 'heading3_text'),
       heading4_text: fieldValue(controls, 'heading4_text'),
-      offer_count_num: Number(fieldValue(controls, 'offer_count_num')) || 1,
+      offer_count_num: (function(value) {
+        var parsed = parseInt(value, 10);
+        if (!isFinite(parsed)) return 1;
+        return Math.min(3, Math.max(0, parsed));
+      })(fieldValue(controls, 'offer_count_num')),
       offer1_value_text: fieldValue(controls, 'offer1_value_text'),
       offer1_sub_text: fieldValue(controls, 'offer1_sub_text'),
       offer2_value_text: fieldValue(controls, 'offer2_value_text'),
@@ -1858,6 +2099,9 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
   const sizeOptions = sizes.map((item) => (
     `<option value="${escapeAttr(item.size)}">${escapeHtml(item.size)}</option>`
   )).join('');
+  const offerCountOptions = (documentHasZeroOffers(document) ? [0, 1, 2, 3] : [1, 2, 3])
+    .map((count) => `<option value="${count}">${count}</option>`)
+    .join('');
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -2251,9 +2495,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         <h2>Offers</h2>
         <label><span>Number</span>
           <select name="offer_count_num">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
+            ${offerCountOptions}
           </select>
         </label>
 
@@ -2402,7 +2644,11 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
             heading2_text: field('heading2_text'),
             heading3_text: field('heading3_text'),
             heading4_text: field('heading4_text'),
-            offer_count_num: Number(field('offer_count_num')) || 1,
+            offer_count_num: (function(value) {
+              var parsed = parseInt(value, 10);
+              if (!isFinite(parsed)) return 1;
+              return Math.min(3, Math.max(0, parsed));
+            })(field('offer_count_num')),
             offer1_value_text: field('offer1_value_text'),
             offer1_sub_text: field('offer1_sub_text'),
             offer2_value_text: field('offer2_value_text'),
@@ -2692,13 +2938,14 @@ export const buildClientPreviewPackageEntries = async (document: Record<string, 
       fontUrlMap,
       previewValidatorScriptPath: includeValidator ? '../../preview-validator.js' : undefined,
       renderMode,
+      presentationSnapshot: options.presentationSnapshots?.[size] || null,
     });
     entries.push({
       path: `ads/html/${slug}_${size}.html`,
       data: baseHtml,
     });
     if (renderMode === 'font') {
-      for (const variant of clientVariantMatrix()) {
+      for (const variant of clientVariantMatrix(document)) {
         const row = rowForClientVariant(document, variant);
         entries.push({
           path: `ads/html/${slug}_${size}_${clientVariantSlug(variant)}.html`,
@@ -2710,6 +2957,8 @@ export const buildClientPreviewPackageEntries = async (document: Record<string, 
 
   for (const assetPath of collectClientAssetPaths(document)) {
     if (assetUrlMap?.[assetPath]) continue;
+    // Outline HTML inlines SVGs as data URIs — don't ship duplicate files.
+    if (renderMode === 'outline' && isSvgAssetPath(assetPath)) continue;
     entries.push({
       path: `ads/${assetPath}`,
       data: await fs.readFile(path.resolve(projectRoot, assetPath)),
@@ -2752,19 +3001,22 @@ export const buildBasePackageEntries = async (document: Record<string, unknown>,
   const assetMode = options.assetMode || 'packaged';
   const useCdnAssets = assetMode === 'cdn';
   const useEmbedAssets = assetMode === 'embed';
+  const useCanonicalAgency = assetMode === 'canonical-agency';
+  const inlineSvgs = useEmbedAssets || useCanonicalAgency;
+  const useCdnFont = useCdnAssets || useEmbedAssets || useCanonicalAgency;
   const renderMode = options.renderMode || 'font';
-  const assetUrlMap = useEmbedAssets
+  const assetUrlMap = inlineSvgs
     ? buildEmbedSvgAssetUrlMap(document)
     : useCdnAssets
       ? CDN_ASSET_URLS
       : undefined;
   const fontUrlMap = renderMode === 'outline'
     ? undefined
-    : ((useCdnAssets || useEmbedAssets) ? CDN_FONT_URLS : undefined);
+    : (useCdnFont ? CDN_FONT_URLS : undefined);
   const entries: PackageEntry[] = [];
   const sizes = Object.keys(document.sizes || {});
   // Canonical (embed): `{size}.html` + `assets/` at zip root.
-  // Agency packaged/CDN: legacy `ads/{size}/index.html` + `ads/assets/`.
+  // Agency packaged/CDN/canonical-agency: `ads/{size}/index.html` (+ optional `ads/assets/`).
   const htmlPathForSize = (size: string) => (
     useEmbedAssets ? `${size}.html` : `ads/${size}/index.html`
   );
@@ -2787,11 +3039,12 @@ export const buildBasePackageEntries = async (document: Record<string, unknown>,
         fontBasePath,
         fontUrlMap,
         // Embed/canonical ships bg JPEGs beside the HTML; Studio can still
-        // override via data-dco-field. Packaged/CDN leave src empty for feed-only bgs.
+        // override via data-dco-field. Agency modes leave src empty for feed-only bgs.
         includePackagedBackground: useEmbedAssets,
         includePreviewBridge: false,
         includeStudioDynamicContent: renderMode === 'font',
-        // Never fall back to the hiker CDN sample set in canonical packages.
+        // Embed: packaged relative bg paths. Canonical-agency: empty (feed only).
+        // Packaged/CDN: default hiker CDN sample for Studio preview.
         studioBackgroundUrlForSize: useEmbedAssets
           ? (adSize) => {
             const sizeCreative = (document.sizes || {})[adSize] as
@@ -2799,17 +3052,26 @@ export const buildBasePackageEntries = async (document: Record<string, unknown>,
               | undefined;
             return String(sizeCreative?.assets?.background || '');
           }
-          : undefined,
+          : useCanonicalAgency
+            ? () => ''
+            : undefined,
         renderMode,
+        presentationSnapshot: options.presentationSnapshots?.[size] || null,
       }),
     });
   }
 
-  // Embed: package non-SVG assets (backgrounds) at `assets/…`. CDN/packaged:
-  // SVG/fonts only under `ads/assets/` (bgs come from Studio feed).
+  // Embed: package non-SVG assets (backgrounds) at `assets/…`.
+  // Packaged: SVGs/fonts under `ads/assets/` (bgs from Studio feed); outline
+  // skips SVGs because renderStudioReadyHtml inlines them.
+  // CDN / canonical-agency: no static assets in the ZIP (SVGs inlined or CDN).
   const packagedAssetPaths = useEmbedAssets
     ? collectClientAssetPaths(document).filter((assetPath) => !isSvgAssetPath(assetPath))
-    : collectBasePackageAssetPaths(document);
+    : (useCdnAssets || useCanonicalAgency)
+      ? []
+      : collectBasePackageAssetPaths(document).filter((assetPath) => (
+        renderMode !== 'outline' || !isSvgAssetPath(assetPath)
+      ));
   for (const assetPath of packagedAssetPaths) {
     if (assetUrlMap?.[assetPath]) continue;
     entries.push({

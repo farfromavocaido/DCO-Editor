@@ -3,7 +3,7 @@
 ## Daily editing
 
 1. Start the editor: `just editor` or `npm run dev -- -p 5174`.
-2. Pick a **Campaign** from the toolbar (default SSE DCO; parallel hiker / keepyuppy briefs are separate JSON files).
+2. Pick a **Campaign** from the toolbar (default SSE DCO; parallel hiker / keepyuppy briefs are separate JSON files that clone the DCO template with their own sample rows and packaged backgrounds).
 3. Pick a size from the toolbar.
 4. Use the layer tree, canvas, timeline, and inspector to edit positions, styles, and motion clips.
 5. Toggle offer count, T&C mode, and CTA shape to preview feed-driven variants.
@@ -16,11 +16,14 @@
 | Action | Output |
 |---|---|
 | **Export HTML (font)** | Downloads `{exportSlug}_html.zip`; also writes `output/{exportSlug}_{size}.html` (+ WIP variants) |
-| **Export HTML (SVG outlines)** | Downloads `{exportSlug}_html_outlines.zip`; same files with text baked to SVG paths (no Museo `@font-face`) |
+| **Export HTML (SVG outlines)** | Snapshots the editor stage (all sizes) then downloads `{exportSlug}_html_outlines.zip`; Studio-shaped fixed-copy outline HTML (Enabler shell); SVGs inlined; nested `assets/…` backgrounds |
+| **Export for Static** | Same editor snapshot bake → `{exportSlug}_html_static.zip`; lean outlined HTML (no Enabler/DV360); inactive layers pruned; flat `assets/<basename>.jpg` backgrounds |
 | **View HTML** | Opens a browser preview of the current size with baked feed row |
 | **HTML source** | Formatted, syntax-highlighted export HTML in the inspector modal |
 | **Client ZIP** | Downloadable preview package with validator (font mode) |
-| **Client ZIP (SVG outlines)** | Fixed-copy outline package without OTF |
+| **Client ZIP (SVG outlines)** | Fixed-copy outline package without OTF; campaign SVGs inlined |
+| **Canonical Zip** | Flat `{size}.html` + packaged backgrounds; SVGs inlined; Museo CDN |
+| **Canonical Agency Zip** | Agency `ads/{size}/index.html`; SVGs inlined; Museo CDN; backgrounds feed-only (no hiker sample) |
 | **Base ZIP** | Agency upload package with mapping and HTML shells |
 
 ## Adding assets

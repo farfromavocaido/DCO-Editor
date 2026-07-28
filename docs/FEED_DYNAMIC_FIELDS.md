@@ -59,14 +59,14 @@ When roundel frame is **off**, the animation skips Act 3 and runs **1 → 2 → 
 
 ## Offers
 
-Controlled by **`offer_count_num`** (1–3). Slots above the count are hidden at runtime. Trailing **`%`**, **`£`**, and **`€`** in value fields get smaller symbol styling automatically.
+Controlled by **`offer_count_num`** (0–3). Slots above the count are hidden at runtime (`0` hides all). Trailing **`%`**, **`£`**, and **`€`** in value fields get smaller symbol styling automatically.
 
 ### `offer_count_num`
 
 - **Type:** integer
-- **Description:** Number of visible offer slots.
-- **Validation:** **1–3**; out-of-range values clamp (no error)
-- **Required:** optional on input; always coerced to 1–3
+- **Description:** Number of visible offer slots (`0` = brand / no-offers variant on SSE DCO).
+- **Validation:** **0–3**; out-of-range values clamp (no error); explicit `0` is preserved
+- **Required:** optional on input; always coerced to 0–3 (invalid → `1`)
 - **Default / fallback:** `1` if missing/invalid; runtime can also infer from non-empty `offerN_value_text`
 - **Sample:** `3`
 

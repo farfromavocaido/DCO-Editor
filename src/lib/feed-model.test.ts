@@ -3,9 +3,11 @@ import assert from 'node:assert/strict';
 
 import {
   activeScopesFromControls,
+  clampOfferCount,
   controlsFromFeedRow,
   createFeedDraft,
   fieldInputValue,
+  rowLabel,
   selectFeedDraftVariant,
   updateFeedDraftField,
 } from './feed-model';
@@ -13,7 +15,7 @@ import { backgroundImageFieldName, backgroundFieldsFromRow } from './feed-backgr
 
 const fields = [
   { name: 'heading1_text', type: 'string' },
-  { name: 'offer_count_num', type: 'integer', min: 1, max: 3 },
+  { name: 'offer_count_num', type: 'integer', min: 0, max: 3 },
   { name: 'tc_type_enum', type: 'enum', options: ['tcs_only', 'tcs_units'] },
   { name: 'cta_type_enum', type: 'enum', options: ['roundel', 'rectangle'] },
   { name: 'include_roundel_frame_bool', type: 'boolean' },
@@ -195,4 +197,49 @@ test('accepts topbar tc controls when feed schema still lists legacy solo/prices
 test('normalizes legacy solo/prices row values into canonical tc controls', () => {
   assert.equal(controlsFromFeedRow({ tc_type_enum: 'solo' }).tcMode, 'tcs_only');
   assert.equal(controlsFromFeedRow({ tc_type_enum: 'prices' }).tcMode, 'tcs_units');
+});
+
+test('preserves explicit offer count 0 and derives offers-0 scope', () => {
+  assert.equal(clampOfferCount(0), 0);
+  assert.equal(clampOfferCount('0'), 0);
+  assert.equal(clampOfferCount('foo'), 1);
+  assert.equal(clampOfferCount(-1), 0);
+  assert.equal(clampOfferCount(9), 3);
+
+  assert.deepEqual(controlsFromFeedRow({
+    offer_count_num: 0,
+    tc_type_enum: 'tcs_units',
+    cta_type_enum: 'roundel',
+    include_roundel_frame_bool: false,
+  }), {
+    offerCount: 0,
+    tcMode: 'tcs_only',
+    ctaShape: 'roundel',
+    includeRoundelFrame: false,
+    frameCount: 3,
+    roundelMode: 'copy-only',
+  });
+
+  assert.deepEqual(activeScopesFromControls({
+    offerCount: 0,
+    tcMode: 'tcs_units',
+    ctaShape: 'roundel',
+    includeRoundelFrame: false,
+    roundelMode: 'copy-only',
+  }), [
+    'offers-0',
+    'tc-solo',
+    'cta-roundel',
+    'frames-3',
+    'roundel-frame-off',
+    'roundel-copy-only',
+  ]);
+
+  assert.equal(rowLabel({ offer_count_num: 0, Unique_ID: 'none' }), 'None · none');
+});
+
+test('coerces offer_count_num 0 through draft field updates', () => {
+  const draft = createFeedDraft(rows, { selectedIndex: 0 });
+  const next = updateFeedDraftField(draft, fields, 'offer_count_num', '0');
+  assert.equal(next.rows[0].offer_count_num, 0);
 });

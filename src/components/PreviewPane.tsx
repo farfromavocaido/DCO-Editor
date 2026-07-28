@@ -224,8 +224,8 @@ export function PreviewPane() {
       applyPreviewTextFitting(stage);
     });
     // One post-font layout commit (export also gates the CSS clock on
-    // fonts.ready via .motion-ready). placePlus measures at motion rest so
-    // playhead enter pose cannot bake into plus left/top.
+    // fonts.ready via .motion-ready). layoutOffers clears slot motion
+    // transforms for the measure pass so scrub pose cannot bake into plus Y.
     window.document.fonts?.ready?.then(() => {
       if (cancelled || !stageRef.current) return;
       applyPreviewTextFitting(stageRef.current);
@@ -987,6 +987,7 @@ export function PreviewPane() {
               <div
                 ref={stageRef}
                 className={stageClassName}
+                data-preview-stage="true"
                 data-size={size}
                 style={{ width: sizeCreative.canvas.width, height: sizeCreative.canvas.height, transform: `scale(${scale})` }}
                 onPointerDownCapture={handleStagePointerDownCapture}

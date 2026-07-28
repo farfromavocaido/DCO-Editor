@@ -11,7 +11,7 @@ import {
 export const runtime = 'nodejs';
 
 const parseAssetMode = (value: unknown): PackageAssetMode => {
-  if (value === 'cdn' || value === 'embed') return value;
+  if (value === 'cdn' || value === 'embed' || value === 'canonical-agency') return value;
   return 'packaged';
 };
 
@@ -22,6 +22,7 @@ const filenameForBasePackage = (
 ) => {
   if (assetMode === 'cdn') return `${slug}_base_cdn_zip.zip`;
   if (assetMode === 'embed') return `${slug}_canonical_zip.zip`;
+  if (assetMode === 'canonical-agency') return `${slug}_canonical_agency_zip.zip`;
   return `${slug}_base_zip${renderMode === 'outline' ? '_outlines' : ''}.zip`;
 };
 
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
       assetMode?: string;
       renderMode?: string;
       campaign?: string;
+      presentationSnapshots?: Record<string, unknown>;
     } = {};
     try {
       body = await request.json();
@@ -46,7 +48,13 @@ export async function POST(request: Request) {
     }
     const campaignId = resolveCampaignId(request, body);
     const creative = document || await readCreativeDocumentForCampaign(campaignId);
-    const zip = await buildBasePackageZip(creative, { assetMode, renderMode });
+    const zip = await buildBasePackageZip(creative, {
+      assetMode,
+      renderMode,
+      ...(renderMode === 'outline' && body.presentationSnapshots
+        ? { presentationSnapshots: body.presentationSnapshots }
+        : {}),
+    });
     const slug = exportSlugForDocument(creative);
     const filename = filenameForBasePackage(slug, assetMode, renderMode);
     return new NextResponse(zip, {

@@ -310,3 +310,104 @@ test('falls back to heading3 for act4 display when roundel is off', () => {
     'Preferred',
   );
 });
+
+test('offers-0 equal-splits non-blank headlines and keeps CTA beat fixed', () => {
+  const layers = [
+    {
+      id: 'headline-act1',
+      clips: [{ id: 'h1', preset: 'slideInRight', start: 'act1_in', end: 'act1_out', params: { enter_duration_pct: 4 } }],
+    },
+    {
+      id: 'headline-act2',
+      clips: [{ id: 'h2', preset: 'slideInRight', start: 'act2_in', end: 'offers_exit', profiles: ['frames-3'], params: { enter_duration_pct: 4 } }],
+    },
+    {
+      id: 'headline-act3',
+      clips: [{ id: 'h3', preset: 'slideInRight', start: 'roundel_in', end: 'act4_in', profiles: ['frames-4'] }],
+    },
+    {
+      id: 'headline-act4',
+      clips: [{ id: 'h4', preset: 'slideInRight', start: 'act4_in', end: 'act3_exit-1', profiles: ['frames-3'], params: { enter_duration_pct: 4 } }],
+    },
+  ];
+  const zeroBeats = {
+    act1_in: 7,
+    act1_out: 32.5,
+    act2_in: 32.5,
+    offers_exit: 66,
+    act4_in: 65.1,
+    cta_in: 69,
+    act3_exit: 96,
+  };
+  const plan = buildHeadlineMotionPlan(
+    layers,
+    {
+      offer_count_num: 0,
+      heading1_text: 'Your how hard can it be energy',
+      heading2_text: 'deserves a different kind of energy',
+      heading3_text: '',
+      heading4_text: '',
+    },
+    'frames-3',
+    zeroBeats,
+  );
+
+  const act1 = plan.find((item) => item.layerId === 'headline-act1');
+  const act2 = plan.find((item) => item.layerId === 'headline-act2');
+  const act4 = plan.find((item) => item.layerId === 'headline-act4');
+  assert.equal(act1?.hidden, false);
+  assert.equal(act2?.hidden, false);
+  assert.equal(act4?.hidden, true);
+  assert.equal(act1?.start, 7);
+  assert.equal(act1?.end, 38);
+  assert.equal(act2?.start, 38);
+  assert.equal(act2?.end, 69);
+  assert.ok((act1?.end ?? 100) <= zeroBeats.cta_in);
+  assert.ok((act2?.end ?? 100) <= zeroBeats.cta_in);
+});
+
+test('offers-0 blank middle headline still equal-splits remaining acts', () => {
+  const layers = [
+    {
+      id: 'headline-act1',
+      clips: [{ id: 'h1', preset: 'slideInRight', start: 'act1_in', end: 'act1_out', params: { enter_duration_pct: 4 } }],
+    },
+    {
+      id: 'headline-act2',
+      clips: [{ id: 'h2', preset: 'slideInRight', start: 'act2_in', end: 'offers_exit', profiles: ['frames-3'], params: { enter_duration_pct: 4 } }],
+    },
+    { id: 'headline-act3', clips: [] },
+    {
+      id: 'headline-act4',
+      clips: [{ id: 'h4', preset: 'slideInRight', start: 'act4_in', end: 'act3_exit-1', profiles: ['frames-3'], params: { enter_duration_pct: 4 } }],
+    },
+  ];
+  const zeroBeats = {
+    act1_in: 7,
+    act1_out: 32.5,
+    act2_in: 32.5,
+    offers_exit: 66,
+    act4_in: 65.1,
+    cta_in: 69,
+    act3_exit: 96,
+  };
+  const plan = buildHeadlineMotionPlan(
+    layers,
+    {
+      offer_count_num: 0,
+      heading1_text: 'One',
+      heading2_text: '',
+      heading4_text: 'Three',
+    },
+    'frames-3',
+    zeroBeats,
+  );
+  const act1 = plan.find((item) => item.layerId === 'headline-act1');
+  const act2 = plan.find((item) => item.layerId === 'headline-act2');
+  const act4 = plan.find((item) => item.layerId === 'headline-act4');
+  assert.equal(act2?.hidden, true);
+  assert.equal(act1?.start, 7);
+  assert.equal(act1?.end, 38);
+  assert.equal(act4?.start, 38);
+  assert.equal(act4?.end, 69);
+});

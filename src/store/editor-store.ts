@@ -11,6 +11,10 @@ import {
   updateFeedDraftField,
 } from '@/lib/feed-model';
 import { layoutOffers } from '@/lib/offer-layout';
+import {
+  capturePresentationSnapshot,
+  type PresentationSnapshots,
+} from '@/lib/outline-snapshot';
 import { alignOfferValueSymbols } from '@/lib/offer-value-symbols';
 import { applyTextFitting } from '@/lib/text-fit';
 import { textFitRulesForSize } from '@/lib/text-fit-rules';
@@ -938,7 +942,7 @@ export const useEditorStore = create<any>((set, get) => ({
   copyHeadlineOfferLayout: (sourceOfferCount, targetOfferCount = null) => {
     const state = get();
     if (!state.creativeDocument) return;
-    const target = targetOfferCount || state.offerCount;
+    const target = targetOfferCount == null ? state.offerCount : targetOfferCount;
     const before = headlineOfferVariantRule(currentSizeCreative(state.creativeDocument, state.size), target);
     const next = copyCreativeHeadlineOfferLayout(
       state.creativeDocument,
@@ -961,7 +965,7 @@ export const useEditorStore = create<any>((set, get) => ({
   resetHeadlineOfferLayout: (offerCount = null) => {
     const state = get();
     if (!state.creativeDocument) return;
-    const target = offerCount || state.offerCount;
+    const target = offerCount == null ? state.offerCount : offerCount;
     const before = headlineOfferVariantRule(currentSizeCreative(state.creativeDocument, state.size), target);
     const next = resetCreativeHeadlineOfferLayout(state.creativeDocument, state.size, target);
     set({ creativeDocument: next, creativeDirty: true });
@@ -1402,11 +1406,60 @@ export const useEditorStore = create<any>((set, get) => ({
     return fromList || 'SSE_DCO';
   },
 
-  buildHtml: async ({ renderMode = 'font' } = {}) => {
+  /**
+   * Walk every size on the live preview stage after fit/layout and capture
+   * presentation metrics for outline bake (Animate-style snapshot).
+   */
+  captureOutlineSnapshotsForAllSizes: async () => {
     const state = get();
-    get().setStatus(renderMode === 'outline'
-      ? 'Exporting outlined SVG HTML for all sizes'
-      : 'Exporting Studio-ready HTML for all sizes');
+    const sizes = state.sizes?.length
+      ? state.sizes
+      : Object.keys(state.creativeDocument?.sizes || {});
+    const originalSize = state.size;
+    const snapshots: PresentationSnapshots = {};
+    const waitForPaint = () => new Promise((resolve) => {
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => resolve(undefined));
+      });
+    });
+
+    get().setStatus('Snapshotting editor presentation for outline export…');
+    for (const size of sizes) {
+      if (size !== get().size) {
+        await get().loadSize(size);
+      }
+      await waitForPaint();
+      try {
+        await window.document.fonts?.ready;
+      } catch {
+        // continue — fit still runs with fallback metrics
+      }
+      const stage = window.document.querySelector('[data-preview-stage]') as HTMLElement | null;
+      if (stage) {
+        get().applyPreviewTextFitting(stage);
+        await waitForPaint();
+        snapshots[size] = capturePresentationSnapshot(stage, size);
+      }
+    }
+    if (originalSize && get().size !== originalSize) {
+      await get().loadSize(originalSize);
+      await waitForPaint();
+      const stage = window.document.querySelector('[data-preview-stage]') as HTMLElement | null;
+      if (stage) get().applyPreviewTextFitting(stage);
+    }
+    return snapshots;
+  },
+
+  buildHtml: async ({ renderMode = 'font', delivery = 'studio' } = {}) => {
+    const state = get();
+    const resolvedDelivery = renderMode === 'outline' && delivery === 'static' ? 'static' : 'studio';
+    get().setStatus(
+      renderMode === 'outline' && resolvedDelivery === 'static'
+        ? 'Exporting static outlined HTML for all sizes'
+        : renderMode === 'outline'
+          ? 'Exporting outlined SVG HTML for all sizes'
+          : 'Exporting Studio-ready HTML for all sizes',
+    );
     const creativeDocument = state.creativeDocument
       ? {
           ...state.creativeDocument,
@@ -1418,14 +1471,19 @@ export const useEditorStore = create<any>((set, get) => ({
           },
         }
       : null;
+    const presentationSnapshots = renderMode === 'outline'
+      ? await get().captureOutlineSnapshotsForAllSizes()
+      : undefined;
     const response = await fetch(withCampaign('/api/creative/export', state.activeCampaignId), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         campaign: state.activeCampaignId,
         renderMode,
+        delivery: resolvedDelivery,
         download: true,
         ...(creativeDocument ? { document: creativeDocument } : {}),
+        ...(presentationSnapshots ? { presentationSnapshots } : {}),
       }),
     });
     if (!response.ok) {
@@ -1443,9 +1501,11 @@ export const useEditorStore = create<any>((set, get) => ({
     const url = window.URL.createObjectURL(blob);
     const anchor = window.document.createElement('a');
     const slug = get().exportSlug();
-    const filename = renderMode === 'outline'
-      ? `${slug}_html_outlines.zip`
-      : `${slug}_html.zip`;
+    const filename = renderMode === 'outline' && resolvedDelivery === 'static'
+      ? `${slug}_html_static.zip`
+      : renderMode === 'outline'
+        ? `${slug}_html_outlines.zip`
+        : `${slug}_html.zip`;
     anchor.href = url;
     anchor.download = filename;
     anchor.rel = 'noopener';
@@ -1474,6 +1534,9 @@ export const useEditorStore = create<any>((set, get) => ({
           },
         }
       : null;
+    const presentationSnapshots = renderMode === 'outline'
+      ? await get().captureOutlineSnapshotsForAllSizes()
+      : undefined;
     const response = await fetch(withCampaign('/api/creative/client-package', state.activeCampaignId), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -1482,6 +1545,7 @@ export const useEditorStore = create<any>((set, get) => ({
         ...(creativeDocument ? { document: creativeDocument } : {}),
         includeValidator: renderMode === 'font' ? includeValidator : false,
         renderMode,
+        ...(presentationSnapshots ? { presentationSnapshots } : {}),
       }),
     });
     if (!response.ok) {
@@ -1522,7 +1586,9 @@ export const useEditorStore = create<any>((set, get) => ({
         ? 'Building agency CDN ZIP'
         : assetMode === 'embed'
           ? 'Building canonical ZIP'
-          : 'Building agency base ZIP';
+          : assetMode === 'canonical-agency'
+            ? 'Building canonical agency ZIP'
+            : 'Building agency base ZIP';
     get().setStatus(statusLabel);
     const state = get();
     const creativeDocument = state.creativeDocument
@@ -1536,6 +1602,9 @@ export const useEditorStore = create<any>((set, get) => ({
           },
         }
       : null;
+    const presentationSnapshots = renderMode === 'outline'
+      ? await get().captureOutlineSnapshotsForAllSizes()
+      : undefined;
     const response = await fetch(withCampaign('/api/creative/base-package', state.activeCampaignId), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -1544,6 +1613,7 @@ export const useEditorStore = create<any>((set, get) => ({
         ...(creativeDocument ? { document: creativeDocument } : {}),
         ...(assetMode !== 'packaged' ? { assetMode } : {}),
         renderMode,
+        ...(presentationSnapshots ? { presentationSnapshots } : {}),
       }),
     });
     if (!response.ok) {
@@ -1566,7 +1636,9 @@ export const useEditorStore = create<any>((set, get) => ({
       ? `${slug}_base_cdn_zip.zip`
       : assetMode === 'embed'
         ? `${slug}_canonical_zip.zip`
-        : `${slug}_base_zip${renderMode === 'outline' ? '_outlines' : ''}.zip`;
+        : assetMode === 'canonical-agency'
+          ? `${slug}_canonical_agency_zip.zip`
+          : `${slug}_base_zip${renderMode === 'outline' ? '_outlines' : ''}.zip`;
     anchor.rel = 'noopener';
     window.document.body.appendChild(anchor);
     anchor.click();
@@ -1579,7 +1651,9 @@ export const useEditorStore = create<any>((set, get) => ({
           ? 'Downloaded agency CDN ZIP'
           : assetMode === 'embed'
             ? 'Downloaded canonical ZIP'
-            : 'Downloaded agency base ZIP',
+            : assetMode === 'canonical-agency'
+              ? 'Downloaded canonical agency ZIP'
+              : 'Downloaded agency base ZIP',
     );
   },
 
@@ -1737,8 +1811,8 @@ export const useEditorStore = create<any>((set, get) => ({
     if (!stageEl || !state.creativeDocument) return;
     // Fit against authored boxes → symbol ink-align → gap/plus layout.
     // Layout must not rewrite subline width (that is the fit constraint).
-    // placePlus measures at motion rest, so the playhead (default ~19% / fadeUp
-    // enter) cannot bake enter_dy into durable plus left/top.
+    // layoutOffers neutralizes slot motion for ink measure (fit translateY on
+    // offer-values stays); SVG pluses still place from the layout box.
     const { sizes, trackings, clipped } = applyTextFitting(stageEl, creativeFitRules(state));
     alignOfferValueSymbols(stageEl);
     layoutOffers(stageEl);

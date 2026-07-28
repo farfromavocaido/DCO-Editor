@@ -11,13 +11,33 @@ export const OFFER_VALUE_RUN_CLASS = 'offer-value-run';
 
 const PREFIX_SYMBOLS = ['£', '€'] as const;
 
-const wrapInnerSymbols = (trimmed: string) => {
+/** Trailing `%` or leading `£`/`€` — same parse as wrap / outline bake. */
+export type OfferValueParts = {
+  prefix: string;
+  body: string;
+  suffix: string;
+};
+
+export const parseOfferValueParts = (text: string): OfferValueParts => {
+  const trimmed = String(text || '').trim();
+  if (!trimmed) return { prefix: '', body: '', suffix: '' };
   if (trimmed.endsWith('%')) {
-    return `${trimmed.slice(0, -1)}<span class="${OFFER_VALUE_SYMBOL_CLASS}">%</span>`;
+    return { prefix: '', body: trimmed.slice(0, -1), suffix: '%' };
   }
   const prefix = trimmed.charAt(0);
   if (PREFIX_SYMBOLS.includes(prefix as (typeof PREFIX_SYMBOLS)[number])) {
-    return `<span class="${OFFER_VALUE_SYMBOL_CLASS}">${prefix}</span>${trimmed.slice(1)}`;
+    return { prefix, body: trimmed.slice(1), suffix: '' };
+  }
+  return { prefix: '', body: trimmed, suffix: '' };
+};
+
+const wrapInnerSymbols = (trimmed: string) => {
+  const parts = parseOfferValueParts(trimmed);
+  if (parts.suffix === '%') {
+    return `${parts.body}<span class="${OFFER_VALUE_SYMBOL_CLASS}">%</span>`;
+  }
+  if (parts.prefix) {
+    return `<span class="${OFFER_VALUE_SYMBOL_CLASS}">${parts.prefix}</span>${parts.body}`;
   }
   return trimmed;
 };

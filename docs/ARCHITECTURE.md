@@ -53,11 +53,11 @@ Reads/writes feed profile data embedded in the creative document. Validates and 
 
 ### `creative-exporter.ts`
 
-Renders Studio-ready HTML, WIP preview variants, client preview ZIPs, and agency base ZIPs from the creative document. Supports `renderMode: 'font' | 'outline'`.
+Renders Studio-ready HTML, WIP preview variants, client preview ZIPs, and agency base ZIPs from the creative document. Supports `renderMode: 'font' | 'outline'` and outline `delivery: 'studio' | 'static'` (outline inlines logo/wave/plus SVGs as data URIs and omits Museo; static strips Enabler and flattens backgrounds).
 
 ### `text-outline.ts`
 
-Loads Museo and converts fitted text boxes into inline SVG path markup for outline export.
+Loads Museo and converts fitted text boxes into inline SVG path markup for outline export, using the CSS line-box model (authored `lineHeight` + half-leading baseline) so path ink matches font-mode layout.
 
 ### `http.ts`
 
@@ -95,11 +95,11 @@ Preview asset URLs are `/assets/...` — served by the Next route, mapped to `ca
   pair. After fit + symbol align, `layoutOffers` (`src/lib/offer-layout.ts`)
   equalizes gaps between ink clusters (horizontal / vertical / triangular),
   re-centres with a max-gap guard, and places pluses at value-ink midpoints.
-  Ink-first: clusters, plus anchors, and side-by-side bottoms all use Range
-  text ink (not CSS/line boxes). Triangular plus Y ignores top-row sublines
-  (value bottoms → bottom value top); vertical factors the upper subline
-  (cluster ink bottom → next value top); pluses are glyph-centred via
-  `placePlus`. Authored subline width stays the fit constraint.
+  Ink-first: clusters, plus anchors, and side-by-side bottoms all use canvas
+  glyph ink (Range only for baseline). Triangular plus Y: MPU/970 raise to
+  subline caps; 300×600 centres in the top-subline→bottom-value gap; else
+  value bottoms. Vertical centres between upper subline bottom and next value
+  top via `placePlus`. Authored subline width stays the fit constraint.
 - Headline skip-hold (duplicate consecutive copy) lives in
   `src/lib/headline-motion.ts`: the previous act holds through the skipped act’s
   authored exit, then always fades out. If the skipped act has `base.color`

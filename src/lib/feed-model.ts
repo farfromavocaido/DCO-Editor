@@ -102,11 +102,22 @@ export const updateFeedDraftField = (draft, fields, fieldName, value) => {
   };
 };
 
+/** Clamp offer count to 0–3. Invalid/NaN → 1; explicit 0 is preserved. */
+export const clampOfferCount = (value) => {
+  const parsed = typeof value === 'number' ? value : Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed)) return 1;
+  return Math.min(3, Math.max(0, parsed));
+};
+
 export const controlsFromFeedRow = (row = {}) => {
   const includeRoundelFrame = coerceBoolean(row.include_roundel_frame_bool);
+  const offerCount = clampOfferCount(row.offer_count_num);
   return {
-    offerCount: Math.min(3, Math.max(1, Number.parseInt(row.offer_count_num, 10) || 1)),
-    tcMode: normalizeTcTypeEnum(row.tc_type_enum) === 'tcs_units' ? 'tcs_units' : 'tcs_only',
+    offerCount,
+    // Zero-offers locks T&Cs off (Solo scope + hidden layers).
+    tcMode: offerCount === 0
+      ? 'tcs_only'
+      : (normalizeTcTypeEnum(row.tc_type_enum) === 'tcs_units' ? 'tcs_units' : 'tcs_only'),
     ctaShape: includeRoundelFrame ? 'rectangle' : normalizeCtaShape(row.cta_type_enum),
     includeRoundelFrame,
     frameCount: includeRoundelFrame ? 4 : 3,
@@ -117,8 +128,8 @@ export const controlsFromFeedRow = (row = {}) => {
 };
 
 export const activeScopesFromControls = (controls = {}) => {
-  const offerCount = Math.min(3, Math.max(1, Number(controls.offerCount) || 1));
-  const tcScope = controls.tcMode === 'tcs_units' ? 'tc-prices' : 'tc-solo';
+  const offerCount = clampOfferCount(controls.offerCount);
+  const tcScope = offerCount === 0 || controls.tcMode !== 'tcs_units' ? 'tc-solo' : 'tc-prices';
   const includeRoundelFrame = Boolean(controls.includeRoundelFrame || Number(controls.frameCount) === 4);
   const ctaScope = includeRoundelFrame || normalizeCtaShape(controls.ctaShape) === 'rectangle' ? 'cta-rect' : 'cta-roundel';
   return [
@@ -169,6 +180,6 @@ export const selectFeedDraftVariant = (draft, fields, fieldName, value) => {
 
 export const rowLabel = (row, index = 0) => {
   const count = controlsFromFeedRow(row).offerCount;
-  const offerLabel = count === 1 ? 'Single' : count === 2 ? 'Dual' : 'Triple';
+  const offerLabel = count === 0 ? 'None' : count === 1 ? 'Single' : count === 2 ? 'Dual' : 'Triple';
   return `${offerLabel} · ${row.Unique_ID || `Row ${index + 1}`}`;
 };

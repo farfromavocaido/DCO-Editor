@@ -197,10 +197,10 @@ Validated fields: all headline, offer, CTA, roundel, and T&C copy fields listed 
 | | |
 |---|---|
 | **Type** | `integer` |
-| **Description** | Number of visible offer slots (1, 2, or 3). |
-| **Validation** | Integer clamped to **min 1, max 3**. Non-numeric → `1`. Values above 3 clamp to 3; below 1 clamp to 1. |
-| **Required** | Optional on input; always coerced to 1–3. |
-| **Fallback** | `1` if missing/invalid. Runtime also derives count from non-empty `offerN_value_text` if explicit count is outside 1–3. Controls `offers-1` / `offers-2` / `offers-3` CSS scope. |
+| **Description** | Number of visible offer slots (`0`–`3`). `0` is the brand / no-offers variant (SSE DCO only in the editor). |
+| **Validation** | Integer clamped to **min 0, max 3**. Non-numeric → `1`. Values above 3 clamp to 3; values below 0 clamp to 0. Explicit `0` is preserved. |
+| **Required** | Optional on input; always coerced to 0–3 (invalid → `1`). |
+| **Fallback** | `1` if missing/invalid. Runtime also derives count from non-empty `offerN_value_text` if explicit count is outside 0–3. Controls `offers-0` / `offers-1` / `offers-2` / `offers-3` CSS scope. Under `offers-0`: all offer slots hidden, green wave hidden, blue wave enters at start with white logo only, T&Cs forced off, white headlines, and blank headline acts share screentime evenly before CTA. |
 
 #### `tc_type_enum`
 
@@ -400,8 +400,8 @@ These are not separate feed fields; they are computed from the fields above (`co
 
 | Scope class | When applied |
 |---|---|
-| `offers-1` … `offers-3` | From `offer_count_num` (or derived offer values) |
-| `tc-solo` / `tc-prices` | From `tc_type_enum` |
+| `offers-0` … `offers-3` | From `offer_count_num` (or derived offer values). `offers-0` also forces `tc-solo` and hides T&C layers. |
+| `tc-solo` / `tc-prices` | From `tc_type_enum` (forced `tc-solo` when `offer_count_num` is `0`) |
 | `cta-roundel` / `cta-rect` | From `cta_type_enum`, or always rect when roundel frame on |
 | `frames-3` / `frames-4` | From `include_roundel_frame_bool` |
 | `roundel-frame-off` / `roundel-frame-on` | From `include_roundel_frame_bool` |

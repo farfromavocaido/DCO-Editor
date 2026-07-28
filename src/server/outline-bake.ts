@@ -85,6 +85,24 @@ export const positionSnapshotForTarget = (
   return null;
 };
 
+/** Rejoin "15"+"%" / "£"+"50" if a bad line capture split the offer value. */
+export const coalesceOfferValueLines = (lines: string[] | null | undefined): string[] | null => {
+  if (!Array.isArray(lines) || lines.length < 2) return lines?.length ? [...lines] : null;
+  const symbol = /^[%£€]$/;
+  const out: string[] = [];
+  for (let i = 0; i < lines.length; i += 1) {
+    const cur = String(lines[i] || '').trim();
+    const next = String(lines[i + 1] || '').trim();
+    if (cur && next && ((symbol.test(cur) && /\d/.test(next)) || (/\d/.test(cur) && symbol.test(next)))) {
+      out.push(`${cur}${next}`);
+      i += 1;
+      continue;
+    }
+    if (cur) out.push(cur);
+  }
+  return out.length ? out : null;
+};
+
 export const positionStyleAttr = (
   snapshot: SizePresentationSnapshot | null | undefined,
   ...ids: string[]
@@ -198,9 +216,12 @@ const targetBakeOptions = ({
     const useContentBox = contentWidth > 0 && contentHeight > 0;
     const inkTop = Number(pos?.inkTop);
     const contentTop = Number(pos?.contentTop);
-    const lockedLines = Array.isArray(snap.lines) && snap.lines.length > 0
+    const lockedLinesRaw = Array.isArray(snap.lines) && snap.lines.length > 0
       ? snap.lines
       : null;
+    const lockedLines = scaleOfferSymbols
+      ? coalesceOfferValueLines(lockedLinesRaw)
+      : (lockedLinesRaw ? [...lockedLinesRaw] : null);
     // Soft-wrap is locked via snap.lines when present. Without lines, still
     // refuse to re-wrap when the captured content box is clearly one line —
     // opentype widths otherwise re-break copy the browser kept on one line.

@@ -138,11 +138,17 @@ const rangeLocalRect = (element: HTMLElement, ancestor: HTMLElement) => {
 
 /**
  * Glyph ink in host space — mirrors offer-layout `glyphInk` (canvas ascent/
- * descent + Range line). Digits-only sample for offer-value runs so % size
+ * descent + line box). Digits-only sample for offer-value runs so % size
  * does not skew vertical ink.
+ *
+ * Offer-value content box uses the run element's border box (not Range of
+ * contents): `.sym-pct` transforms inflate Range unions and were baking SVGs
+ * ~1.5× too tall with the symbol on a fake second line.
  */
 const glyphInkLocal = (element: HTMLElement, host: HTMLElement, preferDigits: boolean) => {
-  const line = rangeLocalRect(element, host);
+  const line = preferDigits
+    ? clientToLocal(element.getBoundingClientRect(), host)
+    : rangeLocalRect(element, host);
   if (!(line.width > 0 || line.height > 0)) return null;
   try {
     const canvas = element.ownerDocument?.createElement('canvas');
@@ -208,13 +214,30 @@ const normalizeLineText = (value: string) => value.replace(/\s+/g, ' ').trim();
 /**
  * Read the lines the browser actually painted (soft wraps included).
  * Character tops via Range — same breaks the preview shows, not opentype wrap.
+ *
+ * IMPORTANT: do not soft-split offer values. `.sym-pct` (0.6em + ink nudge) sits
+ * on a different rect.top than the digits; treating that as a line break baked
+ * "15" and "%" onto separate SVG lines (symbol under the subline).
  */
 export const captureDisplayedLines = (element: HTMLElement | null | undefined): string[] => {
   const fallback = normalizeCapturedText(element?.textContent);
   if (!fallback || !element) return fallback ? fallback.split('\n') : [];
+  const hardOnly = fallback.split('\n').filter((line) => line.length > 0);
+
+  // nowrap / offer-value / scaled currency symbols → hard breaks only.
+  try {
+    const style = typeof window !== 'undefined' ? window.getComputedStyle(element) : null;
+    const nowrap = Boolean(style && /nowrap/i.test(style.whiteSpace || ''));
+    const offerValue = element.classList?.contains('offer-value')
+      || Boolean(element.querySelector?.('.sym-pct, .offer-value-run'));
+    if (nowrap || offerValue) return hardOnly.length ? hardOnly : [fallback.replace(/\n/g, ' ')];
+  } catch {
+    // Non-DOM test doubles — fall through to hard breaks when layout APIs missing.
+  }
+
   const doc = element.ownerDocument;
   if (!doc?.createRange || !doc.createTreeWalker) {
-    return fallback.split('\n').filter((line) => line.length > 0);
+    return hardOnly;
   }
 
   const textNodes: Text[] = [];
@@ -224,7 +247,7 @@ export const captureDisplayedLines = (element: HTMLElement | null | undefined): 
     if (node.textContent) textNodes.push(node as Text);
     node = walker.nextNode();
   }
-  if (!textNodes.length) return fallback.split('\n').filter((line) => line.length > 0);
+  if (!textNodes.length) return hardOnly;
 
   type CharRef = { node: Text; offset: number; ch: string };
   const chars: CharRef[] = [];
@@ -234,7 +257,15 @@ export const captureDisplayedLines = (element: HTMLElement | null | undefined): 
       chars.push({ node: textNode, offset, ch: value[offset] });
     }
   }
-  if (!chars.length) return fallback.split('\n').filter((line) => line.length > 0);
+  if (!chars.length) return hardOnly;
+
+  // Soft-wrap detection: require a top jump roughly ≥ half a line box so nested
+  // inline (different font-size) cannot register as a new line.
+  const fontSize = cssNumber(
+    typeof window !== 'undefined' ? window.getComputedStyle(element).fontSize : '',
+    12,
+  );
+  const minLineJump = Math.max(4, fontSize * 0.45);
 
   const range = doc.createRange();
   const lineStarts = [0];
@@ -255,8 +286,7 @@ export const captureDisplayedLines = (element: HTMLElement | null | undefined): 
         lastTop = rect.top;
         continue;
       }
-      // New visual line (soft wrap or block). 2px tolerates subpixel / zoom.
-      if (Math.abs(rect.top - lastTop) > 2) {
+      if (Math.abs(rect.top - lastTop) > minLineJump) {
         lineStarts.push(index);
         lastTop = rect.top;
       }
@@ -273,7 +303,7 @@ export const captureDisplayedLines = (element: HTMLElement | null | undefined): 
     const line = normalizeLineText(raw.slice(start, end).replace(/\r?\n/g, ''));
     if (line) lines.push(line);
   }
-  return lines.length ? lines : fallback.split('\n').filter((line) => line.length > 0);
+  return lines.length ? lines : hardOnly;
 };
 
 const textKeyForElement = (element: Element) => {

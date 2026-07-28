@@ -7,6 +7,7 @@ import {
   letterSpacingToEm,
   normalizeCapturedText,
 } from '@/lib/outline-snapshot';
+import { coalesceOfferValueLines } from '@/server/outline-bake';
 import { parseOfferValueParts } from '@/lib/offer-value-symbols';
 
 test('normalizeCapturedText keeps newlines and collapses horizontal space', () => {
@@ -30,6 +31,21 @@ test('captureDisplayedLines falls back to hard newlines without a live layout', 
     captureDisplayedLines({ textContent: 'OFF ELECTRICITY*' } as HTMLElement),
     ['OFF ELECTRICITY*'],
   );
+});
+
+test('captureDisplayedLines does not soft-split offer values on sym-pct tops', () => {
+  const host = {
+    textContent: '15%',
+    classList: { contains: (name: string) => name === 'offer-value' },
+    querySelector: () => ({ className: 'sym-pct' }),
+  } as unknown as HTMLElement;
+  assert.deepEqual(captureDisplayedLines(host), ['15%']);
+});
+
+test('coalesceOfferValueLines rejoins digit/symbol pairs', () => {
+  assert.deepEqual(coalesceOfferValueLines(['15', '%']), ['15%']);
+  assert.deepEqual(coalesceOfferValueLines(['£', '50']), ['£50']);
+  assert.deepEqual(coalesceOfferValueLines(['OFF', 'ELECTRICITY*']), ['OFF', 'ELECTRICITY*']);
 });
 
 test('letterSpacingToEm reads em and px from computed styles', () => {

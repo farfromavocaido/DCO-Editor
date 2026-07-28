@@ -2628,10 +2628,10 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         <label><span>Background</span><input name="background_image_url" value="${escapeAttr(initialBackground)}" placeholder="Use packaged background for this size"></label>
 
         <h2>Headlines</h2>
-        <label><span>Heading 1</span><input name="heading1_text" value="${escapeAttr(initialRow.heading1_text)}"></label>
-        <label><span>Heading 2</span><input name="heading2_text" value="${escapeAttr(initialRow.heading2_text)}"></label>
-        <label data-heading3-field class="${initialRow.include_roundel_frame_bool ? '' : 'is-disabled'}"><span>Heading 3</span><input name="heading3_text" value="${escapeAttr(initialRow.heading3_text)}" ${initialRow.include_roundel_frame_bool ? '' : 'disabled'}></label>
-        <label data-heading4-field><span>Heading 4</span><input name="heading4_text" value="${escapeAttr(initialRow.heading4_text || '')}"></label>
+        <label class="field-tall"><span>Heading 1</span><textarea name="heading1_text">${escapeHtml(initialRow.heading1_text)}</textarea></label>
+        <label class="field-tall"><span>Heading 2</span><textarea name="heading2_text">${escapeHtml(initialRow.heading2_text)}</textarea></label>
+        <label data-heading3-field class="field-tall ${initialRow.include_roundel_frame_bool ? '' : 'is-disabled'}"><span>Heading 3</span><textarea name="heading3_text" ${initialRow.include_roundel_frame_bool ? '' : 'disabled'}>${escapeHtml(initialRow.heading3_text)}</textarea></label>
+        <label data-heading4-field class="field-tall"><span>Heading 4</span><textarea name="heading4_text">${escapeHtml(initialRow.heading4_text || '')}</textarea></label>
 
         <h2>Offers</h2>
         <label><span>Number</span>

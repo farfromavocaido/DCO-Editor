@@ -163,6 +163,17 @@ test('client preview page normalizes blank background feed objects to empty stri
   assert.match(html, /previewImageFieldUrl\(backgroundBySize\[size\]\) \|\| ''/);
 });
 
+test('client preview page uses textareas for multiline headline fields', async () => {
+  const document = await readCreativeDocument();
+  const html = renderClientPreviewPage(document, { includeValidator: false });
+  assert.match(html, /<textarea name="heading1_text">/);
+  assert.match(html, /<textarea name="heading2_text">/);
+  assert.match(html, /<textarea name="heading3_text"/);
+  assert.match(html, /<textarea name="heading4_text">/);
+  assert.match(html, /<textarea name="tc_terms_text">/);
+  assert.match(html, /<textarea name="tc_units_text">/);
+});
+
 test('studio export still waits for Enabler init before bootstrap', async () => {
   const document = await readCreativeDocument();
   const html = await renderStudioReadyHtml(document, '160x600', {

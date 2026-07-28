@@ -4,8 +4,21 @@ import { test } from 'vitest';
 import {
   authoredLetterSpacingToEm,
   letterSpacingToEm,
+  normalizeCapturedText,
 } from '@/lib/outline-snapshot';
 import { parseOfferValueParts } from '@/lib/offer-value-symbols';
+
+test('normalizeCapturedText keeps newlines and collapses horizontal space', () => {
+  assert.equal(
+    normalizeCapturedText('A different kind\nof energy'),
+    'A different kind\nof energy',
+  );
+  assert.equal(
+    normalizeCapturedText('A  different\r\nkind\n  of  energy'),
+    'A different\nkind\nof energy',
+  );
+  assert.equal(normalizeCapturedText('  hello  world  '), 'hello world');
+});
 
 test('letterSpacingToEm reads em and px from computed styles', () => {
   assert.equal(letterSpacingToEm('normal', 40), 0);

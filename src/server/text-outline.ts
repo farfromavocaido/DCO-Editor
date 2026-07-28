@@ -189,16 +189,16 @@ const measureWidth = (
   return measureRunsWidth(font, runs, fontSize, trackingEm);
 };
 
-const wrapLines = (
+/** Soft-wrap a single paragraph (no hard breaks) with greedy word packing. */
+const softWrapParagraph = (
   font: Font,
-  text: string,
+  paragraph: string,
   fontSize: number,
   trackingEm: number,
   maxWidth: number,
-  maxLines: number,
   scaleOfferSymbols: boolean,
 ) => {
-  const words = String(text || '').trim().split(/\s+/).filter(Boolean);
+  const words = paragraph.split(/\s+/).filter(Boolean);
   if (!words.length) return [''];
   const lines: string[] = [];
   let current = words[0];
@@ -210,13 +210,51 @@ const wrapLines = (
     }
     lines.push(current);
     current = words[index];
-    if (lines.length >= maxLines - 1) {
-      const rest = [current, ...words.slice(index + 1)].join(' ');
-      lines.push(rest);
-      return lines.slice(0, maxLines);
-    }
   }
   lines.push(current);
+  return lines;
+};
+
+/**
+ * Wrap like CSS `pre-line`: honor authored `\n` as hard breaks, then soft-wrap
+ * each segment. Soft and hard lines share the same line-box height downstream.
+ */
+const wrapLines = (
+  font: Font,
+  text: string,
+  fontSize: number,
+  trackingEm: number,
+  maxWidth: number,
+  maxLines: number,
+  scaleOfferSymbols: boolean,
+) => {
+  const normalized = String(text || '').replace(/\r\n|\r/g, '\n').trim();
+  if (!normalized) return [''];
+  const paragraphs = normalized.split('\n');
+  const lines: string[] = [];
+  for (let p = 0; p < paragraphs.length; p += 1) {
+    const wrapped = softWrapParagraph(
+      font,
+      paragraphs[p],
+      fontSize,
+      trackingEm,
+      maxWidth,
+      scaleOfferSymbols,
+    );
+    for (let i = 0; i < wrapped.length; i += 1) {
+      if (lines.length >= maxLines - 1) {
+        // Remainder of this paragraph + any later paragraphs collapse onto the last line.
+        const restParts = [
+          ...wrapped.slice(i),
+          ...paragraphs.slice(p + 1).flatMap((para) => para.split(/\s+/).filter(Boolean)),
+        ];
+        const rest = restParts.join(' ').replace(/\s+/g, ' ').trim();
+        lines.push(rest || wrapped[i]);
+        return lines.slice(0, maxLines);
+      }
+      lines.push(wrapped[i]);
+    }
+  }
   return lines;
 };
 
@@ -319,9 +357,11 @@ export const outlineFittedText = async (options: OutlineFitOptions): Promise<Out
 
   let fontSize = Math.max(minFontSize, Number(options.fontSize) || 12);
   let trackingEm = startingTracking;
+  // nowrap: collapse authored newlines like CSS white-space:nowrap (font-mode parity).
+  const singleLineText = text.replace(/\s+/g, ' ').trim();
   let lines = wrap
     ? wrapLines(font, text, fontSize, trackingEm, width, maxLines, scaleOfferSymbols)
-    : [text];
+    : [singleLineText];
 
   const overflows = () => {
     const widest = Math.max(
@@ -338,7 +378,7 @@ export const outlineFittedText = async (options: OutlineFitOptions): Promise<Out
       trackingEm = Math.max(trackingFloor, Number((trackingEm - 0.005).toFixed(3)));
       lines = wrap
         ? wrapLines(font, text, fontSize, trackingEm, width, maxLines, scaleOfferSymbols)
-        : [text];
+        : [singleLineText];
     }
   }
 
@@ -347,7 +387,7 @@ export const outlineFittedText = async (options: OutlineFitOptions): Promise<Out
       fontSize = Math.max(minFontSize, Number((fontSize - 0.5).toFixed(3)));
       lines = wrap
         ? wrapLines(font, text, fontSize, trackingEm, width, maxLines, scaleOfferSymbols)
-        : [text];
+        : [singleLineText];
     }
   }
 

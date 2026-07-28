@@ -215,28 +215,28 @@
       {
         "name": "heading1_text",
         "label": "Headline act 1",
-        "type": "string",
+        "type": "multiline",
         "group": "Copy",
         "description": "Act 1 headline copy."
       },
       {
         "name": "heading2_text",
         "label": "Headline act 2",
-        "type": "string",
+        "type": "multiline",
         "group": "Copy",
         "description": "Act 2 headline copy."
       },
       {
         "name": "heading3_text",
         "label": "Headline act 3",
-        "type": "string",
+        "type": "multiline",
         "group": "Copy",
         "description": "Act 3 headline copy over the offer roundel (when enabled)."
       },
       {
         "name": "heading4_text",
         "label": "Headline act 4",
-        "type": "string",
+        "type": "multiline",
         "group": "Copy",
         "description": "Act 4 headline copy over the CTA/endframe."
       },
@@ -271,7 +271,7 @@
       {
         "name": "tc_terms_text",
         "label": "T&Cs text",
-        "type": "string",
+        "type": "multiline",
         "group": "Copy",
         "description": "Terms and conditions line."
       },

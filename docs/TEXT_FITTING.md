@@ -20,7 +20,11 @@ Authored **modes** (not a draggable op-order):
 Pipeline per element:
 
 1. **White-space** — `pre-line` when wrapping is allowed (keeps authored `\n`),
-   otherwise forced `nowrap` (CSS cannot override the mode).
+   otherwise forced `nowrap` (CSS cannot override the mode). Authored hard
+   breaks use the same line-box height as soft-wrapped lines
+   (`fontSize × lineHeight`). Outline export mirrors this: `wrapLines` splits
+   on `\n` first, then soft-wraps each segment; presentation snapshots keep
+   newlines so bake sees the same copy as the live preview.
 2. **Tracking squeeze** — negative `letter-spacing` in small steps, bounded by
    `tracking.minEm` (offer values: −0.05em). Tried before any size change, and
    applied **per box**. A tight value does not force tracking onto a comfortable

@@ -22,7 +22,7 @@ export const FEED_SCHEMA_FIELDS = [
   { name: 'offer3_sub_text', label: 'Offer 3 subline', type: 'string', group: 'Offers', description: 'Subline in offer slot 3.' },
   { name: 'tc_type_enum', label: 'T&C format', type: 'enum', group: 'Creative State', description: 'Terms display mode.', options: ['tcs_only', 'tcs_units'] as const },
   { name: 'tc_terms_text', label: 'T&Cs text', type: 'multiline', group: 'Copy', description: 'Terms and conditions line; line breaks are preserved when the layer wraps.' },
-  { name: 'tc_units_text', label: 'Unit-rate text', type: 'multiline', group: 'Copy', description: 'Unit-rate text; line breaks are preserved.' },
+  { name: 'tc_units_text', label: 'Unit-rate text', type: 'multiline', group: 'Copy', description: 'Unit-rate text; line breaks are preserved when the layer wraps.' },
   { name: 'cta_type_enum', label: 'CTA shape', type: 'enum', group: 'Creative State', description: 'CTA button shape (circle or rectangle).', options: ['roundel', 'rectangle'] as const },
   { name: 'cta_text', label: 'CTA text', type: 'string', group: 'Copy', description: 'CTA label.' },
   { name: 'include_roundel_frame_bool', label: 'Offer roundel frame', type: 'boolean', group: 'Creative State', description: 'Whether the optional Act 3 offer roundel frame is shown.' },

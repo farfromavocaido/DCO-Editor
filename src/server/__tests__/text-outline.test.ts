@@ -60,6 +60,53 @@ test('outlineFittedText respects authored lineHeight', async () => {
   assert.ok(Math.abs(height - 26 * 1.25 * 3) < 0.05, `expected 97.5, got ${height}`);
 });
 
+test('outlineFittedText honors hard newlines with the same line box as soft wrap', async () => {
+  const hard = await outlineFittedText({
+    text: 'A different kind\nof energy',
+    fontSize: 26,
+    width: 400,
+    lineHeight: 1.25,
+    wrap: true,
+    maxLines: 3,
+    allowShrink: false,
+  });
+  assert.deepEqual(hard.lines, ['A different kind', 'of energy']);
+  const height = Number(hard.svg.match(/height="([\d.]+)"/)?.[1] || 0);
+  assert.ok(Math.abs(height - 26 * 1.25 * 2) < 0.05, `expected 65, got ${height}`);
+});
+
+test('outlineFittedText soft-wraps each hard-break segment and caps maxLines', async () => {
+  const mixed = await outlineFittedText({
+    text: 'A different kind\nof energy for everyone',
+    fontSize: 26,
+    width: 138,
+    lineHeight: 1.25,
+    wrap: true,
+    maxLines: 3,
+    allowShrink: false,
+  });
+  assert.equal(mixed.lines.length, 3, 'maxLines caps hard+soft output');
+  // First hard segment soft-wraps at this width (same as soft-only "A different kind…").
+  assert.equal(mixed.lines[0], 'A different');
+  assert.ok(mixed.lines.some((line) => /\bof\b/.test(line)), 'second hard segment still present');
+  const height = Number(mixed.svg.match(/height="([\d.]+)"/)?.[1] || 0);
+  assert.ok(
+    Math.abs(height - 26 * 1.25 * 3) < 0.05,
+    `height should be lineBox × 3, got ${height}`,
+  );
+});
+
+test('outlineFittedText collapses newlines when wrap is disabled', async () => {
+  const single = await outlineFittedText({
+    text: 'A different kind\nof energy',
+    fontSize: 18,
+    width: 400,
+    wrap: false,
+    allowShrink: false,
+  });
+  assert.deepEqual(single.lines, ['A different kind of energy']);
+});
+
 test('outlineFittedText scales offer %/£/€ symbols to 0.6em with ink-bottom align', async () => {
   const font = await loadMuseoFont();
   const fontSize = 60;

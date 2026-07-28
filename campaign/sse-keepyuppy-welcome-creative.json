@@ -5,99 +5,100 @@
     "name": "Keepy Uppy Welcome Credit"
   },
   "clock": {
-    "durationS": 15,
+    "durationS": 12,
     "beats": {
       "start": 0,
-      "act1_begin": 11,
-      "act1_in": 12.5,
-      "offer2_in": 13.6,
-      "offer3_in": 14.7,
-      "plus1_in": 14.9,
-      "plus2_in": 14.9,
-      "terms_in": 19.1,
-      "act2_in": 43,
-      "act1_out": 44,
-      "offers_exit": 66,
-      "wave2_in": 61,
-      "swap": 65,
-      "cta_in": 69,
-      "cta_pulse_start": 80,
-      "cta_pulse_peak": 82,
-      "cta_pulse_end": 83,
-      "act3_exit": 96,
-      "end": 100,
-      "bn_h2_in": 36,
-      "bn_offers_in": 47,
-      "bn_blue_in": 71,
-      "bn_white_in": 74,
-      "bn_cta_in": 78,
-      "tc_exit": 69,
-      "act4_in": 69,
-      "offer1_in": 12.5
+      "act1_begin": 5,
+      "act1_in": 10,
+      "offer1_in": 10,
+      "offer2_in": 11,
+      "offer3_in": 12,
+      "plus1_in": 12.5,
+      "plus2_in": 13,
+      "terms_in": 16,
+      "act2_in": 31,
+      "act1_out": 31,
+      "bn_h2_in": 31,
+      "bn_offers_in": 31,
+      "wave2_in": 52,
+      "offers_exit": 54,
+      "swap": 56,
+      "roundel_in": 56,
+      "tc_exit": 56,
+      "act4_in": 54,
+      "cta_in": 58.2,
+      "bn_blue_in": 52,
+      "bn_white_in": 56,
+      "bn_cta_in": 58.2,
+      "cta_pulse_start": 75,
+      "cta_pulse_peak": 78,
+      "cta_pulse_end": 80,
+      "act3_exit": 92,
+      "end": 100
     },
     "profiles": {
       "frames-3": {
         "start": 0,
-        "act1_begin": 11,
-        "act1_in": 11.6,
-        "offer2_in": 13.6,
-        "offer3_in": 17.6,
-        "plus1_in": 14.5,
-        "plus2_in": 17.8,
-        "terms_in": 19.1,
-        "act2_in": 43,
-        "act1_out": 43.6,
-        "offers_exit": 65.6,
-        "wave2_in": 61,
-        "swap": 65,
-        "cta_in": 69,
-        "cta_pulse_start": 80,
-        "cta_pulse_peak": 82,
-        "cta_pulse_end": 83,
-        "act3_exit": 96,
-        "end": 100,
-        "bn_h2_in": 36,
-        "bn_offers_in": 47,
-        "bn_blue_in": 64.3,
-        "bn_white_in": 74,
-        "bn_cta_in": 70.4,
-        "tc_exit": 66.5,
-        "act4_in": 65.1,
-        "offer1_in": 12.5,
-        "roundel_in": 65
+        "act1_begin": 5,
+        "act1_in": 10,
+        "offer1_in": 10,
+        "offer2_in": 11,
+        "offer3_in": 12,
+        "plus1_in": 12.5,
+        "plus2_in": 13,
+        "terms_in": 16,
+        "act2_in": 31,
+        "act1_out": 31,
+        "bn_h2_in": 31,
+        "bn_offers_in": 31,
+        "wave2_in": 52,
+        "offers_exit": 54,
+        "swap": 56,
+        "roundel_in": 56,
+        "tc_exit": 56,
+        "act4_in": 54,
+        "cta_in": 58.2,
+        "bn_blue_in": 52,
+        "bn_white_in": 56,
+        "bn_cta_in": 58.2,
+        "cta_pulse_start": 75,
+        "cta_pulse_peak": 78,
+        "cta_pulse_end": 80,
+        "act3_exit": 92,
+        "end": 100
       },
       "frames-4": {
         "start": 0,
-        "act1_begin": 4.4,
-        "act1_in": 12.5,
-        "offer2_in": 13.6,
-        "offer3_in": 14.7,
-        "plus1_in": 14.9,
-        "plus2_in": 14.9,
-        "terms_in": 19.1,
-        "act2_in": 32.5,
-        "act1_out": 32.5,
-        "offers_exit": 57.7,
-        "wave2_in": 54.7,
-        "swap": 56.7,
-        "cta_in": 74.1,
-        "cta_pulse_start": 91,
-        "cta_pulse_peak": 93,
-        "cta_pulse_end": 94,
-        "act3_exit": 96,
+        "act1_begin": 5,
+        "act1_in": 10,
+        "offer1_in": 10,
+        "offer2_in": 11,
+        "offer3_in": 12,
+        "plus1_in": 12.5,
+        "plus2_in": 13,
+        "terms_in": 16,
+        "act2_in": 31,
+        "act1_out": 31,
+        "bn_h2_in": 31,
+        "bn_offers_in": 31,
+        "wave2_in": 52,
+        "offers_exit": 54,
+        "swap": 56,
+        "roundel_in": 56,
+        "tc_exit": 56,
+        "act4_in": 54,
+        "cta_in": 58.2,
+        "bn_blue_in": 52,
+        "bn_white_in": 56,
+        "bn_cta_in": 58.2,
+        "cta_pulse_start": 75,
+        "cta_pulse_peak": 78,
+        "cta_pulse_end": 80,
+        "act3_exit": 92,
         "end": 100,
-        "bn_h2_in": 36,
-        "bn_offers_in": 47,
-        "bn_blue_in": 71,
-        "bn_white_in": 74,
-        "bn_cta_in": 78,
-        "tc_exit": 60.1,
-        "act4_in": 76,
-        "offer1_in": 12.5,
-        "act2_out": 45,
-        "act3_in": 45,
-        "act3_out": 55,
-        "roundel_in": 56.7
+        "act2_out": 52,
+        "act3_in": 52,
+        "act3_out": 56
       }
     }
   },
@@ -215,28 +216,28 @@
       {
         "name": "heading1_text",
         "label": "Headline act 1",
-        "type": "string",
+        "type": "multiline",
         "group": "Copy",
         "description": "Act 1 headline copy."
       },
       {
         "name": "heading2_text",
         "label": "Headline act 2",
-        "type": "string",
+        "type": "multiline",
         "group": "Copy",
         "description": "Act 2 headline copy."
       },
       {
         "name": "heading3_text",
         "label": "Headline act 3",
-        "type": "string",
+        "type": "multiline",
         "group": "Copy",
         "description": "Act 3 headline copy over the offer roundel (when enabled)."
       },
       {
         "name": "heading4_text",
         "label": "Headline act 4",
-        "type": "string",
+        "type": "multiline",
         "group": "Copy",
         "description": "Act 4 headline copy over the CTA/endframe."
       },
@@ -271,7 +272,7 @@
       {
         "name": "tc_terms_text",
         "label": "T&Cs text",
-        "type": "string",
+        "type": "multiline",
         "group": "Copy",
         "description": "Terms and conditions line."
       },
@@ -480,13 +481,14 @@
               "id": "greenwave-waveSweep",
               "label": "Greenwave waveSweep",
               "preset": "waveSweep",
-              "start": "start+7",
+              "start": "start+5.8",
               "end": "end-2",
               "params": {
                 "start_x": 370,
                 "end_x": -50,
                 "hold_y": 0,
-                "sweep_duration_pct": 6
+                "sweep_duration_pct": 8.3,
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -517,7 +519,8 @@
                 "end_x": 0,
                 "hold_y": 0,
                 "fade_pct": 2,
-                "sweep_duration_pct": 7
+                "sweep_duration_pct": 8.3,
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -544,7 +547,7 @@
               "params": {
                 "exit_dy": 10,
                 "enter_distance_px": 20,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               },
               "profiles": [
                 "frames-4"
@@ -689,7 +692,7 @@
               "params": {
                 "exit_dy": 20,
                 "enter_distance_px": 20,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               },
               "profiles": [
                 "frames-3"
@@ -704,7 +707,7 @@
               "params": {
                 "exit_dy": 20,
                 "enter_distance_px": 20,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               },
               "profiles": [
                 "frames-4"
@@ -738,7 +741,7 @@
               "end": "bn_h2_in",
               "params": {
                 "enter_distance_px": 20,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               }
             }
           ],
@@ -785,9 +788,11 @@
               "params": {
                 "start_scale": 0.297,
                 "anchor_y": -9,
-                "pulse_start": "bn_cta_in+6",
-                "pulse_peak": "bn_cta_in+8",
-                "pulse_end": "bn_cta_in+9"
+                "pulse_start": "bn_cta_in+7.5",
+                "pulse_peak": "bn_cta_in+10",
+                "pulse_end": "bn_cta_in+11.25",
+                "ease_pulse": "cubic-bezier(0.15, 0.95, 0.25, 1)",
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -839,11 +844,11 @@
               "id": "logo-act3-fade",
               "label": "Logo Act3 fade",
               "preset": "fade",
-              "start": 65.4,
+              "start": "bn_blue_in",
               "end": "end",
               "params": {
                 "fade_pct": 4,
-                "enter_duration_pct": 2
+                "enter_duration_pct": 2.5
               }
             }
           ]
@@ -900,7 +905,7 @@
               "end": "offers_exit",
               "params": {
                 "enter_dy": -8,
-                "enter_duration_pct": 2.8,
+                "enter_duration_pct": 3.5,
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
@@ -959,7 +964,7 @@
               "end": "offers_exit",
               "params": {
                 "enter_dy": -8,
-                "enter_duration_pct": 2.8,
+                "enter_duration_pct": 3.5,
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
@@ -1024,7 +1029,7 @@
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out"
               }
             }
@@ -1059,7 +1064,7 @@
               "start": "act1_out",
               "end": "offers_exit-2",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out",
                 "fade_pct": 1
               }
@@ -1101,7 +1106,7 @@
               "start": "terms_in",
               "end": "offers_exit-2",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out",
                 "fade_pct": 1
               }
@@ -1128,12 +1133,12 @@
               "id": "headline-act4-slideInRight-frames-3",
               "label": "Headline Act4 slideInRight",
               "preset": "slideInRight",
-              "start": "bn_cta_in",
+              "start": "act4_in",
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
                 "enter_distance_px": 20,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               },
               "profiles": [
                 "frames-3"
@@ -1148,7 +1153,7 @@
               "params": {
                 "exit_dy": 10,
                 "enter_distance_px": 20,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               },
               "profiles": [
                 "frames-4"
@@ -1841,13 +1846,14 @@
               "id": "greenwave-waveSweep",
               "label": "Greenwave waveSweep",
               "preset": "waveSweep",
-              "start": "start+7",
+              "start": "start+4.6",
               "end": "end-2",
               "params": {
                 "start_x": 840,
                 "end_x": -110,
                 "hold_y": 0,
-                "sweep_duration_pct": 7
+                "sweep_duration_pct": 8.3,
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -1877,7 +1883,8 @@
                 "start_x": 500,
                 "end_x": 0,
                 "hold_y": 0,
-                "fade_pct": 2
+                "fade_pct": 2,
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -1904,7 +1911,7 @@
               "params": {
                 "exit_dy": 10,
                 "enter_distance_px": 20,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               },
               "profiles": [
                 "frames-4"
@@ -2047,7 +2054,7 @@
               "params": {
                 "exit_dy": 20,
                 "enter_distance_px": 20,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               },
               "profiles": [
                 "frames-3"
@@ -2062,7 +2069,7 @@
               "params": {
                 "exit_dy": 20,
                 "enter_distance_px": 20,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               },
               "profiles": [
                 "frames-4"
@@ -2094,7 +2101,7 @@
               "end": "bn_h2_in",
               "params": {
                 "enter_distance_px": 20,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               }
             }
           ],
@@ -2141,7 +2148,9 @@
                 "anchor_y": 0,
                 "pulse_start": "cta_pulse_start",
                 "pulse_peak": "cta_pulse_peak",
-                "pulse_end": "cta_pulse_end"
+                "pulse_end": "cta_pulse_end",
+                "ease_pulse": "cubic-bezier(0.15, 0.95, 0.25, 1)",
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -2197,7 +2206,7 @@
               "end": "end",
               "params": {
                 "fade_pct": 4,
-                "enter_duration_pct": 2
+                "enter_duration_pct": 2.5
               }
             }
           ]
@@ -2221,7 +2230,7 @@
               "label": "Offer Slot 1 slideInRight",
               "preset": "slideInRight",
               "start": "offer1_in",
-              "end": "wave2_in+5",
+              "end": "offers_exit",
               "params": {
                 "enter_distance_px": 20,
                 "exit_dy": 20,
@@ -2251,10 +2260,10 @@
               "label": "Plus 1 fadeUp",
               "preset": "fadeUp",
               "start": "plus1_in",
-              "end": "wave2_in+5",
+              "end": "offers_exit",
               "params": {
                 "enter_dy": -8,
-                "enter_duration_pct": 2.8,
+                "enter_duration_pct": 3.5,
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
@@ -2280,7 +2289,7 @@
               "label": "Offer Slot 2 slideInRight",
               "preset": "slideInRight",
               "start": "offer2_in",
-              "end": "wave2_in+5",
+              "end": "offers_exit",
               "params": {
                 "enter_distance_px": 20,
                 "exit_dy": 20,
@@ -2310,10 +2319,10 @@
               "label": "Plus 2 fadeUp",
               "preset": "fadeUp",
               "start": "plus2_in",
-              "end": "wave2_in+5",
+              "end": "offers_exit",
               "params": {
                 "enter_dy": -8,
-                "enter_duration_pct": 2.8,
+                "enter_duration_pct": 3.5,
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
@@ -2339,7 +2348,7 @@
               "label": "Offer Slot 3 slideInRight",
               "preset": "slideInRight",
               "start": "offer3_in",
-              "end": "wave2_in+5",
+              "end": "offers_exit",
               "params": {
                 "enter_distance_px": 20,
                 "exit_dy": 20,
@@ -2378,7 +2387,7 @@
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out"
               }
             }
@@ -2413,7 +2422,7 @@
               "start": "act1_out",
               "end": "offers_exit-2",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out",
                 "fade_pct": 1
               }
@@ -2451,7 +2460,7 @@
               "start": "terms_in",
               "end": "offers_exit-2",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out",
                 "fade_pct": 1
               }
@@ -2480,7 +2489,7 @@
               "params": {
                 "exit_dy": 10,
                 "enter_distance_px": 20,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               },
               "profiles": [
                 "frames-3"
@@ -2495,7 +2504,7 @@
               "params": {
                 "exit_dy": 10,
                 "enter_distance_px": 20,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               },
               "profiles": [
                 "frames-4"
@@ -3188,12 +3197,14 @@
               "id": "greenwave-waveSweep",
               "label": "Greenwave waveSweep",
               "preset": "waveSweep",
-              "start": "act1_begin",
+              "start": "start+5",
               "end": "end-2",
               "params": {
                 "start_x": 0,
                 "end_x": -700,
-                "hold_y": 0
+                "hold_y": 0,
+                "sweep_duration_pct": 8.3,
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -3223,7 +3234,8 @@
                 "start_x": 318,
                 "end_x": 88,
                 "hold_y": 0,
-                "fade_pct": 2
+                "fade_pct": 2,
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -3249,7 +3261,7 @@
               "end": "act4_in",
               "params": {
                 "exit_dy": 10,
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "enter_distance_px": 20,
                 "ease_in": "cubic-bezier(0.2, 0.85, 0.25, 1)"
               },
@@ -3390,7 +3402,7 @@
               "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "enter_distance_px": 20,
                 "ease_in": "cubic-bezier(0.2, 0.85, 0.25, 1)"
               },
@@ -3406,7 +3418,7 @@
               "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_duration_pct": 4,
+                "enter_duration_pct": 4.2,
                 "enter_distance_px": 20,
                 "ease_in": "cubic-bezier(0.2, 0.85, 0.25, 1)"
               },
@@ -3436,7 +3448,7 @@
               "start": "act1_in",
               "end": "act1_out",
               "params": {
-                "enter_duration_pct": 3,
+                "enter_duration_pct": 3.8,
                 "enter_distance_px": 20,
                 "ease_in": "cubic-bezier(0.2, 0.85, 0.25, 1)"
               }
@@ -3482,7 +3494,9 @@
                 "anchor_y": -9,
                 "pulse_start": "cta_pulse_start",
                 "pulse_peak": "cta_pulse_peak",
-                "pulse_end": "cta_pulse_end"
+                "pulse_end": "cta_pulse_end",
+                "ease_pulse": "cubic-bezier(0.15, 0.95, 0.25, 1)",
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -3509,7 +3523,7 @@
               "start": "act1_begin",
               "end": "wave2_in+7",
               "params": {
-                "enter_duration_pct": 8,
+                "enter_duration_pct": 6.7,
                 "fade_pct": 7
               }
             }
@@ -3538,7 +3552,7 @@
               "end": "end",
               "params": {
                 "fade_pct": 4,
-                "enter_duration_pct": 7
+                "enter_duration_pct": 5.8
               }
             }
           ]
@@ -3595,7 +3609,7 @@
               "end": "offers_exit",
               "params": {
                 "enter_dy": -9,
-                "enter_duration_pct": 3,
+                "enter_duration_pct": 3.8,
                 "ease_in": "cubic-bezier(0.22, 0.75, 0.3, 1)"
               }
             }
@@ -3654,7 +3668,7 @@
               "end": "offers_exit",
               "params": {
                 "enter_dy": -9,
-                "enter_duration_pct": 3,
+                "enter_duration_pct": 3.8,
                 "ease_in": "cubic-bezier(0.22, 0.75, 0.3, 1)"
               }
             }
@@ -3719,7 +3733,7 @@
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out"
               }
             }
@@ -3754,7 +3768,7 @@
               "start": "act1_out",
               "end": "offers_exit-2",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out",
                 "fade_pct": 1
               }
@@ -3792,7 +3806,7 @@
               "start": "terms_in",
               "end": "offers_exit-2",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out",
                 "fade_pct": 1
               }
@@ -3820,7 +3834,7 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "enter_distance_px": 20,
                 "ease_in": "cubic-bezier(0.2, 0.85, 0.25, 1)"
               },
@@ -3836,7 +3850,7 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "enter_distance_px": 20,
                 "ease_in": "cubic-bezier(0.2, 0.85, 0.25, 1)"
               },
@@ -4485,13 +4499,14 @@
               "id": "greenwave-waveSweep",
               "label": "Greenwave waveSweep",
               "preset": "waveSweep",
-              "start": "start+7",
+              "start": "start+5.8",
               "end": "end-2",
               "params": {
                 "start_x": 430,
                 "end_x": -350,
                 "hold_y": 0,
-                "sweep_duration_pct": 6
+                "sweep_duration_pct": 8.3,
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -4524,7 +4539,8 @@
                 "fade_pct": 2,
                 "start_y": 280,
                 "end_y": 0,
-                "sweep_duration_pct": 6
+                "sweep_duration_pct": 8.3,
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -4550,7 +4566,7 @@
               "end": "act4_in",
               "params": {
                 "exit_dy": 10,
-                "enter_duration_pct": 4,
+                "enter_duration_pct": 4.2,
                 "enter_distance_px": 20
               },
               "profiles": [
@@ -4694,7 +4710,7 @@
               "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_duration_pct": 4,
+                "enter_duration_pct": 4.2,
                 "enter_distance_px": 20
               },
               "profiles": [
@@ -4709,7 +4725,7 @@
               "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_duration_pct": 4,
+                "enter_duration_pct": 4.2,
                 "enter_distance_px": 20
               },
               "profiles": [
@@ -4744,7 +4760,7 @@
               "start": "act1_in",
               "end": "act1_out",
               "params": {
-                "enter_duration_pct": 4,
+                "enter_duration_pct": 4.2,
                 "enter_distance_px": 20
               }
             }
@@ -4793,7 +4809,9 @@
                 "anchor_y": -9,
                 "pulse_start": "cta_pulse_start",
                 "pulse_peak": "cta_pulse_peak",
-                "pulse_end": "cta_pulse_end"
+                "pulse_end": "cta_pulse_end",
+                "ease_pulse": "cubic-bezier(0.15, 0.95, 0.25, 1)",
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -4849,7 +4867,7 @@
               "end": "end",
               "params": {
                 "fade_pct": 4,
-                "enter_duration_pct": 2
+                "enter_duration_pct": 2.5
               }
             }
           ]
@@ -4906,7 +4924,7 @@
               "end": "offers_exit",
               "params": {
                 "enter_dy": -10,
-                "enter_duration_pct": 2.8,
+                "enter_duration_pct": 3.5,
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
@@ -4965,7 +4983,7 @@
               "end": "offers_exit",
               "params": {
                 "enter_dy": -10,
-                "enter_duration_pct": 2.8,
+                "enter_duration_pct": 3.5,
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
@@ -5030,7 +5048,7 @@
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out"
               }
             }
@@ -5065,7 +5083,7 @@
               "start": "act1_out",
               "end": "offers_exit-2",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out",
                 "fade_pct": 1
               }
@@ -5103,7 +5121,7 @@
               "start": "terms_in",
               "end": "offers_exit-2",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out",
                 "fade_pct": 1
               }
@@ -5131,7 +5149,7 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_duration_pct": 4,
+                "enter_duration_pct": 4.2,
                 "enter_distance_px": 20
               },
               "profiles": [
@@ -5146,7 +5164,7 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_duration_pct": 4,
+                "enter_duration_pct": 4.2,
                 "enter_distance_px": 20
               },
               "profiles": [
@@ -5819,13 +5837,14 @@
               "id": "greenwave-waveSweep",
               "label": "Greenwave waveSweep",
               "preset": "waveSweep",
-              "start": "start+7",
+              "start": "start+5.4",
               "end": "end-2",
               "params": {
                 "start_x": 520,
                 "end_x": -400,
                 "hold_y": 0,
-                "sweep_duration_pct": 6
+                "sweep_duration_pct": 8.3,
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -5858,7 +5877,8 @@
                 "fade_pct": 2,
                 "start_y": 420,
                 "end_y": 0,
-                "sweep_duration_pct": 6
+                "sweep_duration_pct": 8.3,
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -5884,7 +5904,7 @@
               "end": "act4_in",
               "params": {
                 "exit_dy": 10,
-                "enter_duration_pct": 4,
+                "enter_duration_pct": 4.2,
                 "enter_distance_px": 20
               },
               "profiles": [
@@ -6028,7 +6048,7 @@
               "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_duration_pct": 4,
+                "enter_duration_pct": 4.2,
                 "enter_distance_px": 20
               },
               "profiles": [
@@ -6043,7 +6063,7 @@
               "end": "offers_exit",
               "params": {
                 "exit_dy": 20,
-                "enter_duration_pct": 4,
+                "enter_duration_pct": 4.2,
                 "enter_distance_px": 20
               },
               "profiles": [
@@ -6076,7 +6096,7 @@
               "start": "act1_in",
               "end": "act1_out",
               "params": {
-                "enter_duration_pct": 4,
+                "enter_duration_pct": 4.2,
                 "enter_distance_px": 20
               }
             }
@@ -6125,7 +6145,9 @@
                 "anchor_y": -9,
                 "pulse_start": "cta_pulse_start",
                 "pulse_peak": "cta_pulse_peak",
-                "pulse_end": "cta_pulse_end"
+                "pulse_end": "cta_pulse_end",
+                "ease_pulse": "cubic-bezier(0.15, 0.95, 0.25, 1)",
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -6181,7 +6203,7 @@
               "end": "end",
               "params": {
                 "fade_pct": 4,
-                "enter_duration_pct": 9
+                "enter_duration_pct": 7.5
               }
             }
           ]
@@ -6238,7 +6260,7 @@
               "end": "offers_exit",
               "params": {
                 "enter_dy": -10,
-                "enter_duration_pct": 2.8,
+                "enter_duration_pct": 3.5,
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
@@ -6297,7 +6319,7 @@
               "end": "offers_exit",
               "params": {
                 "enter_dy": -10,
-                "enter_duration_pct": 2.8,
+                "enter_duration_pct": 3.5,
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
@@ -6362,7 +6384,7 @@
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out"
               }
             }
@@ -6397,7 +6419,7 @@
               "start": "act1_out",
               "end": "offers_exit-2",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out",
                 "fade_pct": 1
               }
@@ -6435,7 +6457,7 @@
               "start": "terms_in",
               "end": "offers_exit-2",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out",
                 "fade_pct": 1
               }
@@ -6463,7 +6485,7 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_duration_pct": 4,
+                "enter_duration_pct": 4.2,
                 "enter_distance_px": 20
               },
               "profiles": [
@@ -6478,7 +6500,7 @@
               "end": "act3_exit-1",
               "params": {
                 "exit_dy": 10,
-                "enter_duration_pct": 4,
+                "enter_duration_pct": 4.2,
                 "enter_distance_px": 20
               },
               "profiles": [
@@ -7144,13 +7166,14 @@
               "id": "greenwave-waveSweep",
               "label": "Greenwave waveSweep",
               "preset": "waveSweep",
-              "start": 5.8,
+              "start": "start+4.2",
               "end": "end-2",
               "params": {
                 "start_x": 1080,
                 "end_x": -500,
                 "hold_y": 0,
-                "sweep_duration_pct": 7
+                "sweep_duration_pct": 8.3,
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -7180,7 +7203,8 @@
                 "start_x": 320,
                 "end_x": 0,
                 "hold_y": 0,
-                "fade_pct": 2
+                "fade_pct": 2,
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -7207,7 +7231,7 @@
               "params": {
                 "exit_dy": 10,
                 "enter_distance_px": 35,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               },
               "profiles": [
                 "frames-4"
@@ -7350,7 +7374,7 @@
               "params": {
                 "exit_dy": 20,
                 "enter_distance_px": 35,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               },
               "profiles": [
                 "frames-3"
@@ -7365,7 +7389,7 @@
               "params": {
                 "exit_dy": 20,
                 "enter_distance_px": 35,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               },
               "profiles": [
                 "frames-4"
@@ -7397,7 +7421,7 @@
               "end": "act1_out",
               "params": {
                 "enter_distance_px": 35,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               }
             }
           ],
@@ -7444,7 +7468,9 @@
                 "anchor_y": 0,
                 "pulse_start": "cta_pulse_start",
                 "pulse_peak": "cta_pulse_peak",
-                "pulse_end": "cta_pulse_end"
+                "pulse_end": "cta_pulse_end",
+                "ease_pulse": "cubic-bezier(0.15, 0.95, 0.25, 1)",
+                "ease_in": "cubic-bezier(0.12, 0.92, 0.2, 1)"
               }
             }
           ]
@@ -7500,7 +7526,7 @@
               "end": "end",
               "params": {
                 "fade_pct": 4,
-                "enter_duration_pct": 7
+                "enter_duration_pct": 5.8
               }
             }
           ]
@@ -7557,7 +7583,7 @@
               "end": "offers_exit",
               "params": {
                 "enter_dy": -10,
-                "enter_duration_pct": 6,
+                "enter_duration_pct": 5,
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
@@ -7616,7 +7642,7 @@
               "end": "offers_exit",
               "params": {
                 "enter_dy": -10,
-                "enter_duration_pct": 2.8,
+                "enter_duration_pct": 3.5,
                 "ease_in": "cubic-bezier(0.22, 0.9, 0.3, 1)"
               }
             }
@@ -7681,7 +7707,7 @@
               "start": "terms_in",
               "end": "act1_out",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out"
               }
             }
@@ -7716,7 +7742,7 @@
               "start": "act1_out",
               "end": "offers_exit-2",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out",
                 "fade_pct": 1
               }
@@ -7754,7 +7780,7 @@
               "start": "terms_in",
               "end": "offers_exit-2",
               "params": {
-                "enter_duration_pct": 2,
+                "enter_duration_pct": 2.5,
                 "ease_in": "ease-out",
                 "fade_pct": 1
               }
@@ -7783,7 +7809,7 @@
               "params": {
                 "exit_dy": 10,
                 "enter_distance_px": 35,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               },
               "profiles": [
                 "frames-3"
@@ -7798,7 +7824,7 @@
               "params": {
                 "exit_dy": 10,
                 "enter_distance_px": 35,
-                "enter_duration_pct": 4
+                "enter_duration_pct": 4.2
               },
               "profiles": [
                 "frames-4"

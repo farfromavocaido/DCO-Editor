@@ -72,6 +72,18 @@ const parseTranslateY = (transform: string) => {
   return cssNumber(match[2] !== undefined ? match[2] : match[1], 0);
 };
 
+/**
+ * Collapse horizontal whitespace but keep authored `\n` (CSS `pre-line` parity)
+ * so outline bake can hard-break the same way as the live font preview.
+ */
+export const normalizeCapturedText = (value: string | null | undefined) => (
+  String(value || '')
+    .replace(/\r\n|\r/g, '\n')
+    .replace(/[^\S\n]+/g, ' ')
+    .replace(/ ?\n ?/g, '\n')
+    .trim()
+);
+
 const textKeyForElement = (element: Element) => {
   const id = element.getAttribute('id');
   if (id) return id;
@@ -116,7 +128,7 @@ export const capturePresentationSnapshot = (
     if (style.visibility === 'hidden') return;
     const fontSize = cssNumber(style.fontSize, 0);
     if (fontSize <= 0) return;
-    const text = (element.textContent || '').replace(/\s+/g, ' ').trim();
+    const text = normalizeCapturedText(element.textContent);
     if (!text && !element.classList.contains('offer-value') && !element.classList.contains('offer-subline')) {
       return;
     }
@@ -146,7 +158,7 @@ export const capturePresentationSnapshot = (
       const fontSize = cssNumber(style.fontSize, 0);
       texts[key] = {
         key,
-        text: (value.textContent || '').replace(/\s+/g, ' ').trim(),
+        text: normalizeCapturedText(value.textContent),
         fontSize,
         letterSpacingEm: letterSpacingToEm(style.letterSpacing, fontSize),
         alignOffsetY: parseTranslateY(value.style.transform || style.transform || ''),
@@ -159,7 +171,7 @@ export const capturePresentationSnapshot = (
       const fontSize = cssNumber(style.fontSize, 0);
       texts[key] = {
         key,
-        text: (sub.textContent || '').replace(/\s+/g, ' ').trim(),
+        text: normalizeCapturedText(sub.textContent),
         fontSize,
         letterSpacingEm: letterSpacingToEm(style.letterSpacing, fontSize),
         alignOffsetY: parseTranslateY(sub.style.transform || style.transform || ''),

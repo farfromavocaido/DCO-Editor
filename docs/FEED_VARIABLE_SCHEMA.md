@@ -148,8 +148,8 @@ Validated fields: all headline, offer, CTA, roundel, and T&C copy fields listed 
 
 | | |
 |---|---|
-| **Type** | `string` |
-| **Description** | Act 1 headline copy. |
+| **Type** | `multiline` |
+| **Description** | Act 1 headline copy; line breaks are preserved when the layer wraps. |
 | **Validation** | Any string. |
 | **Required** | Optional (empty allowed). |
 | **Fallback** | `''`. Layer may still animate with empty text. Client preview default: `'A different kind of energy'`. |
@@ -159,8 +159,8 @@ Validated fields: all headline, offer, CTA, roundel, and T&C copy fields listed 
 
 | | |
 |---|---|
-| **Type** | `string` |
-| **Description** | Act 2 headline copy (over offer blocks). |
+| **Type** | `multiline` |
+| **Description** | Act 2 headline copy (over offer blocks); line breaks are preserved when the layer wraps. |
 | **Validation** | Any string. |
 | **Required** | Optional. |
 | **Fallback** | `''`. Client preview default: `'Our very best electricity plan'`. |
@@ -170,8 +170,8 @@ Validated fields: all headline, offer, CTA, roundel, and T&C copy fields listed 
 
 | | |
 |---|---|
-| **Type** | `string` |
-| **Description** | Act 3 headline copy over the offer roundel (when roundel frame is enabled). |
+| **Type** | `multiline` |
+| **Description** | Act 3 headline copy over the offer roundel (when roundel frame is enabled); line breaks are preserved when the layer wraps. |
 | **Validation** | Any string. |
 | **Required** | Optional. |
 | **Fallback** | `''`. Also used as **display fallback for heading 4** when roundel frame is off and `heading4_text` is empty. Client preview default: `'A different kind of energy'`. |
@@ -181,8 +181,8 @@ Validated fields: all headline, offer, CTA, roundel, and T&C copy fields listed 
 
 | | |
 |---|---|
-| **Type** | `string` |
-| **Description** | Act 4 headline copy over the CTA/end frame. |
+| **Type** | `multiline` |
+| **Description** | Act 4 headline copy over the CTA/end frame; line breaks are preserved when the layer wraps. |
 | **Validation** | Any string. |
 | **Required** | Optional. |
 | **Fallback** | When roundel frame is **off** and this field is empty → runtime shows `heading3_text`. When roundel frame is **on** → empty stays empty. Client preview default: `'Switch and save today'`. |
@@ -312,8 +312,8 @@ Offer slots 2 and 3 are hidden at runtime when `offer_count_num` is 1 or 2 respe
 
 | | |
 |---|---|
-| **Type** | `string` |
-| **Description** | Terms and conditions line (shown in both T&C modes). |
+| **Type** | `multiline` |
+| **Description** | Terms and conditions line (shown in both T&C modes); line breaks are preserved when the layer wraps. |
 | **Validation** | Any string. |
 | **Required** | Optional. |
 | **Fallback** | `''`. Client preview / variant merge default: `'*T&Cs apply'`. In **`tcs_units`** mode, this line exits before unit prices appear. |
@@ -324,7 +324,7 @@ Offer slots 2 and 3 are hidden at runtime when `offer_count_num` is 1 or 2 respe
 | | |
 |---|---|
 | **Type** | `multiline` |
-| **Description** | Unit-rate text; line breaks are preserved. |
+| **Description** | Unit-rate text; line breaks are preserved when the layer wraps. |
 | **Validation** | Any string. |
 | **Required** | Optional; only displayed when `tc_type_enum` is **`tcs_units`**. |
 | **Fallback** | `''`. Client preview default includes a sample electricity rate line. |

@@ -57,6 +57,11 @@ export type OutlineFitOptions = {
   lockMetrics?: boolean;
   wrap?: boolean;
   maxLines?: number;
+  /**
+   * Editor-painted lines (soft wraps included). When set, bake these exactly —
+   * do not re-run wrapLines with opentype metrics.
+   */
+  lines?: string[];
   minFontSize?: number;
   trackingMinEm?: number;
   /** Scale trailing % / leading £€ to 0.6em and ink-bottom-align (offer values). */
@@ -371,9 +376,16 @@ export const outlineFittedText = async (options: OutlineFitOptions): Promise<Out
   let trackingEm = startingTracking;
   // nowrap: collapse authored newlines like CSS white-space:nowrap (font-mode parity).
   const singleLineText = text.replace(/\s+/g, ' ').trim();
-  let lines = wrap
-    ? wrapLines(font, text, fontSize, trackingEm, width, maxLines, scaleOfferSymbols)
-    : [singleLineText];
+  const lockedLines = Array.isArray(options.lines) && options.lines.length > 0
+    ? options.lines.map((line) => String(line).replace(/\s+/g, ' ').trim()).filter(Boolean)
+    : null;
+  // Snapshot lines are WYSIWYG — never re-soft-wrap with opentype (browser breaks
+  // differ; wrap+maxLines:2 was knocking single-line sublines onto two lines).
+  let lines = lockedLines
+    ? lockedLines
+    : wrap
+      ? wrapLines(font, text, fontSize, trackingEm, width, maxLines, scaleOfferSymbols)
+      : [singleLineText];
 
   const overflows = () => {
     const widest = Math.max(
@@ -385,7 +397,7 @@ export const outlineFittedText = async (options: OutlineFitOptions): Promise<Out
     return widest > width + 0.5 || blockHeight > maxHeight + 0.5;
   };
 
-  if (!lockMetrics && trackingFloor < trackingEm && overflows()) {
+  if (!lockedLines && !lockMetrics && trackingFloor < trackingEm && overflows()) {
     while (trackingEm > trackingFloor && overflows()) {
       trackingEm = Math.max(trackingFloor, Number((trackingEm - 0.005).toFixed(3)));
       lines = wrap
@@ -394,7 +406,7 @@ export const outlineFittedText = async (options: OutlineFitOptions): Promise<Out
     }
   }
 
-  if (allowShrink) {
+  if (!lockedLines && allowShrink) {
     while (fontSize > minFontSize && overflows()) {
       fontSize = Math.max(minFontSize, Number((fontSize - 0.5).toFixed(3)));
       lines = wrap

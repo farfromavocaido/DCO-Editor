@@ -3,6 +3,7 @@ import { test } from 'vitest';
 
 import {
   authoredLetterSpacingToEm,
+  captureDisplayedLines,
   letterSpacingToEm,
   normalizeCapturedText,
 } from '@/lib/outline-snapshot';
@@ -18,6 +19,17 @@ test('normalizeCapturedText keeps newlines and collapses horizontal space', () =
     'A different\nkind\nof energy',
   );
   assert.equal(normalizeCapturedText('  hello  world  '), 'hello world');
+});
+
+test('captureDisplayedLines falls back to hard newlines without a live layout', () => {
+  assert.deepEqual(
+    captureDisplayedLines({ textContent: 'OFF\nELECTRICITY*' } as HTMLElement),
+    ['OFF', 'ELECTRICITY*'],
+  );
+  assert.deepEqual(
+    captureDisplayedLines({ textContent: 'OFF ELECTRICITY*' } as HTMLElement),
+    ['OFF ELECTRICITY*'],
+  );
 });
 
 test('letterSpacingToEm reads em and px from computed styles', () => {

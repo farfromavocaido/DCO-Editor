@@ -198,6 +198,24 @@ const targetBakeOptions = ({
     const useContentBox = contentWidth > 0 && contentHeight > 0;
     const inkTop = Number(pos?.inkTop);
     const contentTop = Number(pos?.contentTop);
+    const lockedLines = Array.isArray(snap.lines) && snap.lines.length > 0
+      ? snap.lines
+      : null;
+    // Soft-wrap is locked via snap.lines when present. Without lines, still
+    // refuse to re-wrap when the captured content box is clearly one line —
+    // opentype widths otherwise re-break copy the browser kept on one line.
+    let wrap = lockedLines ? false : Boolean(fit.wrap);
+    let maxLines = lockedLines
+      ? lockedLines.length
+      : (Number(fit.maxLines) || (fit.wrap ? 2 : 1));
+    if (!lockedLines && useContentBox) {
+      const lh = resolvedLineHeight && resolvedLineHeight <= 4 ? resolvedLineHeight : 1.15;
+      const oneLine = Number(snap.fontSize) * lh;
+      if (contentHeight <= oneLine * 1.4) {
+        wrap = false;
+        maxLines = 1;
+      }
+    }
     return {
       text: snap.text || text,
       fontSize: Number(snap.fontSize),
@@ -209,8 +227,9 @@ const targetBakeOptions = ({
       letterSpacingEm: Number(snap.letterSpacingEm) || 0,
       lockMetrics: true,
       allowShrink: false,
-      wrap: Boolean(fit.wrap),
-      maxLines: Number(fit.maxLines) || (fit.wrap ? 2 : 1),
+      wrap,
+      maxLines,
+      ...(lockedLines ? { lines: lockedLines } : {}),
       scaleOfferSymbols: snap.scaleOfferSymbols ?? scaleOfferSymbols,
       alignOffsetY: Number(snap.alignOffsetY) || 0,
       ...(useContentBox

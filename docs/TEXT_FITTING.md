@@ -164,11 +164,12 @@ editor, font HTML, and outline/static exports.
 Outline / static export is a **direct bake** of the editor stage: presentation
 snapshots capture live boxes for slots, pluses, offer-value, and offer-subline
 (inline after ink lock, else computed CSS) **plus** each text run’s content box
-(`.offer-value-run` / Range) and glyph ink. Outline HTML writes host `left`/`top`
-and absolutely places a content-sized SVG at the run box, with an ink-top nudge
-so opentype paths match browser Museo metrics — including side-by-side subline
-`left`. SSE DCO stays `offerPlusLayout: "auto"` (live feed lengths need ink-based
-placement).
+(`.offer-value-run` / Range), glyph ink, and **painted lines** (hard breaks and
+browser soft wraps). Outline HTML writes host `left`/`top` and absolutely places
+a content-sized SVG at the run box, with an ink-top nudge so opentype paths match
+browser Museo metrics — and never re-soft-wraps from `fit.wrap`/`maxLines` when
+the snapshot already recorded the live lines. SSE DCO stays
+`offerPlusLayout: "auto"` (live feed lengths need ink-based placement).
 
 ## Outline export (font → SVG paths)
 
@@ -185,8 +186,8 @@ authored letter-spacing → tracking squeeze, bottom-align, 0.6em symbols).
 
 Pipeline:
 
-1. Prefer snapshot `fontSize` / `letterSpacingEm` / `alignOffsetY` / plus·slot
-   positions; else resolve target metrics + metric fit (including shared
+1. Prefer snapshot `fontSize` / `letterSpacingEm` / `alignOffsetY` / `lines` /
+   plus·slot positions; else resolve target metrics + metric fit (including shared
    equalization across visible offer values/sublines).
 2. Offer values: bake `%` / `£` / `€` at **0.6em** with ink-bottom align
    (opentype glyph `yMin`, same intent as `alignOfferValueSymbols`).
@@ -200,7 +201,9 @@ Pipeline:
    When a snapshot includes a content box, SVG **width/height** follow the live
    run/Range box (left-aligned paths), the exporter absolutely positions that
    SVG inside the host, and an extra ink-top translate closes browser↔opentype
-   metric drift.
+   metric drift. Snapshot `lines` lock soft wraps — bake does not re-`wrapLines`
+   with opentype advances (those diverge from browser Museo and can force an
+   extra line under `fit.wrap` + `maxLines: 2`).
 6. CTA: zero host padding; SVG at intrinsic size (no `width: 100%` scale-down).
 7. Snapshot plus/slot/offer-host `left`/`top`/`height` write as inline styles
    over class CSS (value + subline hosts included — side-by-side ink lock must

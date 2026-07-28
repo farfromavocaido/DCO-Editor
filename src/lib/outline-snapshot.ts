@@ -10,6 +10,12 @@ export type TextPresentationSnapshot = {
   /** Layer id, nested id (`offer-slot-1::offer-value`), or DOM id. */
   key: string;
   text: string;
+  /**
+   * Exact lines the editor painted (hard breaks + soft wraps). Outline bake
+   * must use these — recomputing soft-wrap with opentype widths diverges from
+   * browser Museo (e.g. wrap/maxLines:2 knocking "OFF ELECTRICITY*" to 2 lines).
+   */
+  lines?: string[];
   fontSize: number;
   /** Final letter-spacing in em of the host font-size (0 when normal). */
   letterSpacingEm: number;
@@ -197,6 +203,79 @@ export const normalizeCapturedText = (value: string | null | undefined) => (
     .trim()
 );
 
+const normalizeLineText = (value: string) => value.replace(/\s+/g, ' ').trim();
+
+/**
+ * Read the lines the browser actually painted (soft wraps included).
+ * Character tops via Range — same breaks the preview shows, not opentype wrap.
+ */
+export const captureDisplayedLines = (element: HTMLElement | null | undefined): string[] => {
+  const fallback = normalizeCapturedText(element?.textContent);
+  if (!fallback || !element) return fallback ? fallback.split('\n') : [];
+  const doc = element.ownerDocument;
+  if (!doc?.createRange || !doc.createTreeWalker) {
+    return fallback.split('\n').filter((line) => line.length > 0);
+  }
+
+  const textNodes: Text[] = [];
+  const walker = doc.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+  let node: Node | null = walker.nextNode();
+  while (node) {
+    if (node.textContent) textNodes.push(node as Text);
+    node = walker.nextNode();
+  }
+  if (!textNodes.length) return fallback.split('\n').filter((line) => line.length > 0);
+
+  type CharRef = { node: Text; offset: number; ch: string };
+  const chars: CharRef[] = [];
+  for (const textNode of textNodes) {
+    const value = textNode.textContent || '';
+    for (let offset = 0; offset < value.length; offset += 1) {
+      chars.push({ node: textNode, offset, ch: value[offset] });
+    }
+  }
+  if (!chars.length) return fallback.split('\n').filter((line) => line.length > 0);
+
+  const range = doc.createRange();
+  const lineStarts = [0];
+  let lastTop: number | null = null;
+  for (let index = 0; index < chars.length; index += 1) {
+    const { node: textNode, offset, ch } = chars[index];
+    if (ch === '\n' || ch === '\r') {
+      if (lineStarts[lineStarts.length - 1] !== index + 1) lineStarts.push(index + 1);
+      lastTop = null;
+      continue;
+    }
+    try {
+      range.setStart(textNode, offset);
+      range.setEnd(textNode, offset + 1);
+      const rect = range.getBoundingClientRect();
+      if (!(rect.width > 0 || rect.height > 0)) continue;
+      if (lastTop === null) {
+        lastTop = rect.top;
+        continue;
+      }
+      // New visual line (soft wrap or block). 2px tolerates subpixel / zoom.
+      if (Math.abs(rect.top - lastTop) > 2) {
+        lineStarts.push(index);
+        lastTop = rect.top;
+      }
+    } catch {
+      // Detached / odd nodes — keep scanning.
+    }
+  }
+
+  const raw = chars.map((item) => item.ch).join('');
+  const lines: string[] = [];
+  for (let i = 0; i < lineStarts.length; i += 1) {
+    const start = lineStarts[i];
+    const end = i + 1 < lineStarts.length ? lineStarts[i + 1] : raw.length;
+    const line = normalizeLineText(raw.slice(start, end).replace(/\r?\n/g, ''));
+    if (line) lines.push(line);
+  }
+  return lines.length ? lines : fallback.split('\n').filter((line) => line.length > 0);
+};
+
 const textKeyForElement = (element: Element) => {
   const id = element.getAttribute('id');
   if (id) return id;
@@ -247,9 +326,11 @@ export const capturePresentationSnapshot = (
     if (!text && !element.classList.contains('offer-value') && !element.classList.contains('offer-subline')) {
       return;
     }
+    const lines = captureDisplayedLines(element);
     texts[key] = {
       key,
       text,
+      ...(lines.length ? { lines } : {}),
       fontSize,
       letterSpacingEm: letterSpacingToEm(style.letterSpacing, fontSize),
       alignOffsetY: parseTranslateY(element.style.transform || style.transform || ''),
@@ -271,9 +352,11 @@ export const capturePresentationSnapshot = (
       const key = `${normalizedSlot}::offer-value`;
       const style = window.getComputedStyle(value);
       const fontSize = cssNumber(style.fontSize, 0);
+      const lines = captureDisplayedLines(value);
       texts[key] = {
         key,
         text: normalizeCapturedText(value.textContent),
+        ...(lines.length ? { lines } : {}),
         fontSize,
         letterSpacingEm: letterSpacingToEm(style.letterSpacing, fontSize),
         alignOffsetY: parseTranslateY(value.style.transform || style.transform || ''),
@@ -284,9 +367,11 @@ export const capturePresentationSnapshot = (
       const key = `${normalizedSlot}::offer-subline`;
       const style = window.getComputedStyle(sub);
       const fontSize = cssNumber(style.fontSize, 0);
+      const lines = captureDisplayedLines(sub);
       texts[key] = {
         key,
         text: normalizeCapturedText(sub.textContent),
+        ...(lines.length ? { lines } : {}),
         fontSize,
         letterSpacingEm: letterSpacingToEm(style.letterSpacing, fontSize),
         alignOffsetY: parseTranslateY(sub.style.transform || style.transform || ''),

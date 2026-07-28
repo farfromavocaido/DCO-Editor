@@ -170,6 +170,25 @@ test('outlineFittedText respects locked snapshot letterSpacing without refitting
   assert.equal(locked.letterSpacingEm, -0.04);
 });
 
+test('outlineFittedText locked lines skip soft-wrap even when wrap requested', async () => {
+  const outlined = await outlineFittedText({
+    text: 'OFF ELECTRICITY*',
+    fontSize: 24,
+    width: 80,
+    lineHeight: 1.1,
+    wrap: true,
+    maxLines: 2,
+    lockMetrics: true,
+    lines: ['OFF ELECTRICITY*'],
+  });
+  assert.deepEqual(outlined.lines, ['OFF ELECTRICITY*']);
+  const height = Number(outlined.svg.match(/height="([\d.]+)"/)?.[1] || 0);
+  assert.ok(
+    Math.abs(height - 24 * 1.1) < 0.05,
+    `single locked line should be one line-box tall, got ${height}`,
+  );
+});
+
 test('outlineFittedText content-box bake left-aligns and ink-nudges', async () => {
   const outlined = await outlineFittedText({
     text: '15%',

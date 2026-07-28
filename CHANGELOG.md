@@ -4,6 +4,7 @@
 
 ### Added
 
+- **Statics preview zoom** — Fit / 1x / 2x plus −/+ stepping (up to **750%**) on the GitHub Pages `/statics/` viewer; zoom persists in `sessionStorage`.
 - **Manual line breaks in multiline feed copy** — headlines, T&Cs, and unit-rate accept authored `\n` in the editor and GitHub client preview (heading controls are textareas). Hard breaks only apply when fit wrap is allowed (`pre-line` / outline wrap); each hard-break line uses the same line-box height as soft wrap. Outline `wrapLines` + presentation snapshots preserve newlines so SVG outline export matches the live preview.
 - **Statics preview (GitHub Pages `/statics/`)** — password-gated host for the three non-DCO campaigns’ Export-for-Static HTML; sidebar is campaign + size only; download link reads `outputs/latest.json`.
 - **Export for Preview** (toolbar) — snapshots each non-DCO campaign on the live editor stage, writes tracked `outputs/campaigns/…`, a timestamped `outputs/downloads/SSE_Statics_*.zip`, and refreshes `outputs/latest.json` for commit/publish.

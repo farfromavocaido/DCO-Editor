@@ -24,4 +24,7 @@ test('renders a campaign/size shell with download link', () => {
   assert.match(html, /downloads\/SSE_Statics_20260728-080000\.zip/);
   assert.match(html, /campaigns\/' \+ campaign\.id \+ '\/' \+ campaign\.exportSlug/);
   assert.match(html, /href="\.\.\/"/);
+  assert.match(html, /data-zoom-mode="1"/);
+  assert.match(html, /data-zoom-mode="2"/);
+  assert.match(html, /ZOOM_LEVELS = \[0\.25, 0\.5, 0\.75, 1, 1\.25, 1\.5, 2, 2\.5, 3, 4, 5, 6, 7, 7\.5\]/);
 });

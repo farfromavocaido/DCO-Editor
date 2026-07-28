@@ -202,8 +202,8 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
         flex-wrap: wrap;
         justify-content: flex-end;
       }
-      .preview-actions a,
-      .preview-actions button {
+      .preview-actions > a,
+      .preview-actions > button {
         appearance: none;
         border: 1px solid var(--line);
         border-radius: 8px;
@@ -216,10 +216,45 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
         text-decoration: none;
         cursor: pointer;
       }
-      .preview-actions a.primary {
+      .preview-actions > a.primary {
         border-color: transparent;
         background: var(--teal);
         color: rgb(0, 41, 117);
+      }
+      .zoom-controls {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        flex: 0 0 auto;
+      }
+      .zoom-controls button {
+        display: grid;
+        min-width: 24px;
+        height: 24px;
+        place-items: center;
+        padding: 0 7px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        background: #101821;
+        color: var(--ink);
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 10px;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+      .zoom-controls button:hover,
+      .zoom-controls button[aria-pressed="true"] {
+        border-color: var(--teal);
+        background: rgba(22, 199, 183, 0.12);
+        color: var(--teal);
+      }
+      .zoom-readout {
+        min-width: 40px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 500;
+        text-align: right;
       }
       .stage-wrap {
         flex: 1;
@@ -240,17 +275,17 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
         padding: 24px;
       }
       .frame-shell {
-        width: ${initialWidth}px;
-        height: ${initialHeight}px;
+        flex: 0 0 auto;
+        overflow: hidden;
         background: #fff;
         box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+        isolation: isolate;
       }
       iframe {
         display: block;
-        width: 100%;
-        height: 100%;
         border: 0;
         background: #fff;
+        transform-origin: top left;
       }
       .nav-link {
         display: inline-block;
@@ -304,6 +339,14 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
             <p id="preview-subtitle">${escapeHtml(firstSize)} · outlined static HTML</p>
           </div>
           <div class="preview-actions">
+            <div class="zoom-controls" aria-label="Preview zoom">
+              <button type="button" class="zoom-button" data-zoom-step="-1" aria-label="Zoom out">−</button>
+              <button type="button" class="zoom-button" data-zoom-mode="fit" aria-label="Fit to viewport" aria-pressed="true">Fit</button>
+              <button type="button" class="zoom-button" data-zoom-mode="1" aria-label="100% zoom">1x</button>
+              <button type="button" class="zoom-button" data-zoom-mode="2" aria-label="200% zoom">2x</button>
+              <button type="button" class="zoom-button" data-zoom-step="1" aria-label="Zoom in">+</button>
+              <span class="zoom-readout" data-zoom-readout>Fit</span>
+            </div>
             <button type="button" id="replay">Replay</button>
             <a class="primary" id="download" href="${zipHref}" download>Download ZIP</a>
           </div>
@@ -318,14 +361,19 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
     <script>
       (function() {
         var STORAGE_KEY = 'sse-statics-preview:v1';
+        var ZOOM_LEVELS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 7.5];
         var campaigns = ${campaignsJson};
         var campaignSelect = document.getElementById('campaign');
         var sizeSelect = document.getElementById('size');
         var frame = document.getElementById('ad-frame');
         var shell = document.getElementById('frame-shell');
+        var stage = document.querySelector('.stage-wrap');
         var title = document.getElementById('preview-title');
         var subtitle = document.getElementById('preview-subtitle');
         var replay = document.getElementById('replay');
+        var previewZoom = 'fit';
+        var frameWidth = ${initialWidth};
+        var frameHeight = ${initialHeight};
 
         function findCampaign(id) {
           for (var i = 0; i < campaigns.length; i += 1) {
@@ -357,11 +405,65 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
             : (campaign.sizes[0] || '');
         }
 
+        function zoomLabel(zoom) {
+          if (zoom === 'fit') return 'Fit';
+          if (Number(zoom) === 1) return '1x';
+          if (Number(zoom) === 2) return '2x';
+          return Math.round(Number(zoom) * 100) + '%';
+        }
+
+        function updateZoomButtons() {
+          Array.prototype.forEach.call(document.querySelectorAll('[data-zoom-mode]'), function(button) {
+            var mode = button.getAttribute('data-zoom-mode');
+            var pressed = mode === 'fit'
+              ? previewZoom === 'fit'
+              : Number(mode) === Number(previewZoom);
+            button.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+          });
+          var readout = document.querySelector('[data-zoom-readout]');
+          if (readout) readout.textContent = zoomLabel(previewZoom);
+        }
+
+        function previewScale() {
+          if (previewZoom === 'fit') {
+            var availableWidth = Math.max(1, stage.clientWidth - 48);
+            var availableHeight = Math.max(1, stage.clientHeight - 48);
+            return Math.min(1, availableWidth / frameWidth, availableHeight / frameHeight);
+          }
+          return Number(previewZoom);
+        }
+
+        function fitAdFrame() {
+          var scale = previewScale();
+          shell.style.width = Math.ceil(frameWidth * scale) + 'px';
+          shell.style.height = Math.ceil(frameHeight * scale) + 'px';
+          frame.style.width = frameWidth + 'px';
+          frame.style.height = frameHeight + 'px';
+          frame.style.transform = 'scale(' + scale + ')';
+        }
+
+        function setPreviewZoom(next) {
+          previewZoom = next;
+          updateZoomButtons();
+          fitAdFrame();
+          persist();
+        }
+
+        function nextZoomLevel(current, direction) {
+          var index = ZOOM_LEVELS.findIndex(function(level) { return level >= current; });
+          if (index < 0) index = ZOOM_LEVELS.length - 1;
+          if (direction > 0) {
+            return ZOOM_LEVELS[Math.min(ZOOM_LEVELS.length - 1, current >= ZOOM_LEVELS[index] ? index + 1 : index)];
+          }
+          return ZOOM_LEVELS[Math.max(0, current <= ZOOM_LEVELS[index] ? index - 1 : index)];
+        }
+
         function persist() {
           try {
             sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
               campaignId: campaignSelect.value,
               size: sizeSelect.value,
+              zoom: previewZoom,
             }));
           } catch (error) {}
         }
@@ -370,11 +472,12 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
           var campaign = findCampaign(campaignSelect.value);
           var size = sizeSelect.value || campaign.sizes[0];
           var dims = parseSize(size);
-          shell.style.width = dims.width + 'px';
-          shell.style.height = dims.height + 'px';
+          frameWidth = dims.width;
+          frameHeight = dims.height;
           title.textContent = campaign.name;
           subtitle.textContent = size + ' · outlined static HTML';
           frame.src = adSrc(campaign, size);
+          fitAdFrame();
           persist();
         }
 
@@ -388,6 +491,10 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
           var campaign = findCampaign(saved && saved.campaignId);
           campaignSelect.value = campaign.id;
           fillSizes(campaign, saved && saved.size);
+          if (saved && (saved.zoom === 'fit' || ZOOM_LEVELS.indexOf(Number(saved.zoom)) !== -1)) {
+            previewZoom = saved.zoom === 'fit' ? 'fit' : Number(saved.zoom);
+          }
+          updateZoomButtons();
           loadActiveAd();
         }
 
@@ -400,6 +507,20 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
         replay.addEventListener('click', function() {
           frame.src = frame.src;
         });
+        Array.prototype.forEach.call(document.querySelectorAll('[data-zoom-mode]'), function(button) {
+          button.addEventListener('click', function() {
+            var mode = button.getAttribute('data-zoom-mode');
+            setPreviewZoom(mode === 'fit' ? 'fit' : Number(mode));
+          });
+        });
+        Array.prototype.forEach.call(document.querySelectorAll('[data-zoom-step]'), function(button) {
+          button.addEventListener('click', function() {
+            var direction = Number(button.getAttribute('data-zoom-step'));
+            var current = previewZoom === 'fit' ? 1 : Number(previewZoom);
+            setPreviewZoom(nextZoomLevel(current, direction));
+          });
+        });
+        window.addEventListener('resize', fitAdFrame);
 
         hydrate();
       })();

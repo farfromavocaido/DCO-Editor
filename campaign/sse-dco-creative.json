@@ -7885,8 +7885,8 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 10,
-            "width": 280,
+            "left": 20,
+            "width": 260,
             "textAlign": "center"
           },
           "editable": true
@@ -7899,9 +7899,9 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 10,
+            "left": 20,
             "top": 50,
-            "width": 280,
+            "width": 260,
             "height": 100,
             "fontSize": 34,
             "lineHeight": 1.25,

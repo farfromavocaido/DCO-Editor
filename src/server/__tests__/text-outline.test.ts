@@ -170,6 +170,30 @@ test('outlineFittedText respects locked snapshot letterSpacing without refitting
   assert.equal(locked.letterSpacingEm, -0.04);
 });
 
+test('outlineFittedText content-box bake left-aligns and ink-nudges', async () => {
+  const outlined = await outlineFittedText({
+    text: '15%',
+    fontSize: 41,
+    width: 69,
+    height: 35,
+    lineHeight: 0.85,
+    textAlign: 'right',
+    lockMetrics: true,
+    scaleOfferSymbols: true,
+    contentWidth: 48,
+    contentHeight: 34.85,
+    inkTopInSvg: 2.5,
+  });
+  const width = Number(outlined.svg.match(/width="([\d.]+)"/)?.[1] || 0);
+  const height = Number(outlined.svg.match(/height="([\d.]+)"/)?.[1] || 0);
+  assert.equal(width, 48, 'SVG width follows content box, not authored host');
+  assert.equal(height, 34.85);
+  // Paths start near x=0 (left-aligned in content box), not right-padded in 69px.
+  const xs = [...outlined.svg.matchAll(/[ML]\s*([\d.]+)/g)].map((m) => Number(m[1]));
+  assert.ok(Math.min(...xs) < 5, `content-box paths should start near left, minX=${Math.min(...xs)}`);
+  assert.match(outlined.svg, /transform="translate\(0 /);
+});
+
 test('outlineFittedText applies CSS half-leading for tight lineHeight', async () => {
   // Offer values use lineHeight 0.85 — without half-leading, Museo ascender (~63px
   // at 67px) sits below the 57px host and overlaps the subline at top:67.

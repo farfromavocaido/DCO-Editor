@@ -47,6 +47,7 @@ import {
   bakeOutlinedOfferSlotSvgs,
   bakeOutlinedText,
   positionStyleAttr,
+  placeSvgInContentBox,
 } from './outline-bake';
 import { appRoot, outputRoot, outputsRoot, projectRoot } from './paths';
 
@@ -708,22 +709,24 @@ const renderOutlinedOfferSlot = (
     `offer-slot-${index}`,
     `offer${index}`,
   );
-  const valueStyle = positionStyleAttr(
-    snapshot,
+  const valueIds = [
     `${layer.id}::offer-value`,
     `offer-slot-${index}::offer-value`,
     `offer${index}::offer-value`,
-  );
-  const subStyle = positionStyleAttr(
-    snapshot,
+  ];
+  const subIds = [
     `${layer.id}::offer-subline`,
     `offer-slot-${index}::offer-subline`,
     `offer${index}::offer-subline`,
-  );
+  ];
+  const valueStyle = positionStyleAttr(snapshot, ...valueIds);
+  const subStyle = positionStyleAttr(snapshot, ...subIds);
+  const valueSvg = placeSvgInContentBox(baked.valueSvg, snapshot, ...valueIds);
+  const subSvg = placeSvgInContentBox(baked.subSvg, snapshot, ...subIds);
   // Keep data-gwd-group / gwd-grp-* — manualCss and structured rules key off them.
   return `          <div class="stage-element ${cssClass}" data-gwd-group="OfferSlot" id="offer${index}"${slotStyle}>
-            <div class="gwd-grp-offer offer-value outlined-text"${valueStyle}>${baked.valueSvg}</div>
-            <div class="gwd-grp-offer offer-subline outlined-text"${subStyle}>${baked.subSvg}</div>
+            <div class="gwd-grp-offer offer-value outlined-text"${valueStyle}>${valueSvg}</div>
+            <div class="gwd-grp-offer offer-subline outlined-text"${subStyle}>${subSvg}</div>
           </div>`;
 };
 

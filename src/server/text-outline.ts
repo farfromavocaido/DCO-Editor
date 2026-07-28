@@ -63,6 +63,15 @@ export type OutlineFitOptions = {
   scaleOfferSymbols?: boolean;
   /** text-fit align:bottom translateY — applied as SVG group translate. */
   alignOffsetY?: number;
+  /**
+   * Editor text-run box (Range / offer-value-run). When set, SVG is baked to
+   * this size with left-aligned paths (host keeps authored width + absolute
+   * SVG placement in the exporter).
+   */
+  contentWidth?: number;
+  contentHeight?: number;
+  /** Desired glyph-ink top inside the SVG (editor inkTop − contentTop). */
+  inkTopInSvg?: number;
 };
 
 export type OutlinedText = {
@@ -272,6 +281,7 @@ type MutablePath = {
   commands: PathCommand[];
   extend: (other: unknown) => void;
   toSVG: (decimalPlaces?: number) => string;
+  getBoundingBox?: () => { x1: number; y1: number; x2: number; y2: number };
 };
 
 /**
@@ -300,11 +310,10 @@ const buildPathForLines = (
   trackingEm: number,
   width: number,
   textAlign: 'left' | 'center' | 'right',
-  lineHeight: number,
+  lineBox: number,
   scaleOfferSymbols: boolean,
 ) => {
   const path = new opentype.Path() as MutablePath;
-  const lineBox = lineBoxPx(fontSize, lineHeight);
   lines.forEach((line, lineIndex) => {
     const runs = runsForLine(font, line, fontSize, scaleOfferSymbols);
     const lineWidth = measureRunsWidth(font, runs, fontSize, trackingEm);
@@ -354,6 +363,9 @@ export const outlineFittedText = async (options: OutlineFitOptions): Promise<Out
   const startingTracking = Number.isFinite(options.letterSpacingEm)
     ? Number(options.letterSpacingEm)
     : 0;
+  const contentWidth = Number(options.contentWidth);
+  const contentHeight = Number(options.contentHeight);
+  const useContentBox = contentWidth > 0 && contentHeight > 0;
 
   let fontSize = Math.max(minFontSize, Number(options.fontSize) || 12);
   let trackingEm = startingTracking;
@@ -391,24 +403,46 @@ export const outlineFittedText = async (options: OutlineFitOptions): Promise<Out
     }
   }
 
+  // Content-box bake: SVG matches the editor run/Range box; paths left-aligned
+  // inside it (exporter absolutely positions the SVG). Line box height comes
+  // from the captured content height so half-leading matches the live flex item.
+  const bakeWidth = useContentBox ? contentWidth : width;
+  const bakeAlign = useContentBox ? 'left' : textAlign;
+  const bakeLineBox = useContentBox
+    ? Math.max(1, contentHeight / Math.max(lines.length, 1))
+    : lineBoxPx(fontSize, lineHeight);
+
   const path = buildPathForLines(
     font,
     lines,
     fontSize,
     trackingEm,
-    width,
-    textAlign,
-    lineHeight,
+    bakeWidth,
+    bakeAlign,
+    bakeLineBox,
     scaleOfferSymbols,
   );
+
+  let inkNudgeY = 0;
+  const inkTopInSvg = Number(options.inkTopInSvg);
+  if (Number.isFinite(inkTopInSvg) && typeof path.getBoundingBox === 'function') {
+    const bbox = path.getBoundingBox();
+    if (bbox && Number.isFinite(bbox.y1)) {
+      inkNudgeY = inkTopInSvg - bbox.y1;
+    }
+  }
+
   // SVG height = CSS line boxes (not raw em). Host flex (CTA / headlines) still
   // centres a shorter block; offer hosts keep authored absolute tops/heights.
-  const height = Math.max(1, lines.length * lineBoxPx(fontSize, lineHeight));
+  const height = useContentBox
+    ? contentHeight
+    : Math.max(1, lines.length * lineBoxPx(fontSize, lineHeight));
   const svgPath = path.toSVG(2);
-  const groupOpen = Math.abs(alignOffsetY) > 0.01
-    ? `<g fill="${color}" transform="translate(0 ${alignOffsetY.toFixed(2)})">`
+  const totalOffsetY = alignOffsetY + inkNudgeY;
+  const groupOpen = Math.abs(totalOffsetY) > 0.01
+    ? `<g fill="${color}" transform="translate(0 ${totalOffsetY.toFixed(2)})">`
     : `<g fill="${color}">`;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" aria-hidden="true">${groupOpen}${svgPath}</g></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${bakeWidth}" height="${height}" viewBox="0 0 ${bakeWidth} ${height}" aria-hidden="true">${groupOpen}${svgPath}</g></svg>`;
   return {
     svg,
     fontSize,

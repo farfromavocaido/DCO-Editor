@@ -74,6 +74,17 @@ export const textSnapshotForTarget = (
   return null;
 };
 
+export const positionSnapshotForTarget = (
+  snapshot: SizePresentationSnapshot | null | undefined,
+  targetId: string,
+) => {
+  if (!snapshot?.positions) return null;
+  for (const key of snapshotKeyAliases(targetId)) {
+    if (snapshot.positions[key]) return snapshot.positions[key];
+  }
+  return null;
+};
+
 export const positionStyleAttr = (
   snapshot: SizePresentationSnapshot | null | undefined,
   ...ids: string[]
@@ -84,9 +95,46 @@ export const positionStyleAttr = (
     if (!pos) continue;
     const parts = [`left:${pos.left}px`, `top:${pos.top}px`];
     if (Number.isFinite(pos.width)) parts.push(`width:${pos.width}px`);
+    if (Number.isFinite(pos.height)) parts.push(`height:${pos.height}px`);
+    // Content-box SVG is absolutely placed — kill flex packing so it cannot
+    // fight the baked left/top of the run.
+    if (
+      Number.isFinite(pos.contentLeft)
+      && Number.isFinite(pos.contentTop)
+      && Number(pos.contentWidth) > 0
+      && Number(pos.contentHeight) > 0
+    ) {
+      parts.push('display:block', 'position:absolute');
+    }
     return ` style="${parts.join(';')}"`;
   }
   return '';
+};
+
+/** Inject absolute left/top onto an outline SVG when the snapshot has a content box. */
+export const placeSvgInContentBox = (
+  svg: string,
+  snapshot: SizePresentationSnapshot | null | undefined,
+  ...ids: string[]
+) => {
+  if (!svg || !snapshot?.positions) return svg;
+  for (const id of ids) {
+    const pos = snapshot.positions[id];
+    if (
+      !pos
+      || !Number.isFinite(pos.contentLeft)
+      || !Number.isFinite(pos.contentTop)
+      || !(Number(pos.contentWidth) > 0)
+      || !(Number(pos.contentHeight) > 0)
+    ) {
+      continue;
+    }
+    return svg.replace(
+      '<svg ',
+      `<svg style="position:absolute;left:${pos.contentLeft}px;top:${pos.contentTop}px" `,
+    );
+  }
+  return svg;
 };
 
 type BakeTargetArgs = {
@@ -144,6 +192,12 @@ const targetBakeOptions = ({
     : 1.15;
 
   if (snap && Number(snap.fontSize) > 0) {
+    const pos = positionSnapshotForTarget(snapshot, targetId);
+    const contentWidth = Number(pos?.contentWidth);
+    const contentHeight = Number(pos?.contentHeight);
+    const useContentBox = contentWidth > 0 && contentHeight > 0;
+    const inkTop = Number(pos?.inkTop);
+    const contentTop = Number(pos?.contentTop);
     return {
       text: snap.text || text,
       fontSize: Number(snap.fontSize),
@@ -159,6 +213,15 @@ const targetBakeOptions = ({
       maxLines: Number(fit.maxLines) || (fit.wrap ? 2 : 1),
       scaleOfferSymbols: snap.scaleOfferSymbols ?? scaleOfferSymbols,
       alignOffsetY: Number(snap.alignOffsetY) || 0,
+      ...(useContentBox
+        ? {
+          contentWidth,
+          contentHeight,
+          ...(Number.isFinite(inkTop) && Number.isFinite(contentTop)
+            ? { inkTopInSvg: inkTop - contentTop }
+            : {}),
+        }
+        : {}),
       baseFontSize,
       align: String(fit.align || ''),
     };

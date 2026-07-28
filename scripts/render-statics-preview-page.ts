@@ -36,9 +36,21 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
   )).join('');
   const zipHref = escapeAttr(latest.zip);
   const zipLabel = escapeHtml(String(latest.zip).split('/').pop() || latest.zip);
+  // Stable Ireland-local stamp (CI boxes are UTC; avoid ambiguous en-US locale).
   const generatedLabel = latest.generatedAt
-    ? escapeHtml(new Date(latest.generatedAt).toLocaleString())
+    ? escapeHtml(new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/Dublin',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+      timeZoneName: 'short',
+    }).format(new Date(latest.generatedAt)))
     : '—';
+  const generatedIso = latest.generatedAt ? escapeAttr(latest.generatedAt) : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -77,6 +89,13 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
         border-bottom: 1px solid var(--line);
         background: #10161d;
       }
+      .header-end {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 6px;
+        min-width: 0;
+      }
       .header-title {
         margin: 0;
         color: var(--ink);
@@ -84,6 +103,26 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
         font-weight: 500;
         line-height: 1;
         white-space: nowrap;
+      }
+      .header-stamp {
+        margin: 0;
+        color: var(--teal);
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+        line-height: 1.2;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+      }
+      .header-stamp time {
+        color: var(--ink);
+        font-weight: 300;
+      }
+      .header-stamp [data-export-ago],
+      .kicker [data-export-ago],
+      .meta [data-export-ago] {
+        color: var(--muted);
+        font-weight: 300;
       }
       .brand-lockup {
         display: flex;
@@ -313,7 +352,14 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
         <span class="brand-divider" aria-hidden="true">|</span>
         <img class="brand-logo brand-logo-sse" src="../brand/SSELogoWhite.svg" alt="SSE">
       </div>
-      <p class="header-title">Statics Preview</p>
+      <div class="header-end">
+        <p class="header-title">Statics Preview</p>
+        <p class="header-stamp" title="From outputs/latest.json (Export for Preview)">
+          Exported
+          <time datetime="${generatedIso}">${generatedLabel}</time>
+          <span data-export-ago></span>
+        </p>
+      </div>
     </header>
     <main class="layout">
       <form class="controls" id="controls">
@@ -328,13 +374,13 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
           <select id="size" name="size">${sizeOptions}</select>
         </label>
         <p class="meta">Fixed-copy SVG outline HTML from <strong>Export for Preview</strong>.</p>
-        <p class="meta">Package: ${zipLabel}<br>Generated: ${generatedLabel}</p>
+        <p class="meta">Package: ${zipLabel}<br>Exported: ${generatedLabel} <span data-export-ago></span></p>
         <a class="nav-link" href="../">DCO preview</a>
       </form>
       <section class="preview">
         <div class="preview-head">
           <div>
-            <span class="kicker">Client review</span>
+            <span class="kicker">Client review · exported ${generatedLabel} <span data-export-ago></span></span>
             <h1 id="preview-title">${escapeHtml(first.name)}</h1>
             <p id="preview-subtitle">${escapeHtml(firstSize)} · outlined static HTML</p>
           </div>
@@ -522,6 +568,36 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
         });
         window.addEventListener('resize', fitAdFrame);
 
+        function formatExportAgo(iso) {
+          if (!iso) return '';
+          var then = new Date(iso).getTime();
+          if (!isFinite(then)) return '';
+          var seconds = Math.round((Date.now() - then) / 1000);
+          var future = seconds < 0;
+          var abs = Math.abs(seconds);
+          var label;
+          if (abs < 45) label = 'just now';
+          else if (abs < 90) label = '1 min ago';
+          else if (abs < 3600) label = Math.round(abs / 60) + ' mins ago';
+          else if (abs < 5400) label = '1 hr ago';
+          else if (abs < 86400) label = Math.round(abs / 3600) + ' hrs ago';
+          else if (abs < 172800) label = '1 day ago';
+          else label = Math.round(abs / 86400) + ' days ago';
+          if (future && label !== 'just now') label = 'in ' + label.replace(' ago', '');
+          return label === 'just now' ? '· just now' : '· ' + label;
+        }
+
+        function refreshExportAgo() {
+          var stamp = document.querySelector('time[datetime]');
+          var iso = stamp && stamp.getAttribute('datetime');
+          var text = formatExportAgo(iso);
+          Array.prototype.forEach.call(document.querySelectorAll('[data-export-ago]'), function(node) {
+            node.textContent = text;
+          });
+        }
+
+        refreshExportAgo();
+        window.setInterval(refreshExportAgo, 30000);
         hydrate();
       })();
     </script>

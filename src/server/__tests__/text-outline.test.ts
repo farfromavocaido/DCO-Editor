@@ -243,34 +243,25 @@ test('outline export HTML bakes paths, inlines SVGs, and omits Museo font-face',
   assert.match(html, /data-offer-plus-layout="manual"/);
 });
 
-test('non-DCO outline export ignores snapshotted plus/slot XY (manual pluses)', async () => {
-  const document = await readCreativeDocumentForCampaign('sse-hiker-welcome');
+test('outline export bakes snapshotted offer-host and plus positions (direct WYSIWYG)', async () => {
+  const document = await readCreativeDocumentForCampaign('sse-keepyuppy-discount');
   assert.equal(document.campaign?.offerPlusLayout, 'manual');
-  const html = await renderStudioReadyHtml(document, '300x250', {
+  const html = await renderStudioReadyHtml(document, '728x90', {
     renderMode: 'outline',
     presentationSnapshot: {
-      size: '300x250',
+      size: '728x90',
       texts: {},
       positions: {
-        'plus-1': { key: 'plus-1', left: 144.578, top: 111.838 },
-        offer1: { key: 'offer1', left: 11.875, top: 82 },
+        'plus-1': { key: 'plus-1', left: 400, top: 24 },
+        'offer-slot-1::offer-value': { key: 'offer-slot-1::offer-value', left: -99, top: -6 },
+        'offer-slot-1::offer-subline': { key: 'offer-slot-1::offer-subline', left: 82, top: 19 },
       },
     },
   });
-  const plusTag = html.match(/id="plus-1"[^>]*>/)?.[0] || '';
-  assert.match(plusTag, /id="plus-1"/);
-  assert.doesNotMatch(plusTag, /style="/);
-  const offerTag = html.match(/id="offer1"[^>]*>/)?.[0] || '';
-  assert.doesNotMatch(offerTag, /style="/);
-  // Authored offers-2 plus CSS still present (left follows creative JSON, not snapshot).
-  const authoredLeft = document.sizes['300x250'].variantRules
-    .find((rule: { id?: string }) => rule.id === 'offers-2|plus-1')
-    ?.props?.left;
-  assert.equal(typeof authoredLeft, 'number');
-  assert.match(
-    html,
-    new RegExp(`\\.offers-2\\s+\\.plus-1\\s*\\{[^}]*left:\\s*${authoredLeft}px`),
-  );
+  assert.match(html, /id="plus-1"[^>]*style="left:400px;top:24px"/);
+  assert.match(html, /class="gwd-grp-offer offer-value outlined-text" style="left:-99px;top:-6px"/);
+  // Side-by-side ink lock from the editor — not the authored CSS left:106.
+  assert.match(html, /class="gwd-grp-offer offer-subline outlined-text" style="left:82px;top:19px"/);
 });
 
 test('outline HTML export ZIP includes background assets beside the HTML', async () => {

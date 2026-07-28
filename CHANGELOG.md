@@ -26,7 +26,8 @@
 
 ### Fixed
 
-- **Non-DCO outline plus placement**: auto `layoutOffers` plus/slot XY baked into SVG-outline / static exports sat off the digit band (font-preview ink ≠ outlined value boxes). Non-DCO campaigns now use `campaign.offerPlusLayout: "manual"` — inspector/variant CSS positions stick; outline bake strips snapshotted plus/slot XY. SSE DCO stays auto for live feed lengths.
+- **Outline offer-host WYSIWYG**: presentation snapshots now capture computed/inline boxes for offer-value, offer-subline, slots, and pluses; outline HTML bakes those as inline styles. Fixes side-by-side Top Discount banners where the editor ink-locked subline `left` but export kept authored CSS (e.g. `left: 106` vs ~82).
+- **Non-DCO outline plus placement**: non-DCO campaigns use `campaign.offerPlusLayout: "manual"` (skip auto gap/plus layout). Outline/static export bakes live editor host boxes for pluses and offer text (see offer-host WYSIWYG). SSE DCO stays auto for live feed lengths.
 - 320×50 unit-rate line: box now matches terms-prices (`top: 42`, `height: 8`, bottom flush with the 50px canvas) and drops `fit.align: "bottom"` — the old `top: 40`/`height: 14` box sat 4px past the stage edge, and offer-style `translateY` after shrink pushed ink further into the clip.
 - Outline bake now honors `layer.base.color` before the navy headline heuristic, so 320×50 endframe `headline-act4` fills white on the blue wave (was invisible navy).
 - Outline offer values no longer force `overflow: hidden` on OfferSlot hosts — that clipped glyph ink when the SVG line-box (`fontSize × lineHeight`) exceeded the authored yellow-box height (e.g. Keepy `728x90` offers-2: 55px SVG in a 48px host). Hosts stay `overflow: visible` like font-mode; half-leading still keeps ink out of sibling sublines.
@@ -37,6 +38,7 @@
 
 ### Changed
 
+- **Statics preview export stamp** — header + kicker show `outputs/latest.json` export time in Europe/Dublin with a live “· N mins ago” relative label (was easy to miss in sidebar meta only / looked like UTC).
 - **Keepy Uppy Welcome layout = Hiker Welcome** — copied object positioning / boxes / classRules / variantRules / manualCss from Hiker across the full size suite; Keepy feed copy, background JPEGs, campaign id, and motion clips/timing kept.
 - **Hiker / Keepy Uppy Welcome sublines** — centred under each offer slot (`left: 0`, slot width, `textAlign`/`justifyContent: center`) across all sizes and offer counts. Top Discount and SSE DCO unchanged.
 - **offers-0 CTA / roundel colours** — CTA text navy on green fill for both rectangle and circular shapes; when the roundel is included, frame is green with navy copy/value (SSE DCO `offers-0|*` variantRules).

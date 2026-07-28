@@ -101,8 +101,10 @@ const textKeyForElement = (element: Element) => {
 };
 
 /**
- * Read fitted text + layout positions from a live preview/export stage.
  * Call after `applyPreviewTextFitting` (fit → symbol align → layoutOffers).
+ * Captures text metrics plus live host boxes (slots, pluses, offer-value /
+ * offer-subline) so outline/static export can bake WYSIWYG left/top — including
+ * side-by-side subline ink lock that only exists as inline style in the editor.
  */
 export const capturePresentationSnapshot = (
   stage: ParentNode | null | undefined,
@@ -179,6 +181,31 @@ export const capturePresentationSnapshot = (
     }
   });
 
+  const recordPosition = (element: HTMLElement, key: string) => {
+    if (!key || positions[key]) return;
+    const style = window.getComputedStyle(element);
+    if (style.visibility === 'hidden') return;
+    // Prefer inline layout writes (side-by-side / placePlus); else computed CSS box.
+    const left = element.style.left
+      ? cssNumber(element.style.left, NaN)
+      : cssNumber(style.left, NaN);
+    const top = element.style.top
+      ? cssNumber(element.style.top, NaN)
+      : cssNumber(style.top, NaN);
+    if (!Number.isFinite(left) && !Number.isFinite(top)) return;
+    const widthRaw = element.style.width || style.width;
+    const heightRaw = element.style.height || style.height;
+    const width = cssNumber(widthRaw, NaN);
+    const height = cssNumber(heightRaw, NaN);
+    positions[key] = {
+      key,
+      left: Number.isFinite(left) ? left : cssNumber(style.left, 0),
+      top: Number.isFinite(top) ? top : cssNumber(style.top, 0),
+      ...(Number.isFinite(width) && width >= 0 ? { width } : {}),
+      ...(Number.isFinite(height) && height >= 0 ? { height } : {}),
+    };
+  };
+
   const positionSelectors = [
     '#plus-1',
     '#plus-2',
@@ -189,28 +216,31 @@ export const capturePresentationSnapshot = (
     stage.querySelectorAll(selector).forEach((node) => {
       const element = node as HTMLElement;
       const key = element.id;
-      if (!key || positions[key]) return;
-      // Prefer inline layout writes from layoutOffers; fall back to computed.
-      const left = element.style.left
-        ? cssNumber(element.style.left, NaN)
-        : cssNumber(window.getComputedStyle(element).left, NaN);
-      const top = element.style.top
-        ? cssNumber(element.style.top, NaN)
-        : cssNumber(window.getComputedStyle(element).top, NaN);
-      if (!Number.isFinite(left) && !Number.isFinite(top)) return;
-      // Only record when layoutOffers (or fit) wrote an inline position.
-      if (!element.style.left && !element.style.top) return;
-      positions[key] = {
-        key,
-        left: Number.isFinite(left) ? left : cssNumber(window.getComputedStyle(element).left, 0),
-        top: Number.isFinite(top) ? top : cssNumber(window.getComputedStyle(element).top, 0),
-      };
+      if (!key) return;
+      recordPosition(element, key);
       // Alias offerN ↔ offer-slot-N for exporter lookups.
       if (key.startsWith('offer') && !key.startsWith('offer-slot-') && !key.includes('-')) {
         const alias = key.replace(/^offer/, 'offer-slot-');
-        positions[alias] = { ...positions[key], key: alias };
+        if (positions[key] && !positions[alias]) {
+          positions[alias] = { ...positions[key], key: alias };
+        }
       }
     });
+  });
+
+  // Nested offer hosts: bake live left/top after side-by-side ink lock (fixed-copy WYSIWYG).
+  stage.querySelectorAll('[id^="offer-slot-"], [id^="offer"]').forEach((slot) => {
+    const slotEl = slot as HTMLElement;
+    const slotId = slotEl.id || '';
+    if (!slotId) return;
+    const normalizedSlot = slotId.startsWith('offer-slot-')
+      ? slotId
+      : (/^offer\d+$/.test(slotId) ? slotId.replace(/^offer/, 'offer-slot-') : '');
+    if (!normalizedSlot) return;
+    const value = slotEl.querySelector('.offer-value') as HTMLElement | null;
+    const sub = slotEl.querySelector('.offer-subline') as HTMLElement | null;
+    if (value) recordPosition(value, `${normalizedSlot}::offer-value`);
+    if (sub) recordPosition(sub, `${normalizedSlot}::offer-subline`);
   });
 
   return { size, texts, positions };

@@ -32,7 +32,6 @@ import { layoutOffersRuntime } from '@/lib/offer-layout';
 import {
   OFFER_PLUS_LAYOUT_ATTR,
   resolveOfferPlusLayout,
-  stripAutoOfferPositions,
 } from '@/lib/offer-plus-layout';
 import {
   alignOfferValueSymbolsRuntime,
@@ -53,15 +52,11 @@ import { appRoot, outputRoot, outputsRoot, projectRoot } from './paths';
 
 const DEFAULT_STATE = 'offers-1 tc-solo cta-roundel frames-3 roundel-frame-off roundel-copy-only';
 
-/** Outline bake: drop auto slot/plus XY when the campaign uses manual pluses. */
+/** Outline bake: use the editor snapshot as-is (direct WYSIWYG positions). */
 const outlineSnapshotForDocument = (
-  document: Record<string, unknown>,
+  _document: Record<string, unknown>,
   snapshot: SizePresentationSnapshot | null | undefined,
-) => (
-  resolveOfferPlusLayout(document) === 'manual'
-    ? (stripAutoOfferPositions(snapshot) || null)
-    : (snapshot || null)
-);
+) => snapshot || null;
 
 export const exportSlugForDocument = (document: Record<string, unknown> = {}) => (
   getCampaign(document?.campaign?.id).exportSlug
@@ -713,10 +708,22 @@ const renderOutlinedOfferSlot = (
     `offer-slot-${index}`,
     `offer${index}`,
   );
+  const valueStyle = positionStyleAttr(
+    snapshot,
+    `${layer.id}::offer-value`,
+    `offer-slot-${index}::offer-value`,
+    `offer${index}::offer-value`,
+  );
+  const subStyle = positionStyleAttr(
+    snapshot,
+    `${layer.id}::offer-subline`,
+    `offer-slot-${index}::offer-subline`,
+    `offer${index}::offer-subline`,
+  );
   // Keep data-gwd-group / gwd-grp-* — manualCss and structured rules key off them.
   return `          <div class="stage-element ${cssClass}" data-gwd-group="OfferSlot" id="offer${index}"${slotStyle}>
-            <div class="gwd-grp-offer offer-value outlined-text">${baked.valueSvg}</div>
-            <div class="gwd-grp-offer offer-subline outlined-text">${baked.subSvg}</div>
+            <div class="gwd-grp-offer offer-value outlined-text"${valueStyle}>${baked.valueSvg}</div>
+            <div class="gwd-grp-offer offer-subline outlined-text"${subStyle}>${baked.subSvg}</div>
           </div>`;
 };
 

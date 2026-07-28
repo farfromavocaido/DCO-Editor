@@ -240,6 +240,30 @@ test('outline export HTML bakes paths, inlines SVGs, and omits Museo font-face',
   // Animations stay paused until .motion-ready — outline runtime must release it.
   assert.match(html, /\.stage:not\(\.motion-ready\)/);
   assert.match(html, /classList\.add\('motion-ready'\)/);
+  assert.match(html, /data-offer-plus-layout="manual"/);
+});
+
+test('non-DCO outline export ignores snapshotted plus/slot XY (manual pluses)', async () => {
+  const document = await readCreativeDocumentForCampaign('sse-hiker-welcome');
+  assert.equal(document.campaign?.offerPlusLayout, 'manual');
+  const html = await renderStudioReadyHtml(document, '300x250', {
+    renderMode: 'outline',
+    presentationSnapshot: {
+      size: '300x250',
+      texts: {},
+      positions: {
+        'plus-1': { key: 'plus-1', left: 144.578, top: 111.838 },
+        offer1: { key: 'offer1', left: 11.875, top: 82 },
+      },
+    },
+  });
+  const plusTag = html.match(/id="plus-1"[^>]*>/)?.[0] || '';
+  assert.match(plusTag, /id="plus-1"/);
+  assert.doesNotMatch(plusTag, /style="/);
+  const offerTag = html.match(/id="offer1"[^>]*>/)?.[0] || '';
+  assert.doesNotMatch(offerTag, /style="/);
+  // Authored offers-2 plus CSS still present for designers to edit.
+  assert.match(html, /\.offers-2\s+\.plus-1\s*\{[^}]*left:\s*151px/);
 });
 
 test('outline HTML export ZIP includes background assets beside the HTML', async () => {

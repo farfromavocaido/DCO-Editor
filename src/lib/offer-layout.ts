@@ -33,6 +33,10 @@
  *   2. Side-by-side: re-anchor subline to value-ink right + ink bottoms
  *   3. Detect family from slot CSS geometry
  *   4. Equalize ink-cluster gaps in the authored envelope; place pluses
+ *
+ * Manual pluses (`data-offer-plus-layout="manual"` on the stage): steps 1–2
+ * still run (stale inline cleared → authored CSS; side-by-side subline lock),
+ * but step 4 is skipped so inspector-placed pluses/slots stick for non-DCO.
  */
 
 /** Design guide only — not written to the DOM at runtime. */
@@ -338,6 +342,19 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
         ? (box.top + cssNumber(window.getComputedStyle(subline).top, subline.offsetTop || 0))
         : null,
     };
+  }
+
+  /** auto (DCO) vs manual (authored non-DCO plus/slot XY). */
+  function resolvePlusLayoutMode(scope) {
+    var marked = null;
+    if (scope && scope.getAttribute) {
+      marked = scope.getAttribute('data-offer-plus-layout');
+    }
+    if (!marked && scope && scope.querySelector) {
+      var host = scope.querySelector('[data-offer-plus-layout]');
+      if (host) marked = host.getAttribute('data-offer-plus-layout');
+    }
+    return marked === 'manual' ? 'manual' : 'auto';
   }
 
   /** Stage size key from data-size, authored style, or layout box. */
@@ -740,6 +757,7 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     }
     if (!scope || !scope.querySelectorAll) return;
     var sizeKey = resolveSizeKey(scope);
+    var plusLayout = resolvePlusLayoutMode(scope);
 
     var slotNodes = scope.querySelectorAll('[data-gwd-group="OfferSlot"]');
     var slots = [];
@@ -781,6 +799,10 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     for (var s = 0; s < slots.length; s += 1) {
       layoutSlotChildren(slots[s]);
     }
+
+    // Manual: keep authored slot/plus CSS (inspector). Still cleared stale inline
+    // above so a prior auto pass cannot stick after switching campaigns.
+    if (plusLayout === 'manual') return;
 
     // Match export pre-motion rest: clear slot scrub/CSS motion for ink measure.
     // Fit translateY on .offer-value children is preserved (not on the slot).

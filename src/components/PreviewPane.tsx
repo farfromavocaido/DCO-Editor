@@ -43,6 +43,7 @@ import {
 } from '@/lib/selection-groups';
 import { zoomLabel, zoomScale } from '@/lib/canvas-zoom';
 import { offerValueSymbolCss } from '@/lib/offer-value-symbols';
+import { resolveOfferPlusLayout } from '@/lib/offer-plus-layout';
 import {
   assetUrl,
   feedFieldForEditableTarget,
@@ -1007,6 +1008,7 @@ export function PreviewPane() {
                 className={stageClassName}
                 data-preview-stage="true"
                 data-size={size}
+                data-offer-plus-layout={resolveOfferPlusLayout(document)}
                 style={{ width: sizeCreative.canvas.width, height: sizeCreative.canvas.height, transform: `scale(${scale})` }}
                 onPointerDownCapture={handleStagePointerDownCapture}
                 onDoubleClickCapture={handleStageDoubleClickCapture}

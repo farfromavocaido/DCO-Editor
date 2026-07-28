@@ -2,7 +2,8 @@
   "version": 1,
   "campaign": {
     "id": "sse-keepyuppy-discount",
-    "name": "Keepy Uppy Top Discount"
+    "name": "Keepy Uppy Top Discount",
+    "offerPlusLayout": "manual"
   },
   "clock": {
     "durationS": 15,
@@ -349,7 +350,7 @@
         "cta_text": "Switch Now",
         "include_roundel_frame_bool": false,
         "roundel_text_text": "Save up to",
-        "roundel_value_text": "\u20ac1,080",
+        "roundel_value_text": "€1,080",
         "heading4_text": "A different kind of energy",
         "background_image_url_160x600": {
           "Url": ""
@@ -1773,7 +1774,7 @@
         {
           "cssClass": "offer-value",
           "properties": {
-            "left": -10,
+            "left": -20,
             "top": 2,
             "width": 69,
             "height": 35,
@@ -1828,7 +1829,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .terms-prices,\n    .terms-solo,\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* \u2500\u2500 T&C wrappers (far-left tiny zone) \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n\n    /* Act 4 only: white over blue wave on 320\u00d750 */\n    #headline-act4 {\n      color: rgb(255, 255, 255);\n      top: 9px;\n    }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .terms-prices,\n    .terms-solo,\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C wrappers (far-left tiny zone) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n\n    /* Act 4 only: white over blue wave on 320×50 */\n    #headline-act4 {\n      color: rgb(255, 255, 255);\n      top: 9px;\n    }\n"
     },
     "728x90": {
       "canvas": {
@@ -2266,7 +2267,7 @@
           "zIndex": 10,
           "base": {
             "left": 315,
-            "top": 12,
+            "top": 13,
             "width": 366,
             "height": 75,
             "cssClass": "offer-slot-1"
@@ -3147,7 +3148,7 @@
         {
           "cssClass": "offer-value",
           "properties": {
-            "left": -79,
+            "left": -99,
             "top": -6,
             "width": 180,
             "height": 58,
@@ -3210,7 +3211,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .cta {\n      padding: 0px 16px;\n      box-sizing: border-box;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n\n    /* Act 4 only: lower headline placement on 728\u00d790 */\n    #headline-act4 {\n      top: 17px;\n    }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .cta {\n      padding: 0px 16px;\n      box-sizing: border-box;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n\n    /* Act 4 only: lower headline placement on 728×90 */\n    #headline-act4 {\n      top: 17px;\n    }\n"
     },
     "300x250": {
       "canvas": {
@@ -4542,7 +4543,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* \u2500\u2500 T&C wrappers \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C wrappers ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     },
     "160x600": {
       "canvas": {
@@ -5908,7 +5909,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 18px;\n      box-sizing: border-box;\n    }\n\n    /* \u2500\u2500 T&C wrappers (bottom-left, flush like the reference) \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 18px;\n      box-sizing: border-box;\n    }\n\n    /* ── T&C wrappers (bottom-left, flush like the reference) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     },
     "300x600": {
       "canvas": {
@@ -6352,7 +6353,7 @@
           "zIndex": 9,
           "base": {
             "left": 20,
-            "top": 190,
+            "top": 200,
             "width": 260,
             "height": 180,
             "cssClass": "offer-slot-1"
@@ -7266,7 +7267,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 26px;\n      box-sizing: border-box;\n    }\n\n    /* \u2500\u2500 T&C wrappers (bottom-left) \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 26px;\n      box-sizing: border-box;\n    }\n\n    /* ── T&C wrappers (bottom-left) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     },
     "970x250": {
       "canvas": {
@@ -7703,8 +7704,8 @@
           "kind": "group",
           "zIndex": 10,
           "base": {
-            "left": 390,
-            "top": 50,
+            "left": 368,
+            "top": 43,
             "width": 320,
             "height": 170,
             "cssClass": "offer-slot-1"
@@ -8578,22 +8579,24 @@
             "lineHeight": 0.85,
             "letterSpacing": -0.5,
             "width": "100%",
-            "textAlign": "left",
-            "whiteSpace": "nowrap"
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "justifyContent": "center"
           }
         },
         {
           "cssClass": "offer-subline",
           "properties": {
-            "left": 0,
+            "left": -18,
             "top": 125,
             "fontSize": 28,
             "lineHeight": 1.1,
             "letterSpacing": 0,
             "width": 356,
-            "textAlign": "left",
+            "textAlign": "center",
             "textTransform": "uppercase",
-            "height": 32
+            "height": 32,
+            "justifyContent": "center"
           },
           "fit": {
             "mode": "shrink",
@@ -8628,7 +8631,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* \u2500\u2500 T&C wrappers (bottom-left) \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 30px;\n      box-sizing: border-box;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C wrappers (bottom-left) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 30px;\n      box-sizing: border-box;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     }
   }
 }

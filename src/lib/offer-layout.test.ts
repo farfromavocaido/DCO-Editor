@@ -38,6 +38,9 @@ const installDom = () => {
 };
 
 test('runtime encodes ink-first helpers and per-family plus anchors', () => {
+  assert.match(layoutOffersRuntime, /function resolvePlusLayoutMode\(/);
+  assert.match(layoutOffersRuntime, /data-offer-plus-layout/);
+  assert.match(layoutOffersRuntime, /plusLayout === 'manual'/);
   assert.match(layoutOffersRuntime, /function inkRect\(/);
   assert.match(layoutOffersRuntime, /function textInk\(/);
   assert.match(layoutOffersRuntime, /function glyphInk\(/);
@@ -480,6 +483,60 @@ test('vertical SVG plus centres on subline-ink → next-value-ink midpoint', () 
   const top = parseFloat(plus.style.top);
   assert.ok(Math.abs(top - 102) < 3, `vertical SVG plus top=${top}, expected ~102 (subline ink mid)`);
   assert.ok(top < 108, `looks like CSS-box subline bottom was used: top=${top}`);
+});
+
+test('manual offerPlusLayout keeps authored plus left/top (no placePlus)', () => {
+  const { document } = installDom();
+  const stage = document.createElement('div');
+  stage.setAttribute('data-size', '300x250');
+  stage.setAttribute('data-offer-plus-layout', 'manual');
+  Object.defineProperty(stage, 'offsetWidth', { value: 300 });
+  Object.defineProperty(stage, 'offsetHeight', { value: 250 });
+  stage.getBoundingClientRect = () => stubRect(0, 0, 300, 250) as DOMRect;
+
+  const makeSlot = (index: number, left: number) => {
+    const slot = document.createElement('div');
+    slot.setAttribute('data-gwd-group', 'OfferSlot');
+    slot.setAttribute('data-offer-index', String(index));
+    slot.style.cssText = `position:absolute;left:${left}px;top:80px;width:100px;height:80px`;
+    Object.defineProperty(slot, 'offsetWidth', { value: 100 });
+    Object.defineProperty(slot, 'offsetHeight', { value: 80 });
+    Object.defineProperty(slot, 'offsetParent', { get: () => stage });
+    slot.getBoundingClientRect = () => stubRect(left, 80, 100, 80) as DOMRect;
+    const value = document.createElement('p');
+    value.className = 'offer-value';
+    value.textContent = '10%';
+    value.style.cssText = 'left:0;top:0;width:80px;height:40px';
+    value.getBoundingClientRect = () => stubRect(left + 10, 80, 60, 30) as DOMRect;
+    const subline = document.createElement('p');
+    subline.className = 'offer-subline';
+    subline.textContent = 'OFF';
+    subline.style.cssText = 'left:0;top:50px;width:80px;height:20px';
+    subline.getBoundingClientRect = () => stubRect(left + 10, 130, 60, 16) as DOMRect;
+    slot.appendChild(value);
+    slot.appendChild(subline);
+    return slot;
+  };
+
+  stage.appendChild(makeSlot(1, 20));
+  stage.appendChild(makeSlot(2, 180));
+  const plus = document.createElement('img');
+  plus.id = 'plus-1';
+  plus.className = 'plus-1';
+  plus.style.cssText = 'position:absolute;left:151px;top:94px;width:26px;height:26px';
+  Object.defineProperty(plus, 'offsetWidth', { value: 26 });
+  Object.defineProperty(plus, 'offsetHeight', { value: 26 });
+  Object.defineProperty(plus, 'offsetParent', { get: () => stage });
+  stage.appendChild(plus);
+  document.body.appendChild(stage);
+
+  // Seed stale auto-layout inline, then clear via manual pass → CSS class would
+  // win in the browser; here we assert layoutOffers clears without rewriting.
+  plus.style.left = '144.578px';
+  plus.style.top = '111.838px';
+  layoutOffers(stage);
+  assert.equal(plus.style.left, '');
+  assert.equal(plus.style.top, '');
 });
 
 test('placePlus centres glyph ink, not the tall CSS line-box', () => {

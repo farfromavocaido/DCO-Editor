@@ -4,6 +4,7 @@
 
 ### Added
 
+- **`campaign.offerPlusLayout`** — `auto` (DCO ink-based `layoutOffers` plus placement) or `manual` (authored CSS / inspector). Non-DCO creative JSONs set `manual`; stage emits `data-offer-plus-layout`.
 - **offers-0 background blur** — editor-controlled `kind: "blur"` layer (`bg-blur`) over the photo (under the scrim/waves). Offers-0 only; knobs: enabled + strength (px → `backdrop-filter`, default **3**). Fades in with the roundel (`frames-4`) or CTA (`frames-3`, including `bn_cta_in` on 320x50) and out with the blue wave (`end`, `fade_pct: 2`). Preview/export honour clip `profiles` for non-headline layers.
 - **offers-0 headline scrim** — editor-controlled dark CSS gradient (`kind: "gradient"`, layer `headline-scrim`) above the background and below the blue wave. Visible only under Offers = 0. Knobs: direction, end %, start opacity (0–1), midpoint along the fade (0–1; mid opacity is half of start). Defaults: top→down 25% on 300x250 / 160x600 / 300x600; left→right 30% on 320x50 / 728x90 / 970x250; start opacity 0.15. Seeded into all campaign creative JSONs; baked into preview and HTML export.
 - **Statics preview zoom** — Fit / 1x / 2x plus −/+ stepping (up to **750%**) on the GitHub Pages `/statics/` viewer; zoom persists in `sessionStorage`.
@@ -25,6 +26,7 @@
 
 ### Fixed
 
+- **Non-DCO outline plus placement**: auto `layoutOffers` plus/slot XY baked into SVG-outline / static exports sat off the digit band (font-preview ink ≠ outlined value boxes). Non-DCO campaigns now use `campaign.offerPlusLayout: "manual"` — inspector/variant CSS positions stick; outline bake strips snapshotted plus/slot XY. SSE DCO stays auto for live feed lengths.
 - 320×50 unit-rate line: box now matches terms-prices (`top: 42`, `height: 8`, bottom flush with the 50px canvas) and drops `fit.align: "bottom"` — the old `top: 40`/`height: 14` box sat 4px past the stage edge, and offer-style `translateY` after shrink pushed ink further into the clip.
 - Outline bake now honors `layer.base.color` before the navy headline heuristic, so 320×50 endframe `headline-act4` fills white on the blue wave (was invisible navy).
 - Outline offer values no longer force `overflow: hidden` on OfferSlot hosts — that clipped glyph ink when the SVG line-box (`fontSize × lineHeight`) exceeded the authored yellow-box height (e.g. Keepy `728x90` offers-2: 55px SVG in a 48px host). Hosts stay `overflow: visible` like font-mode; half-leading still keeps ink out of sibling sublines.
@@ -35,6 +37,8 @@
 
 ### Changed
 
+- **Keepy Uppy Welcome layout = Hiker Welcome** — copied object positioning / boxes / classRules / variantRules / manualCss from Hiker across the full size suite; Keepy feed copy, background JPEGs, campaign id, and motion clips/timing kept.
+- **Hiker / Keepy Uppy Welcome sublines** — centred under each offer slot (`left: 0`, slot width, `textAlign`/`justifyContent: center`) across all sizes and offer counts. Top Discount and SSE DCO unchanged.
 - **offers-0 CTA / roundel colours** — CTA text navy on green fill for both rectangle and circular shapes; when the roundel is included, frame is green with navy copy/value (SSE DCO `offers-0|*` variantRules).
 - **Roundel copy text** — centred (H+V), shrink fit, font 24 / min 18 / maxLines 3 on the roundel-copy layer + `roundel-copy-only` rule (all sizes); offers-0 only keeps navy colour.
 - **Keepy Uppy Welcome Credit timing (pilot):** `durationS` **12**; second-based spine (wave ~0.5–0.7s / ~1s sweep; H1+offers ~1.2s then ~2s hold; H2 ~2s hold; H4+CTA ~3s; fade to 12s). Enter/sweep percents scaled so transition absolute times stay ~0.5s / ~1s (not sped up by the shorter clock). Roundel off / frames-3 path. Green/blue `waveSweep` and CTA pop/pulse use a sharper ease-out (`cubic-bezier(0.12, 0.92, 0.2, 1)` / pulse `0.15, 0.95, 0.25, 1`) so motion dashes in then settles without shortening durations. H2→H4 handoff mirrors H1→H2 (`act4_in` = `offers_exit` at **54%**); CTA starts as H4 settles (`cta_in` **58.2%**). **728x90** offers/pluses now end on `offers_exit` with H2 (was `wave2_in+5`, clashing with bluewave). **320x50** white logo (`logo-act3`) enters on `bn_blue_in` with the bluewave (was a stale absolute %). Same clock + motion timing applied to **Hiker Welcome** and **Keepy Uppy Top Discount** (geometry/layout preserved per campaign).

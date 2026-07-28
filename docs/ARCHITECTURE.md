@@ -94,12 +94,14 @@ Preview asset URLs are `/assets/...` — served by the Next route, mapped to `ca
   live inside `.offer-value-run` so flex bottom-align cannot split the glyph
   pair. After fit + symbol align, `layoutOffers` (`src/lib/offer-layout.ts`)
   equalizes gaps between ink clusters (horizontal / vertical / triangular),
-  re-centres with a max-gap guard, and places pluses at value-ink midpoints.
-  Ink-first: clusters, plus anchors, and side-by-side bottoms all use canvas
-  glyph ink (Range only for baseline). Triangular plus Y: MPU/970 raise to
-  subline caps; 300×600 centres in the top-subline→bottom-value gap; else
-  value bottoms. Vertical centres between upper subline bottom and next value
-  top via `placePlus`. Authored subline width stays the fit constraint.
+  re-centres with a max-gap guard, and places pluses at value-ink midpoints
+  when `campaign.offerPlusLayout` is `auto` (SSE DCO). Non-DCO documents use
+  `manual` — authored plus/slot CSS sticks; outline bake strips snapshotted
+  slot/plus XY. Ink-first: clusters, plus anchors, and side-by-side bottoms
+  all use canvas glyph ink (Range only for baseline). Triangular plus Y:
+  MPU/970 raise to subline caps; 300×600 centres in the top-subline→bottom-value
+  gap; else value bottoms. Vertical centres between upper subline bottom and
+  next value top via `placePlus`. Authored subline width stays the fit constraint.
 - Headline skip-hold (duplicate consecutive copy) lives in
   `src/lib/headline-motion.ts`: the previous act holds through the skipped act’s
   authored exit, then always fades out. If the skipped act has `base.color`

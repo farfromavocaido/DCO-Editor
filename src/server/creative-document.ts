@@ -16,6 +16,14 @@ export const validateCreativeDocument = (document: CreativeDocument) => {
   if (!isRegisteredCampaignId(campaignId)) {
     throw new Error(`Creative document campaign id must be a registered campaign (got ${campaignId ?? 'missing'})`);
   }
+  const offerPlusLayout = document.campaign?.offerPlusLayout;
+  if (
+    offerPlusLayout !== undefined
+    && offerPlusLayout !== 'auto'
+    && offerPlusLayout !== 'manual'
+  ) {
+    throw new Error(`campaign.offerPlusLayout must be "auto" or "manual" (got ${String(offerPlusLayout)})`);
+  }
   if (!document.clock?.durationS || !document.clock?.beats) throw new Error('Creative document requires clock data');
   if (!document.feed?.profileName || !Array.isArray(document.feed?.sampleRows)) {
     throw new Error('Creative document requires feed profile data');

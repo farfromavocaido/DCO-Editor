@@ -30,6 +30,11 @@ import { activeScopesFromControls, clampOfferCount, controlsFromFeedRow } from '
 import { visibilityForLayer } from '@/lib/offer-interaction-model';
 import { layoutOffersRuntime } from '@/lib/offer-layout';
 import {
+  OFFER_PLUS_LAYOUT_ATTR,
+  resolveOfferPlusLayout,
+  stripAutoOfferPositions,
+} from '@/lib/offer-plus-layout';
+import {
   alignOfferValueSymbolsRuntime,
   offerValueSymbolCss,
   wrapOfferValueSymbolRuntime,
@@ -47,6 +52,16 @@ import {
 import { appRoot, outputRoot, outputsRoot, projectRoot } from './paths';
 
 const DEFAULT_STATE = 'offers-1 tc-solo cta-roundel frames-3 roundel-frame-off roundel-copy-only';
+
+/** Outline bake: drop auto slot/plus XY when the campaign uses manual pluses. */
+const outlineSnapshotForDocument = (
+  document: Record<string, unknown>,
+  snapshot: SizePresentationSnapshot | null | undefined,
+) => (
+  resolveOfferPlusLayout(document) === 'manual'
+    ? (stripAutoOfferPositions(snapshot) || null)
+    : (snapshot || null)
+);
 
 export const exportSlugForDocument = (document: Record<string, unknown> = {}) => (
   getCampaign(document?.campaign?.id).exportSlug
@@ -1361,27 +1376,30 @@ const renderBody = async (document: Record<string, unknown>, size: string, optio
   const background = options.includePackagedBackground === false ? '' : assetSrc(sizeCreative.assets.background, options);
   const row = sampleRowForDocument(document);
   const stateClass = options.renderMode === 'outline' ? stateClasses(row) : DEFAULT_STATE;
+  const plusLayoutAttr = ` ${OFFER_PLUS_LAYOUT_ATTR}="${escapeAttr(resolveOfferPlusLayout(document))}"`;
   if (options.renderMode === 'outline') {
     const activeScopes = activeScopesFromControls(controlsFromFeedRow(row));
+    const presentationSnapshot = outlineSnapshotForDocument(document, options.presentationSnapshot);
+    const outlineOptions = { ...options, presentationSnapshot };
     const offerBakes = await bakeOutlinedOfferSlotSvgs({
       document,
       size,
       row,
       activeScopes,
-      snapshot: options.presentationSnapshot,
+      snapshot: presentationSnapshot,
     });
     const layers = (await Promise.all(
       sizeCreative.layers
         .filter((layer: Record<string, unknown>) => layer.id !== 'bg-image')
         .map((layer: Record<string, unknown>) => (
-          renderOutlinedLayer(document, size, layer, row, activeScopes, options, offerBakes)
+          renderOutlinedLayer(document, size, layer, row, activeScopes, outlineOptions, offerBakes)
         )),
     )).filter(Boolean).join('\n');
-    const terms = await renderOutlinedTermsWrappers(document, size, row, activeScopes, options);
+    const terms = await renderOutlinedTermsWrappers(document, size, row, activeScopes, outlineOptions);
     const packagedSrcAttr = isStaticDelivery(options)
       ? ''
       : ` data-packaged-src="${escapeAttr(background)}"`;
-    return `      <main id="page-content" class="stage page-content ${stateClass}" data-size="${escapeAttr(size)}">
+    return `      <main id="page-content" class="stage page-content ${stateClass}" data-size="${escapeAttr(size)}"${plusLayoutAttr}>
           <img alt="" draggable="false" class="stage-element bg-image" id="bg-image" src="${escapeAttr(background)}"${packagedSrcAttr}>
 ${layers}
 ${terms}
@@ -1392,7 +1410,7 @@ ${terms}
     .map((layer: Record<string, unknown>) => renderLayer(layer, options))
     .filter(Boolean)
     .join('\n');
-  return `      <main id="page-content" class="stage page-content ${stateClass}" data-size="${escapeAttr(size)}" data-dco-state="offer_count_num,tc_type_enum,cta_type_enum,include_roundel_frame_bool,roundel_value_text">
+  return `      <main id="page-content" class="stage page-content ${stateClass}" data-size="${escapeAttr(size)}"${plusLayoutAttr} data-dco-state="offer_count_num,tc_type_enum,cta_type_enum,include_roundel_frame_bool,roundel_value_text">
           <img alt="" draggable="false" class="stage-element bg-image" id="bg-image" src="${escapeAttr(background)}" data-packaged-src="${escapeAttr(background)}" data-dco-field="${escapeAttr(backgroundImageFieldName(size))}">
 ${layers}
 ${renderTermsWrappers(sizeCreative)}

@@ -152,6 +152,19 @@ you set.
 Plus anchors are named helpers (`plusAnchorHorizontal` / `Vertical` /
 `Triangular`) so family rules stay explicit and shared through `placePlus`.
 
+### Manual pluses (non-DCO)
+
+Fixed-copy campaigns set `campaign.offerPlusLayout: "manual"` (default for every
+registered campaign except `sse-dco`). The stage carries
+`data-offer-plus-layout="manual"`. `layoutOffers` still clears stale inline
+slot/plus styles and runs side-by-side subline locking, but **skips** gap
+equalization and `placePlus` so inspector-authored `left`/`top` stick in the
+editor, font HTML, and outline/static exports.
+
+Outline presentation snapshots still bake text fit metrics; auto slot/plus XY
+are stripped before bake so class/variant CSS wins. SSE DCO stays
+`offerPlusLayout: "auto"` (live feed lengths need ink-based placement).
+
 ## Outline export (font → SVG paths)
 
 Fixed-copy outline / static HTML is an **Adobe Animate-style snapshot**: what the

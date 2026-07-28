@@ -137,6 +137,16 @@
 
 
 
+    .headline-scrim {
+      left: 0px;
+      top: 0px;
+      width: 320px;
+      height: 50px;
+      visibility: hidden;
+      background-image: linear-gradient(to right, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.075) 15%, rgba(0, 0, 0, 0) 30%);
+      position: absolute;
+    }
+
     .greenwave {
       left: -40px;
       top: -20px;
@@ -672,6 +682,10 @@
       justify-content: flex-start;
       height: 33px;
       font-size: 12px;
+    }
+
+    .offers-0 .headline-scrim {
+      visibility: visible;
     }
 
     @keyframes greenwave-greenwave-waveSweep {

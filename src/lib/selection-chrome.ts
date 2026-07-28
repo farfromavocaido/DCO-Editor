@@ -15,7 +15,7 @@ export const selectionChromeKind = (
   if (selectedTarget.kind === 'nested') return 'text-box';
   if (selectedTarget.kind === 'text') return 'text-box';
   if (selectedTarget.kind === 'image') return 'image-box';
-  if (selectedTarget.kind === 'shape' || selectedTarget.kind === 'gradient') return 'shape-box';
+  if (selectedTarget.kind === 'shape' || selectedTarget.kind === 'gradient' || selectedTarget.kind === 'blur') return 'shape-box';
   return selectedTarget.coordinateScope === 'group' ? 'text-box' : 'element-box';
 };
 

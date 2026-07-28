@@ -16,6 +16,7 @@ import {
   isBackgroundLayer,
   isHeadlineLayer,
 } from '@/lib/creative-model';
+import { blurBackdropFilter, blurIsActive, isBlurLayer } from '@/lib/blur-layer';
 import { gradientBackgroundImage, isGradientLayer } from '@/lib/gradient-layer';
 import {
   CREATIVE_AD_SIZES,
@@ -525,9 +526,7 @@ ${[
 const layerClipsForProfile = (
   layer: Record<string, unknown>,
   profile = 'frames-3',
-) => (
-  isHeadlineLayer(layer) ? clipsForProfile(layer.clips, profile) : (layer.clips || [])
-);
+) => clipsForProfile(layer.clips, profile);
 
 const staticRuleForLayer = (
   layer: Record<string, unknown>,
@@ -538,7 +537,9 @@ const staticRuleForLayer = (
   // restate base `visibility: hidden` and override the offers-0 show rule.
   if (isGradientLayer(layer) && options.selectorPrefix) return '';
   const profile = options.profile || 'frames-3';
-  const clips = layerClipsForProfile(layer, profile);
+  const clips = isBlurLayer(layer) && !blurIsActive(layer.blur)
+    ? []
+    : layerClipsForProfile(layer, profile);
   const firstKeyframe = clips.length ? compileAnimationClips(clips, beats)[0] : null;
   if (isHeadlineLayer(layer)) {
     const initialTransform = firstKeyframe ? formatTransform(firstKeyframe) : null;
@@ -571,11 +572,21 @@ ${declarations.join('\n')}
     const backgroundImage = gradientBackgroundImage(layer.gradient || {});
     if (backgroundImage) declarations.push(cssDecl('background-image', backgroundImage));
   }
+  if (isBlurLayer(layer)) {
+    const filter = blurBackdropFilter(layer.blur || {});
+    declarations.push(cssDecl('backdrop-filter', filter));
+    declarations.push(cssDecl('-webkit-backdrop-filter', filter));
+    declarations.push(cssDecl('background-color', 'rgba(255, 255, 255, 0.01)'));
+  }
   if (initialTransform) declarations.push(`      transform: ${initialTransform};`);
-  if (firstKeyframe?.opacity !== undefined) declarations.push(`      opacity: ${firstKeyframe.opacity};`);
+  if (isBlurLayer(layer) && !blurIsActive(layer.blur)) {
+    declarations.push(cssDecl('opacity', 0));
+  } else if (firstKeyframe?.opacity !== undefined) {
+    declarations.push(`      opacity: ${firstKeyframe.opacity};`);
+  }
   declarations.push('      position: absolute;');
-  // Gradient scrims author visibility on base; other layers inherit stage visibility.
-  if (!isGradientLayer(layer)) declarations.push('      visibility: inherit;');
+  // Gradient/blur author visibility on base; other layers inherit stage visibility.
+  if (!isGradientLayer(layer) && !isBlurLayer(layer)) declarations.push('      visibility: inherit;');
   return `    .${cssClass} {
 ${declarations.filter(Boolean).join('\n')}
     }`;
@@ -590,6 +601,7 @@ const animationCssForLayer = (
   options: { suffix?: string; selectorPrefix?: string; profile?: string } = {},
 ) => {
   const profile = options.profile || 'frames-3';
+  if (isBlurLayer(layer) && !blurIsActive(layer.blur)) return '';
   const clips = layerClipsForProfile(layer, profile);
   if (!clips.length) return '';
   const name = animationNameForLayer({ ...layer, clips }, options.suffix || '');
@@ -720,7 +732,7 @@ const renderOutlinedLayer = async (
   if (layer.kind === 'image') {
     return `          <img alt="" draggable="false" class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}" src="${escapeAttr(assetSrc(layer.asset, options))}"${positionAttr}>`;
   }
-  if (isGradientLayer(layer)) {
+  if (isGradientLayer(layer) || isBlurLayer(layer)) {
     return `          <div class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}"${positionAttr}></div>`;
   }
   const text = textForLayerFromRow(String(layer.id), row);
@@ -753,7 +765,7 @@ const renderLayer = (layer: Record<string, unknown>, options: RenderOptions = {}
   if (layer.kind === 'image') {
     return `          <img alt="" draggable="false" class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}" src="${escapeAttr(assetSrc(layer.asset, options))}">`;
   }
-  if (isGradientLayer(layer)) {
+  if (isGradientLayer(layer) || isBlurLayer(layer)) {
     return `          <div class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}" data-layer-id="${escapeAttr(layer.id)}"></div>`;
   }
   const tag = layer.id === 'cta' ? 'div' : 'p';

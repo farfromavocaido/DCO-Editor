@@ -116,16 +116,20 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
     var resolved = {};
     var key;
     for (key in rule) {
-      if (key !== 'scopes') resolved[key] = rule[key];
+      if (key !== 'scopes' && key !== 'scopeOnly') resolved[key] = rule[key];
     }
     var className = ' ' + String((root && root.className) || '') + ' ';
+    var matchedScope = false;
     for (var scope in rule.scopes) {
       if (className.indexOf(' ' + scope + ' ') === -1) continue;
+      matchedScope = true;
       var overrides = rule.scopes[scope];
       for (key in overrides) {
         resolved[key] = overrides[key];
       }
     }
+    // Host rules created only to carry variant fit must not run when idle.
+    if (rule.scopeOnly && !matchedScope) return null;
     return resolved;
   }
 
@@ -226,6 +230,7 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
 
   function applyRule(root, rule) {
     var resolved = resolveRule(rule, root);
+    if (!resolved) return undefined;
     var elements = [];
     root.querySelectorAll('.' + resolved.cssClass).forEach(function (element) {
       if (!element.textContent || !String(element.textContent).trim()) return;

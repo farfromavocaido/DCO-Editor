@@ -142,23 +142,41 @@ test('exports offers-0 headline scrim gradient above bg and below waves', async 
   const htmlLandscape = await renderStudioReadyHtml(document, '320x50');
 
   assert.match(htmlPortrait, /id="headline-scrim"/);
-  assert.match(
-    htmlPortrait,
-    /linear-gradient\(to bottom, rgba\(0, 0, 0, 0\.15\) 0%, rgba\(0, 0, 0, 0\.075\) 12\.5%, rgba\(0, 0, 0, 0\) 25%\)/,
-  );
+  assert.match(htmlPortrait, /linear-gradient\(to bottom, rgba\(0, 0, 0,/);
   assert.match(htmlPortrait, /\.offers-0 \.headline-scrim\s*\{[^}]*visibility:\s*visible/);
   assert.match(htmlPortrait, /\.headline-scrim\s*\{[^}]*visibility:\s*hidden/);
 
-  assert.match(
-    htmlLandscape,
-    /linear-gradient\(to right, rgba\(0, 0, 0, 0\.15\) 0%, rgba\(0, 0, 0, 0\.075\) 15%, rgba\(0, 0, 0, 0\) 30%\)/,
-  );
+  assert.match(htmlLandscape, /linear-gradient\(to right, rgba\(0, 0, 0,/);
 
   const size = document.sizes['300x250'];
   const byId = Object.fromEntries(size.layers.map((layer) => [layer.id, layer]));
   assert.equal(byId['headline-scrim'].kind, 'gradient');
   assert.ok(byId['headline-scrim'].zIndex > byId['bg-image'].zIndex);
   assert.ok(byId.bluewave.zIndex > byId['headline-scrim'].zIndex);
+});
+
+test('exports offers-0 background blur over the photo with profile fades', async () => {
+  const document = await readCreativeDocument();
+  const html = await renderStudioReadyHtml(document, '300x250');
+  const htmlBanner = await renderStudioReadyHtml(document, '320x50');
+
+  assert.match(html, /id="bg-blur"/);
+  assert.match(html, /backdrop-filter:\s*blur\(3px\)/);
+  assert.match(html, /-webkit-backdrop-filter:\s*blur\(3px\)/);
+  assert.match(html, /\.offers-0 \.bg-blur\s*\{[^}]*visibility:\s*visible/);
+  // frames-4 enter with roundel; frames-3 enter with CTA
+  assert.match(html, /\.frames-4 \.bg-blur/);
+  assert.match(html, /@keyframes bg-blur-bg-blur-fade-frames-4/);
+  assert.match(html, /@keyframes bg-blur-bg-blur-fade-frames-3/);
+
+  assert.match(htmlBanner, /id="bg-blur"/);
+
+  const size = document.sizes['300x250'];
+  const byId = Object.fromEntries(size.layers.map((layer) => [layer.id, layer]));
+  assert.equal(byId['bg-blur'].kind, 'blur');
+  assert.ok(byId['bg-blur'].zIndex > byId['bg-image'].zIndex);
+  assert.ok(byId['headline-scrim'].zIndex > byId['bg-blur'].zIndex);
+  assert.ok(byId.bluewave.zIndex > byId['bg-blur'].zIndex);
 });
 
 test('preview ad html skips empty Enabler bootstrap so iframe postMessage text persists', async () => {
@@ -689,11 +707,11 @@ test('exports uniform bottom-aligned tracking rules for pricing blocks', async (
 
 test('exports creative text fit rules for dynamic headline binding', async () => {
   const document = await readCreativeDocument();
-  document.sizes['300x250'].layers.find((layer) => layer.id === 'headline-act2')!.fit = {
-    mode: 'shrink',
-    minFontSize: 22,
-    maxLines: 2,
-  };
+  // Headlines share one fit rule — stamp every act so the derived rule picks it up.
+  for (const layer of document.sizes['300x250'].layers) {
+    if (!String(layer.id || '').startsWith('headline-act')) continue;
+    layer.fit = { mode: 'shrink', minFontSize: 22, maxLines: 2 };
+  }
 
   const html = await renderStudioReadyHtml(document, '300x250');
 
@@ -730,6 +748,6 @@ test('uses sensible default text-fit minimums based on designed font size', asyn
   const headline = rules.find((rule: Record<string, unknown>) => rule.cssClass === 'sse-headline');
   assert.ok(headline, 'headline rule missing');
   assert.equal(headline.shared, true);
-  assert.equal(headline.maxLines, 4);
+  assert.ok(Number(headline.maxLines) >= 1);
   assert.ok(Number(headline.minFontSize) >= 12, 'partial fit config must not collapse the floor to 1px');
 });

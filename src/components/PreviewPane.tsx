@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { compileAnimationClips, frameAtPercent } from '@/lib/creative-compiler';
-import { compileHeadlineKeyframes, headlineAct4DisplayText } from '@/lib/headline-motion';
+import { blurBackdropFilter, blurIsActive, isBlurLayer } from '@/lib/blur-layer';
 import { cssName, cssValue, structuredRuleCss } from '@/lib/creative-css';
 import {
   collectSnapBounds,
@@ -30,6 +30,7 @@ import {
   targetIdForLayerChild,
 } from '@/lib/creative-model';
 import { gradientBackgroundImage, isGradientLayer } from '@/lib/gradient-layer';
+import { clipsForProfile, compileHeadlineKeyframes, headlineAct4DisplayText } from '@/lib/headline-motion';
 import {
   deriveSelectedTarget,
   filterManipulationTargetIds,
@@ -75,10 +76,17 @@ const renderLayerRule = (layer: Record<string, unknown>) => {
     const backgroundImage = gradientBackgroundImage(layer.gradient || {});
     if (backgroundImage) decl.push(`      background-image: ${backgroundImage};`);
   }
+  if (isBlurLayer(layer)) {
+    const filter = blurBackdropFilter(layer.blur || {});
+    decl.push(`      backdrop-filter: ${filter};`);
+    decl.push(`      -webkit-backdrop-filter: ${filter};`);
+    // Tiny fill helps some WebKit builds actually sample the backdrop.
+    decl.push('      background-color: rgba(255, 255, 255, 0.01);');
+  }
   decl.push('      position: absolute;');
-  // Gradient scrims author visibility on base (hidden) + offers-0 override;
+  // Gradient/blur author visibility on base (hidden) + offers-0 override;
   // other layers still inherit the stage visibility cascade.
-  if (!isGradientLayer(layer)) decl.push('      visibility: inherit;');
+  if (!isGradientLayer(layer) && !isBlurLayer(layer)) decl.push('      visibility: inherit;');
   return `    .${cssClass} {\n${decl.join('\n')}\n    }`;
 };
 
@@ -633,16 +641,19 @@ export function PreviewPane() {
     const profile = activeFrameScope(activeScopes);
     const keyframes = layer.id?.startsWith('headline-act')
       ? compileHeadlineKeyframes(layer, sizeCreative?.layers || [], row, profile, activeBeats)
-      : compileAnimationClips(layer.clips || [], activeBeats);
+      : compileAnimationClips(clipsForProfile(layer.clips || [], profile), activeBeats);
     const frame = frameAtPercent(keyframes, percent);
     const transform = [
       `translate3d(${frame.translate[0]}px, ${frame.translate[1]}px, 0px)`,
       frame.scale === 1 ? '' : `scale3d(${frame.scale}, ${frame.scale}, 1)`,
     ].filter(Boolean).join(' ');
+    const opacity = isBlurLayer(layer) && !blurIsActive(layer.blur)
+      ? 0
+      : frame.opacity * isolationOpacityForTarget(String(targetId));
     return {
       transform,
-      opacity: frame.opacity * isolationOpacityForTarget(String(targetId)),
-      pointerEvents: frame.opacity <= 0.03 ? 'none' : 'auto',
+      opacity,
+      pointerEvents: opacity <= 0.03 ? 'none' : 'auto',
       ...(frame.color ? { color: frame.color } : {}),
     };
   };
@@ -769,7 +780,7 @@ export function PreviewPane() {
     if (layer.id === 'terms-solo') return null;
     if (layer.id.startsWith('offer-slot-')) return renderOfferSlot(layer);
 
-    if (layer.kind === 'shape' || isGradientLayer(layer)) {
+    if (layer.kind === 'shape' || isGradientLayer(layer) || isBlurLayer(layer)) {
       return (
         <div
           key={layer.id}

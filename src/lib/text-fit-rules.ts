@@ -107,7 +107,7 @@ const layerRule = (layer, classRuleProps = {}) => {
   const cssClass = isHeadlineLayer(layer)
     ? HEADLINE_CSS_CLASS
     : (layer?.base?.cssClass || layer?.id);
-  if (!cssClass || layer.kind === 'image' || layer.kind === 'shape' || layer.kind === 'group' || layer.kind === 'gradient') return null;
+  if (!cssClass || layer.kind === 'image' || layer.kind === 'shape' || layer.kind === 'group' || layer.kind === 'gradient' || layer.kind === 'blur') return null;
   if (String(layer.id || '') === 'cta') return null;
   if (isHeadlineLayer(layer)) return headlineRule(layer, classRuleProps);
   const baseFontSize = Number(layer?.base?.fontSize);
@@ -145,8 +145,19 @@ const attachScopeOverrides = (rules, variantRules = []) => {
   for (const variant of variantRules) {
     if (!variant?.fit || !variant.scope) continue;
     const cssClass = String(variant.cssClass || variant.layerId || '');
-    const rule = rules.find((item) => item.cssClass === cssClass);
-    if (!rule) continue;
+    let rule = rules.find((item) => item.cssClass === cssClass);
+    if (!rule) {
+      // Variant authored fit with no layer/class baseline — keep an inert host
+      // rule so scoped overrides apply only when that scope class is active.
+      rule = {
+        cssClass,
+        shared: false,
+        wrap: false,
+        allowShrink: false,
+        scopeOnly: true,
+      };
+      rules.push(rule);
+    }
     rule.scopes = rule.scopes || {};
     rule.scopes[variant.scope] = {
       ...(rule.scopes[variant.scope] || {}),

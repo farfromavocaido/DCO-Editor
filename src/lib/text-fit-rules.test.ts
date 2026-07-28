@@ -191,3 +191,26 @@ test('explicit class rule fit config still derives a minimum from its base size'
   assert.equal(roundel.minFontSize, 8, 'authored minFontSize wins');
   assert.equal(roundel.shared, false);
 });
+
+test('variant fit without a layer baseline creates a scope-only host rule', () => {
+  const rules = textFitRulesForSize(sizeCreative({
+    layers: [textLayer('roundel-copy')],
+    variantRules: [{
+      id: 'offers-0|roundel-copy',
+      scope: 'offers-0',
+      layerId: 'roundel-copy',
+      cssClass: 'roundel-copy',
+      props: { fontSize: 24 },
+      fit: { mode: 'shrink', minFontSize: 18, maxLines: 3 },
+    }],
+  }));
+
+  const roundel = ruleFor(rules, 'roundel-copy');
+  assert.ok(roundel, 'host rule missing');
+  assert.equal(roundel.scopeOnly, true);
+  assert.equal(roundel.allowShrink, false);
+  assert.equal(roundel.scopes['offers-0'].allowShrink, true);
+  assert.equal(roundel.scopes['offers-0'].wrap, true);
+  assert.equal(roundel.scopes['offers-0'].maxLines, 3);
+  assert.equal(roundel.scopes['offers-0'].minFontSize, 18);
+});

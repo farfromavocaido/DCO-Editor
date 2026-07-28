@@ -76,6 +76,7 @@ import {
   updateCreativeLayerMetadata,
   updateCreativeLayerBase,
   updateCreativeLayerGradient,
+  updateCreativeLayerBlur,
   updateCreativeLayerClip,
   updateCreativeLayerFit,
   updateCreativeClassFit,
@@ -404,6 +405,10 @@ export const useEditorStore = create<any>((set, get) => ({
     }
     if (change.kind === 'creativeGradient') {
       get().applyCreativeLayerGradientValue(change.size, change.layerId, change.field, value);
+      return;
+    }
+    if (change.kind === 'creativeBlur') {
+      get().applyCreativeLayerBlurValue(change.size, change.layerId, change.field, value);
       return;
     }
     if (change.kind === 'creativeTarget') {
@@ -795,6 +800,33 @@ export const useEditorStore = create<any>((set, get) => ({
     get().applyCreativeLayerGradientValue(size, layerId, field, nextValue);
     if (record) {
       get().pushHistory([{ kind: 'creativeGradient', size, layerId, field, before: previous, after: nextValue }]);
+    }
+  },
+
+  applyCreativeLayerBlurValue: (size, layerId, field, value) => {
+    const state = get();
+    if (!state.creativeDocument) return;
+    const next = updateCreativeLayerBlur(state.creativeDocument, size, layerId, field, value);
+    set({ creativeDocument: next, creativeDirty: true });
+    get().setStatus('Unsaved creative changes', 'warn');
+  },
+
+  updateCreativeLayerBlurValue: (layerId, field, value, { record = true, before = undefined } = {}) => {
+    const state = get();
+    const size = state.size;
+    const layer = findCreativeLayer(state.creativeDocument, size, layerId);
+    if (!layer) return;
+    const nextValue = typeof value === 'boolean'
+      ? value
+      : value === ''
+        ? ''
+        : Number.isFinite(Number(value))
+          ? Number(value)
+          : value;
+    const previous = before ?? layer.blur?.[field];
+    get().applyCreativeLayerBlurValue(size, layerId, field, nextValue);
+    if (record) {
+      get().pushHistory([{ kind: 'creativeBlur', size, layerId, field, before: previous, after: nextValue }]);
     }
   },
 

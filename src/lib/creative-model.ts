@@ -433,6 +433,26 @@ export const updateCreativeLayerGradient = (
   return next;
 };
 
+export const updateCreativeLayerBlur = (
+  document: Record<string, unknown>,
+  size: string,
+  layerId: string,
+  field: string,
+  value: unknown,
+) => {
+  const next = deepClone(document);
+  const layer = findCreativeLayer(next, size, layerId);
+  if (!layer) throw new Error(`Unknown layer: ${layerId}`);
+  if (String(layer.kind || '') !== 'blur') {
+    throw new Error(`Layer ${layerId} is not a blur layer`);
+  }
+  layer.blur = {
+    ...(layer.blur || {}),
+    [field]: value,
+  };
+  return next;
+};
+
 export const updateCreativeLayerFit = (
   document: Record<string, unknown>,
   size: string,

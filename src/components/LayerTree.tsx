@@ -15,7 +15,7 @@ const iconForLayer = (layer, hasChildren = false) => {
   if (layer?.kind === 'image') return 'image';
   if (layer?.kind === 'text') return 'text';
   if (layer?.kind === 'shape') return 'shape';
-  if (layer?.kind === 'gradient') return 'shape';
+  if (layer?.kind === 'gradient' || layer?.kind === 'blur') return 'shape';
   if (layer?.kind === 'group') return 'group';
   return 'shape';
 };

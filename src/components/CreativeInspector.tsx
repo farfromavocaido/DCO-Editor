@@ -111,7 +111,7 @@ function InspectorSection({ id, title, open, onToggle, children }) {
 }
 
 export function CreativeInspector() {
-  const [openSections, setOpenSections] = useState(() => new Set(['layout', 'headline-offers', 'gradient', 'type', 'style', 'animation']));
+  const [openSections, setOpenSections] = useState(() => new Set(['layout', 'headline-offers', 'gradient', 'blur', 'type', 'style', 'animation']));
   const [layerCode, setLayerCode] = useState('');
   const [codeError, setCodeError] = useState('');
   const document = useEditorStore((s) => s.creativeDocument);
@@ -142,6 +142,7 @@ export function CreativeInspector() {
   const updateTargetValue = useEditorStore((s) => s.updateCreativeTargetValue);
   const updateLayerMetadata = useEditorStore((s) => s.updateCreativeLayerMetadataValue);
   const updateLayerGradient = useEditorStore((s) => s.updateCreativeLayerGradientValue);
+  const updateLayerBlur = useEditorStore((s) => s.updateCreativeLayerBlurValue);
   const promoteTargetToSharedStyle = useEditorStore((s) => s.promoteCreativeTargetToSharedStyle);
   const clearTargetOverrides = useEditorStore((s) => s.clearCreativeTargetOverrides);
   const updateLayerFit = useEditorStore((s) => s.updateCreativeLayerFitValue);
@@ -268,6 +269,7 @@ export function CreativeInspector() {
 
   const isGroupedSelection = selectedTarget.kind === 'group' || selectedTarget.kind === 'multi';
   const isGradientSelection = selectedLayer.kind === 'gradient' && !isGroupedSelection;
+  const isBlurSelection = selectedLayer.kind === 'blur' && !isGroupedSelection;
   const isHeadlineSelection = isHeadlineLayer(selectedLayer) && !isGroupedSelection;
   const layoutNote = isolationPath?.length === 1 && isolationPath[0] === OFFERS_BLOCK_ID
     ? 'Editing inside the offer block. Select a slot or plus sign; double-click a slot to edit value and subline placement.'
@@ -418,6 +420,35 @@ export function CreativeInspector() {
                 type="number"
                 value={selectedLayer.gradient?.midpoint ?? ''}
                 onChange={(value) => updateLayerGradient(selectedLayer.id, 'midpoint', value)}
+              />
+            </div>
+          </InspectorSection>
+        ) : null}
+
+        {isBlurSelection ? (
+          <InspectorSection
+            id="blur"
+            title="Blur"
+            open={openSections.has('blur')}
+            onToggle={() => toggleSection('blur')}
+          >
+            <p className="inspector-note">
+              Offers-0 backdrop blur over the photo. Fades in with the roundel (or CTA if the roundel is off) and out with the blue wave.
+            </p>
+            <div className="inspector-grid">
+              <label className="inspector-field">
+                <span>enabled</span>
+                <input
+                  type="checkbox"
+                  checked={selectedLayer.blur?.enabled !== false}
+                  onChange={(event) => updateLayerBlur(selectedLayer.id, 'enabled', event.target.checked)}
+                />
+              </label>
+              <FieldControl
+                label="strength"
+                type="number"
+                value={selectedLayer.blur?.strength ?? ''}
+                onChange={(value) => updateLayerBlur(selectedLayer.id, 'strength', value)}
               />
             </div>
           </InspectorSection>
@@ -590,7 +621,7 @@ export function CreativeInspector() {
           </InspectorSection>
         ) : null}
 
-        {!isGradientSelection ? (
+        {!isGradientSelection && !isBlurSelection ? (
         <InspectorSection
           id="animation"
           title="Motion"

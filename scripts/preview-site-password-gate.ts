@@ -1,14 +1,39 @@
 const escapeJsString = (value: string) => JSON.stringify(value);
+const escapeHtml = (value: string) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+}[char] || char));
 
 export const PREVIEW_SITE_PASSWORD = process.env.PREVIEW_SITE_PASSWORD || 'ssedco';
 
-export const wrapPreviewSiteWithPasswordGate = (html: string, password = PREVIEW_SITE_PASSWORD) => {
+export type PreviewPasswordGateOptions = {
+  password?: string;
+  kicker?: string;
+  title?: string;
+  copy?: string;
+};
+
+export const wrapPreviewSiteWithPasswordGate = (
+  html: string,
+  passwordOrOptions: string | PreviewPasswordGateOptions = PREVIEW_SITE_PASSWORD,
+) => {
+  const options: PreviewPasswordGateOptions = typeof passwordOrOptions === 'string'
+    ? { password: passwordOrOptions }
+    : (passwordOrOptions || {});
+  const password = options.password || PREVIEW_SITE_PASSWORD;
+  const kicker = options.kicker || 'SSE DCO';
+  const title = options.title || 'Client preview';
+  const copy = options.copy || 'Enter the preview password to continue.';
+
   const gateMarkup = `
     <div id="preview-password-gate" hidden>
       <form id="preview-password-form">
-        <p class="preview-password-kicker">SSE DCO</p>
-        <h2>Client preview</h2>
-        <p class="preview-password-copy">Enter the preview password to continue.</p>
+        <p class="preview-password-kicker">${escapeHtml(kicker)}</p>
+        <h2>${escapeHtml(title)}</h2>
+        <p class="preview-password-copy">${escapeHtml(copy)}</p>
         <label>
           <span>Password</span>
           <input id="preview-password-input" type="password" autocomplete="current-password" autofocus>

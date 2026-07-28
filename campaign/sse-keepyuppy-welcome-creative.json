@@ -39,7 +39,7 @@
       "frames-3": {
         "start": 0,
         "act1_begin": 11,
-        "act1_in": 12.5,
+        "act1_in": 11.6,
         "offer2_in": 13.6,
         "offer3_in": 17.6,
         "plus1_in": 14.5,
@@ -7144,7 +7144,7 @@
               "id": "greenwave-waveSweep",
               "label": "Greenwave waveSweep",
               "preset": "waveSweep",
-              "start": "start+7",
+              "start": 5.8,
               "end": "end-2",
               "params": {
                 "start_x": 1080,

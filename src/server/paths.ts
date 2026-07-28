@@ -11,8 +11,11 @@ export const appRoot = path.resolve(serverDir, '../..');
 /** Campaign data: creative document, assets */
 export const projectRoot = path.resolve(appRoot, 'campaign');
 
-/** Generated HTML and export packages */
+/** Generated HTML and export packages (local scratch; gitignored) */
 export const outputRoot = path.resolve(appRoot, 'output');
+
+/** Tracked statics preview package for GitHub Pages (`outputs/`) */
+export const outputsRoot = path.resolve(appRoot, 'outputs');
 
 export const creativeDocumentPathFor = (campaignId: string | null | undefined = DEFAULT_CAMPAIGN_ID) => {
   const entry = getCampaign(campaignId);

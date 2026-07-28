@@ -1450,6 +1450,164 @@ export const useEditorStore = create<any>((set, get) => ({
     return snapshots;
   },
 
+  /**
+   * Bake Export-for-Static HTML for all non-DCO campaigns into tracked `outputs/`.
+   * Snapshots the live editor stage per campaign (same path as Export for Static).
+   */
+  exportForPreview: async () => {
+    const original = {
+      activeCampaignId: get().activeCampaignId,
+      size: get().size,
+      creativeDocument: get().creativeDocument,
+      creativeDirty: get().creativeDirty,
+      feedDraft: get().feedDraft,
+      feedProfileName: get().feedProfileName,
+      feedFields: get().feedFields,
+      sizes: get().sizes,
+      offerCount: get().offerCount,
+      tcMode: get().tcMode,
+      ctaShape: get().ctaShape,
+      includeRoundelFrame: get().includeRoundelFrame,
+      frameCount: get().frameCount,
+      roundelMode: get().roundelMode,
+      selectedLayerId: get().selectedLayerId,
+      selectedTargetId: get().selectedTargetId,
+      selectedTargetIds: get().selectedTargetIds,
+      selectedClipId: get().selectedClipId,
+      isolationPath: get().isolationPath,
+      isolatedGroupId: get().isolatedGroupId,
+      saveFeedDisabled: get().saveFeedDisabled,
+    };
+
+    const waitForPaint = () => new Promise((resolve) => {
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => resolve(undefined));
+      });
+    });
+
+    const mergedDocumentForState = () => {
+      const state = get();
+      if (!state.creativeDocument) return null;
+      return {
+        ...state.creativeDocument,
+        feed: {
+          ...state.creativeDocument.feed,
+          sampleRows: state.feedDraft.rows?.length
+            ? state.feedDraft.rows
+            : state.creativeDocument.feed.sampleRows,
+        },
+      };
+    };
+
+    const loadCampaignQuiet = async (campaignId) => {
+      set({
+        activeCampaignId: campaignId,
+        creativeDirty: false,
+        saveFeedDisabled: true,
+        history: [],
+        historyIndex: -1,
+        selectedLayerId: '',
+        selectedTargetId: '',
+        selectedTargetIds: [],
+        selectedClipId: '',
+        isolationPath: [],
+        isolatedGroupId: '',
+      });
+      await Promise.all([
+        get().loadFeedSchema(),
+        get().loadCreativeDocument(),
+      ]);
+      const document = get().creativeDocument;
+      const sizes = Object.keys(document?.sizes || {}).sort();
+      set({ sizes });
+      const preferred = sizes.includes(original.size)
+        ? original.size
+        : (sizes.includes('300x600') ? '300x600' : sizes[0]);
+      if (preferred) await get().loadSize(preferred);
+      await waitForPaint();
+    };
+
+    const previewCampaigns = (get().campaigns || []).filter((entry) => entry.id !== 'sse-dco');
+    if (!previewCampaigns.length) {
+      throw new Error('No non-DCO campaigns registered for Export for Preview');
+    }
+
+    get().setStatus('Exporting statics preview package…');
+    const payloads = [];
+    try {
+      const alreadySnapshotted = new Set();
+      if (previewCampaigns.some((entry) => entry.id === original.activeCampaignId)) {
+        const document = mergedDocumentForState();
+        if (!document) throw new Error('No creative document loaded');
+        const presentationSnapshots = await get().captureOutlineSnapshotsForAllSizes();
+        payloads.push({
+          id: original.activeCampaignId,
+          document,
+          presentationSnapshots,
+        });
+        alreadySnapshotted.add(original.activeCampaignId);
+      }
+
+      for (const entry of previewCampaigns) {
+        if (alreadySnapshotted.has(entry.id)) continue;
+        get().setStatus(`Snapshotting ${entry.name} for preview export…`);
+        await loadCampaignQuiet(entry.id);
+        const document = mergedDocumentForState();
+        if (!document) throw new Error(`Failed to load ${entry.id}`);
+        const presentationSnapshots = await get().captureOutlineSnapshotsForAllSizes();
+        payloads.push({
+          id: entry.id,
+          document,
+          presentationSnapshots,
+        });
+      }
+
+      get().setStatus('Writing outputs/ statics package…');
+      const response = await fetch('/api/creative/export-preview', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ campaigns: payloads }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.error || response.statusText || 'Failed to export preview package');
+      }
+      const zipName = String(payload.latest?.zip || '').split('/').pop() || 'SSE_Statics.zip';
+      get().setStatus(`Wrote outputs/ (${zipName}) — commit to publish`);
+      return payload;
+    } finally {
+      set({
+        activeCampaignId: original.activeCampaignId,
+        size: original.size,
+        creativeDocument: original.creativeDocument,
+        creativeDirty: original.creativeDirty,
+        feedDraft: original.feedDraft,
+        feedProfileName: original.feedProfileName,
+        feedFields: original.feedFields,
+        sizes: original.sizes,
+        offerCount: original.offerCount,
+        tcMode: original.tcMode,
+        ctaShape: original.ctaShape,
+        includeRoundelFrame: original.includeRoundelFrame,
+        frameCount: original.frameCount,
+        roundelMode: original.roundelMode,
+        selectedLayerId: original.selectedLayerId,
+        selectedTargetId: original.selectedTargetId,
+        selectedTargetIds: original.selectedTargetIds,
+        selectedClipId: original.selectedClipId,
+        isolationPath: original.isolationPath,
+        isolatedGroupId: original.isolatedGroupId,
+        saveFeedDisabled: original.saveFeedDisabled,
+        history: [],
+        historyIndex: -1,
+      });
+      writeEditorSession({ campaignId: original.activeCampaignId, size: original.size });
+      await waitForPaint();
+      const stage = window.document.querySelector('[data-preview-stage]');
+      if (stage) get().applyPreviewTextFitting(stage);
+    }
+  },
+
   buildHtml: async ({ renderMode = 'font', delivery = 'studio' } = {}) => {
     const state = get();
     const resolvedDelivery = renderMode === 'outline' && delivery === 'static' ? 'static' : 'studio';

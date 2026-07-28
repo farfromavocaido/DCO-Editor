@@ -4,6 +4,9 @@
 
 ### Added
 
+- **Statics preview (GitHub Pages `/statics/`)** — password-gated host for the three non-DCO campaigns’ Export-for-Static HTML; sidebar is campaign + size only; download link reads `outputs/latest.json`.
+- **Export for Preview** (toolbar) — snapshots each non-DCO campaign on the live editor stage, writes tracked `outputs/campaigns/…`, a timestamped `outputs/downloads/SSE_Statics_*.zip`, and refreshes `outputs/latest.json` for commit/publish.
+- **Static HTML clickTag** — Export for Static / preview packages open `https://www.sseairtricity.com/uk` via IAB `clickTag` (hardcoded default; customisable later).
 - **Zero-offers DCO variant (`offers-0`)** on SSE DCO: TopBar Offers control gains `0` (sse-dco only). Hides offer slots, green wave, blue logo, and T&Cs; blue wave + white logo enter from the start; headlines render white with blank-aware equal screentime before CTA; per-size CTA repositioning via `offers-0|cta` rules. Existing `offers-1/2/3` unchanged.
 - **offers-0 editable rest geometry**: `offers-0|bluewave` and `offers-0|logo-act3` variantRules so wave/logo rest can be tuned without affecting offers 1–3; editor variant merge/write now follows document order (CSS cascade) so `offers-0|cta` wins over `cta-rect` for drag/align.
 - **Outline presentation snapshot**: editor outline/static exports capture the live preview after fit → symbol align → `layoutOffers` (all sizes) and bake those metrics into SVG paths — Animate-style “what you see is what you get.” Includes 0.6em `%`/`£`/`€`, final letter-spacing, bottom-align `translateY`, shared equalization, and plus/slot positions. API accepts optional `presentationSnapshots`; without them, `outline-bake` approximates via Museo metrics.

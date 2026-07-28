@@ -1,15 +1,21 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
 import { GET as feedGet } from '@/app/api/feed-schema/route';
 import { GET as creativeGet } from '@/app/api/creative/route';
 import { POST as creativeExportAllPost } from '@/app/api/creative/export/route';
 import { POST as clientPackagePost } from '@/app/api/creative/client-package/route';
 import { POST as basePackagePost } from '@/app/api/creative/base-package/route';
+import { POST as exportPreviewPost } from '@/app/api/creative/export-preview/route';
 import { POST as creativeExportPost } from '@/app/api/creative/[size]/export/route';
 import * as creativeViewRoute from '@/app/api/creative/[size]/view/route';
 import * as creativeSourceRoute from '@/app/api/creative/[size]/source/route';
+import { listStaticPreviewCampaigns } from '@/server/campaign-registry';
 import { readCreativeDocument } from '@/server/creative-document';
+import { DEFAULT_STATIC_CLICK_TAG } from '@/server/creative-exporter';
+import { outputsRoot } from '@/server/paths';
 
 const CDN_MUSEO_URL = 'https://s0.2mdn.net/creatives/assets/5627648/Museo700-Regular.otf';
 const CDN_MUSEO_SANS_URL = 'https://s0.2mdn.net/creatives/assets/5627648/MuseoSans_700.otf';
@@ -291,4 +297,51 @@ test('POST /api/creative/base-package can return a canonical agency zip', async 
   assert.ok(!bytes.includes(Buffer.from(CDN_LOGO_URL)));
   assert.ok(!bytes.includes(Buffer.from('_hiker.jpg')));
   assert.ok(!bytes.includes(Buffer.from('ads/assets/fonts/Museo700-Regular.otf')));
+});
+
+test('POST /api/creative/export-preview writes tracked outputs for non-DCO campaigns', async () => {
+  const campaigns = listStaticPreviewCampaigns().map((entry) => ({ id: entry.id }));
+  const response = await exportPreviewPost(new Request('http://localhost/api/creative/export-preview', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ campaigns }),
+  }));
+
+  assert.equal(response.status, 200);
+  const payload = await response.json();
+  assert.equal(payload.ok, true);
+  assert.ok(payload.latest?.zip?.startsWith('downloads/SSE_Statics_'));
+  assert.equal(payload.latest.campaigns.length, 3);
+
+  const htmlPath = path.resolve(
+    outputsRoot,
+    'campaigns/sse-hiker-welcome/SSE_Hiker_Welcome_300x250.html',
+  );
+  const html = await fs.readFile(htmlPath, 'utf8');
+  assert.match(html, new RegExp(DEFAULT_STATIC_CLICK_TAG.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(html, /window\.clickTag = clickTag/);
+
+  const zipPath = path.resolve(outputsRoot, payload.latest.zip);
+  const zip = await fs.readFile(zipPath);
+  assert.equal(zip.subarray(0, 4).toString('binary'), 'PK\u0003\u0004');
+
+  // Restore stub so test runs do not leave a dirty publish tree.
+  await fs.rm(path.resolve(outputsRoot, 'campaigns'), { recursive: true, force: true });
+  await fs.rm(path.resolve(outputsRoot, 'downloads'), { recursive: true, force: true });
+  await fs.writeFile(
+    path.resolve(outputsRoot, 'latest.json'),
+    `${JSON.stringify({ generatedAt: null, zip: null, campaigns: [] }, null, 2)}\n`,
+  );
+});
+
+test('POST /api/creative/export-preview rejects the DCO campaign', async () => {
+  const response = await exportPreviewPost(new Request('http://localhost/api/creative/export-preview', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ campaigns: [{ id: 'sse-dco' }] }),
+  }));
+
+  assert.equal(response.status, 400);
+  const payload = await response.json();
+  assert.match(payload.error || '', /not a statics preview campaign/);
 });

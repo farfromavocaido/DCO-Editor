@@ -68,6 +68,7 @@ export function TopBar() {
   const saveCreativeDocument = useEditorStore((s) => s.saveCreativeDocument);
   const saveFeedRows = useEditorStore((s) => s.saveFeedRows);
   const buildHtml = useEditorStore((s) => s.buildHtml);
+  const exportForPreview = useEditorStore((s) => s.exportForPreview);
   const exportClientPackage = useEditorStore((s) => s.exportClientPackage);
   const exportBasePackage = useEditorStore((s) => s.exportBasePackage);
   const viewHtml = useEditorStore((s) => s.viewHtml);
@@ -283,6 +284,16 @@ export function TopBar() {
                 }}
               >
                 Export for Static
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  exportForPreview().catch((error) => setStatus(error.message, 'error'));
+                  setMoreOpen(false);
+                }}
+              >
+                Export for Preview
               </button>
               <button
                 type="button"

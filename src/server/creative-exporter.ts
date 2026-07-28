@@ -36,13 +36,13 @@ import { applyOffers0BeatOverlay, beatsForFrameScope } from '@/lib/timing-profil
 import { textFitEngineSource } from '@/lib/text-fit';
 import { textFitRulesForSize } from '@/lib/text-fit-rules';
 import type { PresentationSnapshots, SizePresentationSnapshot } from '@/lib/outline-snapshot';
-import { getCampaign } from './campaign-registry';
+import { getCampaign, listStaticPreviewCampaigns } from './campaign-registry';
 import {
   bakeOutlinedOfferSlotSvgs,
   bakeOutlinedText,
   positionStyleAttr,
 } from './outline-bake';
-import { appRoot, outputRoot, projectRoot } from './paths';
+import { appRoot, outputRoot, outputsRoot, projectRoot } from './paths';
 
 const DEFAULT_STATE = 'offers-1 tc-solo cta-roundel frames-3 roundel-frame-off roundel-copy-only';
 
@@ -794,6 +794,9 @@ const renderOutlinedTermsWrappers = async (
           </div>`;
 };
 
+/** Default landing URL for static (non-Enabler) HTML5 clickTag. */
+export const DEFAULT_STATIC_CLICK_TAG = 'https://www.sseairtricity.com/uk';
+
 const outlineRuntimeScript = (delivery: DeliveryMode = 'studio') => {
   if (delivery === 'static') {
     return `
@@ -801,6 +804,8 @@ const outlineRuntimeScript = (delivery: DeliveryMode = 'studio') => {
       (function() {
         var MOTION_START_TIMEOUT_MS = 3000;
         var motionReleased = false;
+        var clickTag = ${JSON.stringify(DEFAULT_STATIC_CLICK_TAG)};
+        window.clickTag = clickTag;
         function releaseMotionClock() {
           if (motionReleased) return;
           var root = document.getElementById('page-content');
@@ -808,7 +813,15 @@ const outlineRuntimeScript = (delivery: DeliveryMode = 'studio') => {
           motionReleased = true;
           root.classList.add('motion-ready');
         }
+        function wireClickTag() {
+          var root = document.getElementById('page-content');
+          if (!root) return;
+          root.addEventListener('click', function() {
+            window.open(clickTag, '_blank');
+          });
+        }
         function boot() {
+          wireClickTag();
           window.requestAnimationFrame(function() {
             window.requestAnimationFrame(releaseMotionClock);
           });
@@ -1567,6 +1580,134 @@ export const buildHtmlExportZip = async (
     result,
     zip: createZipBuffer(entries),
     slug: exportSlugForDocument(document),
+  };
+};
+
+export type ExportPreviewCampaignInput = {
+  id: string;
+  document: Record<string, unknown>;
+  presentationSnapshots?: PresentationSnapshots;
+};
+
+export type ExportPreviewLatest = {
+  generatedAt: string;
+  zip: string;
+  campaigns: Array<{
+    id: string;
+    name: string;
+    exportSlug: string;
+    sizes: string[];
+  }>;
+};
+
+const formatStaticsZipTimestamp = (date = new Date()) => {
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return [
+    date.getFullYear(),
+    pad(date.getMonth() + 1),
+    pad(date.getDate()),
+    '-',
+    pad(date.getHours()),
+    pad(date.getMinutes()),
+    pad(date.getSeconds()),
+  ].join('');
+};
+
+const writeTreeEntries = async (root: string, entries: PackageEntry[]) => {
+  for (const entry of entries) {
+    const target = path.resolve(root, entry.path);
+    await fs.mkdir(path.dirname(target), { recursive: true });
+    const data = Buffer.isBuffer(entry.data) ? entry.data : Buffer.from(String(entry.data));
+    await fs.writeFile(target, data);
+  }
+};
+
+/**
+ * Bake Export-for-Static HTML for the non-DCO campaigns into tracked `outputs/`,
+ * zip them for client download, and refresh `latest.json`.
+ */
+export const buildExportPreviewPackage = async (
+  campaigns: ExportPreviewCampaignInput[],
+) => {
+  const allowed = new Map(listStaticPreviewCampaigns().map((entry) => [entry.id, entry]));
+  if (!campaigns.length) {
+    throw new Error('Export for Preview requires at least one non-DCO campaign');
+  }
+
+  const campaignEntries: PackageEntry[] = [];
+  const campaignMeta: ExportPreviewLatest['campaigns'] = [];
+  const written: string[] = [];
+
+  for (const input of campaigns) {
+    const registry = allowed.get(input.id);
+    if (!registry) {
+      throw new Error(`Campaign ${input.id} is not a statics preview campaign`);
+    }
+    const document = input.document;
+    if (document?.campaign?.id && document.campaign.id !== input.id) {
+      throw new Error(`Document campaign id ${document.campaign.id} does not match ${input.id}`);
+    }
+    const slug = exportSlugForDocument(document);
+    const sizes = Object.keys(document.sizes || {});
+
+    for (const size of sizes) {
+      const html = await renderStudioReadyHtml(document, size, {
+        renderMode: 'outline',
+        delivery: 'static',
+        presentationSnapshot: input.presentationSnapshots?.[size] || null,
+      });
+      const relativePath = `campaigns/${input.id}/${slug}_${size}.html`;
+      campaignEntries.push({ path: relativePath, data: html });
+      written.push(relativePath);
+    }
+
+    for (const assetPath of collectOutlineHtmlSidecarAssets(document)) {
+      const entryPath = flatAssetEntryPath(assetPath);
+      const relativePath = `campaigns/${input.id}/${entryPath}`;
+      campaignEntries.push({
+        path: relativePath,
+        data: await fs.readFile(path.resolve(projectRoot, assetPath)),
+      });
+      written.push(relativePath);
+    }
+
+    campaignMeta.push({
+      id: input.id,
+      name: registry.name,
+      exportSlug: slug,
+      sizes,
+    });
+  }
+
+  const generatedAt = new Date().toISOString();
+  const zipName = `SSE_Statics_${formatStaticsZipTimestamp()}.zip`;
+  const zipRelative = `downloads/${zipName}`;
+  const zipBuffer = createZipBuffer(campaignEntries);
+  const latest: ExportPreviewLatest = {
+    generatedAt,
+    zip: zipRelative,
+    campaigns: campaignMeta,
+  };
+
+  const campaignsDir = path.resolve(outputsRoot, 'campaigns');
+  const downloadsDir = path.resolve(outputsRoot, 'downloads');
+  await fs.rm(campaignsDir, { recursive: true, force: true });
+  await fs.rm(downloadsDir, { recursive: true, force: true });
+  await fs.mkdir(campaignsDir, { recursive: true });
+  await fs.mkdir(downloadsDir, { recursive: true });
+  await writeTreeEntries(outputsRoot, campaignEntries);
+  await fs.writeFile(path.resolve(outputsRoot, zipRelative), zipBuffer);
+  await fs.writeFile(
+    path.resolve(outputsRoot, 'latest.json'),
+    `${JSON.stringify(latest, null, 2)}\n`,
+  );
+  written.push(zipRelative, 'latest.json');
+
+  return {
+    ok: true as const,
+    latest,
+    written,
+    zipBytes: zipBuffer.length,
   };
 };
 

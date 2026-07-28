@@ -56,3 +56,8 @@ export const getCampaign = (campaignId: string | null | undefined): CampaignEntr
 export const isRegisteredCampaignId = (campaignId: string | null | undefined): boolean => (
   Boolean(campaignId && byId.has(campaignId))
 );
+
+/** Non-DCO campaigns hosted on the statics preview Pages route. */
+export const listStaticPreviewCampaigns = () => (
+  CAMPAIGNS.filter((entry) => entry.id !== DEFAULT_CAMPAIGN_ID)
+);

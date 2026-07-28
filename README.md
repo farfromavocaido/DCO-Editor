@@ -6,6 +6,8 @@ Next.js app for authoring SSE DCO display banners from a single creative documen
 
 **Client preview (GitHub Pages):** [farfromavocaido.github.io/DCO-Editor/](https://farfromavocaido.github.io/DCO-Editor/) — rebuilt automatically on every push to `main`. A lightweight password gate protects the hosted preview (default password: `ssedco`; override with `PREVIEW_SITE_PASSWORD` when exporting). The preview remembers size, form values, and zoom in the browser across refresh; **Restore defaults** clears that and reloads the baked-in sample row. Client ZIP downloads from the editor are unchanged.
 
+**Statics preview:** [farfromavocaido.github.io/DCO-Editor/statics/](https://farfromavocaido.github.io/DCO-Editor/statics/) — same password gate; hosts the three non-DCO campaigns as Export-for-Static HTML (campaign + size picker, ZIP download). Populate via editor **Export for Preview**, commit `outputs/`, then push.
+
 ## Quick start
 
 From the repo root:
@@ -50,7 +52,8 @@ npm run export:preview-site   # static client preview → site/ (CDN fonts/SVGs,
 5. **Save creative** persists the document; **Save sample values** updates feed rows in the same file.
 6. **Build HTML** writes Studio-ready files to `output/`.
 7. **Client ZIP** / **Base ZIP** for handoff packages.
-8. Push to `main` to publish the client preview to GitHub Pages (see `.github/workflows/pages.yml`).
+8. **Export for Preview** writes non-DCO static HTML into tracked `outputs/` (commit that folder to update `/statics/`).
+9. Push to `main` to publish the client preview to GitHub Pages (see `.github/workflows/pages.yml`).
 
 See [docs/WORKFLOW.md](docs/WORKFLOW.md) for detail.
 
@@ -69,6 +72,7 @@ See [docs/WORKFLOW.md](docs/WORKFLOW.md) for detail.
 │   ├── sse-dco-creative.json
 │   └── assets/
 ├── output/                 generated HTML + ZIPs (gitignored)
+├── outputs/                tracked statics preview package (Export for Preview)
 ├── site/                   static client preview build (gitignored)
 ├── scripts/                one-off data migrations + preview-site export
 ├── src/

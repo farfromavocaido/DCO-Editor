@@ -31,6 +31,23 @@ Builds HTML for all sizes into `output/`. Optional body: `{ document, renderMode
 
 When `download: true`, returns a ZIP attachment of the HTML files plus staged backgrounds (outline modes).
 
+### `POST /api/creative/export-preview`
+
+Writes the tracked statics preview package under `outputs/` (not a browser download). Body:
+
+```json
+{
+  "campaigns": [
+    { "id": "sse-hiker-welcome", "document": {}, "presentationSnapshots": {} }
+  ]
+}
+```
+
+- Only non-DCO campaign ids are accepted (`sse-hiker-welcome`, `sse-keepyuppy-welcome`, `sse-keepyuppy-discount`).
+- `document` optional (loaded from disk when omitted). Prefer editor-supplied `presentationSnapshots` for WYSIWYG outline bake.
+- Renders Export-for-Static HTML per size, copies flat background assets, replaces `outputs/campaigns/`, writes one `outputs/downloads/SSE_Statics_<timestamp>.zip` (previous downloads removed), and updates `outputs/latest.json`.
+- Returns `{ ok, latest, written, zipBytes }`.
+
 ### `POST /api/creative/{size}/export`
 
 Builds HTML for one size into `output/`. Optional body: `{ renderMode }`.

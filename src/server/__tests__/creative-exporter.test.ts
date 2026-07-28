@@ -6,6 +6,7 @@ import {
   buildBasePackageEntries,
   buildClientPreviewPackageEntries,
   createZipBuffer,
+  DEFAULT_STATIC_CLICK_TAG,
   renderClientPreviewPage,
   renderStudioReadyHtml,
   renderWipHtml,
@@ -41,6 +42,33 @@ const expectedStatePatternForRow = (row: Record<string, unknown>) => {
     : 'roundel-copy-only';
   return new RegExp(`offers-${offerCount} ${tcScope} ${ctaScope} ${frameScope} ${roundelCopyScope}`);
 };
+
+test('static outline delivery wires IAB clickTag and omits Enabler exit', async () => {
+  const document = await readCreativeDocument();
+  const html = await renderStudioReadyHtml(document, '300x250', {
+    renderMode: 'outline',
+    delivery: 'static',
+  });
+
+  assert.match(html, /var clickTag = /);
+  assert.match(html, new RegExp(DEFAULT_STATIC_CLICK_TAG.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(html, /window\.clickTag = clickTag/);
+  assert.match(html, /window\.open\(clickTag, '_blank'\)/);
+  assert.doesNotMatch(html, /Enabler\.exit\('Main Exit'/);
+  assert.doesNotMatch(html, /https:\/\/s0\.2mdn\.net\/ads\/studio\/Enabler\.js/);
+});
+
+test('studio outline delivery keeps Enabler exit and has no static clickTag', async () => {
+  const document = await readCreativeDocument();
+  const html = await renderStudioReadyHtml(document, '300x250', {
+    renderMode: 'outline',
+    delivery: 'studio',
+  });
+
+  assert.match(html, /Enabler\.exit\('Main Exit'/);
+  assert.doesNotMatch(html, /window\.clickTag = clickTag/);
+  assert.doesNotMatch(html, /window\.open\(clickTag, '_blank'\)/);
+});
 
 test('exports custom Studio-ready HTML without GWD custom elements', async () => {
   const document = await readCreativeDocument();

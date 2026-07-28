@@ -3290,7 +3290,7 @@
               "id": "greenwave-waveSweep",
               "label": "Greenwave waveSweep",
               "preset": "waveSweep",
-              "start": "start+5",
+              "start": 6.5,
               "end": "end-2",
               "params": {
                 "start_x": 0,

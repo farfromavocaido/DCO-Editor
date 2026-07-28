@@ -35,6 +35,8 @@
 
 Local check: `npm run export:preview-site` then serve `site/` (`just preview`). Statics URL path: `/statics/`.
 
+GitHub Pages replaces the whole artifact on each deploy (old server files are gone). Browser caches are the remaining footgun: the statics shell cache-busts ad/ZIP URLs with `?v=<generatedAt>`, polls `latest.json`, and offers **Reload latest** (plus a banner when the open tab is behind the server package).
+
 ## Adding assets
 
 Place files under `campaign/assets/` and reference them as `assets/...` in the creative document layer `asset` fields or size `assets` map.

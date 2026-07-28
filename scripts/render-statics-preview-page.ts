@@ -51,12 +51,20 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
     }).format(new Date(latest.generatedAt)))
     : '—';
   const generatedIso = latest.generatedAt ? escapeAttr(latest.generatedAt) : '';
+  // Query-bust so GH Pages / browser caches cannot keep serving a prior package
+  // under the same HTML paths after a new Export for Preview.
+  const cacheBust = latest.generatedAt
+    ? escapeAttr(encodeURIComponent(latest.generatedAt))
+    : String(Date.now());
+  const zipHrefBusted = `${zipHref}?v=${cacheBust}`;
 
   return `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
     <title>SSE statics preview</title>
     <link rel="stylesheet" href="https://use.typekit.net/grv2rfu.css">
     <style>
@@ -334,6 +342,33 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
         text-decoration: none;
       }
       .nav-link:hover { text-decoration: underline; }
+      .stale-banner {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 14px;
+        border-bottom: 1px solid rgba(22, 199, 183, 0.35);
+        background: rgba(22, 199, 183, 0.12);
+        color: var(--ink);
+        font-size: 13px;
+        line-height: 1.35;
+      }
+      .stale-banner.is-visible { display: flex; }
+      .stale-banner button {
+        appearance: none;
+        flex: 0 0 auto;
+        border: 1px solid var(--teal);
+        border-radius: 8px;
+        background: var(--teal);
+        color: rgb(0, 41, 117);
+        font: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 10px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
       @media (max-width: 900px) {
         body { overflow: auto; height: auto; }
         .layout {
@@ -342,10 +377,15 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
         }
         .controls { border-right: 0; border-bottom: 1px solid var(--line); }
         .stage-wrap { min-height: 420px; }
+        .stale-banner { flex-wrap: wrap; }
       }
     </style>
   </head>
   <body>
+    <div id="stale-banner" class="stale-banner" role="status" aria-live="polite" hidden>
+      <span>A newer export is on the server — this tab may still be showing an older package.</span>
+      <button type="button" data-reload-latest>Load latest</button>
+    </div>
     <header>
       <div class="brand-lockup" aria-label="Boys and Girls and SSE">
         <img class="brand-logo brand-logo-bg" src="../brand/BGlogo_SVG.svg" alt="Boys and Girls">
@@ -394,7 +434,8 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
               <span class="zoom-readout" data-zoom-readout>Fit</span>
             </div>
             <button type="button" id="replay">Replay</button>
-            <a class="primary" id="download" href="${zipHref}" download>Download ZIP</a>
+            <button type="button" id="reload-latest" title="Fetch the newest export and bypass the browser cache">Reload latest</button>
+            <a class="primary" id="download" href="${zipHrefBusted}" download>Download ZIP</a>
           </div>
         </div>
         <div class="stage-wrap">
@@ -409,6 +450,8 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
         var STORAGE_KEY = 'sse-statics-preview:v1';
         var ZOOM_LEVELS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 7.5];
         var campaigns = ${campaignsJson};
+        var packageGeneratedAt = ${JSON.stringify(latest.generatedAt || '')};
+        var cacheBust = ${JSON.stringify(latest.generatedAt ? encodeURIComponent(latest.generatedAt) : String(Date.now()))};
         var campaignSelect = document.getElementById('campaign');
         var sizeSelect = document.getElementById('size');
         var frame = document.getElementById('ad-frame');
@@ -417,6 +460,7 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
         var title = document.getElementById('preview-title');
         var subtitle = document.getElementById('preview-subtitle');
         var replay = document.getElementById('replay');
+        var staleBanner = document.getElementById('stale-banner');
         var previewZoom = 'fit';
         var frameWidth = ${initialWidth};
         var frameHeight = ${initialHeight};
@@ -435,7 +479,8 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
         }
 
         function adSrc(campaign, size) {
-          return 'campaigns/' + campaign.id + '/' + campaign.exportSlug + '_' + size + '.html';
+          return 'campaigns/' + campaign.id + '/' + campaign.exportSlug + '_' + size
+            + '.html?v=' + cacheBust;
         }
 
         function fillSizes(campaign, preferred) {
@@ -544,6 +589,52 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
           loadActiveAd();
         }
 
+        function showStaleBanner(visible) {
+          if (!staleBanner) return;
+          if (visible) {
+            staleBanner.hidden = false;
+            staleBanner.classList.add('is-visible');
+          } else {
+            staleBanner.hidden = true;
+            staleBanner.classList.remove('is-visible');
+          }
+        }
+
+        /** Bypass browser cache: pull latest.json, then reload the shell with a new ?v=. */
+        function reloadLatest() {
+          fetch('latest.json', { cache: 'no-store' })
+            .then(function(response) {
+              if (!response.ok) throw new Error('latest.json ' + response.status);
+              return response.json();
+            })
+            .then(function(data) {
+              var next = (data && data.generatedAt) || String(Date.now());
+              var url = new URL(window.location.href);
+              url.searchParams.set('v', next);
+              window.location.replace(url.toString());
+            })
+            .catch(function() {
+              var url = new URL(window.location.href);
+              url.searchParams.set('v', String(Date.now()));
+              window.location.replace(url.toString());
+            });
+        }
+
+        function checkForNewerPackage() {
+          fetch('latest.json', { cache: 'no-store' })
+            .then(function(response) {
+              if (!response.ok) throw new Error('latest.json ' + response.status);
+              return response.json();
+            })
+            .then(function(data) {
+              var remote = data && data.generatedAt;
+              if (remote && packageGeneratedAt && remote !== packageGeneratedAt) {
+                showStaleBanner(true);
+              }
+            })
+            .catch(function() {});
+        }
+
         campaignSelect.addEventListener('change', function() {
           var campaign = findCampaign(campaignSelect.value);
           fillSizes(campaign, sizeSelect.value);
@@ -551,7 +642,10 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
         });
         sizeSelect.addEventListener('change', loadActiveAd);
         replay.addEventListener('click', function() {
-          frame.src = frame.src;
+          frame.src = adSrc(findCampaign(campaignSelect.value), sizeSelect.value);
+        });
+        Array.prototype.forEach.call(document.querySelectorAll('[data-reload-latest], #reload-latest'), function(button) {
+          button.addEventListener('click', reloadLatest);
         });
         Array.prototype.forEach.call(document.querySelectorAll('[data-zoom-mode]'), function(button) {
           button.addEventListener('click', function() {
@@ -567,6 +661,7 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
           });
         });
         window.addEventListener('resize', fitAdFrame);
+        window.addEventListener('focus', checkForNewerPackage);
 
         function formatExportAgo(iso) {
           if (!iso) return '';
@@ -598,6 +693,8 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
 
         refreshExportAgo();
         window.setInterval(refreshExportAgo, 30000);
+        checkForNewerPackage();
+        window.setInterval(checkForNewerPackage, 60000);
         hydrate();
       })();
     </script>

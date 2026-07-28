@@ -41,6 +41,7 @@
 ### Changed
 
 - **Statics preview export stamp** — header + kicker show `outputs/latest.json` export time in Europe/Dublin with a live “· N mins ago” relative label (was easy to miss in sidebar meta only / looked like UTC).
+- **Statics preview cache bust** — ad iframe + ZIP URLs carry `?v=<generatedAt>`; shell polls `latest.json` (`cache: no-store`) and shows a banner when a newer package is on the server; **Reload latest** forces a fresh shell load so clients don’t need a manual hard refresh.
 - **Keepy Uppy Welcome layout = Hiker Welcome** — copied object positioning / boxes / classRules / variantRules / manualCss from Hiker across the full size suite; Keepy feed copy, background JPEGs, campaign id, and motion clips/timing kept.
 - **Hiker / Keepy Uppy Welcome sublines** — centred under each offer slot (`left: 0`, slot width, `textAlign`/`justifyContent: center`) across all sizes and offer counts. Top Discount and SSE DCO unchanged.
 - **offers-0 CTA / roundel colours** — CTA text navy on green fill for both rectangle and circular shapes; when the roundel is included, frame is green with navy copy/value (SSE DCO `offers-0|*` variantRules).

@@ -21,7 +21,13 @@ test('renders a campaign/size shell with download link', () => {
   assert.match(html, /Hiker Welcome Credit/);
   assert.match(html, /id="campaign"/);
   assert.match(html, /id="size"/);
-  assert.match(html, /downloads\/SSE_Statics_20260728-080000\.zip/);
+  assert.match(html, /downloads\/SSE_Statics_20260728-080000\.zip\?v=/);
+  assert.match(html, /\.html\?v=' \+ cacheBust/);
+  assert.match(html, /id="reload-latest"/);
+  assert.match(html, /id="stale-banner"/);
+  assert.match(html, /checkForNewerPackage/);
+  assert.match(html, /cache: 'no-store'/);
+  assert.match(html, /Cache-Control" content="no-cache/);
   assert.match(html, /campaigns\/' \+ campaign\.id \+ '\/' \+ campaign\.exportSlug/);
   assert.match(html, /href="\.\.\/"/);
   assert.match(html, /data-zoom-mode="1"/);

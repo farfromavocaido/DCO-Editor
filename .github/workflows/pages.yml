@@ -35,6 +35,10 @@ jobs:
 
       - name: Export client preview site
         run: npm run export:preview-site
+        env:
+          # Fail the Pages build if outputs/ was wiped (e.g. by a test) instead of
+          # silently publishing the empty /statics/ placeholder.
+          STRICT_STATICS_EXPORT: '1'
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

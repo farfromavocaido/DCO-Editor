@@ -22,6 +22,7 @@
 
 ### Fixed
 
+- Pages `/statics/` stayed empty after green builds: the export-preview API test wiped `outputs/` before `export:preview-site`; the test now restores the prior package, and CI sets `STRICT_STATICS_EXPORT=1` so a missing package fails the deploy.
 - Offer plus Y parity: `layoutOffers` clears offer-slot motion for ink measure (editor scrub matches export rest); `300x600` offers-3 plus centres in the top→bottom gap (no digit-centred horizontal fallback); triangular detection allows slight bottom-slot slack; `glyphInk` unscales Range lines before applying canvas metrics so editor stage zoom no longer drifts plus Y vs HTML.
 - Editor play/scrub now applies keyframe CSS timing functions (`ease-out`, `cubic-bezier(...)`, etc.) in `frameAtPercent`, matching export `animation-timing-function`.
 - Dev server allows HMR when the editor is opened via `127.0.0.1` (`allowedDevOrigins` in `next.config.ts`).

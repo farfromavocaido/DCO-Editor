@@ -1,6 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 
 import { GET as feedGet } from '@/app/api/feed-schema/route';
@@ -300,39 +301,59 @@ test('POST /api/creative/base-package can return a canonical agency zip', async 
 });
 
 test('POST /api/creative/export-preview writes tracked outputs for non-DCO campaigns', async () => {
-  const campaigns = listStaticPreviewCampaigns().map((entry) => ({ id: entry.id }));
-  const response = await exportPreviewPost(new Request('http://localhost/api/creative/export-preview', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ campaigns }),
-  }));
+  // Snapshot committed package first — this test overwrites outputs/, and CI runs
+  // export:preview-site afterward. Wiping to an empty stub left Pages /statics/ empty.
+  const snapshotDir = await fs.mkdtemp(path.join(os.tmpdir(), 'outputs-snap-'));
+  const snapshotNames = ['campaigns', 'downloads', 'latest.json'] as const;
+  for (const name of snapshotNames) {
+    const src = path.resolve(outputsRoot, name);
+    try {
+      await fs.cp(src, path.join(snapshotDir, name), { recursive: true });
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+    }
+  }
 
-  assert.equal(response.status, 200);
-  const payload = await response.json();
-  assert.equal(payload.ok, true);
-  assert.ok(payload.latest?.zip?.startsWith('downloads/SSE_Statics_'));
-  assert.equal(payload.latest.campaigns.length, 3);
+  try {
+    const campaigns = listStaticPreviewCampaigns().map((entry) => ({ id: entry.id }));
+    const response = await exportPreviewPost(new Request('http://localhost/api/creative/export-preview', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ campaigns }),
+    }));
 
-  const htmlPath = path.resolve(
-    outputsRoot,
-    'campaigns/sse-hiker-welcome/SSE_Hiker_Welcome_300x250.html',
-  );
-  const html = await fs.readFile(htmlPath, 'utf8');
-  assert.match(html, new RegExp(DEFAULT_STATIC_CLICK_TAG.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-  assert.match(html, /window\.clickTag = clickTag/);
+    assert.equal(response.status, 200);
+    const payload = await response.json();
+    assert.equal(payload.ok, true);
+    assert.ok(payload.latest?.zip?.startsWith('downloads/SSE_Statics_'));
+    assert.equal(payload.latest.campaigns.length, 3);
 
-  const zipPath = path.resolve(outputsRoot, payload.latest.zip);
-  const zip = await fs.readFile(zipPath);
-  assert.equal(zip.subarray(0, 4).toString('binary'), 'PK\u0003\u0004');
+    const htmlPath = path.resolve(
+      outputsRoot,
+      'campaigns/sse-hiker-welcome/SSE_Hiker_Welcome_300x250.html',
+    );
+    const html = await fs.readFile(htmlPath, 'utf8');
+    assert.match(html, new RegExp(DEFAULT_STATIC_CLICK_TAG.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.match(html, /window\.clickTag = clickTag/);
 
-  // Restore stub so test runs do not leave a dirty publish tree.
-  await fs.rm(path.resolve(outputsRoot, 'campaigns'), { recursive: true, force: true });
-  await fs.rm(path.resolve(outputsRoot, 'downloads'), { recursive: true, force: true });
-  await fs.writeFile(
-    path.resolve(outputsRoot, 'latest.json'),
-    `${JSON.stringify({ generatedAt: null, zip: null, campaigns: [] }, null, 2)}\n`,
-  );
+    const zipPath = path.resolve(outputsRoot, payload.latest.zip);
+    const zip = await fs.readFile(zipPath);
+    assert.equal(zip.subarray(0, 4).toString('binary'), 'PK\u0003\u0004');
+  } finally {
+    await fs.rm(path.resolve(outputsRoot, 'campaigns'), { recursive: true, force: true });
+    await fs.rm(path.resolve(outputsRoot, 'downloads'), { recursive: true, force: true });
+    for (const name of snapshotNames) {
+      const src = path.join(snapshotDir, name);
+      try {
+        await fs.cp(src, path.resolve(outputsRoot, name), { recursive: true });
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+      }
+    }
+    await fs.rm(snapshotDir, { recursive: true, force: true });
+  }
 });
+
 
 test('POST /api/creative/export-preview rejects the DCO campaign', async () => {
   const response = await exportPreviewPost(new Request('http://localhost/api/creative/export-preview', {

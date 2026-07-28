@@ -39,14 +39,14 @@
     "profiles": {
       "frames-3": {
         "start": 0,
-        "act1_begin": 11,
+        "act1_begin": 8,
         "act1_in": 12.5,
         "offer2_in": 13.6,
         "offer3_in": 14.7,
         "plus1_in": 14.9,
         "plus2_in": 14.9,
         "terms_in": 19.1,
-        "act2_in": 43,
+        "act2_in": 43.3,
         "act1_out": 44,
         "offers_exit": 66,
         "wave2_in": 61,

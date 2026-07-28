@@ -75,6 +75,7 @@ import {
   resetCreativeHeadlineOfferLayout,
   updateCreativeLayerMetadata,
   updateCreativeLayerBase,
+  updateCreativeLayerGradient,
   updateCreativeLayerClip,
   updateCreativeLayerFit,
   updateCreativeClassFit,
@@ -399,6 +400,10 @@ export const useEditorStore = create<any>((set, get) => ({
   applyHistoryChange: (change, value) => {
     if (change.kind === 'creativeBase') {
       get().applyCreativeLayerBaseValue(change.size, change.layerId, change.field, value);
+      return;
+    }
+    if (change.kind === 'creativeGradient') {
+      get().applyCreativeLayerGradientValue(change.size, change.layerId, change.field, value);
       return;
     }
     if (change.kind === 'creativeTarget') {
@@ -769,6 +774,27 @@ export const useEditorStore = create<any>((set, get) => ({
     get().applyCreativeLayerBaseValue(size, layerId, field, nextValue);
     if (record) {
       get().pushHistory([{ kind: 'creativeBase', size, layerId, field, before: previous, after: nextValue }]);
+    }
+  },
+
+  applyCreativeLayerGradientValue: (size, layerId, field, value) => {
+    const state = get();
+    if (!state.creativeDocument) return;
+    const next = updateCreativeLayerGradient(state.creativeDocument, size, layerId, field, value);
+    set({ creativeDocument: next, creativeDirty: true });
+    get().setStatus('Unsaved creative changes', 'warn');
+  },
+
+  updateCreativeLayerGradientValue: (layerId, field, value, { record = true, before = undefined } = {}) => {
+    const state = get();
+    const size = state.size;
+    const layer = findCreativeLayer(state.creativeDocument, size, layerId);
+    if (!layer) return;
+    const nextValue = value === '' ? '' : typeof value === 'boolean' ? value : Number.isFinite(Number(value)) ? Number(value) : value;
+    const previous = before ?? layer.gradient?.[field];
+    get().applyCreativeLayerGradientValue(size, layerId, field, nextValue);
+    if (record) {
+      get().pushHistory([{ kind: 'creativeGradient', size, layerId, field, before: previous, after: nextValue }]);
     }
   },
 

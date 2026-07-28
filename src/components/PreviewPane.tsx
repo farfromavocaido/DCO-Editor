@@ -29,6 +29,7 @@ import {
   isHeadlineLayer,
   targetIdForLayerChild,
 } from '@/lib/creative-model';
+import { gradientBackgroundImage, isGradientLayer } from '@/lib/gradient-layer';
 import {
   deriveSelectedTarget,
   filterManipulationTargetIds,
@@ -70,8 +71,14 @@ const renderLayerRule = (layer: Record<string, unknown>) => {
       const cssKey = key === 'fontSize' ? 'font-size' : cssName(key);
       return `      ${cssKey}: ${cssValue(key, value)};`;
     });
+  if (isGradientLayer(layer)) {
+    const backgroundImage = gradientBackgroundImage(layer.gradient || {});
+    if (backgroundImage) decl.push(`      background-image: ${backgroundImage};`);
+  }
   decl.push('      position: absolute;');
-  decl.push('      visibility: inherit;');
+  // Gradient scrims author visibility on base (hidden) + offers-0 override;
+  // other layers still inherit the stage visibility cascade.
+  if (!isGradientLayer(layer)) decl.push('      visibility: inherit;');
   return `    .${cssClass} {\n${decl.join('\n')}\n    }`;
 };
 
@@ -762,7 +769,7 @@ export function PreviewPane() {
     if (layer.id === 'terms-solo') return null;
     if (layer.id.startsWith('offer-slot-')) return renderOfferSlot(layer);
 
-    if (layer.kind === 'shape') {
+    if (layer.kind === 'shape' || isGradientLayer(layer)) {
       return (
         <div
           key={layer.id}

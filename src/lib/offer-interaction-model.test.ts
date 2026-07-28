@@ -5,6 +5,7 @@ import {
   activeOfferMemberIds,
   offerInteractionTree,
   selectionPathForTarget,
+  visibilityForLayer,
 } from './offer-interaction-model';
 import {
   OFFERS_BLOCK_ID,
@@ -38,6 +39,35 @@ const mpuTripleDoc = {
     },
   },
 };
+
+test('visibilityForLayer honours base visibility when no active rule overrides it', () => {
+  const doc = {
+    version: 1,
+    sizes: {
+      '300x250': {
+        layers: [
+          {
+            id: 'headline-scrim',
+            kind: 'gradient',
+            base: { cssClass: 'headline-scrim', visibility: 'hidden' },
+            clips: [],
+          },
+        ],
+        variantRules: [
+          {
+            id: 'offers-0|headline-scrim|visibility',
+            scope: 'offers-0',
+            layerId: 'headline-scrim',
+            cssClass: 'headline-scrim',
+            props: { visibility: 'visible' },
+          },
+        ],
+      },
+    },
+  };
+  assert.equal(visibilityForLayer(doc, '300x250', 'headline-scrim', ['offers-1']), 'hidden');
+  assert.equal(visibilityForLayer(doc, '300x250', 'headline-scrim', ['offers-0']), 'visible');
+});
 
 test('activeOfferMemberIds excludes hidden plus signs for MPU triple', () => {
   assert.deepEqual(activeOfferMemberIds(mpuTripleDoc, '300x250', ['offers-3']), [

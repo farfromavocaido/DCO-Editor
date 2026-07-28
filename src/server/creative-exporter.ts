@@ -16,6 +16,7 @@ import {
   isBackgroundLayer,
   isHeadlineLayer,
 } from '@/lib/creative-model';
+import { gradientBackgroundImage, isGradientLayer } from '@/lib/gradient-layer';
 import {
   CREATIVE_AD_SIZES,
   backgroundFieldsFromRow,
@@ -533,6 +534,9 @@ const staticRuleForLayer = (
   beats: Record<string, number>,
   options: { profile?: string; selectorPrefix?: string } = {},
 ) => {
+  // Gradients are static (no clips). Scoped re-emits under `.offers-0` would
+  // restate base `visibility: hidden` and override the offers-0 show rule.
+  if (isGradientLayer(layer) && options.selectorPrefix) return '';
   const profile = options.profile || 'frames-3';
   const clips = layerClipsForProfile(layer, profile);
   const firstKeyframe = clips.length ? compileAnimationClips(clips, beats)[0] : null;
@@ -563,10 +567,15 @@ ${declarations.join('\n')}
     if (['left', 'top', 'bottom', 'width', 'height', 'fontSize', 'cssClass'].includes(key)) continue;
     declarations.push(cssDecl(camelToKebab(key), value));
   }
+  if (isGradientLayer(layer)) {
+    const backgroundImage = gradientBackgroundImage(layer.gradient || {});
+    if (backgroundImage) declarations.push(cssDecl('background-image', backgroundImage));
+  }
   if (initialTransform) declarations.push(`      transform: ${initialTransform};`);
   if (firstKeyframe?.opacity !== undefined) declarations.push(`      opacity: ${firstKeyframe.opacity};`);
   declarations.push('      position: absolute;');
-  declarations.push('      visibility: inherit;');
+  // Gradient scrims author visibility on base; other layers inherit stage visibility.
+  if (!isGradientLayer(layer)) declarations.push('      visibility: inherit;');
   return `    .${cssClass} {
 ${declarations.filter(Boolean).join('\n')}
     }`;
@@ -711,6 +720,9 @@ const renderOutlinedLayer = async (
   if (layer.kind === 'image') {
     return `          <img alt="" draggable="false" class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}" src="${escapeAttr(assetSrc(layer.asset, options))}"${positionAttr}>`;
   }
+  if (isGradientLayer(layer)) {
+    return `          <div class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}"${positionAttr}></div>`;
+  }
   const text = textForLayerFromRow(String(layer.id), row);
   const svg = await outlinedSvgMarkup({
     document,
@@ -740,6 +752,9 @@ const renderLayer = (layer: Record<string, unknown>, options: RenderOptions = {}
   if (layer.id.startsWith('offer-slot-')) return renderOfferSlot(layer);
   if (layer.kind === 'image') {
     return `          <img alt="" draggable="false" class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}" src="${escapeAttr(assetSrc(layer.asset, options))}">`;
+  }
+  if (isGradientLayer(layer)) {
+    return `          <div class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}" data-layer-id="${escapeAttr(layer.id)}"></div>`;
   }
   const tag = layer.id === 'cta' ? 'div' : 'p';
   const className = [

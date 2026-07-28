@@ -413,6 +413,26 @@ export const updateCreativeLayerBase = (
   return next;
 };
 
+export const updateCreativeLayerGradient = (
+  document: Record<string, unknown>,
+  size: string,
+  layerId: string,
+  field: string,
+  value: unknown,
+) => {
+  const next = deepClone(document);
+  const layer = findCreativeLayer(next, size, layerId);
+  if (!layer) throw new Error(`Unknown layer: ${layerId}`);
+  if (String(layer.kind || '') !== 'gradient') {
+    throw new Error(`Layer ${layerId} is not a gradient layer`);
+  }
+  layer.gradient = {
+    ...(layer.gradient || {}),
+    [field]: value,
+  };
+  return next;
+};
+
 export const updateCreativeLayerFit = (
   document: Record<string, unknown>,
   size: string,

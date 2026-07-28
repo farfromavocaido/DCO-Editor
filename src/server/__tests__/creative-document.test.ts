@@ -47,6 +47,24 @@ test('loads the checked-in SSE DCO creative document', async () => {
   assert.ok(document.presets.some((preset) => preset.id === 'fade'));
 });
 
+test('seeds an offers-0 headline scrim gradient on every size', async () => {
+  const document = await readCreativeDocument();
+  for (const [size, sizeCreative] of Object.entries(document.sizes)) {
+    const scrim = sizeCreative.layers.find((layer) => layer.id === 'headline-scrim');
+    assert.ok(scrim, `missing scrim on ${size}`);
+    assert.equal(scrim.kind, 'gradient');
+    assert.equal(scrim.base.visibility, 'hidden');
+    assert.ok(sizeCreative.variantRules.some((rule) => rule.id === 'offers-0|headline-scrim|visibility'));
+    if (['300x250', '160x600', '300x600'].includes(size)) {
+      assert.equal(scrim.gradient.direction, 'to-bottom');
+      assert.equal(scrim.gradient.endPct, 25);
+    } else {
+      assert.equal(scrim.gradient.direction, 'to-right');
+      assert.equal(scrim.gradient.endPct, 30);
+    }
+  }
+});
+
 test('preserves 728x90 banner assets and partial bluewave treatment', async () => {
   const document = await readCreativeDocument();
   const size = document.sizes['728x90'];

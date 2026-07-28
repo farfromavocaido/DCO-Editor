@@ -34,14 +34,19 @@ const resolveOutlineFillColor = ({
   layer?: Record<string, unknown> | null;
 }) => {
   if (values.color) return String(values.color);
-  const haystack = `${targetId} ${cssClass || ''} ${layer?.id || ''} ${layer?.base?.cssClass || ''}`;
+  // Layer base color (e.g. 320×50 headline-act4 white on blue wave) must win over
+  // the navy headline heuristic — findCreativeTarget often omits base.color from values.
+  const baseColor = layer?.base && typeof layer.base === 'object'
+    ? (layer.base as Record<string, unknown>).color
+    : undefined;
+  if (baseColor) return String(baseColor);
+  const haystack = `${targetId} ${cssClass || ''} ${layer?.id || ''} ${(layer?.base as Record<string, unknown> | undefined)?.cssClass || ''}`;
   if (
     (layer && isHeadlineLayer(layer))
     || /offer-value|offer-subline|terms|unit-rate|sse-headline|sse-bottom|sse-text/.test(haystack)
   ) {
     return BRAND_TEXT_FILL;
   }
-  if (layer?.base?.color) return String(layer.base.color);
   return BRAND_TEXT_FILL;
 };
 

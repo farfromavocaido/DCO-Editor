@@ -136,6 +136,31 @@ test('exports offers-0 runtime and scoped wave timing overrides', async () => {
   );
 });
 
+test('exports offers-0 headline scrim gradient above bg and below waves', async () => {
+  const document = await readCreativeDocument();
+  const htmlPortrait = await renderStudioReadyHtml(document, '300x250');
+  const htmlLandscape = await renderStudioReadyHtml(document, '320x50');
+
+  assert.match(htmlPortrait, /id="headline-scrim"/);
+  assert.match(
+    htmlPortrait,
+    /linear-gradient\(to bottom, rgba\(0, 0, 0, 0\.15\) 0%, rgba\(0, 0, 0, 0\.075\) 12\.5%, rgba\(0, 0, 0, 0\) 25%\)/,
+  );
+  assert.match(htmlPortrait, /\.offers-0 \.headline-scrim\s*\{[^}]*visibility:\s*visible/);
+  assert.match(htmlPortrait, /\.headline-scrim\s*\{[^}]*visibility:\s*hidden/);
+
+  assert.match(
+    htmlLandscape,
+    /linear-gradient\(to right, rgba\(0, 0, 0, 0\.15\) 0%, rgba\(0, 0, 0, 0\.075\) 15%, rgba\(0, 0, 0, 0\) 30%\)/,
+  );
+
+  const size = document.sizes['300x250'];
+  const byId = Object.fromEntries(size.layers.map((layer) => [layer.id, layer]));
+  assert.equal(byId['headline-scrim'].kind, 'gradient');
+  assert.ok(byId['headline-scrim'].zIndex > byId['bg-image'].zIndex);
+  assert.ok(byId.bluewave.zIndex > byId['headline-scrim'].zIndex);
+});
+
 test('preview ad html skips empty Enabler bootstrap so iframe postMessage text persists', async () => {
   const document = await readCreativeDocument();
   const html = await renderStudioReadyHtml(document, '160x600', { assetBasePath: '../' });

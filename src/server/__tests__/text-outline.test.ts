@@ -48,6 +48,17 @@ test('outline export uses brand navy for headlines/offers and keeps CTA white', 
   );
 });
 
+test('outline export honors 320x50 endframe headline white override', async () => {
+  const document = await readCreativeDocumentForCampaign('sse-keepyuppy-welcome');
+  const html = await renderStudioReadyHtml(document, '320x50', { renderMode: 'outline' });
+  assert.match(
+    html,
+    /id="headline-act4"[^>]*>[\s\S]*?<g fill="rgb\(255, 255, 255\)"/,
+    'act4 must bake white (layer.base.color), not brand navy',
+  );
+  assert.match(html, /id="headline-act1"[^>]*>[\s\S]*?<g fill="rgb\(0, 41, 117\)"/);
+});
+
 test('outlineFittedText respects authored lineHeight', async () => {
   const spaced = await outlineFittedText({
     text: 'A different kind of energy',

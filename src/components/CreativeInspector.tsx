@@ -111,7 +111,7 @@ function InspectorSection({ id, title, open, onToggle, children }) {
 }
 
 export function CreativeInspector() {
-  const [openSections, setOpenSections] = useState(() => new Set(['layout', 'headline-offers', 'type', 'style', 'animation']));
+  const [openSections, setOpenSections] = useState(() => new Set(['layout', 'headline-offers', 'gradient', 'type', 'style', 'animation']));
   const [layerCode, setLayerCode] = useState('');
   const [codeError, setCodeError] = useState('');
   const document = useEditorStore((s) => s.creativeDocument);
@@ -141,6 +141,7 @@ export function CreativeInspector() {
   const updateSelectedFeedField = useEditorStore((s) => s.updateSelectedFeedField);
   const updateTargetValue = useEditorStore((s) => s.updateCreativeTargetValue);
   const updateLayerMetadata = useEditorStore((s) => s.updateCreativeLayerMetadataValue);
+  const updateLayerGradient = useEditorStore((s) => s.updateCreativeLayerGradientValue);
   const promoteTargetToSharedStyle = useEditorStore((s) => s.promoteCreativeTargetToSharedStyle);
   const clearTargetOverrides = useEditorStore((s) => s.clearCreativeTargetOverrides);
   const updateLayerFit = useEditorStore((s) => s.updateCreativeLayerFitValue);
@@ -266,6 +267,7 @@ export function CreativeInspector() {
   }
 
   const isGroupedSelection = selectedTarget.kind === 'group' || selectedTarget.kind === 'multi';
+  const isGradientSelection = selectedLayer.kind === 'gradient' && !isGroupedSelection;
   const isHeadlineSelection = isHeadlineLayer(selectedLayer) && !isGroupedSelection;
   const layoutNote = isolationPath?.length === 1 && isolationPath[0] === OFFERS_BLOCK_ID
     ? 'Editing inside the offer block. Select a slot or plus sign; double-click a slot to edit value and subline placement.'
@@ -376,6 +378,48 @@ export function CreativeInspector() {
             onToggle={() => toggleSection('headline-offers')}
           >
             <HeadlineOfferLayoutSection document={document} size={size} offerCount={offerCount} />
+          </InspectorSection>
+        ) : null}
+
+        {isGradientSelection ? (
+          <InspectorSection
+            id="gradient"
+            title="Gradient"
+            open={openSections.has('gradient')}
+            onToggle={() => toggleSection('gradient')}
+          >
+            <p className="inspector-note">
+              Static dark scrim for offers-0 white headlines. Mid opacity is always half of start opacity.
+              Visible only when Offers is 0.
+            </p>
+            <div className="inspector-grid">
+              <SelectControl
+                label="direction"
+                value={selectedLayer.gradient?.direction || 'to-bottom'}
+                onChange={(value) => updateLayerGradient(selectedLayer.id, 'direction', value)}
+              >
+                <option value="to-bottom">to bottom</option>
+                <option value="to-right">to right</option>
+              </SelectControl>
+              <FieldControl
+                label="end %"
+                type="number"
+                value={selectedLayer.gradient?.endPct ?? ''}
+                onChange={(value) => updateLayerGradient(selectedLayer.id, 'endPct', value)}
+              />
+              <FieldControl
+                label="start opacity"
+                type="number"
+                value={selectedLayer.gradient?.startOpacity ?? ''}
+                onChange={(value) => updateLayerGradient(selectedLayer.id, 'startOpacity', value)}
+              />
+              <FieldControl
+                label="midpoint"
+                type="number"
+                value={selectedLayer.gradient?.midpoint ?? ''}
+                onChange={(value) => updateLayerGradient(selectedLayer.id, 'midpoint', value)}
+              />
+            </div>
           </InspectorSection>
         ) : null}
 
@@ -546,6 +590,7 @@ export function CreativeInspector() {
           </InspectorSection>
         ) : null}
 
+        {!isGradientSelection ? (
         <InspectorSection
           id="animation"
           title="Motion"
@@ -653,6 +698,7 @@ export function CreativeInspector() {
             </>
           ) : null}
         </InspectorSection>
+        ) : null}
 
         <InspectorSection
           id="variants"

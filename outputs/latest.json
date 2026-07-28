@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-07-28T11:28:06.519Z",
-  "zip": "downloads/SSE_Statics_20260728-122806.zip",
+  "generatedAt": "2026-07-28T12:07:10.048Z",
+  "zip": "downloads/SSE_Statics_20260728-130710.zip",
   "campaigns": [
     {
-      "id": "sse-keepyuppy-welcome",
-      "name": "Keepy Uppy Welcome Credit",
-      "exportSlug": "SSE_KeepyUppy_Welcome",
+      "id": "sse-hiker-welcome",
+      "name": "Hiker Welcome Credit",
+      "exportSlug": "SSE_Hiker_Welcome",
       "sizes": [
         "320x50",
         "728x90",
@@ -16,9 +16,9 @@
       ]
     },
     {
-      "id": "sse-hiker-welcome",
-      "name": "Hiker Welcome Credit",
-      "exportSlug": "SSE_Hiker_Welcome",
+      "id": "sse-keepyuppy-welcome",
+      "name": "Keepy Uppy Welcome Credit",
+      "exportSlug": "SSE_KeepyUppy_Welcome",
       "sizes": [
         "320x50",
         "728x90",

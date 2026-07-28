@@ -4,6 +4,7 @@
 
 ### Added
 
+- **offers-0 headline scrim** — editor-controlled dark CSS gradient (`kind: "gradient"`, layer `headline-scrim`) above the background and below the blue wave. Visible only under Offers = 0. Knobs: direction, end %, start opacity (0–1), midpoint along the fade (0–1; mid opacity is half of start). Defaults: top→down 25% on 300x250 / 160x600 / 300x600; left→right 30% on 320x50 / 728x90 / 970x250; start opacity 0.15. Seeded into all campaign creative JSONs; baked into preview and HTML export.
 - **Statics preview zoom** — Fit / 1x / 2x plus −/+ stepping (up to **750%**) on the GitHub Pages `/statics/` viewer; zoom persists in `sessionStorage`.
 - **Manual line breaks in multiline feed copy** — headlines, T&Cs, and unit-rate accept authored `\n` in the editor and GitHub client preview (heading controls are textareas). Hard breaks only apply when fit wrap is allowed (`pre-line` / outline wrap); each hard-break line uses the same line-box height as soft wrap. Outline `wrapLines` + presentation snapshots preserve newlines so SVG outline export matches the live preview.
 - **Statics preview (GitHub Pages `/statics/`)** — password-gated host for the three non-DCO campaigns’ Export-for-Static HTML; sidebar is campaign + size only; download link reads `outputs/latest.json`.
@@ -23,6 +24,8 @@
 
 ### Fixed
 
+- 320×50 unit-rate line: box now matches terms-prices (`top: 42`, `height: 8`, bottom flush with the 50px canvas) and drops `fit.align: "bottom"` — the old `top: 40`/`height: 14` box sat 4px past the stage edge, and offer-style `translateY` after shrink pushed ink further into the clip.
+- Outline bake now honors `layer.base.color` before the navy headline heuristic, so 320×50 endframe `headline-act4` fills white on the blue wave (was invisible navy).
 - Outline offer values no longer force `overflow: hidden` on OfferSlot hosts — that clipped glyph ink when the SVG line-box (`fontSize × lineHeight`) exceeded the authored yellow-box height (e.g. Keepy `728x90` offers-2: 55px SVG in a 48px host). Hosts stay `overflow: visible` like font-mode; half-leading still keeps ink out of sibling sublines.
 - Pages `/statics/` stayed empty after green builds: the export-preview API test wiped `outputs/` before `export:preview-site`; the test now restores the prior package, and CI sets `STRICT_STATICS_EXPORT=1` so a missing package fails the deploy.
 - Offer plus Y parity: `layoutOffers` clears offer-slot motion for ink measure (editor scrub matches export rest); `300x600` offers-3 plus centres in the top→bottom gap (no digit-centred horizontal fallback); triangular detection allows slight bottom-slot slack; `glyphInk` unscales Range lines before applying canvas metrics so editor stage zoom no longer drifts plus Y vs HTML.

@@ -107,7 +107,7 @@ const layerRule = (layer, classRuleProps = {}) => {
   const cssClass = isHeadlineLayer(layer)
     ? HEADLINE_CSS_CLASS
     : (layer?.base?.cssClass || layer?.id);
-  if (!cssClass || layer.kind === 'image' || layer.kind === 'shape' || layer.kind === 'group') return null;
+  if (!cssClass || layer.kind === 'image' || layer.kind === 'shape' || layer.kind === 'group' || layer.kind === 'gradient') return null;
   if (String(layer.id || '') === 'cta') return null;
   if (isHeadlineLayer(layer)) return headlineRule(layer, classRuleProps);
   const baseFontSize = Number(layer?.base?.fontSize);

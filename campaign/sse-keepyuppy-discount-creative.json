@@ -1043,9 +1043,9 @@
             "textAlign": "left",
             "cssClass": "unit-rate-prices",
             "left": 6,
-            "top": 40,
+            "top": 42,
             "width": 132,
-            "height": 14,
+            "height": 8,
             "fontSize": 6
           },
           "binding": {
@@ -1068,8 +1068,7 @@
           "fit": {
             "mode": "shrink",
             "maxLines": 1,
-            "minFontSize": 5,
-            "align": "bottom"
+            "minFontSize": 5
           }
         },
         {

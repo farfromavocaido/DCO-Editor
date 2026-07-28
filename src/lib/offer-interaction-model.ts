@@ -29,7 +29,10 @@ export const visibilityForLayer = (
     && rule.props?.visibility !== undefined
   ));
   const last = visibilityRules.at(-1);
-  return last?.props?.visibility === 'hidden' ? 'hidden' : 'visible';
+  if (last) return last.props.visibility === 'hidden' ? 'hidden' : 'visible';
+  // Honour authored base visibility so layers like the offers-0 scrim stay
+  // pruned from non-matching static packages without per-scope hide rules.
+  return layer.base?.visibility === 'hidden' ? 'hidden' : 'visible';
 };
 
 export const activeOfferMemberIds = (

@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { ensureBackgroundLayers } from '@/lib/creative-model';
+import { isGradientLayer, validateGradientConfig } from '@/lib/gradient-layer';
 import { isRegisteredCampaignId } from './campaign-registry';
 import { creativeDocumentPath, creativeDocumentPathFor } from './paths';
 
@@ -27,6 +28,7 @@ export const validateCreativeDocument = (document: CreativeDocument) => {
     for (const layer of sizeCreative.layers) {
       if (!layer.id || !layer.kind || !layer.base) throw new Error(`Size ${size} has an invalid layer`);
       if (!Array.isArray(layer.clips)) throw new Error(`Layer ${layer.id} clips must be an array`);
+      if (isGradientLayer(layer)) validateGradientConfig(layer.gradient, String(layer.id));
     }
   }
   return document;

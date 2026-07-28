@@ -262,8 +262,15 @@ test('non-DCO outline export ignores snapshotted plus/slot XY (manual pluses)', 
   assert.doesNotMatch(plusTag, /style="/);
   const offerTag = html.match(/id="offer1"[^>]*>/)?.[0] || '';
   assert.doesNotMatch(offerTag, /style="/);
-  // Authored offers-2 plus CSS still present for designers to edit.
-  assert.match(html, /\.offers-2\s+\.plus-1\s*\{[^}]*left:\s*151px/);
+  // Authored offers-2 plus CSS still present (left follows creative JSON, not snapshot).
+  const authoredLeft = document.sizes['300x250'].variantRules
+    .find((rule: { id?: string }) => rule.id === 'offers-2|plus-1')
+    ?.props?.left;
+  assert.equal(typeof authoredLeft, 'number');
+  assert.match(
+    html,
+    new RegExp(`\\.offers-2\\s+\\.plus-1\\s*\\{[^}]*left:\\s*${authoredLeft}px`),
+  );
 });
 
 test('outline HTML export ZIP includes background assets beside the HTML', async () => {

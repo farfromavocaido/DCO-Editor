@@ -1268,8 +1268,8 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 0,
-            "top": 25,
+            "left": 1,
+            "top": 26,
             "width": 74,
             "height": 15,
             "fontSize": 7,

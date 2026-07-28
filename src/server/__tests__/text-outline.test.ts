@@ -32,6 +32,9 @@ test('outline export uses brand navy for headlines/offers and keeps CTA white', 
   assert.match(html, /id="cta"[^>]*>[\s\S]*?<g fill="rgb\(255, 255, 255\)"/);
   assert.match(html, /\.outlined-text svg \{[\s\S]*?height:\s*auto/);
   assert.match(html, /\.cta\.outlined-text \{[\s\S]*?padding:\s*0/);
+  // Offer hosts must not hard-clip: SVG line-box can exceed authored height
+  // (e.g. 65×0.85=55 inside a 48px box) and font-mode lets that ink paint.
+  assert.doesNotMatch(html, /\[data-gwd-group="OfferSlot"\] \.outlined-text \{[\s\S]*?overflow:\s*hidden/);
   const ctaSvg = html.match(/id="cta"[^>]*>[\s\S]*?<svg[^>]*width="([\d.]+)"[^>]*height="([\d.]+)"/);
   assert.ok(ctaSvg);
   assert.equal(Number(ctaSvg[1]), 130, 'CTA SVG width matches authored box (no padding shrink)');

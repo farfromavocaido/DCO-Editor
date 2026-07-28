@@ -177,7 +177,8 @@ Pipeline:
    `y = ascender + (lineBox − content) / 2 + i × lineBox`
    where `content = ascender − descender` at the fitted size.
 5. Emit a content-tight SVG (`height = lines × lineBox`). Bottom-align uses an
-   SVG group `translate(0, alignOffsetY)`. Offer `.outlined-text` clips overflow.
+   SVG group `translate(0, alignOffsetY)`. Offer hosts stay `overflow: visible`
+   (same as font-mode) so tight `lineHeight: 0.85` boxes do not clip glyph ink.
 6. CTA: zero host padding; SVG at intrinsic size (no `width: 100%` scale-down).
 7. Snapshot plus/slot `left`/`top` write as inline styles over class CSS.
 

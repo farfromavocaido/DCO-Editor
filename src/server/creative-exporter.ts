@@ -911,11 +911,6 @@ const outlinedTextCss = `
     .cta.outlined-text {
       padding: 0;
     }
-    /* Offer value/subline boxes are tight (lineHeight 0.85). Clip like CSS text
-       so residual ink cannot paint into the sibling subline. */
-    [data-gwd-group="OfferSlot"] .outlined-text {
-      overflow: hidden;
-    }
 `;
 
 const stateClasses = (row: Record<string, unknown>) => {

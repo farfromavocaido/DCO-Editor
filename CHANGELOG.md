@@ -23,6 +23,7 @@
 
 ### Fixed
 
+- Outline offer values no longer force `overflow: hidden` on OfferSlot hosts — that clipped glyph ink when the SVG line-box (`fontSize × lineHeight`) exceeded the authored yellow-box height (e.g. Keepy `728x90` offers-2: 55px SVG in a 48px host). Hosts stay `overflow: visible` like font-mode; half-leading still keeps ink out of sibling sublines.
 - Pages `/statics/` stayed empty after green builds: the export-preview API test wiped `outputs/` before `export:preview-site`; the test now restores the prior package, and CI sets `STRICT_STATICS_EXPORT=1` so a missing package fails the deploy.
 - Offer plus Y parity: `layoutOffers` clears offer-slot motion for ink measure (editor scrub matches export rest); `300x600` offers-3 plus centres in the top→bottom gap (no digit-centred horizontal fallback); triangular detection allows slight bottom-slot slack; `glyphInk` unscales Range lines before applying canvas metrics so editor stage zoom no longer drifts plus Y vs HTML.
 - Editor play/scrub now applies keyframe CSS timing functions (`ease-out`, `cubic-bezier(...)`, etc.) in `frameAtPercent`, matching export `animation-timing-function`.
@@ -37,7 +38,7 @@
 - Outline HTML runtime now adds `.motion-ready` (same animation gate as font exports), so the 15s CSS clock actually starts instead of staying paused forever.
 - Outline fill color follows font-mode CSS: headlines/offers/legal default to brand navy (`rgb(0, 41, 117)`) when no color is authored; CTA/roundel keep their white fills. Outlined SVGs use content-tight height + `height: auto` so flex hosts (CTA) vertically center the label.
 - Outline typography parity: bake authored unitless `lineHeight` (was hardcoded `1.05`); keep outlined SVG at intrinsic size (no `width:100%` shrink) and zero CTA padding so 15px CTA copy is not scaled to ~10.8px inside `padding: 0 18px`.
-- Outline path bake uses the CSS line-box model (ascender + half-leading), so tight offer values (`lineHeight: 0.85`) no longer hang into absolutely positioned sublines; offer `.outlined-text` clips overflow like font-mode text.
+- Outline path bake uses the CSS line-box model (ascender + half-leading), so tight offer values (`lineHeight: 0.85`) no longer hang into absolutely positioned sublines.
 - Hiker Welcome Credit, Keepy Uppy Welcome Credit, and Keepy Uppy Top Discount rebuilt as exact SSE DCO structural clones (clock, layout, motion, presets); only campaign identity, sample-row feed values, and packaged `assets/` backgrounds differ.
 - Keepy Uppy Welcome Credit now shares Hiker Welcome Credit layout/positioning (variantRules + layer bases); Keepy Uppy sample copy and packaged backgrounds unchanged; Top Discount left as-is.
 - MPU (`300x250`) offer enter mid-ground 48px / ~2.5–2.85%; headlines back to 4% enter (default ease-out); wave sweeps stay on CSS `ease-out`.

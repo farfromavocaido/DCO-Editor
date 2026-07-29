@@ -213,6 +213,28 @@ test('outlineFittedText content-box bake left-aligns and ink-nudges', async () =
   assert.match(outlined.svg, /transform="translate\(0 /);
 });
 
+test('outlineFittedText clamps content-box ink nudge inside the SVG', async () => {
+  // 320x50 short hosts captured inkTopInSvg ≈ 6–8px from fontBoundingBox vs
+  // opentype half-leading — unclamped that shoved value glyphs into sublines.
+  const outlined = await outlineFittedText({
+    text: '15%',
+    fontSize: 34,
+    width: 56,
+    height: 23,
+    lineHeight: 0.85,
+    lockMetrics: true,
+    scaleOfferSymbols: true,
+    contentWidth: 55,
+    contentHeight: 28.9,
+    inkTopInSvg: 8,
+  });
+  const translate = Number(outlined.svg.match(/translate\(0 ([-\d.]+)\)/)?.[1] || 0);
+  assert.ok(
+    translate < 3,
+    `content-box ink nudge must stay in-box on short hosts, got translateY=${translate}`,
+  );
+});
+
 test('outlineFittedText applies CSS half-leading for tight lineHeight', async () => {
   // Offer values use lineHeight 0.85 — without half-leading, Museo ascender (~63px
   // at 67px) sits below the 57px host and overlaps the subline at top:67.

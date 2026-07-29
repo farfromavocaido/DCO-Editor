@@ -449,8 +449,26 @@ export const outlineFittedText = async (options: OutlineFitOptions): Promise<Out
   const height = useContentBox
     ? contentHeight
     : Math.max(1, lines.length * lineBoxPx(fontSize, lineHeight));
+
+  let totalOffsetY = alignOffsetY + inkNudgeY;
+  // Content-box bake already places the SVG on the editor run. Do not let a
+  // metric mismatch (canvas fontBoundingBox vs opentype half-leading) shove
+  // glyphs out of that box — on short 320x50 hosts that spilled values into
+  // stacked sublines / broke side-by-side baselines. Working tall sizes keep
+  // their small in-box nudges unchanged.
+  if (useContentBox && typeof path.getBoundingBox === 'function') {
+    const bbox = path.getBoundingBox();
+    if (bbox && Number.isFinite(bbox.y1) && Number.isFinite(bbox.y2)) {
+      const slack = 0.5;
+      const minOffset = -bbox.y1 - slack;
+      const maxOffset = height - bbox.y2 + slack;
+      if (Number.isFinite(minOffset) && Number.isFinite(maxOffset) && minOffset <= maxOffset) {
+        totalOffsetY = Math.min(maxOffset, Math.max(minOffset, totalOffsetY));
+      }
+    }
+  }
+
   const svgPath = path.toSVG(2);
-  const totalOffsetY = alignOffsetY + inkNudgeY;
   const groupOpen = Math.abs(totalOffsetY) > 0.01
     ? `<g fill="${color}" transform="translate(0 ${totalOffsetY.toFixed(2)})">`
     : `<g fill="${color}">`;

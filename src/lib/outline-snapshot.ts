@@ -33,15 +33,19 @@ export type PositionSnapshot = {
   height?: number;
   /**
    * Live text-run box relative to the host (offer-value-run / Range line).
-   * Outline bakes the SVG to this box and positions it absolutely — same as
-   * shrink-wrapped flex-end text, not a full-width right-aligned path block.
+   * Used when ink rect is unavailable.
    */
   contentLeft?: number;
   contentTop?: number;
   contentWidth?: number;
   contentHeight?: number;
-  /** Glyph ink top/bottom relative to the host (canvas metrics when available). */
+  /**
+   * Painted glyph ink relative to the host (Animate bake anchor).
+   * Outline places the SVG at inkLeft/inkTop and maps path bbox → (0,0).
+   */
+  inkLeft?: number;
   inkTop?: number;
+  inkRight?: number;
   inkBottom?: number;
 };
 
@@ -452,8 +456,14 @@ export const capturePresentationSnapshot = (
     pos.contentTop = Number(ink.top.toFixed(2));
     pos.contentWidth = Number(Math.max(ink.width, 1).toFixed(2));
     pos.contentHeight = Number(Math.max(ink.height, 1).toFixed(2));
+    // Animate anchor = painted ink top-left (horizontal from run/Range, vertical
+    // from canvas glyph ink when available).
+    pos.inkLeft = Number(ink.left.toFixed(2));
+    pos.inkRight = Number(ink.right.toFixed(2));
     if (Number.isFinite(ink.inkTop)) pos.inkTop = Number(ink.inkTop.toFixed(2));
+    else pos.inkTop = pos.contentTop;
     if (Number.isFinite(ink.inkBottom)) pos.inkBottom = Number(ink.inkBottom.toFixed(2));
+    else pos.inkBottom = Number((ink.top + ink.height).toFixed(2));
   };
 
   const positionSelectors = [

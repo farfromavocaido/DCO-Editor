@@ -198,12 +198,12 @@ Pipeline:
 5. Emit a content-tight SVG (`height = lines × lineBox`). Bottom-align uses an
    SVG group `translate(0, alignOffsetY)`. Offer hosts stay `overflow: visible`
    (same as font-mode) so tight `lineHeight: 0.85` boxes do not clip glyph ink.
-   When a snapshot includes a content box, SVG **width/height** follow the live
-   run/Range box (left-aligned paths), the exporter absolutely positions that
-   SVG inside the host, and an extra ink-top translate closes browser↔opentype
-   metric drift. Snapshot `lines` lock soft wraps — bake does not re-`wrapLines`
-   with opentype advances (those diverge from browser Museo and can force an
-   extra line under `fit.wrap` + `maxLines: 2`).
+   When a snapshot includes inkLeft/inkTop, SVG is placed at that host-relative
+ink origin and path commands are translated so the glyph bounding-box top-left
+is `(0,0)` — true Animate-style bake (no flex, no re-nudging inside a line box).
+When only a content box is present, SVG **width/height** follow the live
+run/Range box (left-aligned paths) with an in-box ink clamp. Snapshot `lines`
+lock soft wraps — bake does not re-`wrapLines` with opentype advances.
 6. CTA: zero host padding; SVG at intrinsic size (no `width: 100%` scale-down).
 7. Snapshot plus/slot/offer-host `left`/`top`/`height` write as inline styles
    over class CSS (value + subline hosts included — side-by-side ink lock must

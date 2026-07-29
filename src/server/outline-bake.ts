@@ -114,13 +114,16 @@ export const positionStyleAttr = (
     const parts = [`left:${pos.left}px`, `top:${pos.top}px`];
     if (Number.isFinite(pos.width)) parts.push(`width:${pos.width}px`);
     if (Number.isFinite(pos.height)) parts.push(`height:${pos.height}px`);
-    // Content-box SVG is absolutely placed — kill flex packing so it cannot
-    // fight the baked left/top of the run.
+    // Content-box / ink SVG is absolutely placed — kill flex packing so it
+    // cannot fight the baked left/top of the run.
     if (
-      Number.isFinite(pos.contentLeft)
-      && Number.isFinite(pos.contentTop)
-      && Number(pos.contentWidth) > 0
-      && Number(pos.contentHeight) > 0
+      (Number.isFinite(pos.inkLeft) && Number.isFinite(pos.inkTop))
+      || (
+        Number.isFinite(pos.contentLeft)
+        && Number.isFinite(pos.contentTop)
+        && Number(pos.contentWidth) > 0
+        && Number(pos.contentHeight) > 0
+      )
     ) {
       parts.push('display:block', 'position:absolute');
     }
@@ -129,7 +132,7 @@ export const positionStyleAttr = (
   return '';
 };
 
-/** Inject absolute left/top onto an outline SVG when the snapshot has a content box. */
+/** Inject absolute left/top onto an outline SVG (ink anchor preferred). */
 export const placeSvgInContentBox = (
   svg: string,
   snapshot: SizePresentationSnapshot | null | undefined,
@@ -138,19 +141,24 @@ export const placeSvgInContentBox = (
   if (!svg || !snapshot?.positions) return svg;
   for (const id of ids) {
     const pos = snapshot.positions[id];
-    if (
-      !pos
-      || !Number.isFinite(pos.contentLeft)
-      || !Number.isFinite(pos.contentTop)
-      || !(Number(pos.contentWidth) > 0)
-      || !(Number(pos.contentHeight) > 0)
-    ) {
-      continue;
+    if (!pos) continue;
+    if (Number.isFinite(pos.inkLeft) && Number.isFinite(pos.inkTop)) {
+      return svg.replace(
+        '<svg ',
+        `<svg style="position:absolute;left:${pos.inkLeft}px;top:${pos.inkTop}px" `,
+      );
     }
-    return svg.replace(
-      '<svg ',
-      `<svg style="position:absolute;left:${pos.contentLeft}px;top:${pos.contentTop}px" `,
-    );
+    if (
+      Number.isFinite(pos.contentLeft)
+      && Number.isFinite(pos.contentTop)
+      && Number(pos.contentWidth) > 0
+      && Number(pos.contentHeight) > 0
+    ) {
+      return svg.replace(
+        '<svg ',
+        `<svg style="position:absolute;left:${pos.contentLeft}px;top:${pos.contentTop}px" `,
+      );
+    }
   }
   return svg;
 };
@@ -214,8 +222,9 @@ const targetBakeOptions = ({
     const contentWidth = Number(pos?.contentWidth);
     const contentHeight = Number(pos?.contentHeight);
     const useContentBox = contentWidth > 0 && contentHeight > 0;
+    const inkLeft = Number(pos?.inkLeft);
     const inkTop = Number(pos?.inkTop);
-    const contentTop = Number(pos?.contentTop);
+    const useInkAnchor = Number.isFinite(inkLeft) && Number.isFinite(inkTop);
     const lockedLinesRaw = Array.isArray(snap.lines) && snap.lines.length > 0
       ? snap.lines
       : null;
@@ -252,16 +261,20 @@ const targetBakeOptions = ({
       maxLines,
       ...(lockedLines ? { lines: lockedLines } : {}),
       scaleOfferSymbols: snap.scaleOfferSymbols ?? scaleOfferSymbols,
-      alignOffsetY: Number(snap.alignOffsetY) || 0,
-      ...(useContentBox
-        ? {
-          contentWidth,
-          contentHeight,
-          ...(Number.isFinite(inkTop) && Number.isFinite(contentTop)
-            ? { inkTopInSvg: inkTop - contentTop }
-            : {}),
-        }
-        : {}),
+      // Ink-anchor bake already includes editor bottom-align in the captured
+      // ink rect — do not re-apply translateY.
+      alignOffsetY: useInkAnchor ? 0 : (Number(snap.alignOffsetY) || 0),
+      ...(useInkAnchor
+        ? { inkLeft, inkTop, ...(useContentBox ? { contentWidth, contentHeight } : {}) }
+        : useContentBox
+          ? {
+            contentWidth,
+            contentHeight,
+            ...(Number.isFinite(inkTop) && Number.isFinite(Number(pos?.contentTop))
+              ? { inkTopInSvg: inkTop - Number(pos?.contentTop) }
+              : {}),
+          }
+          : {}),
       baseFontSize,
       align: String(fit.align || ''),
     };

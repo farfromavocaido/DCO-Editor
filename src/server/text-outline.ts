@@ -69,14 +69,19 @@ export type OutlineFitOptions = {
   /** text-fit align:bottom translateY — applied as SVG group translate. */
   alignOffsetY?: number;
   /**
-   * Editor text-run box (Range / offer-value-run). When set, SVG is baked to
-   * this size with left-aligned paths (host keeps authored width + absolute
-   * SVG placement in the exporter).
+   * Editor text-run box (Range / offer-value-run). When set without ink anchor,
+   * SVG is baked to this size with left-aligned paths.
    */
   contentWidth?: number;
   contentHeight?: number;
-  /** Desired glyph-ink top inside the SVG (editor inkTop − contentTop). */
+  /** Desired glyph-ink top inside the SVG (legacy content-box nudge). */
   inkTopInSvg?: number;
+  /**
+   * Animate bake: place SVG at this host-relative ink origin and map path
+   * bounding-box top-left to (0,0). Ignores content-box sizing / ink nudges.
+   */
+  inkLeft?: number;
+  inkTop?: number;
 };
 
 export type OutlinedText = {
@@ -371,6 +376,9 @@ export const outlineFittedText = async (options: OutlineFitOptions): Promise<Out
   const contentWidth = Number(options.contentWidth);
   const contentHeight = Number(options.contentHeight);
   const useContentBox = contentWidth > 0 && contentHeight > 0;
+  const inkLeft = Number(options.inkLeft);
+  const inkTopAnchor = Number(options.inkTop);
+  const useInkAnchor = Number.isFinite(inkLeft) && Number.isFinite(inkTopAnchor);
 
   let fontSize = Math.max(minFontSize, Number(options.fontSize) || 12);
   let trackingEm = startingTracking;
@@ -413,6 +421,44 @@ export const outlineFittedText = async (options: OutlineFitOptions): Promise<Out
         ? wrapLines(font, text, fontSize, trackingEm, width, maxLines, scaleOfferSymbols)
         : [singleLineText];
     }
+  }
+
+  // ——— Animate ink-anchor bake: SVG origin = editor ink top-left ———
+  if (useInkAnchor) {
+    const bakeWidth = Math.max(width, contentWidth || 0, 1);
+    const bakeLineBox = lineBoxPx(fontSize, lineHeight);
+    const path = buildPathForLines(
+      font,
+      lines,
+      fontSize,
+      trackingEm,
+      bakeWidth,
+      'left',
+      bakeLineBox,
+      scaleOfferSymbols,
+    );
+    const bbox = typeof path.getBoundingBox === 'function'
+      ? path.getBoundingBox()
+      : { x1: 0, y1: 0, x2: bakeWidth, y2: bakeLineBox * lines.length };
+    const x1 = Number(bbox?.x1);
+    const y1 = Number(bbox?.y1);
+    const x2 = Number(bbox?.x2);
+    const y2 = Number(bbox?.y2);
+    const bw = Math.max(1, (Number.isFinite(x2) && Number.isFinite(x1) ? x2 - x1 : bakeWidth));
+    const bh = Math.max(1, (Number.isFinite(y2) && Number.isFinite(y1) ? y2 - y1 : bakeLineBox * lines.length));
+    const tx = Number.isFinite(x1) ? -x1 : 0;
+    const ty = Number.isFinite(y1) ? -y1 : 0;
+    const svgPath = path.toSVG(2);
+    const groupOpen = (Math.abs(tx) > 0.01 || Math.abs(ty) > 0.01)
+      ? `<g fill="${color}" transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)})">`
+      : `<g fill="${color}">`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${bw}" height="${bh}" viewBox="0 0 ${bw} ${bh}" aria-hidden="true">${groupOpen}${svgPath}</g></svg>`;
+    return {
+      svg,
+      fontSize,
+      letterSpacingEm: trackingEm,
+      lines,
+    };
   }
 
   // Content-box bake: SVG matches the editor run/Range box; paths left-aligned

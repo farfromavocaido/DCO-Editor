@@ -189,6 +189,27 @@ test('outlineFittedText locked lines skip soft-wrap even when wrap requested', a
   );
 });
 
+test('outlineFittedText ink-anchor bake maps path bbox to SVG origin', async () => {
+  const outlined = await outlineFittedText({
+    text: '15%',
+    fontSize: 41,
+    width: 69,
+    height: 35,
+    lineHeight: 0.85,
+    lockMetrics: true,
+    scaleOfferSymbols: true,
+    inkLeft: 2.5,
+    inkTop: 4,
+    lines: ['15%'],
+  });
+  const width = Number(outlined.svg.match(/width="([\d.]+)"/)?.[1] || 0);
+  const height = Number(outlined.svg.match(/height="([\d.]+)"/)?.[1] || 0);
+  assert.ok(width > 40 && width < 80, `ink-tight width, got ${width}`);
+  assert.ok(height > 20 && height < 50, `ink-tight height, got ${height}`);
+  // Path ink should sit at SVG (0,0) after translate(-bbox).
+  assert.match(outlined.svg, /translate\(/);
+});
+
 test('outlineFittedText content-box bake left-aligns and ink-nudges', async () => {
   const outlined = await outlineFittedText({
     text: '15%',

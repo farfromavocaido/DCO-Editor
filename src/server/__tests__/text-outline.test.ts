@@ -39,11 +39,12 @@ test('outline export uses brand navy for headlines/offers and keeps CTA white', 
   assert.ok(ctaSvg);
   assert.equal(Number(ctaSvg[1]), 130, 'CTA SVG width matches authored box (no padding shrink)');
   assert.ok(Number(ctaSvg[2]) < 40, `CTA SVG should be content-tight, got height=${ctaSvg[2]}`);
-  // Authored lineHeight 1.25 × fontSize 26 × 3 wrapped lines = 97.5 (not 1.05 → 81.9).
+  // Authored lineHeight 1.25 × fontSize 26 × 4 wrapped lines = 130
+  // ("Our highest welcome credit"; was 3 lines / 97.5 for the old energy H1).
   const headlineSvg = html.match(/id="headline-act1"[^>]*>[\s\S]*?<svg[^>]*height="([\d.]+)"/);
   assert.ok(headlineSvg);
   assert.ok(
-    Math.abs(Number(headlineSvg[1]) - 97.5) < 0.05,
+    Math.abs(Number(headlineSvg[1]) - 130) < 0.05,
     `headline SVG height should use lineHeight 1.25, got ${headlineSvg[1]}`,
   );
 });

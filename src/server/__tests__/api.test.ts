@@ -15,7 +15,7 @@ import * as creativeViewRoute from '@/app/api/creative/[size]/view/route';
 import * as creativeSourceRoute from '@/app/api/creative/[size]/source/route';
 import { listStaticPreviewCampaigns } from '@/server/campaign-registry';
 import { readCreativeDocument } from '@/server/creative-document';
-import { DEFAULT_STATIC_CLICK_TAG } from '@/server/creative-exporter';
+import { getCampaign } from '@/server/campaign-registry';
 import { outputsRoot } from '@/server/paths';
 
 const CDN_MUSEO_URL = 'https://s0.2mdn.net/creatives/assets/5627648/Museo700-Regular.otf';
@@ -333,7 +333,8 @@ test('POST /api/creative/export-preview writes tracked outputs for non-DCO campa
       'campaigns/sse-hiker-welcome/SSE_Hiker_Welcome_300x250.html',
     );
     const html = await fs.readFile(htmlPath, 'utf8');
-    assert.match(html, new RegExp(DEFAULT_STATIC_CLICK_TAG.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    const hikerClickTag = getCampaign('sse-hiker-welcome').clickTag || '';
+    assert.match(html, new RegExp(hikerClickTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
     assert.match(html, /window\.clickTag = clickTag/);
 
     const zipPath = path.resolve(outputsRoot, payload.latest.zip);

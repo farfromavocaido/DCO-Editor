@@ -42,7 +42,7 @@ import { applyOffers0BeatOverlay, beatsForFrameScope } from '@/lib/timing-profil
 import { textFitEngineSource } from '@/lib/text-fit';
 import { textFitRulesForSize } from '@/lib/text-fit-rules';
 import type { PresentationSnapshots, SizePresentationSnapshot } from '@/lib/outline-snapshot';
-import { getCampaign, listStaticPreviewCampaigns } from './campaign-registry';
+import { clickTagForCampaign, getCampaign, listStaticPreviewCampaigns } from './campaign-registry';
 import {
   bakeOutlinedOfferSlotSvgs,
   bakeOutlinedText,
@@ -849,14 +849,25 @@ const renderOutlinedTermsWrappers = async (
 /** Default landing URL for static (non-Enabler) HTML5 clickTag. */
 export const DEFAULT_STATIC_CLICK_TAG = 'https://www.sseairtricity.com/uk';
 
-const outlineRuntimeScript = (delivery: DeliveryMode = 'studio') => {
+/** Resolve static clickTag: campaign product URL when set, else homepage default. */
+export const staticClickTagForDocument = (document: Record<string, unknown> | null | undefined) => {
+  const campaignId = document?.campaign && typeof document.campaign === 'object'
+    ? (document.campaign as { id?: string }).id
+    : undefined;
+  return clickTagForCampaign(campaignId) || DEFAULT_STATIC_CLICK_TAG;
+};
+
+const outlineRuntimeScript = (
+  delivery: DeliveryMode = 'studio',
+  clickTagUrl: string = DEFAULT_STATIC_CLICK_TAG,
+) => {
   if (delivery === 'static') {
     return `
     <script>
       (function() {
         var MOTION_START_TIMEOUT_MS = 3000;
         var motionReleased = false;
-        var clickTag = ${JSON.stringify(DEFAULT_STATIC_CLICK_TAG)};
+        var clickTag = ${JSON.stringify(clickTagUrl)};
         window.clickTag = clickTag;
         function releaseMotionClock() {
           if (motionReleased) return;
@@ -1458,7 +1469,7 @@ export const renderStudioReadyHtml = async (
     })}\n`
     : '';
   const scripts = renderMode === 'outline'
-    ? outlineRuntimeScript(resolvedOptions.delivery)
+    ? outlineRuntimeScript(resolvedOptions.delivery, staticClickTagForDocument(document))
     : runtimeScript(textFitRulesForSize(sizeCreative), resolvedOptions, {
       layers: sizeCreative.layers,
       beatsProfiles: {

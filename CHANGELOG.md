@@ -26,6 +26,7 @@
 
 ### Changed
 
+- **Per-campaign static clickTags** — Export for Static / preview bake product landing URLs: Keypad → `/keypad-electricity`, Welcome Credit → `/electricity-welcome-credit`, Top Discount → `/electricity-top-discount`. SSE DCO still uses the homepage default.
 - **Non-DCO headline order** — Hiker Keypad, Keepy Uppy Welcome Credit, and Keepy Uppy Top Discount now lead with the offer headline (keypad / welcome credit / discount); “A different kind of energy” is act 2.
 - **Non-DCO H2 ↔ T&Cs handoff** — headline-act2 enter (and banner H1 exit on 320×50 / 728×90) now use `act1_out`, the same beat as the terms-prices → unit-rate-prices transition, so H2 always lands with the legal-line swap.
 

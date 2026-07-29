@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 
-import { readCreativeDocument } from '../creative-document';
+import { readCreativeDocument, readCreativeDocumentForCampaign } from '../creative-document';
 import {
   buildBasePackageEntries,
   buildClientPreviewPackageEntries,
@@ -51,11 +51,30 @@ test('static outline delivery wires IAB clickTag and omits Enabler exit', async 
   });
 
   assert.match(html, /var clickTag = /);
+  // SSE DCO has no product clickTag — homepage default.
   assert.match(html, new RegExp(DEFAULT_STATIC_CLICK_TAG.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.match(html, /window\.clickTag = clickTag/);
   assert.match(html, /window\.open\(clickTag, '_blank'\)/);
   assert.doesNotMatch(html, /Enabler\.exit\('Main Exit'/);
   assert.doesNotMatch(html, /https:\/\/s0\.2mdn\.net\/ads\/studio\/Enabler\.js/);
+});
+
+test('static outline delivery uses per-campaign product clickTags', async () => {
+  const escape = (url: string) => url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const cases = [
+    ['sse-hiker-welcome', 'https://sseairtricity.com/uk/home/products/keypad-electricity'],
+    ['sse-keepyuppy-welcome', 'https://sseairtricity.com/uk/home/products/electricity-welcome-credit'],
+    ['sse-keepyuppy-discount', 'https://sseairtricity.com/uk/home/products/electricity-top-discount'],
+  ] as const;
+  for (const [campaignId, url] of cases) {
+    const document = await readCreativeDocumentForCampaign(campaignId);
+    const html = await renderStudioReadyHtml(document, '300x250', {
+      renderMode: 'outline',
+      delivery: 'static',
+    });
+    assert.match(html, new RegExp(escape(url)), `${campaignId} clickTag`);
+    assert.doesNotMatch(html, new RegExp(escape(DEFAULT_STATIC_CLICK_TAG)));
+  }
 });
 
 test('studio outline delivery keeps Enabler exit and has no static clickTag', async () => {

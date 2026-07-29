@@ -30,3 +30,19 @@ test('resolves campaign entries and rejects unknown ids', () => {
   assert.equal(isRegisteredCampaignId('nope'), false);
   assert.throws(() => getCampaign('nope'), /Unknown campaign id/);
 });
+
+test('non-DCO campaigns carry product clickTags', () => {
+  assert.equal(
+    getCampaign('sse-hiker-welcome').clickTag,
+    'https://sseairtricity.com/uk/home/products/keypad-electricity',
+  );
+  assert.equal(
+    getCampaign('sse-keepyuppy-welcome').clickTag,
+    'https://sseairtricity.com/uk/home/products/electricity-welcome-credit',
+  );
+  assert.equal(
+    getCampaign('sse-keepyuppy-discount').clickTag,
+    'https://sseairtricity.com/uk/home/products/electricity-top-discount',
+  );
+  assert.equal(getCampaign('sse-dco').clickTag, undefined);
+});

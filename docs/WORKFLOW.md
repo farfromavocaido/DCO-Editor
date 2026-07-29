@@ -17,7 +17,7 @@
 |---|---|
 | **Export HTML (font)** | Downloads `{exportSlug}_html.zip`; also writes `output/{exportSlug}_{size}.html` (+ WIP variants) |
 | **Export HTML (SVG outlines)** | Snapshots the editor stage (all sizes) then downloads `{exportSlug}_html_outlines.zip`; Studio-shaped fixed-copy outline HTML (Enabler shell); SVGs inlined; nested `assets/…` backgrounds |
-| **Export for Static** | Same editor snapshot bake → `{exportSlug}_html_static.zip`; lean outlined HTML (no Enabler/DV360); inactive layers pruned; flat `assets/<basename>.jpg` backgrounds; IAB `clickTag` defaults to `https://www.sseairtricity.com/uk` |
+| **Export for Static** | Same editor snapshot bake → `{exportSlug}_html_static.zip`; lean outlined HTML (no Enabler/DV360); inactive layers pruned; flat `assets/<basename>.jpg` backgrounds; IAB `clickTag` is per campaign (Keypad / Welcome Credit / Top Discount product URLs; DCO falls back to `https://www.sseairtricity.com/uk`) |
 | **Export for Preview** | Snapshots all non-DCO campaigns → tracked `outputs/` (per-campaign HTML + assets, timestamped zip, `latest.json`). Commit `outputs/` and push to publish `/statics/` on GitHub Pages |
 | **View HTML** | Opens a browser preview of the current size with baked feed row |
 | **HTML source** | Formatted, syntax-highlighted export HTML in the inspector modal |

@@ -189,28 +189,29 @@ test('outlineFittedText locked lines skip soft-wrap even when wrap requested', a
   );
 });
 
-test('outlineFittedText ink-anchor bake maps path bbox to SVG origin', async () => {
+test('outlineFittedText paint-box bake fills content size with no nudge', async () => {
   const outlined = await outlineFittedText({
     text: '15%',
-    fontSize: 41,
-    width: 69,
-    height: 35,
+    fontSize: 34,
+    width: 56,
+    height: 23,
     lineHeight: 0.85,
     lockMetrics: true,
     scaleOfferSymbols: true,
-    inkLeft: 2.5,
-    inkTop: 4,
+    contentWidth: 55,
+    contentHeight: 23,
+    inkLeft: 0.5,
+    inkTop: 0,
+    inkTopInSvg: 8,
+    alignOffsetY: 5,
     lines: ['15%'],
   });
-  const width = Number(outlined.svg.match(/width="([\d.]+)"/)?.[1] || 0);
-  const height = Number(outlined.svg.match(/height="([\d.]+)"/)?.[1] || 0);
-  assert.ok(width > 40 && width < 80, `ink-tight width, got ${width}`);
-  assert.ok(height > 20 && height < 50, `ink-tight height, got ${height}`);
-  // Path ink should sit at SVG (0,0) after translate(-bbox).
-  assert.match(outlined.svg, /translate\(/);
+  assert.match(outlined.svg, /width="55"/);
+  assert.match(outlined.svg, /height="23"/);
+  assert.doesNotMatch(outlined.svg, /transform="translate/);
 });
 
-test('outlineFittedText content-box bake left-aligns and ink-nudges', async () => {
+test('outlineFittedText content-box bake left-aligns without host width', async () => {
   const outlined = await outlineFittedText({
     text: '15%',
     fontSize: 41,
@@ -222,38 +223,13 @@ test('outlineFittedText content-box bake left-aligns and ink-nudges', async () =
     scaleOfferSymbols: true,
     contentWidth: 48,
     contentHeight: 34.85,
-    inkTopInSvg: 2.5,
   });
   const width = Number(outlined.svg.match(/width="([\d.]+)"/)?.[1] || 0);
   const height = Number(outlined.svg.match(/height="([\d.]+)"/)?.[1] || 0);
   assert.equal(width, 48, 'SVG width follows content box, not authored host');
   assert.equal(height, 34.85);
-  // Paths start near x=0 (left-aligned in content box), not right-padded in 69px.
   const xs = [...outlined.svg.matchAll(/[ML]\s*([\d.]+)/g)].map((m) => Number(m[1]));
   assert.ok(Math.min(...xs) < 5, `content-box paths should start near left, minX=${Math.min(...xs)}`);
-  assert.match(outlined.svg, /transform="translate\(0 /);
-});
-
-test('outlineFittedText clamps content-box ink nudge inside the SVG', async () => {
-  // 320x50 short hosts captured inkTopInSvg ≈ 6–8px from fontBoundingBox vs
-  // opentype half-leading — unclamped that shoved value glyphs into sublines.
-  const outlined = await outlineFittedText({
-    text: '15%',
-    fontSize: 34,
-    width: 56,
-    height: 23,
-    lineHeight: 0.85,
-    lockMetrics: true,
-    scaleOfferSymbols: true,
-    contentWidth: 55,
-    contentHeight: 28.9,
-    inkTopInSvg: 8,
-  });
-  const translate = Number(outlined.svg.match(/translate\(0 ([-\d.]+)\)/)?.[1] || 0);
-  assert.ok(
-    translate < 3,
-    `content-box ink nudge must stay in-box on short hosts, got translateY=${translate}`,
-  );
 });
 
 test('outlineFittedText applies CSS half-leading for tight lineHeight', async () => {

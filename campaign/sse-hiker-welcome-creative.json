@@ -1195,7 +1195,7 @@
           },
           "props": {
             "left": 112,
-            "top": 7,
+            "top": 8,
             "width": 74,
             "height": 37
           },
@@ -1211,7 +1211,7 @@
           },
           "props": {
             "left": 197,
-            "top": 7,
+            "top": 8,
             "width": 74,
             "height": 35
           },
@@ -1227,7 +1227,7 @@
           },
           "props": {
             "left": 192,
-            "top": 13,
+            "top": 14,
             "width": 13,
             "height": 13,
             "objectFit": "contain"

@@ -141,64 +141,16 @@ const rangeLocalRect = (element: HTMLElement, ancestor: HTMLElement) => {
 };
 
 /**
- * Glyph ink in host space — mirrors offer-layout `glyphInk` (canvas ascent/
- * descent + line box). Digits-only sample for offer-value runs so % size
- * does not skew vertical ink.
- *
- * Offer-value content box uses the run element's border box (not Range of
- * contents): `.sym-pct` transforms inflate Range unions and were baking SVGs
- * ~1.5× too tall with the symbol on a fake second line.
+ * Paint box in host space for Animate bake.
+ * Uses the laid-out run/Range box only — not canvas fontBoundingBox ink.
+ * Canvas ink tops were systematically low on tight 320x50 line boxes and shoved
+ * outlined values into sublines after ink-anchor placement.
  */
-const glyphInkLocal = (element: HTMLElement, host: HTMLElement, preferDigits: boolean) => {
-  const line = preferDigits
-    ? clientToLocal(element.getBoundingClientRect(), host)
-    : rangeLocalRect(element, host);
-  if (!(line.width > 0 || line.height > 0)) return null;
-  try {
-    const canvas = element.ownerDocument?.createElement('canvas');
-    const ctx = canvas?.getContext?.('2d');
-    if (!ctx || ctx.measureText('5').actualBoundingBoxAscent === undefined) {
-      return { ...line, inkTop: line.top, inkBottom: line.bottom };
-    }
-    const cs = window.getComputedStyle(element);
-    ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-    let sample = String(element.textContent || '').replace(/\s+/g, ' ').trim();
-    if (preferDigits) {
-      const digits = sample.replace(/[^\d.]/g, '');
-      if (digits) sample = digits;
-    }
-    if (!sample) return { ...line, inkTop: line.top, inkBottom: line.bottom };
-    const metrics = ctx.measureText(sample);
-    const ascent = metrics.actualBoundingBoxAscent;
-    const descent = metrics.actualBoundingBoxDescent;
-    if (!Number.isFinite(ascent) || !Number.isFinite(descent)) {
-      return { ...line, inkTop: line.top, inkBottom: line.bottom };
-    }
-    const fontAscent = metrics.fontBoundingBoxAscent;
-    const fontDescent = metrics.fontBoundingBoxDescent;
-    let baseline: number;
-    if (
-      Number.isFinite(fontAscent)
-      && Number.isFinite(fontDescent)
-      && (fontAscent + fontDescent) > 0.5
-    ) {
-      let leading = line.height - (fontAscent + fontDescent);
-      if (!(leading > 0)) leading = 0;
-      baseline = line.top + leading / 2 + fontAscent;
-    } else {
-      const inkH = ascent + descent;
-      baseline = line.top + (line.height - inkH) / 2 + ascent;
-    }
-    const inkTop = baseline - ascent;
-    const inkBottom = baseline + descent;
-    return {
-      ...line,
-      inkTop,
-      inkBottom,
-    };
-  } catch {
-    return { ...line, inkTop: line.top, inkBottom: line.bottom };
+const paintBoxLocal = (element: HTMLElement, host: HTMLElement, preferDigits: boolean) => {
+  if (preferDigits) {
+    return clientToLocal(element.getBoundingClientRect(), host);
   }
+  return rangeLocalRect(element, host);
 };
 
 /**
@@ -438,7 +390,7 @@ export const capturePresentationSnapshot = (
     };
   };
 
-  /** Content-run + glyph-ink relative to the offer host (Animate-style bake). */
+  /** Content-run + paint box relative to the offer host (Animate-style bake). */
   const recordOfferTextGeometry = (
     host: HTMLElement,
     key: string,
@@ -450,20 +402,18 @@ export const capturePresentationSnapshot = (
     const run = (preferDigits
       ? (host.querySelector('.offer-value-run') as HTMLElement | null)
       : null) || host;
-    const ink = glyphInkLocal(run, host, preferDigits);
-    if (!ink || !(ink.width > 0 || ink.height > 0)) return;
-    pos.contentLeft = Number(ink.left.toFixed(2));
-    pos.contentTop = Number(ink.top.toFixed(2));
-    pos.contentWidth = Number(Math.max(ink.width, 1).toFixed(2));
-    pos.contentHeight = Number(Math.max(ink.height, 1).toFixed(2));
-    // Animate anchor = painted ink top-left (horizontal from run/Range, vertical
-    // from canvas glyph ink when available).
-    pos.inkLeft = Number(ink.left.toFixed(2));
-    pos.inkRight = Number(ink.right.toFixed(2));
-    if (Number.isFinite(ink.inkTop)) pos.inkTop = Number(ink.inkTop.toFixed(2));
-    else pos.inkTop = pos.contentTop;
-    if (Number.isFinite(ink.inkBottom)) pos.inkBottom = Number(ink.inkBottom.toFixed(2));
-    else pos.inkBottom = Number((ink.top + ink.height).toFixed(2));
+    const box = paintBoxLocal(run, host, preferDigits);
+    if (!box || !(box.width > 0 || box.height > 0)) return;
+    // Layout box of the painted run/line — exact editor envelope.
+    pos.contentLeft = Number(box.left.toFixed(2));
+    pos.contentTop = Number(box.top.toFixed(2));
+    pos.contentWidth = Number(Math.max(box.width, 1).toFixed(2));
+    pos.contentHeight = Number(Math.max(box.height, 1).toFixed(2));
+    // Ink anchor = same paint box (no canvas font-metric reinterpretation).
+    pos.inkLeft = pos.contentLeft;
+    pos.inkTop = pos.contentTop;
+    pos.inkRight = Number(box.right.toFixed(2));
+    pos.inkBottom = Number(box.bottom.toFixed(2));
   };
 
   const positionSelectors = [

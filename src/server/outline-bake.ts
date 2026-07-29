@@ -132,7 +132,15 @@ export const positionStyleAttr = (
   return '';
 };
 
-/** Inject absolute left/top onto an outline SVG (ink anchor preferred). */
+/**
+ * Inject absolute left/top onto an outline SVG (paint box / ink origin).
+ *
+ * Also reapplies text-fit `align: bottom` translateY. The paint box is captured
+ * relative to the host, so a host `translateY` cancels out of contentTop — but
+ * the editor still shifts glyphs down toward the designed baseline after shrink.
+ * Without this, shrunk 320×50 values (e.g. Hiker `10.5%`) sit too high vs their
+ * sublines while unshrunk Keepy copy matches.
+ */
 export const placeSvgInContentBox = (
   svg: string,
   snapshot: SizePresentationSnapshot | null | undefined,
@@ -142,21 +150,20 @@ export const placeSvgInContentBox = (
   for (const id of ids) {
     const pos = snapshot.positions[id];
     if (!pos) continue;
-    if (Number.isFinite(pos.inkLeft) && Number.isFinite(pos.inkTop)) {
-      return svg.replace(
-        '<svg ',
-        `<svg style="position:absolute;left:${pos.inkLeft}px;top:${pos.inkTop}px" `,
-      );
-    }
+    const left = Number.isFinite(pos.contentLeft) ? pos.contentLeft : pos.inkLeft;
+    const top = Number.isFinite(pos.contentTop) ? pos.contentTop : pos.inkTop;
     if (
-      Number.isFinite(pos.contentLeft)
-      && Number.isFinite(pos.contentTop)
+      Number.isFinite(left)
+      && Number.isFinite(top)
       && Number(pos.contentWidth) > 0
       && Number(pos.contentHeight) > 0
     ) {
+      const textSnap = textSnapshotForTarget(snapshot, id);
+      const alignY = Number(textSnap?.alignOffsetY) || 0;
+      const placedTop = Number((Number(top) + alignY).toFixed(2));
       return svg.replace(
         '<svg ',
-        `<svg style="position:absolute;left:${pos.contentLeft}px;top:${pos.contentTop}px" `,
+        `<svg style="position:absolute;left:${left}px;top:${placedTop}px" `,
       );
     }
   }
@@ -224,7 +231,6 @@ const targetBakeOptions = ({
     const useContentBox = contentWidth > 0 && contentHeight > 0;
     const inkLeft = Number(pos?.inkLeft);
     const inkTop = Number(pos?.inkTop);
-    const useInkAnchor = Number.isFinite(inkLeft) && Number.isFinite(inkTop);
     const lockedLinesRaw = Array.isArray(snap.lines) && snap.lines.length > 0
       ? snap.lines
       : null;
@@ -261,20 +267,19 @@ const targetBakeOptions = ({
       maxLines,
       ...(lockedLines ? { lines: lockedLines } : {}),
       scaleOfferSymbols: snap.scaleOfferSymbols ?? scaleOfferSymbols,
-      // Ink-anchor bake already includes editor bottom-align in the captured
-      // ink rect — do not re-apply translateY.
-      alignOffsetY: useInkAnchor ? 0 : (Number(snap.alignOffsetY) || 0),
-      ...(useInkAnchor
-        ? { inkLeft, inkTop, ...(useContentBox ? { contentWidth, contentHeight } : {}) }
-        : useContentBox
-          ? {
-            contentWidth,
-            contentHeight,
-            ...(Number.isFinite(inkTop) && Number.isFinite(Number(pos?.contentTop))
-              ? { inkTopInSvg: inkTop - Number(pos?.contentTop) }
-              : {}),
-          }
-          : {}),
+      // Paint-box: fit bottom-align is applied in placeSvgInContentBox (host-
+      // relative contentTop cancels the editor host translateY). Without a
+      // paint box, bake translateY into the path group as before.
+      alignOffsetY: useContentBox ? 0 : (Number(snap.alignOffsetY) || 0),
+      ...(useContentBox
+        ? {
+          contentWidth,
+          contentHeight,
+          ...(Number.isFinite(inkLeft) && Number.isFinite(inkTop)
+            ? { inkLeft, inkTop }
+            : {}),
+        }
+        : {}),
       baseFontSize,
       align: String(fit.align || ''),
     };

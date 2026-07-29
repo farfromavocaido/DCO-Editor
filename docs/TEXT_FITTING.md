@@ -202,8 +202,12 @@ Pipeline:
 ink origin and path commands are translated so the glyph bounding-box top-left
 is `(0,0)` — true Animate-style bake (no flex, no re-nudging inside a line box).
 When only a content box is present, SVG **width/height** follow the live
-run/Range box (left-aligned paths) with an in-box ink clamp. Snapshot `lines`
-lock soft wraps — bake does not re-`wrapLines` with opentype advances.
+run/Range box (left-aligned paths) with CSS half-leading and **no** path-group
+`translateY`. Fit `align: bottom` is reapplied as CSS `top` on the placed SVG
+(`contentTop + alignOffsetY`) — host-relative run capture cancels the editor’s
+host `translateY`, so skipping it left shrunk values (e.g. Hiker 320×50
+`10.5%`) too high above their sublines. Snapshot `lines` lock soft wraps —
+bake does not re-`wrapLines` with opentype advances.
 6. CTA: zero host padding; SVG at intrinsic size (no `width: 100%` scale-down).
 7. Snapshot plus/slot/offer-host `left`/`top`/`height` write as inline styles
    over class CSS (value + subline hosts included — side-by-side ink lock must

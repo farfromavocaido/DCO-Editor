@@ -376,9 +376,6 @@ export const outlineFittedText = async (options: OutlineFitOptions): Promise<Out
   const contentWidth = Number(options.contentWidth);
   const contentHeight = Number(options.contentHeight);
   const useContentBox = contentWidth > 0 && contentHeight > 0;
-  const inkLeft = Number(options.inkLeft);
-  const inkTopAnchor = Number(options.inkTop);
-  const useInkAnchor = Number.isFinite(inkLeft) && Number.isFinite(inkTopAnchor);
 
   let fontSize = Math.max(minFontSize, Number(options.fontSize) || 12);
   let trackingEm = startingTracking;
@@ -423,10 +420,12 @@ export const outlineFittedText = async (options: OutlineFitOptions): Promise<Out
     }
   }
 
-  // ——— Animate ink-anchor bake: SVG origin = editor ink top-left ———
-  if (useInkAnchor) {
-    const bakeWidth = Math.max(width, contentWidth || 0, 1);
-    const bakeLineBox = lineBoxPx(fontSize, lineHeight);
+  // ——— Animate paint-box bake: SVG = editor run/Range box, no re-nudge ———
+  // Capture is the laid-out box; half-leading fills it like CSS. Do not remap
+  // via canvas ink tops / path bbox — that shoved 320x50 values into sublines.
+  if (useContentBox) {
+    const bakeWidth = contentWidth;
+    const bakeLineBox = Math.max(1, contentHeight / Math.max(lines.length, 1));
     const path = buildPathForLines(
       font,
       lines,
@@ -437,22 +436,8 @@ export const outlineFittedText = async (options: OutlineFitOptions): Promise<Out
       bakeLineBox,
       scaleOfferSymbols,
     );
-    const bbox = typeof path.getBoundingBox === 'function'
-      ? path.getBoundingBox()
-      : { x1: 0, y1: 0, x2: bakeWidth, y2: bakeLineBox * lines.length };
-    const x1 = Number(bbox?.x1);
-    const y1 = Number(bbox?.y1);
-    const x2 = Number(bbox?.x2);
-    const y2 = Number(bbox?.y2);
-    const bw = Math.max(1, (Number.isFinite(x2) && Number.isFinite(x1) ? x2 - x1 : bakeWidth));
-    const bh = Math.max(1, (Number.isFinite(y2) && Number.isFinite(y1) ? y2 - y1 : bakeLineBox * lines.length));
-    const tx = Number.isFinite(x1) ? -x1 : 0;
-    const ty = Number.isFinite(y1) ? -y1 : 0;
     const svgPath = path.toSVG(2);
-    const groupOpen = (Math.abs(tx) > 0.01 || Math.abs(ty) > 0.01)
-      ? `<g fill="${color}" transform="translate(${tx.toFixed(2)} ${ty.toFixed(2)})">`
-      : `<g fill="${color}">`;
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${bw}" height="${bh}" viewBox="0 0 ${bw} ${bh}" aria-hidden="true">${groupOpen}${svgPath}</g></svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${bakeWidth}" height="${contentHeight}" viewBox="0 0 ${bakeWidth} ${contentHeight}" aria-hidden="true"><g fill="${color}">${svgPath}</g></svg>`;
     return {
       svg,
       fontSize,
@@ -461,64 +446,24 @@ export const outlineFittedText = async (options: OutlineFitOptions): Promise<Out
     };
   }
 
-  // Content-box bake: SVG matches the editor run/Range box; paths left-aligned
-  // inside it (exporter absolutely positions the SVG). Line box height comes
-  // from the captured content height so half-leading matches the live flex item.
-  const bakeWidth = useContentBox ? contentWidth : width;
-  const bakeAlign = useContentBox ? 'left' : textAlign;
-  const bakeLineBox = useContentBox
-    ? Math.max(1, contentHeight / Math.max(lines.length, 1))
-    : lineBoxPx(fontSize, lineHeight);
-
   const path = buildPathForLines(
     font,
     lines,
     fontSize,
     trackingEm,
-    bakeWidth,
-    bakeAlign,
-    bakeLineBox,
+    width,
+    textAlign,
+    lineBoxPx(fontSize, lineHeight),
     scaleOfferSymbols,
   );
 
-  let inkNudgeY = 0;
-  const inkTopInSvg = Number(options.inkTopInSvg);
-  if (Number.isFinite(inkTopInSvg) && typeof path.getBoundingBox === 'function') {
-    const bbox = path.getBoundingBox();
-    if (bbox && Number.isFinite(bbox.y1)) {
-      inkNudgeY = inkTopInSvg - bbox.y1;
-    }
-  }
-
-  // SVG height = CSS line boxes (not raw em). Host flex (CTA / headlines) still
-  // centres a shorter block; offer hosts keep authored absolute tops/heights.
-  const height = useContentBox
-    ? contentHeight
-    : Math.max(1, lines.length * lineBoxPx(fontSize, lineHeight));
-
-  let totalOffsetY = alignOffsetY + inkNudgeY;
-  // Content-box bake already places the SVG on the editor run. Do not let a
-  // metric mismatch (canvas fontBoundingBox vs opentype half-leading) shove
-  // glyphs out of that box — on short 320x50 hosts that spilled values into
-  // stacked sublines / broke side-by-side baselines. Working tall sizes keep
-  // their small in-box nudges unchanged.
-  if (useContentBox && typeof path.getBoundingBox === 'function') {
-    const bbox = path.getBoundingBox();
-    if (bbox && Number.isFinite(bbox.y1) && Number.isFinite(bbox.y2)) {
-      const slack = 0.5;
-      const minOffset = -bbox.y1 - slack;
-      const maxOffset = height - bbox.y2 + slack;
-      if (Number.isFinite(minOffset) && Number.isFinite(maxOffset) && minOffset <= maxOffset) {
-        totalOffsetY = Math.min(maxOffset, Math.max(minOffset, totalOffsetY));
-      }
-    }
-  }
-
+  // Non-snapshot path: optional bottom-align translate only.
+  const height = Math.max(1, lines.length * lineBoxPx(fontSize, lineHeight));
   const svgPath = path.toSVG(2);
-  const groupOpen = Math.abs(totalOffsetY) > 0.01
-    ? `<g fill="${color}" transform="translate(0 ${totalOffsetY.toFixed(2)})">`
+  const groupOpen = Math.abs(alignOffsetY) > 0.01
+    ? `<g fill="${color}" transform="translate(0 ${alignOffsetY.toFixed(2)})">`
     : `<g fill="${color}">`;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${bakeWidth}" height="${height}" viewBox="0 0 ${bakeWidth} ${height}" aria-hidden="true">${groupOpen}${svgPath}</g></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" aria-hidden="true">${groupOpen}${svgPath}</g></svg>`;
   return {
     svg,
     fontSize,

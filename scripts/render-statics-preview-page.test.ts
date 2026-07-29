@@ -10,7 +10,7 @@ test('renders a campaign/size shell with download link', () => {
     campaigns: [
       {
         id: 'sse-hiker-welcome',
-        name: 'Hiker Welcome Credit',
+        name: 'Hiker Keypad',
         exportSlug: 'SSE_Hiker_Welcome',
         sizes: ['300x250', '728x90'],
       },
@@ -18,7 +18,7 @@ test('renders a campaign/size shell with download link', () => {
   });
 
   assert.match(html, /Statics Preview/);
-  assert.match(html, /Hiker Welcome Credit/);
+  assert.match(html, /Hiker Keypad/);
   assert.match(html, /id="campaign"/);
   assert.match(html, /id="size"/);
   assert.match(html, /downloads\/SSE_Statics_20260728-080000\.zip\?v=/);

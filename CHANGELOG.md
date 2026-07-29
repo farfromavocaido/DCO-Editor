@@ -24,6 +24,11 @@
 - Font vs SVG-outline export mode: outline bakes fixed-copy Museo glyph paths via `opentype.js` and omits the OTF from packages (`renderMode: 'outline'`).
 - Hiker / Keepy Uppy background assets under `campaign/assets/hiker/` and `campaign/assets/keepyuppy/`.
 
+### Changed
+
+- **Non-DCO headline order** — Hiker Keypad, Keepy Uppy Welcome Credit, and Keepy Uppy Top Discount now lead with the offer headline (keypad / welcome credit / discount); “A different kind of energy” is act 2.
+- **Non-DCO H2 ↔ T&Cs handoff** — headline-act2 enter (and banner H1 exit on 320×50 / 728×90) now use `act1_out`, the same beat as the terms-prices → unit-rate-prices transition, so H2 always lands with the legal-line swap.
+
 ### Fixed
 
 - **Outline paint-box + fit bottom-align**: paint-box placement now reapplies text-fit `align: bottom` `translateY` when positioning the SVG. Host-relative run capture cancels that transform from `contentTop`, so shrunk 320×50 values (Hiker `10.5%`) were sitting too high vs sublines while unshrunk Keepy copy looked fine.

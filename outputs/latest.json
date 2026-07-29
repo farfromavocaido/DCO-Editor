@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-29T10:00:49.971Z",
-  "zip": "downloads/SSE_Statics_20260729-110049.zip",
+  "generatedAt": "2026-07-29T11:56:37.222Z",
+  "zip": "downloads/SSE_Statics_20260729-125637.zip",
   "campaigns": [
     {
       "id": "sse-hiker-welcome",
-      "name": "Hiker Welcome Credit",
+      "name": "Hiker Keypad",
       "exportSlug": "SSE_Hiker_Welcome",
       "sizes": [
         "320x50",

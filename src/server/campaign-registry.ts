@@ -17,7 +17,7 @@ export const CAMPAIGNS: CampaignEntry[] = [
   },
   {
     id: 'sse-hiker-welcome',
-    name: 'Hiker Welcome Credit',
+    name: 'Hiker Keypad',
     file: 'sse-hiker-welcome-creative.json',
     exportSlug: 'SSE_Hiker_Welcome',
   },

@@ -300,7 +300,7 @@ test('POST /api/creative/base-package can return a canonical agency zip', async 
   assert.ok(!bytes.includes(Buffer.from('ads/assets/fonts/Museo700-Regular.otf')));
 });
 
-test('POST /api/creative/export-preview writes tracked outputs for non-DCO campaigns', async () => {
+test('POST /api/creative/export-preview writes tracked outputs for statics + DCO agency', async () => {
   // Snapshot committed package first — this test overwrites outputs/, and CI runs
   // export:preview-site afterward. Wiping to an empty stub left Pages /statics/ empty.
   const snapshotDir = await fs.mkdtemp(path.join(os.tmpdir(), 'outputs-snap-'));
@@ -326,7 +326,11 @@ test('POST /api/creative/export-preview writes tracked outputs for non-DCO campa
     const payload = await response.json();
     assert.equal(payload.ok, true);
     assert.ok(payload.latest?.zip?.startsWith('downloads/SSE_Statics_'));
+    assert.ok(payload.latest?.dcoZip?.startsWith('downloads/SSE_DCO_canonical_agency_'));
     assert.equal(payload.latest.campaigns.length, 3);
+    assert.equal(payload.latest.dco?.id, 'sse-dco');
+    assert.equal(payload.latest.dco?.packageKind, 'canonical-agency');
+    assert.ok(payload.latest.dco?.sizes?.includes('300x250'));
 
     const htmlPath = path.resolve(
       outputsRoot,
@@ -337,9 +341,18 @@ test('POST /api/creative/export-preview writes tracked outputs for non-DCO campa
     assert.match(html, new RegExp(hikerClickTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
     assert.match(html, /window\.clickTag = clickTag/);
 
+    const agencyHtmlPath = path.resolve(outputsRoot, 'campaigns/sse-dco/ads/300x250/index.html');
+    const agencyHtml = await fs.readFile(agencyHtmlPath, 'utf8');
+    assert.match(agencyHtml, /<!DOCTYPE html>/i);
+    assert.ok(await fs.readFile(path.resolve(outputsRoot, 'campaigns/sse-dco/mapping.txt'), 'utf8'));
+
     const zipPath = path.resolve(outputsRoot, payload.latest.zip);
     const zip = await fs.readFile(zipPath);
     assert.equal(zip.subarray(0, 4).toString('binary'), 'PK\u0003\u0004');
+    const dcoZipPath = path.resolve(outputsRoot, payload.latest.dcoZip);
+    const dcoZip = await fs.readFile(dcoZipPath);
+    assert.equal(dcoZip.subarray(0, 4).toString('binary'), 'PK\u0003\u0004');
+    assert.ok(dcoZip.includes(Buffer.from('ads/300x250/index.html')));
   } finally {
     await fs.rm(path.resolve(outputsRoot, 'campaigns'), { recursive: true, force: true });
     await fs.rm(path.resolve(outputsRoot, 'downloads'), { recursive: true, force: true });
@@ -356,7 +369,7 @@ test('POST /api/creative/export-preview writes tracked outputs for non-DCO campa
 });
 
 
-test('POST /api/creative/export-preview rejects the DCO campaign', async () => {
+test('POST /api/creative/export-preview rejects DCO in the campaigns list', async () => {
   const response = await exportPreviewPost(new Request('http://localhost/api/creative/export-preview', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

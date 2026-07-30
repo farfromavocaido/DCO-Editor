@@ -1,0 +1,29 @@
+SSE DCO dynamic field mapping
+Designed for Studio / GWD-style dynamic creative handoff.
+
+field_name	type	allowed_values	creative_usage
+heading1_text	text		Headline 1 copy
+heading2_text	text		Headline 2 copy
+heading3_text	text		Act 3 headline copy over the offer roundel
+heading4_text	text		Act 4 headline copy over the CTA/endframe
+offer_count_num	integer	0-3	Visible offer count (0 = no offers)
+offer1_value_text	text		Offer 1 value
+offer1_sub_text	text		Offer 1 subline
+offer2_value_text	text		Offer 2 value
+offer2_sub_text	text		Offer 2 subline
+offer3_value_text	text		Offer 3 value
+offer3_sub_text	text		Offer 3 subline
+tc_type_enum	enum	tcs_only | tcs_units	Terms display mode
+tc_terms_text	text		Terms and conditions copy
+tc_units_text	text		Unit price copy
+cta_type_enum	enum	roundel | rectangle	CTA visual type; default roundel
+cta_text	text		CTA label
+include_roundel_frame_bool	boolean	true | false	Show optional roundel frame; false keeps the three-act timing
+roundel_text_text	text		Optional roundel frame copy
+roundel_value_text	text		Optional large roundel value
+background_image_url_160x600	image		Optional background image URL for 160x600. Leave blank to use the packaged default.
+background_image_url_300x250	image		Optional background image URL for 300x250. Leave blank to use the packaged default.
+background_image_url_300x600	image		Optional background image URL for 300x600. Leave blank to use the packaged default.
+background_image_url_320x50	image		Optional background image URL for 320x50. Leave blank to use the packaged default.
+background_image_url_728x90	image		Optional background image URL for 728x90. Leave blank to use the packaged default.
+background_image_url_970x250	image		Optional background image URL for 970x250. Leave blank to use the packaged default.

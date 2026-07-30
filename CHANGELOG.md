@@ -26,6 +26,7 @@
 
 ### Changed
 
+- **Pages DCO root = Canonical Agency Zip** — **Export for Preview** also bakes SSE DCO as `outputs/campaigns/sse-dco/` (`ads/{size}/index.html` + `mapping.txt`, same as toolbar Export Canonical Agency Zip) plus `downloads/SSE_DCO_canonical_agency_*.zip`. `export:preview-site` serves that package at the Pages root (size picker + ZIP); `/statics/` remains non-DCO only. `latest.json` gains `dco` / `dcoZip`.
 - **SSE DCO Offer Roundel parity** — offers-2 / offers-3 now carry the same Offer Roundel frame/copy/value placement as the 1-offer baseline on every size (CTA Roundel untouched).
 - **SSE DCO editor sample defaults** — offer counts 1/2/3 share the same demo copy (H1–H4 energy / best plan / switch and save / energy; roundel Save up to €1,080; 15% / 30% / €125 offers). Terms and CTA text left as the prior defaults.
 - **Per-campaign static clickTags** — Export for Static / preview bake product landing URLs: Keypad → `/keypad-electricity`, Welcome Credit → `/electricity-welcome-credit`, Top Discount → `/electricity-top-discount`. SSE DCO still uses the homepage default.

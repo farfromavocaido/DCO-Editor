@@ -67,7 +67,7 @@ When a field is missing or empty at render time, behaviour depends on context:
 
 ## Client preview persistence
 
-The client / GitHub `preview-page.html` stores selected ad size, control values (including per-size backgrounds), and zoom under `localStorage` key `sse-dco-client-preview:{exportSlug}` so a refresh keeps the working session. **Restore defaults** removes that key and re-applies the baked-in `clientInitialRow()` sample values.
+The downloadable client ZIP `preview-page.html` stores selected ad size, control values (including per-size backgrounds), and zoom under `localStorage` key `sse-dco-client-preview:{exportSlug}` so a refresh keeps the working session. **Restore defaults** removes that key and re-applies the baked-in `clientInitialRow()` sample values. (GitHub Pages root hosts the Canonical Agency Zip viewer instead — no live feed form.)
 
 ## Copy validation (client preview only)
 

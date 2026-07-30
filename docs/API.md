@@ -33,20 +33,21 @@ When `download: true`, returns a ZIP attachment of the HTML files plus staged ba
 
 ### `POST /api/creative/export-preview`
 
-Writes the tracked statics preview package under `outputs/` (not a browser download). Body:
+Writes the tracked preview package under `outputs/` (not a browser download). Body:
 
 ```json
 {
   "campaigns": [
     { "id": "sse-hiker-welcome", "document": {}, "presentationSnapshots": {} }
-  ]
+  ],
+  "dcoDocument": {}
 }
 ```
 
-- Only non-DCO campaign ids are accepted (`sse-hiker-welcome`, `sse-keepyuppy-welcome`, `sse-keepyuppy-discount`).
-- `document` optional (loaded from disk when omitted). Prefer editor-supplied `presentationSnapshots` for WYSIWYG outline bake.
-- Renders Export-for-Static HTML per size, copies flat background assets, replaces `outputs/campaigns/`, writes one `outputs/downloads/SSE_Statics_<timestamp>.zip` (previous downloads removed), and updates `outputs/latest.json`.
-- Returns `{ ok, latest, written, zipBytes }`.
+- `campaigns` — only non-DCO ids (`sse-hiker-welcome`, `sse-keepyuppy-welcome`, `sse-keepyuppy-discount`). `document` optional (loaded from disk when omitted). Prefer editor-supplied `presentationSnapshots` for WYSIWYG outline bake.
+- `dcoDocument` optional — SSE DCO creative JSON; when omitted, loaded from disk. Always baked as **Canonical Agency Zip** (`ads/{size}/index.html` + `mapping.txt`) under `outputs/campaigns/sse-dco/`.
+- Replaces `outputs/campaigns/`, writes `outputs/downloads/SSE_Statics_<timestamp>.zip` (non-DCO only), `outputs/downloads/SSE_DCO_canonical_agency_<timestamp>.zip`, and updates `outputs/latest.json` (`campaigns`, `dco`, `zip`, `dcoZip`).
+- Returns `{ ok, latest, written, zipBytes, dcoZipBytes }`.
 
 ### `POST /api/creative/{size}/export`
 

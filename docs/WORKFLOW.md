@@ -18,24 +18,26 @@
 | **Export HTML (font)** | Downloads `{exportSlug}_html.zip`; also writes `output/{exportSlug}_{size}.html` (+ WIP variants) |
 | **Export HTML (SVG outlines)** | Snapshots the editor stage (all sizes) then downloads `{exportSlug}_html_outlines.zip`; Studio-shaped fixed-copy outline HTML (Enabler shell); SVGs inlined; nested `assets/…` backgrounds |
 | **Export for Static** | Same editor snapshot bake → `{exportSlug}_html_static.zip`; lean outlined HTML (no Enabler/DV360); inactive layers pruned; flat `assets/<basename>.jpg` backgrounds; IAB `clickTag` is per campaign (Keypad / Welcome Credit / Top Discount product URLs; DCO falls back to `https://www.sseairtricity.com/uk`) |
-| **Export for Preview** | Snapshots all non-DCO campaigns → tracked `outputs/` (per-campaign HTML + assets, timestamped zip, `latest.json`). Commit `outputs/` and push to publish `/statics/` on GitHub Pages |
+| **Export for Preview** | Snapshots all non-DCO campaigns + bakes SSE DCO as Canonical Agency Zip → tracked `outputs/` (`campaigns/`, `SSE_Statics_*.zip`, `SSE_DCO_canonical_agency_*.zip`, `latest.json`). Commit `outputs/` and push to publish Pages root (DCO) + `/statics/` |
 | **View HTML** | Opens a browser preview of the current size with baked feed row |
 | **HTML source** | Formatted, syntax-highlighted export HTML in the inspector modal |
 | **Client ZIP** | Downloadable preview package with validator (font mode) |
 | **Client ZIP (SVG outlines)** | Fixed-copy outline package without OTF; campaign SVGs inlined |
 | **Canonical Zip** | Flat `{size}.html` + packaged backgrounds; SVGs inlined; Museo CDN |
-| **Canonical Agency Zip** | Agency `ads/{size}/index.html`; SVGs inlined; Museo CDN; backgrounds feed-only (no hiker sample) |
+| **Canonical Agency Zip** | Agency `ads/{size}/index.html`; SVGs inlined; Museo CDN; backgrounds feed-only (no hiker sample). Same tree Export for Preview writes under `outputs/campaigns/sse-dco/` |
 | **Base ZIP** | Agency upload package with mapping and HTML shells |
 
-## Statics preview publish
+## Preview publish (DCO + statics)
 
 1. In the editor, run **Export for Preview** (More menu).
-2. Commit the updated `outputs/` tree (`campaigns/`, `downloads/SSE_Statics_*.zip`, `latest.json`).
-3. Push to `main`. The Pages workflow rebuilds `site/` including gated `site/statics/` from the committed package.
+2. Commit the updated `outputs/` tree (`campaigns/` including `sse-dco/`, both zips under `downloads/`, `latest.json`).
+3. Push to `main`. The Pages workflow rebuilds `site/`:
+   - **Root** — gated Canonical Agency Zip viewer (`ads/{size}/index.html`)
+   - **`/statics/`** — gated non-DCO Export-for-Static viewer
 
-Local check: `npm run export:preview-site` then serve `site/` (`just preview`). Statics URL path: `/statics/`.
+Local check: `npm run export:preview-site` then serve `site/` (`just preview`).
 
-GitHub Pages replaces the whole artifact on each deploy (old server files are gone). Browser caches are the remaining footgun: the statics shell cache-busts ad/ZIP URLs with `?v=<generatedAt>`, polls `latest.json`, and offers **Reload latest** (plus a banner when the open tab is behind the server package).
+GitHub Pages replaces the whole artifact on each deploy (old server files are gone). Browser caches are the remaining footgun: both shells cache-bust ad/ZIP URLs with `?v=<generatedAt>`, poll `latest.json`, and offer **Reload latest** (plus a banner when the open tab is behind the server package).
 
 ## Adding assets
 

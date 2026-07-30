@@ -1509,8 +1509,9 @@ export const useEditorStore = create<any>((set, get) => ({
   },
 
   /**
-   * Bake Export-for-Static HTML for all non-DCO campaigns into tracked `outputs/`.
-   * Snapshots the live editor stage per campaign (same path as Export for Static).
+   * Bake non-DCO Export-for-Static HTML + SSE DCO Canonical Agency Zip into tracked
+   * `outputs/`. Snapshots the live editor stage per non-DCO campaign; DCO uses the
+   * unsaved editor document when that campaign is active, otherwise disk.
    */
   exportForPreview: async () => {
     const original = {
@@ -1590,8 +1591,11 @@ export const useEditorStore = create<any>((set, get) => ({
       throw new Error('No non-DCO campaigns registered for Export for Preview');
     }
 
-    get().setStatus('Exporting statics preview package…');
+    get().setStatus('Exporting preview package (statics + DCO agency)…');
     const payloads = [];
+    const dcoDocument = original.activeCampaignId === 'sse-dco'
+      ? mergedDocumentForState()
+      : null;
     try {
       const alreadySnapshotted = new Set();
       if (previewCampaigns.some((entry) => entry.id === original.activeCampaignId)) {
@@ -1620,18 +1624,22 @@ export const useEditorStore = create<any>((set, get) => ({
         });
       }
 
-      get().setStatus('Writing outputs/ statics package…');
+      get().setStatus('Writing outputs/ (statics + DCO agency)…');
       const response = await fetch('/api/creative/export-preview', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ campaigns: payloads }),
+        body: JSON.stringify({
+          campaigns: payloads,
+          ...(dcoDocument ? { dcoDocument } : {}),
+        }),
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(payload.error || response.statusText || 'Failed to export preview package');
       }
       const zipName = String(payload.latest?.zip || '').split('/').pop() || 'SSE_Statics.zip';
-      get().setStatus(`Wrote outputs/ (${zipName}) — commit to publish`);
+      const dcoZipName = String(payload.latest?.dcoZip || '').split('/').pop() || 'SSE_DCO_canonical_agency.zip';
+      get().setStatus(`Wrote outputs/ (${zipName} + ${dcoZipName}) — commit to publish`);
       return payload;
     } finally {
       set({

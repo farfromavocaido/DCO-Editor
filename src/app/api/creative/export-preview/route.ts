@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { listStaticPreviewCampaigns } from '@/server/campaign-registry';
+import { DEFAULT_CAMPAIGN_ID, listStaticPreviewCampaigns } from '@/server/campaign-registry';
 import { readCreativeDocumentForCampaign } from '@/server/creative-document';
 import {
   buildExportPreviewPackage,
@@ -17,7 +17,7 @@ type CampaignBody = {
 
 export async function POST(request: Request) {
   try {
-    let body: { campaigns?: CampaignBody[] } = {};
+    let body: { campaigns?: CampaignBody[]; dcoDocument?: Record<string, unknown> } = {};
     try {
       body = await request.json();
     } catch {
@@ -52,7 +52,9 @@ export async function POST(request: Request) {
       });
     }
 
-    const result = await buildExportPreviewPackage(inputs);
+    // DCO is always baked as Canonical Agency Zip into outputs/ (Pages root).
+    const dcoDocument = body.dcoDocument || await readCreativeDocumentForCampaign(DEFAULT_CAMPAIGN_ID);
+    const result = await buildExportPreviewPackage(inputs, { dcoDocument });
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(

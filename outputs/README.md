@@ -1,5 +1,13 @@
-# Statics preview outputs
+# Preview outputs
 
-Tracked HTML packages for the GitHub Pages statics preview (`/statics/`).
+Tracked packages for the GitHub Pages preview site:
 
-Populate via the editor toolbar action **Export for Preview** (writes campaign HTML, a timestamped zip under `downloads/`, and refreshes `latest.json`). Commit this folder when you want the hosted preview updated.
+| Path | Hosted at |
+|---|---|
+| `campaigns/sse-dco/` | Pages **root** — Canonical Agency Zip (`ads/{size}/index.html`) |
+| `campaigns/<non-dco>/` | Pages **`/statics/`** — Export-for-Static HTML |
+| `downloads/SSE_DCO_canonical_agency_*.zip` | DCO ZIP download |
+| `downloads/SSE_Statics_*.zip` | Statics ZIP download |
+| `latest.json` | Manifest for both shells |
+
+Populate via the editor toolbar action **Export for Preview**. Commit this folder when you want the hosted preview updated.

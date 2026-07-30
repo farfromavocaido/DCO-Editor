@@ -1,6 +1,7 @@
 {
-  "generatedAt": "2026-07-29T16:17:44.917Z",
-  "zip": "downloads/SSE_Statics_20260729-171744.zip",
+  "generatedAt": "2026-07-30T12:40:18.739Z",
+  "zip": "downloads/SSE_Statics_20260730-134018.zip",
+  "dcoZip": "downloads/SSE_DCO_canonical_agency_20260730-134018.zip",
   "campaigns": [
     {
       "id": "sse-hiker-welcome",
@@ -41,5 +42,19 @@
         "970x250"
       ]
     }
-  ]
+  ],
+  "dco": {
+    "id": "sse-dco",
+    "name": "SSE DCO",
+    "exportSlug": "SSE_DCO",
+    "sizes": [
+      "320x50",
+      "728x90",
+      "300x250",
+      "160x600",
+      "300x600",
+      "970x250"
+    ],
+    "packageKind": "canonical-agency"
+  }
 }

@@ -1650,15 +1650,30 @@ export type ExportPreviewCampaignInput = {
   presentationSnapshots?: PresentationSnapshots;
 };
 
+export type ExportPreviewDcoPackage = {
+  id: string;
+  name: string;
+  exportSlug: string;
+  sizes: string[];
+  /** Always canonical-agency for the Pages DCO display package. */
+  packageKind: 'canonical-agency';
+};
+
 export type ExportPreviewLatest = {
   generatedAt: string;
+  /** Non-DCO statics tree zip under downloads/ (Pages `/statics/`). */
   zip: string;
+  /** SSE DCO Canonical Agency Zip (same entries as toolbar Export Canonical Agency Zip). */
+  dcoZip: string;
+  /** Non-DCO Export-for-Static campaigns (Pages `/statics/`). */
   campaigns: Array<{
     id: string;
     name: string;
     exportSlug: string;
     sizes: string[];
   }>;
+  /** SSE DCO canonical-agency package hosted on the Pages root display. */
+  dco: ExportPreviewDcoPackage;
 };
 
 const formatStaticsZipTimestamp = (date = new Date()) => {
@@ -1684,18 +1699,30 @@ const writeTreeEntries = async (root: string, entries: PackageEntry[]) => {
 };
 
 /**
- * Bake Export-for-Static HTML for the non-DCO campaigns into tracked `outputs/`,
- * zip them for client download, and refresh `latest.json`.
+ * Bake Export-for-Static HTML for the non-DCO campaigns **and** the SSE DCO
+ * Canonical Agency Zip into tracked `outputs/`, zip them for download, and
+ * refresh `latest.json`.
  */
 export const buildExportPreviewPackage = async (
   campaigns: ExportPreviewCampaignInput[],
+  options: { dcoDocument?: Record<string, unknown> } = {},
 ) => {
   const allowed = new Map(listStaticPreviewCampaigns().map((entry) => [entry.id, entry]));
   if (!campaigns.length) {
     throw new Error('Export for Preview requires at least one non-DCO campaign');
   }
+  const dcoDocument = options.dcoDocument;
+  if (!dcoDocument) {
+    throw new Error('Export for Preview requires the SSE DCO creative document');
+  }
+  const dcoRegistry = getCampaign('sse-dco');
+  const dcoCampaignId = (dcoDocument.campaign as { id?: string } | undefined)?.id;
+  if (dcoCampaignId && dcoCampaignId !== dcoRegistry.id) {
+    throw new Error(`DCO document campaign id ${dcoCampaignId} does not match ${dcoRegistry.id}`);
+  }
 
-  const campaignEntries: PackageEntry[] = [];
+  const staticEntries: PackageEntry[] = [];
+  const outputEntries: PackageEntry[] = [];
   const campaignMeta: ExportPreviewLatest['campaigns'] = [];
   const written: string[] = [];
 
@@ -1705,11 +1732,12 @@ export const buildExportPreviewPackage = async (
       throw new Error(`Campaign ${input.id} is not a statics preview campaign`);
     }
     const document = input.document;
-    if (document?.campaign?.id && document.campaign.id !== input.id) {
-      throw new Error(`Document campaign id ${document.campaign.id} does not match ${input.id}`);
+    const documentCampaignId = (document.campaign as { id?: string } | undefined)?.id;
+    if (documentCampaignId && documentCampaignId !== input.id) {
+      throw new Error(`Document campaign id ${documentCampaignId} does not match ${input.id}`);
     }
     const slug = exportSlugForDocument(document);
-    const sizes = Object.keys(document.sizes || {});
+    const sizes = Object.keys((document.sizes as Record<string, unknown>) || {});
 
     for (const size of sizes) {
       const html = await renderStudioReadyHtml(document, size, {
@@ -1718,17 +1746,21 @@ export const buildExportPreviewPackage = async (
         presentationSnapshot: input.presentationSnapshots?.[size] || null,
       });
       const relativePath = `campaigns/${input.id}/${slug}_${size}.html`;
-      campaignEntries.push({ path: relativePath, data: html });
+      const entry = { path: relativePath, data: html };
+      staticEntries.push(entry);
+      outputEntries.push(entry);
       written.push(relativePath);
     }
 
     for (const assetPath of collectOutlineHtmlSidecarAssets(document)) {
       const entryPath = flatAssetEntryPath(assetPath);
       const relativePath = `campaigns/${input.id}/${entryPath}`;
-      campaignEntries.push({
+      const entry = {
         path: relativePath,
         data: await fs.readFile(path.resolve(projectRoot, assetPath)),
-      });
+      };
+      staticEntries.push(entry);
+      outputEntries.push(entry);
       written.push(relativePath);
     }
 
@@ -1740,14 +1772,38 @@ export const buildExportPreviewPackage = async (
     });
   }
 
+  // Exact Export Canonical Agency Zip tree under campaigns/sse-dco/.
+  const agencyEntries = await buildBasePackageEntries(dcoDocument, {
+    assetMode: 'canonical-agency',
+    renderMode: 'font',
+  });
+  for (const entry of agencyEntries) {
+    const relativePath = `campaigns/${dcoRegistry.id}/${entry.path}`;
+    outputEntries.push({ path: relativePath, data: entry.data });
+    written.push(relativePath);
+  }
+  const dcoMeta: ExportPreviewDcoPackage = {
+    id: dcoRegistry.id,
+    name: dcoRegistry.name,
+    exportSlug: exportSlugForDocument(dcoDocument) || dcoRegistry.exportSlug,
+    sizes: Object.keys((dcoDocument.sizes as Record<string, unknown>) || {}),
+    packageKind: 'canonical-agency',
+  };
+
   const generatedAt = new Date().toISOString();
-  const zipName = `SSE_Statics_${formatStaticsZipTimestamp()}.zip`;
+  const stamp = formatStaticsZipTimestamp();
+  const zipName = `SSE_Statics_${stamp}.zip`;
   const zipRelative = `downloads/${zipName}`;
-  const zipBuffer = createZipBuffer(campaignEntries);
+  const dcoZipName = `SSE_DCO_canonical_agency_${stamp}.zip`;
+  const dcoZipRelative = `downloads/${dcoZipName}`;
+  const zipBuffer = createZipBuffer(staticEntries);
+  const dcoZipBuffer = createZipBuffer(agencyEntries);
   const latest: ExportPreviewLatest = {
     generatedAt,
     zip: zipRelative,
+    dcoZip: dcoZipRelative,
     campaigns: campaignMeta,
+    dco: dcoMeta,
   };
 
   const campaignsDir = path.resolve(outputsRoot, 'campaigns');
@@ -1756,19 +1812,21 @@ export const buildExportPreviewPackage = async (
   await fs.rm(downloadsDir, { recursive: true, force: true });
   await fs.mkdir(campaignsDir, { recursive: true });
   await fs.mkdir(downloadsDir, { recursive: true });
-  await writeTreeEntries(outputsRoot, campaignEntries);
+  await writeTreeEntries(outputsRoot, outputEntries);
   await fs.writeFile(path.resolve(outputsRoot, zipRelative), zipBuffer);
+  await fs.writeFile(path.resolve(outputsRoot, dcoZipRelative), dcoZipBuffer);
   await fs.writeFile(
     path.resolve(outputsRoot, 'latest.json'),
     `${JSON.stringify(latest, null, 2)}\n`,
   );
-  written.push(zipRelative, 'latest.json');
+  written.push(zipRelative, dcoZipRelative, 'latest.json');
 
   return {
     ok: true as const,
     latest,
     written,
     zipBytes: zipBuffer.length,
+    dcoZipBytes: dcoZipBuffer.length,
   };
 };
 

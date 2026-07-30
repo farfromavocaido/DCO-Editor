@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,6 +15,21 @@ import { renderStaticsPreviewPage } from './render-statics-preview-page';
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const siteRoot = path.resolve(appRoot, 'site');
 const DCO_CAMPAIGN_ID = 'sse-dco';
+
+/** Stable-enough stamp for iframe `?v=` — prefers CI/git SHA, else export time. */
+const resolveDeployCacheBust = () => {
+  const fromEnv = String(process.env.GITHUB_SHA || process.env.VERCEL_GIT_COMMIT_SHA || '').trim();
+  if (fromEnv) return fromEnv.slice(0, 12);
+  try {
+    return execSync('git rev-parse --short HEAD', {
+      cwd: appRoot,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+  } catch {
+    return new Date().toISOString();
+  }
+};
 
 const writeEntry = async (relativePath: string, data: string | Buffer) => {
   const targetPath = path.resolve(siteRoot, relativePath);
@@ -153,10 +169,13 @@ const main = async () => {
     console.warn('outputs/ has no DCO agency zip yet — DCO preview download button omitted');
   }
 
-  // CDN assets/fonts match Studio production handoff (base CDN zip).
+  // Museo from Studio CDN; SVGs inlined like Canonical Agency Zip; deploy stamp busts iframe cache.
+  const cacheBust = resolveDeployCacheBust();
   const entries = await buildClientPreviewPackageEntries(document, {
     includeValidator: false,
     assetMode: 'cdn',
+    inlineSvgs: true,
+    cacheBust,
     ...(agencyZipHref ? { agencyZipHref } : {}),
   });
 

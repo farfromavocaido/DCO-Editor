@@ -96,8 +96,9 @@ one for the other both renders the wrong brand font and invalidates every
 measurement. The canonical live URL is the Studio CDN asset in
 `src/lib/brand-font.ts` (`MUSEO_CDN_URL`). The editor layout, `/api/creative/{size}/view`,
 CDN base zips, and the GitHub Pages preview site all load that same file
-(`local("☺")` + `font-weight: 100 900`). Downloadable client ZIPs stay
-packaged/self-contained with the OTF under `campaign/assets/fonts`. Never map
+(`local("☺")` + `font-weight: 100 900`). Pages preview inlines campaign SVGs (like
+Canonical Agency Zip) and cache-busts iframe ad URLs with `?v=<gitSha>`. Downloadable
+client ZIPs stay packaged/self-contained with the OTF under `campaign/assets/fonts`. Never map
 the Museo family to `MuseoSans_700.otf`. Ad stacks are
 `Museo, Arial, sans-serif`.
 

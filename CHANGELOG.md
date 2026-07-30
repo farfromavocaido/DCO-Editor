@@ -26,6 +26,8 @@
 
 ### Changed
 
+- **Pages DCO preview assets** — hosted client preview now inlines campaign SVGs (same as Canonical Agency Zip) while keeping Museo on Studio CDN; no more wave/logo CDN links in the iframe ads.
+- **Pages DCO iframe cache-bust** — `export:preview-site` stamps iframe URLs with `?v=<gitSha>` so deploys do not leave colleagues on stale ad HTML.
 - **Toolbar: Sync Zips** — renamed from Export for Preview; same action still syncs non-DCO statics + DCO Canonical Agency Zip into `outputs/`.
 - **DCO Pages agency zip share** — hosted DCO preview offers **Download Agency Zip** plus **Copy link** (absolute direct-download URL for media-agency handoff). **Sync Zips** bakes the zip into `outputs/` (`campaigns/sse-dco/` + `downloads/SSE_DCO_canonical_agency_*.zip`; `latest.json` gains `dco` / `dcoZip`). Preview field values do not affect the zip.
 - **SSE DCO Offer Roundel parity** — offers-2 / offers-3 now carry the same Offer Roundel frame/copy/value placement as the 1-offer baseline on every size (CTA Roundel untouched).

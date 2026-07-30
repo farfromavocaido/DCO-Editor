@@ -526,7 +526,7 @@ test('builds a client preview package without copy validation when requested', a
   assert.match(variant, /url\("\.\.\/assets\/fonts\/Museo700-Regular\.otf"\) format\("opentype"\)/);
 });
 
-test('builds a CDN-linked client preview package for GitHub Pages parity', async () => {
+test('builds a CDN-linked client preview package for Studio CDN parity', async () => {
   const document = await readCreativeDocument();
   const entries = await buildClientPreviewPackageEntries(document, {
     includeValidator: false,
@@ -557,6 +557,38 @@ test('builds a CDN-linked client preview package for GitHub Pages parity', async
   assert.doesNotMatch(html, /MuseoSans_700\.otf/);
   assert.doesNotMatch(html, /url\("\.\.\/assets\/fonts\/Museo700-Regular\.otf"\)/);
   assert.doesNotMatch(html, /src="\.\.\/assets\/SVG\//);
+});
+
+test('Pages client preview inlines SVGs, keeps Museo CDN, and cache-busts iframe src', async () => {
+  const document = await readCreativeDocument();
+  const entries = await buildClientPreviewPackageEntries(document, {
+    includeValidator: false,
+    assetMode: 'cdn',
+    inlineSvgs: true,
+    cacheBust: 'deadbeef1234',
+  });
+  const names = entries.map((entry) => entry.path).sort();
+  const html = entries
+    .filter((entry) => entry.path.startsWith('ads/html/') && entry.path.endsWith('.html'))
+    .map((entry) => String(entry.data || ''))
+    .join('\n');
+  const preview = String(entries.find((entry) => entry.path === 'preview-page.html')?.data || '');
+
+  assert.ok(names.includes('ads/html/SSE_DCO_728x90.html'));
+  assert.ok(names.includes('ads/assets/bg_728x90.jpg'));
+  assert.ok(!names.includes('ads/assets/fonts/Museo700-Regular.otf'));
+  assert.ok(!names.some((name) => name.startsWith('ads/assets/SVG/')));
+
+  assert.ok(html.includes(CDN_MUSEO_URL), 'Expected Museo CDN URL');
+  for (const url of CDN_SVG_URLS) {
+    assert.ok(!html.includes(url), `Pages preview must not CDN-link ${url}`);
+  }
+  assert.match(html, /src="data:image\/svg\+xml/);
+  assert.doesNotMatch(html, /src="\.\.\/assets\/SVG\//);
+
+  assert.match(preview, /var cacheBust = "deadbeef1234"/);
+  assert.match(preview, /ads\/html\/SSE_DCO_[^"]+\.html\?v=deadbeef1234/);
+  assert.match(preview, /function adSrcForMeta/);
 });
 
 test('client preview page can offer a static Canonical Agency Zip download', async () => {

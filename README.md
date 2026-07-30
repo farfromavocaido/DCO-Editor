@@ -30,7 +30,7 @@ Other commands:
 npm test                 # Vitest
 npm run build            # production build
 npm run start            # production server on :5174
-npm run export:preview-site   # static client preview → site/ (CDN fonts/SVGs + agency zip download + /statics/)
+npm run export:preview-site   # static client preview → site/ (CDN Museo, inlined SVGs, agency zip download + /statics/)
 ```
 
 ## What it edits

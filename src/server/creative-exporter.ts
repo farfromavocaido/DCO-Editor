@@ -124,6 +124,11 @@ type ClientPreviewPackageOptions = {
   includeValidator?: boolean;
   /** `cdn` matches Studio CDN base zips (fonts/SVGs from s0.2mdn.net). Default `packaged` keeps downloadable ZIPs self-contained. */
   assetMode?: PackageAssetMode;
+  /**
+   * When true, inline campaign SVGs as data URIs (like Canonical Agency Zip) instead of
+   * CDN or relative file refs. Typical with `assetMode: 'cdn'` for Museo-from-CDN + embedded SVGs.
+   */
+  inlineSvgs?: boolean;
   renderMode?: RenderMode;
   presentationSnapshots?: PresentationSnapshots;
   /**
@@ -131,6 +136,8 @@ type ClientPreviewPackageOptions = {
    * Preview form values do not affect this package — it is a static handoff zip.
    */
   agencyZipHref?: string;
+  /** Appended as `?v=` on iframe ad URLs so deploys bust stale browser caches. */
+  cacheBust?: string;
 };
 
 type BasePackageOptions = {
@@ -2360,6 +2367,10 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
   const sizes = canvasMetaForClient(document);
   const initialRow = clientInitialRow(document);
   const initialSize = sizes[0] || { size: '', width: 0, height: 0, src: '' };
+  const cacheBust = options.cacheBust ? String(options.cacheBust) : '';
+  const initialAdSrc = cacheBust
+    ? `${initialSize.src}?v=${encodeURIComponent(cacheBust)}`
+    : initialSize.src;
   const initialBackground = imageFieldUrl(initialRow[backgroundImageFieldName(initialSize.size)]);
   const sizeOptions = sizes.map((item) => (
     `<option value="${escapeAttr(item.size)}">${escapeHtml(item.size)}</option>`
@@ -2869,7 +2880,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           </div>
           <div class="ad-viewport">
             <div class="ad-frame-shell" data-ad-frame-shell>
-              <iframe title="SSE DCO ${escapeAttr(initialSize.size)}" data-ad-frame src="${escapeAttr(initialSize.src)}" width="${initialSize.width}" height="${initialSize.height}"></iframe>
+              <iframe title="SSE DCO ${escapeAttr(initialSize.size)}" data-ad-frame src="${escapeAttr(initialAdSrc)}" width="${initialSize.width}" height="${initialSize.height}"></iframe>
             </div>
           </div>
         </article>
@@ -2881,6 +2892,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         var defaults = ${jsString(initialRow)};
         var defaultSize = ${jsString(initialSize.size)};
         var sizes = ${jsString(sizes)};
+        var cacheBust = ${jsString(cacheBust)};
         var controls = document.getElementById('controls');
         var frame = document.querySelector('[data-ad-frame]');
         var frames = frame ? [frame] : [];
@@ -3095,6 +3107,13 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           frame.contentWindow.postMessage({ type: 'SSE_DCO_PREVIEW_STATE', row: row }, '*');
         }
 
+        function adSrcForMeta(meta, forceReplay) {
+          var params = [];
+          if (cacheBust) params.push('v=' + encodeURIComponent(cacheBust));
+          if (forceReplay) params.push('replay=' + Date.now());
+          return params.length ? meta.src + '?' + params.join('&') : meta.src;
+        }
+
         function loadActiveAd(forceReplay) {
           if (!frame) return;
           var meta = selectedSizeMeta();
@@ -3106,7 +3125,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           frame.setAttribute('height', meta.height);
           var currentSrc = (frame.getAttribute('src') || '').split('?')[0];
           if (forceReplay || currentSrc !== meta.src) {
-            frame.setAttribute('src', meta.src + (forceReplay ? '?replay=' + Date.now() : ''));
+            frame.setAttribute('src', adSrcForMeta(meta, forceReplay));
           }
           fitAdFrames();
         }
@@ -3269,8 +3288,13 @@ export const buildClientPreviewPackageEntries = async (document: Record<string, 
   const renderMode = options.renderMode || 'font';
   const includeValidator = options.includeValidator !== false && renderMode === 'font';
   const useCdnAssets = options.assetMode === 'cdn';
+  const inlineSvgs = Boolean(options.inlineSvgs) || renderMode === 'outline';
   const slug = exportSlugForDocument(document);
-  const assetUrlMap = useCdnAssets ? CDN_ASSET_URLS : undefined;
+  const assetUrlMap = inlineSvgs
+    ? buildEmbedSvgAssetUrlMap(document)
+    : useCdnAssets
+      ? CDN_ASSET_URLS
+      : undefined;
   const fontUrlMap = renderMode === 'outline' ? undefined : (useCdnAssets ? CDN_FONT_URLS : undefined);
   const entries: PackageEntry[] = [];
   const sizes = Object.keys(document.sizes || {});
@@ -3301,8 +3325,8 @@ export const buildClientPreviewPackageEntries = async (document: Record<string, 
 
   for (const assetPath of collectClientAssetPaths(document)) {
     if (assetUrlMap?.[assetPath]) continue;
-    // Outline HTML inlines SVGs as data URIs — don't ship duplicate files.
-    if (renderMode === 'outline' && isSvgAssetPath(assetPath)) continue;
+    // Inlined SVGs (outline or Pages embed) — don't ship duplicate files.
+    if (inlineSvgs && isSvgAssetPath(assetPath)) continue;
     entries.push({
       path: `ads/${assetPath}`,
       data: await fs.readFile(path.resolve(projectRoot, assetPath)),
@@ -3331,6 +3355,7 @@ export const buildClientPreviewPackageEntries = async (document: Record<string, 
     data: renderClientPreviewPage(document, {
       includeValidator,
       ...(options.agencyZipHref ? { agencyZipHref: options.agencyZipHref } : {}),
+      ...(options.cacheBust ? { cacheBust: options.cacheBust } : {}),
     }),
   });
 

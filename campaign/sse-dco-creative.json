@@ -1080,9 +1080,9 @@
               "start": "offer1_in",
               "end": "offers_exit",
               "params": {
-                "enter_distance_px": 60,
+                "enter_distance_px": 30,
                 "exit_dy": 20,
-                "enter_duration_pct": 2.35,
+                "enter_duration_pct": 6,
                 "ease_in": "cubic-bezier(0.22, 0.82, 0.28, 1)"
               }
             }
@@ -1141,7 +1141,7 @@
               "params": {
                 "enter_distance_px": 60,
                 "exit_dy": 20,
-                "enter_duration_pct": 2.15,
+                "enter_duration_pct": 5,
                 "ease_in": "cubic-bezier(0.2, 0.75, 0.25, 1)"
               }
             }
@@ -1200,7 +1200,7 @@
               "params": {
                 "enter_distance_px": 60,
                 "exit_dy": 20,
-                "enter_duration_pct": 1.95,
+                "enter_duration_pct": 4,
                 "ease_in": "cubic-bezier(0.18, 0.7, 0.22, 1)"
               }
             }

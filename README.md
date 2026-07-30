@@ -4,7 +4,7 @@ Next.js app for authoring SSE DCO display banners from a single creative documen
 
 **Repository:** [github.com/farfromavocaido/DCO-Editor](https://github.com/farfromavocaido/DCO-Editor)
 
-**DCO preview (GitHub Pages root):** [farfromavocaido.github.io/DCO-Editor/](https://farfromavocaido.github.io/DCO-Editor/) — rebuilt automatically on every push to `main`. Hosts the **Canonical Agency Zip** tree (`ads/{size}/index.html`) baked by **Export for Preview** into tracked `outputs/`. Same password gate as statics (default `ssedco`; override with `PREVIEW_SITE_PASSWORD`). Size picker + ZIP download; no live feed form (agency HTML is fixed-package).
+**Client preview (GitHub Pages):** [farfromavocaido.github.io/DCO-Editor/](https://farfromavocaido.github.io/DCO-Editor/) — rebuilt automatically on every push to `main`. A lightweight password gate protects the hosted preview (default password: `ssedco`; override with `PREVIEW_SITE_PASSWORD` when exporting). The preview remembers size, form values, and zoom in the browser across refresh; **Restore defaults** clears that and reloads the baked-in sample row. Also offers a **Canonical Agency Zip** download from tracked `outputs/` (static handoff — independent of preview field values).
 
 **Statics preview:** [farfromavocaido.github.io/DCO-Editor/statics/](https://farfromavocaido.github.io/DCO-Editor/statics/) — same password gate; hosts the three non-DCO campaigns as Export-for-Static HTML (campaign + size picker, ZIP download). Populate via editor **Export for Preview**, commit `outputs/`, then push.
 
@@ -30,7 +30,7 @@ Other commands:
 npm test                 # Vitest
 npm run build            # production build
 npm run start            # production server on :5174
-npm run export:preview-site   # Pages site → site/ from outputs/ (DCO agency root + /statics/)
+npm run export:preview-site   # static client preview → site/ (CDN fonts/SVGs + agency zip download + /statics/)
 ```
 
 ## What it edits
@@ -52,8 +52,8 @@ npm run export:preview-site   # Pages site → site/ from outputs/ (DCO agency r
 5. **Save creative** persists the document; **Save sample values** updates feed rows in the same file.
 6. **Build HTML** writes Studio-ready files to `output/`.
 7. **Client ZIP** / **Base ZIP** for handoff packages.
-8. **Export for Preview** writes non-DCO static HTML + the DCO Canonical Agency Zip into tracked `outputs/` (commit that folder to update Pages root + `/statics/`).
-9. Push to `main` to publish the preview site to GitHub Pages (see `.github/workflows/pages.yml`).
+8. **Export for Preview** writes non-DCO static HTML + the DCO Canonical Agency Zip into tracked `outputs/` (commit that folder to update `/statics/` and the DCO page’s agency ZIP download).
+9. Push to `main` to publish the client preview to GitHub Pages (see `.github/workflows/pages.yml`).
 
 See [docs/WORKFLOW.md](docs/WORKFLOW.md) for detail.
 
@@ -72,8 +72,8 @@ See [docs/WORKFLOW.md](docs/WORKFLOW.md) for detail.
 │   ├── sse-dco-creative.json
 │   └── assets/
 ├── output/                 generated HTML + ZIPs (gitignored)
-├── outputs/                tracked preview package (Export for Preview: statics + DCO agency)
-├── site/                   GitHub Pages build from outputs/ (gitignored)
+├── outputs/                tracked preview package (Export for Preview: statics + DCO agency zip)
+├── site/                   static client preview build (gitignored)
 ├── scripts/                one-off data migrations + preview-site export
 ├── src/
 │   ├── app/              Next.js routes (page + API + asset proxy)

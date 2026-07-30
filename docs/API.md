@@ -45,8 +45,8 @@ Writes the tracked preview package under `outputs/` (not a browser download). Bo
 ```
 
 - `campaigns` — only non-DCO ids (`sse-hiker-welcome`, `sse-keepyuppy-welcome`, `sse-keepyuppy-discount`). `document` optional (loaded from disk when omitted). Prefer editor-supplied `presentationSnapshots` for WYSIWYG outline bake.
-- `dcoDocument` optional — SSE DCO creative JSON; when omitted, loaded from disk. Always baked as **Canonical Agency Zip** (`ads/{size}/index.html` + `mapping.txt`) under `outputs/campaigns/sse-dco/`.
-- Replaces `outputs/campaigns/`, writes `outputs/downloads/SSE_Statics_<timestamp>.zip` (non-DCO only), `outputs/downloads/SSE_DCO_canonical_agency_<timestamp>.zip`, and updates `outputs/latest.json` (`campaigns`, `dco`, `zip`, `dcoZip`).
+- `dcoDocument` optional — SSE DCO creative JSON; when omitted, loaded from disk. Always baked as **Canonical Agency Zip** under `outputs/campaigns/sse-dco/` plus `outputs/downloads/SSE_DCO_canonical_agency_<timestamp>.zip` for the hosted DCO preview download (preview form values do not affect this zip).
+- Replaces `outputs/campaigns/`, writes `outputs/downloads/SSE_Statics_<timestamp>.zip` (non-DCO only), the DCO agency zip, and updates `outputs/latest.json` (`campaigns`, `dco`, `zip`, `dcoZip`).
 - Returns `{ ok, latest, written, zipBytes, dcoZipBytes }`.
 
 ### `POST /api/creative/{size}/export`

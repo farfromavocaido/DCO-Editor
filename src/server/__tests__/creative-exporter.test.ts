@@ -559,6 +559,22 @@ test('builds a CDN-linked client preview package for GitHub Pages parity', async
   assert.doesNotMatch(html, /src="\.\.\/assets\/SVG\//);
 });
 
+test('client preview page can offer a static Canonical Agency Zip download', async () => {
+  const document = await readCreativeDocument();
+  const without = renderClientPreviewPage(document, { includeValidator: false });
+  assert.doesNotMatch(without, /class="agency-zip-download"/);
+  assert.doesNotMatch(without, /independent of preview field values/);
+
+  const withZip = renderClientPreviewPage(document, {
+    includeValidator: false,
+    agencyZipHref: 'downloads/SSE_DCO_canonical_agency_example.zip',
+  });
+  assert.match(withZip, /class="agency-zip-download"/);
+  assert.match(withZip, /href="downloads\/SSE_DCO_canonical_agency_example\.zip"/);
+  assert.match(withZip, /Canonical Agency Zip/);
+  assert.match(withZip, /independent of preview field values/);
+});
+
 test('renders the client preview page as one self-contained document shell', async () => {
   const document = await readCreativeDocument();
   const html = renderClientPreviewPage(document, { includeValidator: true });

@@ -126,6 +126,11 @@ type ClientPreviewPackageOptions = {
   assetMode?: PackageAssetMode;
   renderMode?: RenderMode;
   presentationSnapshots?: PresentationSnapshots;
+  /**
+   * Optional Canonical Agency Zip href for the Pages DCO preview download button.
+   * Preview form values do not affect this package — it is a static handoff zip.
+   */
+  agencyZipHref?: string;
 };
 
 type BasePackageOptions = {
@@ -1672,7 +1677,7 @@ export type ExportPreviewLatest = {
     exportSlug: string;
     sizes: string[];
   }>;
-  /** SSE DCO canonical-agency package hosted on the Pages root display. */
+  /** SSE DCO Canonical Agency Zip metadata (Pages root download; preview form is unrelated). */
   dco: ExportPreviewDcoPackage;
 };
 
@@ -1700,8 +1705,8 @@ const writeTreeEntries = async (root: string, entries: PackageEntry[]) => {
 
 /**
  * Bake Export-for-Static HTML for the non-DCO campaigns **and** the SSE DCO
- * Canonical Agency Zip into tracked `outputs/`, zip them for download, and
- * refresh `latest.json`.
+ * Canonical Agency Zip into tracked `outputs/` (statics for `/statics/`, agency
+ * zip for the DCO Pages download), then refresh `latest.json`.
  */
 export const buildExportPreviewPackage = async (
   campaigns: ExportPreviewCampaignInput[],
@@ -2362,6 +2367,16 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
   const offerCountOptions = (documentHasZeroOffers(document) ? [0, 1, 2, 3] : [1, 2, 3])
     .map((count) => `<option value="${count}">${count}</option>`)
     .join('');
+  const agencyZipHref = options.agencyZipHref ? String(options.agencyZipHref) : '';
+  const agencyZipLabel = agencyZipHref
+    ? escapeHtml(agencyZipHref.split('/').pop() || 'Canonical Agency Zip')
+    : '';
+  const agencyZipDownload = agencyZipHref
+    ? `<a class="agency-zip-download" href="${escapeAttr(agencyZipHref)}" download title="Static Canonical Agency Zip — independent of preview field values">Canonical Agency Zip</a>`
+    : '';
+  const agencyZipNote = agencyZipHref
+    ? `<p class="agency-zip-note">Agency handoff ZIP (<code>${agencyZipLabel}</code>) is a static download — preview fields above do not change it. <a href="statics/">Statics preview</a></p>`
+    : `<p class="agency-zip-note"><a href="statics/">Statics preview</a></p>`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -2644,7 +2659,8 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         font-weight: 500;
       }
       .replay-button,
-      .restore-defaults-button {
+      .restore-defaults-button,
+      .agency-zip-download {
         border: 1px solid var(--line);
         border-radius: 6px;
         background: #101821;
@@ -2655,11 +2671,33 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         font-weight: 400;
         min-height: 34px;
         padding: 7px 12px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+      }
+      .agency-zip-download {
+        background: var(--teal);
+        border-color: transparent;
+        color: #062a27;
+        font-weight: 500;
+      }
+      .agency-zip-note {
+        margin: 16px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+      .agency-zip-note a { color: var(--teal); }
+      .agency-zip-note code {
+        font-size: 11px;
+        word-break: break-all;
       }
       .replay-button:hover,
       .replay-button:focus-visible,
       .restore-defaults-button:hover,
-      .restore-defaults-button:focus-visible {
+      .restore-defaults-button:focus-visible,
+      .agency-zip-download:hover,
+      .agency-zip-download:focus-visible {
         border-color: var(--teal);
         outline: none;
       }
@@ -2789,6 +2827,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         </label>
         <label class="field-tall"><span>T&C text</span><textarea name="tc_terms_text">${escapeHtml(initialRow.tc_terms_text)}</textarea></label>
         <label class="field-tall"><span>Unit price text</span><textarea name="tc_units_text">${escapeHtml(initialRow.tc_units_text)}</textarea></label>
+        ${agencyZipNote}
       </form>
       <section class="preview">
         <div class="preview-head">
@@ -2807,6 +2846,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
             </div>
             <button class="restore-defaults-button" id="restore-defaults" type="button">Restore defaults</button>
             <button class="replay-button" id="replay-ad" type="button">Replay ad</button>
+            ${agencyZipDownload}
           </div>
         </div>
         <article class="ad-card">
@@ -3244,7 +3284,10 @@ export const buildClientPreviewPackageEntries = async (document: Record<string, 
 
   entries.push({
     path: 'preview-page.html',
-    data: renderClientPreviewPage(document, { includeValidator }),
+    data: renderClientPreviewPage(document, {
+      includeValidator,
+      ...(options.agencyZipHref ? { agencyZipHref: options.agencyZipHref } : {}),
+    }),
   });
 
   if (includeValidator) {

@@ -2,12 +2,12 @@
 
 Tracked packages for the GitHub Pages preview site:
 
-| Path | Hosted at |
+| Path | Used by |
 |---|---|
-| `campaigns/sse-dco/` | Pages **root** — Canonical Agency Zip (`ads/{size}/index.html`) |
 | `campaigns/<non-dco>/` | Pages **`/statics/`** — Export-for-Static HTML |
-| `downloads/SSE_DCO_canonical_agency_*.zip` | DCO ZIP download |
+| `campaigns/sse-dco/` | Source tree for the Canonical Agency Zip bake |
 | `downloads/SSE_Statics_*.zip` | Statics ZIP download |
-| `latest.json` | Manifest for both shells |
+| `downloads/SSE_DCO_canonical_agency_*.zip` | Static download on the DCO client preview (independent of preview form values) |
+| `latest.json` | Manifest for statics shell + DCO agency zip href |
 
 Populate via the editor toolbar action **Export for Preview**. Commit this folder when you want the hosted preview updated.

@@ -5556,7 +5556,7 @@
             "left": 40,
             "top": 127,
             "width": 100,
-            "height": 64,
+            "height": 35,
             "fontSize": 42,
             "lineHeight": 1,
             "whiteSpace": "nowrap"
@@ -5937,7 +5937,7 @@
             "left": 38,
             "top": 126,
             "width": 106,
-            "height": 64,
+            "height": 35,
             "fontSize": 42,
             "lineHeight": 1,
             "whiteSpace": "nowrap",
@@ -5993,10 +5993,10 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 38,
+            "left": 37,
             "top": 126,
-            "width": 106,
-            "height": 64,
+            "width": 107,
+            "height": 35,
             "fontSize": 42,
             "lineHeight": 1,
             "whiteSpace": "nowrap",

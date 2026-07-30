@@ -329,13 +329,14 @@
       {
         "_id": 0,
         "Unique_ID": "single_elec15_solo_roundel",
-        "Reporting_label": "1offer|15pc_electricity|tc_solo|cta_roundel",
-        "Active": true,
+        "Reporting_label": "1offer|15pc_electricity|tc_prices|cta_roundel",
         "Default": true,
+        "offer_count_num": 1,
+        "Active": true,
         "heading1_text": "A different kind of energy",
         "heading2_text": "Our very best electricity plan",
-        "heading3_text": "A different kind of energy",
-        "offer_count_num": 1,
+        "heading3_text": "Switch and save today",
+        "heading4_text": "A different kind of energy",
         "offer1_value_text": "15%",
         "offer1_sub_text": "OFF ELECTRICITY*",
         "offer2_value_text": "30%",
@@ -347,10 +348,97 @@
         "tc_units_text": "Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat",
         "cta_type_enum": "roundel",
         "cta_text": "Switch today",
-        "include_roundel_frame_bool": false,
+        "include_roundel_frame_bool": true,
         "roundel_text_text": "Save up to",
         "roundel_value_text": "€1,080",
+        "background_image_url_160x600": {
+          "Url": ""
+        },
+        "background_image_url_300x250": {
+          "Url": ""
+        },
+        "background_image_url_300x600": {
+          "Url": ""
+        },
+        "background_image_url_320x50": {
+          "Url": ""
+        },
+        "background_image_url_728x90": {
+          "Url": ""
+        },
+        "background_image_url_970x250": {
+          "Url": ""
+        }
+      },
+      {
+        "_id": 1,
+        "Unique_ID": "dual_offers_roundel",
+        "Reporting_label": "2offer|15pc_elec_30pc_gas|tc_prices|cta_roundel",
+        "Default": false,
+        "offer_count_num": 2,
+        "Active": true,
+        "heading1_text": "A different kind of energy",
+        "heading2_text": "Our very best electricity plan",
+        "heading3_text": "Switch and save today",
         "heading4_text": "A different kind of energy",
+        "offer1_value_text": "15%",
+        "offer1_sub_text": "OFF ELECTRICITY*",
+        "offer2_value_text": "30%",
+        "offer2_sub_text": "OFF GAS*",
+        "offer3_value_text": "€125",
+        "offer3_sub_text": "OFF YOUR FIRST BILL*",
+        "tc_type_enum": "tcs_units",
+        "tc_terms_text": "*T&Cs apply",
+        "tc_units_text": "Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat",
+        "cta_type_enum": "roundel",
+        "cta_text": "Switch today",
+        "include_roundel_frame_bool": true,
+        "roundel_text_text": "Save up to",
+        "roundel_value_text": "€1,080",
+        "background_image_url_160x600": {
+          "Url": ""
+        },
+        "background_image_url_300x250": {
+          "Url": ""
+        },
+        "background_image_url_300x600": {
+          "Url": ""
+        },
+        "background_image_url_320x50": {
+          "Url": ""
+        },
+        "background_image_url_728x90": {
+          "Url": ""
+        },
+        "background_image_url_970x250": {
+          "Url": ""
+        }
+      },
+      {
+        "_id": 2,
+        "Unique_ID": "triple_offers_roundel",
+        "Reporting_label": "3offer|15pc_elec_30pc_gas_125bill|tc_prices|cta_roundel",
+        "Default": false,
+        "offer_count_num": 3,
+        "Active": true,
+        "heading1_text": "A different kind of energy",
+        "heading2_text": "Our very best electricity plan",
+        "heading3_text": "Switch and save today",
+        "heading4_text": "A different kind of energy",
+        "offer1_value_text": "15%",
+        "offer1_sub_text": "OFF ELECTRICITY*",
+        "offer2_value_text": "30%",
+        "offer2_sub_text": "OFF GAS*",
+        "offer3_value_text": "€125",
+        "offer3_sub_text": "OFF YOUR FIRST BILL*",
+        "tc_type_enum": "tcs_units",
+        "tc_terms_text": "*T&Cs apply",
+        "tc_units_text": "Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat",
+        "cta_type_enum": "roundel",
+        "cta_text": "Switch today",
+        "include_roundel_frame_bool": true,
+        "roundel_text_text": "Save up to",
+        "roundel_value_text": "€1,080",
         "background_image_url_160x600": {
           "Url": ""
         },
@@ -379,7 +467,8 @@
         "heading1_text": "Your 'how hard can it be' energy",
         "heading2_text": "deserves a different kind of energy",
         "heading3_text": "",
-        "offer_count_num": 2,
+        "heading4_text": "",
+        "offer_count_num": 0,
         "offer1_value_text": "",
         "offer1_sub_text": "",
         "offer2_value_text": "",
@@ -394,7 +483,6 @@
         "include_roundel_frame_bool": true,
         "roundel_text_text": "Switch and save today",
         "roundel_value_text": "",
-        "heading4_text": "",
         "background_image_url_160x600": {
           "Url": ""
         },
@@ -1717,7 +1805,9 @@
             "offer_count_num": 0
           },
           "props": {
-            "backgroundColor": "rgb(0, 229, 165)"
+            "backgroundColor": "rgb(0, 229, 165)",
+            "left": 149,
+            "top": -5
           },
           "editable": true
         },
@@ -1810,8 +1900,8 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 183,
-            "top": 12,
+            "left": 153,
+            "top": 9,
             "width": 53,
             "height": 14,
             "fontSize": 10,
@@ -1829,8 +1919,8 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 175,
-            "top": 22,
+            "left": 145,
+            "top": 23,
             "width": 70,
             "height": 25,
             "fontSize": 17,
@@ -2087,7 +2177,7 @@
           },
           "props": {
             "left": 106,
-            "top": 7,
+            "top": 23,
             "backgroundColor": "rgb(0, 229, 165)",
             "color": "rgb(0, 41, 117)"
           },
@@ -2122,6 +2212,124 @@
             "top": 14,
             "width": 55,
             "height": 21
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|roundel-frame",
+          "scope": "offers-2",
+          "layerId": "roundel-frame",
+          "cssClass": "roundel-frame",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 179,
+            "top": -5,
+            "width": 61,
+            "height": 61
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|roundel-copy",
+          "scope": "offers-2",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 153,
+            "top": 9,
+            "width": 53,
+            "height": 14,
+            "fontSize": 10,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|roundel-value",
+          "scope": "offers-2",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 145,
+            "top": 23,
+            "width": 70,
+            "height": 25,
+            "fontSize": 17,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "textAlign": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-frame",
+          "scope": "offers-3",
+          "layerId": "roundel-frame",
+          "cssClass": "roundel-frame",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 179,
+            "top": -5,
+            "width": 61,
+            "height": 61
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-copy",
+          "scope": "offers-3",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 153,
+            "top": 9,
+            "width": 53,
+            "height": 14,
+            "fontSize": 10,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-value",
+          "scope": "offers-3",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 145,
+            "top": 23,
+            "width": 70,
+            "height": 25,
+            "fontSize": 17,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "textAlign": "center"
           },
           "editable": true
         }
@@ -2479,7 +2687,7 @@
           "fit": {
             "mode": "shrink",
             "minFontSize": 18,
-            "maxLines": 3
+            "maxLines": 1
           }
         },
         {
@@ -2520,7 +2728,8 @@
             }
           ],
           "fit": {
-            "minFontSize": 18
+            "minFontSize": 24,
+            "maxLines": 1
           }
         },
         {
@@ -3513,9 +3722,9 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 333,
+            "left": 326,
             "top": 24,
-            "width": 60,
+            "width": 76,
             "height": 16,
             "fontSize": 15,
             "lineHeight": 1.05,
@@ -3540,7 +3749,7 @@
             "top": 37,
             "width": 90,
             "height": 34,
-            "fontSize": 22,
+            "fontSize": 28,
             "lineHeight": 1,
             "whiteSpace": "nowrap",
             "textAlign": "center",
@@ -3827,6 +4036,130 @@
             "top": 26,
             "width": 124,
             "height": 45
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|roundel-frame",
+          "scope": "offers-2",
+          "layerId": "roundel-frame",
+          "cssClass": "roundel-frame",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 312,
+            "top": -4,
+            "width": 101,
+            "height": 100
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|roundel-copy",
+          "scope": "offers-2",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 326,
+            "top": 24,
+            "width": 76,
+            "height": 16,
+            "fontSize": 15,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|roundel-value",
+          "scope": "offers-2",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 318,
+            "top": 37,
+            "width": 90,
+            "height": 34,
+            "fontSize": 28,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-frame",
+          "scope": "offers-3",
+          "layerId": "roundel-frame",
+          "cssClass": "roundel-frame",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 312,
+            "top": -4,
+            "width": 101,
+            "height": 100
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-copy",
+          "scope": "offers-3",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 326,
+            "top": 24,
+            "width": 76,
+            "height": 16,
+            "fontSize": 15,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-value",
+          "scope": "offers-3",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 318,
+            "top": 37,
+            "width": 90,
+            "height": 34,
+            "fontSize": 28,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
           },
           "editable": true
         }
@@ -4200,7 +4533,7 @@
           "fit": {
             "mode": "shrink",
             "minFontSize": 16,
-            "maxLines": 3
+            "maxLines": 1
           }
         },
         {
@@ -4241,7 +4574,8 @@
             }
           ],
           "fit": {
-            "minFontSize": 32
+            "minFontSize": 28,
+            "maxLines": 1
           }
         },
         {
@@ -5201,7 +5535,7 @@
           },
           "props": {
             "left": 42,
-            "top": 106,
+            "top": 111,
             "width": 98,
             "height": 24,
             "fontSize": 20,
@@ -5219,9 +5553,9 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 38,
-            "top": 126,
-            "width": 102,
+            "left": 35,
+            "top": 131,
+            "width": 106,
             "height": 64,
             "fontSize": 42,
             "lineHeight": 1,
@@ -5549,6 +5883,124 @@
             "top": 214,
             "width": 78,
             "height": 28
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|roundel-frame",
+          "scope": "offers-2",
+          "layerId": "roundel-frame",
+          "cssClass": "roundel-frame",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 32,
+            "top": 72,
+            "width": 118,
+            "height": 118
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|roundel-copy",
+          "scope": "offers-2",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 42,
+            "top": 111,
+            "width": 98,
+            "height": 24,
+            "fontSize": 20,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|roundel-value",
+          "scope": "offers-2",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 35,
+            "top": 131,
+            "width": 106,
+            "height": 64,
+            "fontSize": 42,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "textAlign": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-frame",
+          "scope": "offers-3",
+          "layerId": "roundel-frame",
+          "cssClass": "roundel-frame",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 32,
+            "top": 72,
+            "width": 118,
+            "height": 118
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-copy",
+          "scope": "offers-3",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 42,
+            "top": 111,
+            "width": 98,
+            "height": 24,
+            "fontSize": 20,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-value",
+          "scope": "offers-3",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 35,
+            "top": 131,
+            "width": 106,
+            "height": 64,
+            "fontSize": 42,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "textAlign": "center"
           },
           "editable": true
         }
@@ -7242,6 +7694,130 @@
             "height": 36
           },
           "editable": true
+        },
+        {
+          "id": "offers-2|roundel-frame",
+          "scope": "offers-2",
+          "layerId": "roundel-frame",
+          "cssClass": "roundel-frame",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 20,
+            "top": 224,
+            "width": 120,
+            "height": 120
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|roundel-copy",
+          "scope": "offers-2",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 30,
+            "top": 258,
+            "width": 100,
+            "height": 24,
+            "fontSize": 20,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|roundel-value",
+          "scope": "offers-2",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 12,
+            "top": 268,
+            "width": 136,
+            "height": 60,
+            "fontSize": 28,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-frame",
+          "scope": "offers-3",
+          "layerId": "roundel-frame",
+          "cssClass": "roundel-frame",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 20,
+            "top": 224,
+            "width": 120,
+            "height": 120
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-copy",
+          "scope": "offers-3",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 30,
+            "top": 258,
+            "width": 100,
+            "height": 24,
+            "fontSize": 20,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-value",
+          "scope": "offers-3",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 12,
+            "top": 268,
+            "width": 136,
+            "height": 60,
+            "fontSize": 28,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
         }
       ],
       "classRules": [
@@ -7645,7 +8221,7 @@
             }
           ],
           "fit": {
-            "minFontSize": 44
+            "minFontSize": 38
           }
         },
         {
@@ -8540,9 +9116,9 @@
           "props": {
             "backgroundColor": "rgb(0, 229, 165)",
             "top": 181,
-            "width": 144,
-            "height": 146,
-            "left": 79
+            "width": 150,
+            "height": 150,
+            "left": 75
           },
           "editable": true
         },
@@ -8636,7 +9212,7 @@
           },
           "props": {
             "left": 90,
-            "top": 224,
+            "top": 222,
             "width": 120,
             "height": 28,
             "fontSize": 24,
@@ -8907,7 +9483,8 @@
             "left": 65,
             "top": 157,
             "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(0, 41, 117)",
+            "fontSize": 18
           },
           "editable": true
         },
@@ -8940,6 +9517,124 @@
             "top": 554,
             "width": 105,
             "height": 38
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|roundel-frame",
+          "scope": "offers-2",
+          "layerId": "roundel-frame",
+          "cssClass": "roundel-frame",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 75,
+            "top": 180,
+            "width": 150,
+            "height": 150
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|roundel-copy",
+          "scope": "offers-2",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 90,
+            "top": 222,
+            "width": 120,
+            "height": 28,
+            "fontSize": 24,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|roundel-value",
+          "scope": "offers-2",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 80,
+            "top": 247,
+            "width": 137,
+            "height": 70,
+            "fontSize": 52,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "textAlign": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-frame",
+          "scope": "offers-3",
+          "layerId": "roundel-frame",
+          "cssClass": "roundel-frame",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 75,
+            "top": 180,
+            "width": 150,
+            "height": 150
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-copy",
+          "scope": "offers-3",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 90,
+            "top": 222,
+            "width": 120,
+            "height": 28,
+            "fontSize": 24,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-value",
+          "scope": "offers-3",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 80,
+            "top": 247,
+            "width": 137,
+            "height": 70,
+            "fontSize": 52,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "textAlign": "center"
           },
           "editable": true
         }
@@ -9301,7 +9996,7 @@
           "fit": {
             "mode": "shrink",
             "minFontSize": 18,
-            "maxLines": 3
+            "maxLines": 1
           }
         },
         {
@@ -9342,7 +10037,8 @@
             }
           ],
           "fit": {
-            "minFontSize": 12
+            "minFontSize": 12,
+            "maxLines": 1
           }
         },
         {
@@ -9529,10 +10225,10 @@
           "kind": "group",
           "zIndex": 11,
           "base": {
-            "left": 390,
-            "top": 50,
-            "width": 320,
-            "height": 170,
+            "left": 370,
+            "top": 43,
+            "width": 334,
+            "height": 177,
             "cssClass": "offer-slot-1"
           },
           "clips": [
@@ -10647,6 +11343,124 @@
             "height": 58
           },
           "editable": true
+        },
+        {
+          "id": "offers-2|roundel-frame",
+          "scope": "offers-2",
+          "layerId": "roundel-frame",
+          "cssClass": "roundel-frame",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 375,
+            "top": 40,
+            "width": 170,
+            "height": 170
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|roundel-copy",
+          "scope": "offers-2",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 400,
+            "top": 86,
+            "width": 120,
+            "height": 30,
+            "fontSize": 26,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-2|roundel-value",
+          "scope": "offers-2",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 2
+          },
+          "props": {
+            "left": 386,
+            "top": 117,
+            "width": 148,
+            "height": 46,
+            "fontSize": 64,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "textAlign": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-frame",
+          "scope": "offers-3",
+          "layerId": "roundel-frame",
+          "cssClass": "roundel-frame",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 375,
+            "top": 40,
+            "width": 170,
+            "height": 170
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-copy",
+          "scope": "offers-3",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 400,
+            "top": 86,
+            "width": 120,
+            "height": 30,
+            "fontSize": 26,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-3|roundel-value",
+          "scope": "offers-3",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 3
+          },
+          "props": {
+            "left": 386,
+            "top": 117,
+            "width": 148,
+            "height": 46,
+            "fontSize": 64,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "textAlign": "center"
+          },
+          "editable": true
         }
       ],
       "classRules": [
@@ -10680,28 +11494,31 @@
         {
           "cssClass": "offer-value",
           "properties": {
-            "left": 0,
+            "left": 30,
             "top": 0,
-            "fontSize": 145,
+            "fontSize": 151,
             "lineHeight": 0.85,
             "letterSpacing": -0.5,
-            "width": "100%",
-            "textAlign": "left",
-            "whiteSpace": "nowrap"
+            "width": 275,
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "height": 128,
+            "justifyContent": "center"
           }
         },
         {
           "cssClass": "offer-subline",
           "properties": {
-            "left": 0,
-            "top": 125,
-            "fontSize": 28,
+            "left": 33,
+            "top": 127,
+            "fontSize": 29,
             "lineHeight": 1.1,
             "letterSpacing": 0,
-            "width": 356,
-            "textAlign": "left",
+            "width": 265,
+            "textAlign": "center",
             "textTransform": "uppercase",
-            "height": 32
+            "height": 39,
+            "justifyContent": "center"
           },
           "fit": {
             "mode": "shrink",

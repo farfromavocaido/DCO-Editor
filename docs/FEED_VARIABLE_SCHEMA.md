@@ -56,7 +56,7 @@ When a field is missing or empty at render time, behaviour depends on context:
 | Context | Defaults |
 |---|---|
 | **Production export** | `firstDynamicRow()` uses `window.dynamicContent`; empty/missing keys become `''` via `normalizeProfileRow()`. No hard-coded copy defaults in production HTML. |
-| **Client preview / WIP** | `clientInitialRow()` seeds demo copy, then merges `feed.sampleRows[0]`. Key literals: `cta_text` → `'Switch today'`, `tc_terms_text` → `'*T&Cs apply'`, `roundel_text_text` → `'Save up to'`, `include_roundel_frame_bool` → `false`, `offer_count_num` → `1`, `cta_type_enum` → `'roundel'`, `tc_type_enum` → `'tcs_only'`. |
+| **Client preview / WIP** | `clientInitialRow()` seeds demo copy, then merges `feed.sampleRows[0]`. Key literals: H1–H4 energy / best plan / switch and save / energy; offers `15%` / `30%` / `€125`; `roundel_text_text` → `'Save up to'`, `roundel_value_text` → `'€1,080'`, `include_roundel_frame_bool` → `true`, `offer_count_num` → `1`, `cta_type_enum` → `'roundel'`, `cta_text` → `'Switch today'`, `tc_type_enum` → `'tcs_units'`. |
 | **Variant row matching** | `rowForClientVariant()` merges sample rows by offer count / T&C / CTA shape, with the same string fallbacks as client preview for CTA, T&C, roundel, and background fields. |
 | **Background image** | Empty per-size `background_image_url_{size}` → packaged size background from creative JSON (`previewBackgroundSrc()` / no `applyBackgroundImage()` call). |
 | **Offer count at runtime** | `deriveOfferCount()`: uses `offer_count_num` if 1–3; else counts non-empty `offerN_value_text`; minimum `1`. |
@@ -301,7 +301,7 @@ Offer slots 2 and 3 are hidden at runtime when `offer_count_num` is 1 or 2 respe
 | **Description** | Subline in offer slot 3. |
 | **Validation** | Any string. |
 | **Required** | Optional; only shown when `offer_count_num ≥ 3`. |
-| **Fallback** | `''`. Client preview default: `'OFF BILL*'` (sample row uses `'OFF YOUR FIRST BILL*'`). |
+| **Fallback** | `''`. Client preview / sample default: `'OFF YOUR FIRST BILL*'`. |
 | **Copy validation** | `#offer3 .offer-subline` when slot visible. |
 
 ---

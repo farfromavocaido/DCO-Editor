@@ -26,6 +26,8 @@
 
 ### Changed
 
+- **SSE DCO Offer Roundel parity** — offers-2 / offers-3 now carry the same Offer Roundel frame/copy/value placement as the 1-offer baseline on every size (CTA Roundel untouched).
+- **SSE DCO editor sample defaults** — offer counts 1/2/3 share the same demo copy (H1–H4 energy / best plan / switch and save / energy; roundel Save up to €1,080; 15% / 30% / €125 offers). Terms and CTA text left as the prior defaults.
 - **Per-campaign static clickTags** — Export for Static / preview bake product landing URLs: Keypad → `/keypad-electricity`, Welcome Credit → `/electricity-welcome-credit`, Top Discount → `/electricity-top-discount`. SSE DCO still uses the homepage default.
 - **Non-DCO headline order** — Hiker Keypad, Keepy Uppy Welcome Credit, and Keepy Uppy Top Discount now lead with the offer headline (keypad / welcome credit / discount); “A different kind of energy” is act 2.
 - **Non-DCO H2 ↔ T&Cs handoff** — headline-act2 enter (and banner H1 exit on 320×50 / 728×90) now use `act1_out`, the same beat as the terms-prices → unit-rate-prices transition, so H2 always lands with the legal-line swap.

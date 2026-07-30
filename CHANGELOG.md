@@ -36,6 +36,7 @@
 
 ### Fixed
 
+- **CI timing guard** — allow 320×50 offer enter durations up to 6% (soft stagger 6 / 5 / 4); other sizes still expect 1.8–3.
 - **Outline paint-box + fit bottom-align**: paint-box placement now reapplies text-fit `align: bottom` `translateY` when positioning the SVG. Host-relative run capture cancels that transform from `contentTop`, so shrunk 320×50 values (Hiker `10.5%`) were sitting too high vs sublines while unshrunk Keepy copy looked fine.
 - **Outline offer-host WYSIWYG**: presentation snapshots now capture computed/inline boxes for offer-value, offer-subline, slots, and pluses; outline HTML bakes those as inline styles. Fixes side-by-side Top Discount banners where the editor ink-locked subline `left` but export kept authored CSS (e.g. `left: 106` vs ~82).
 - **Outline offer content-box bake**: snapshots also capture the live text-run box (`.offer-value-run` / Range) and glyph ink; outline SVGs bake to that box, sit with `position:absolute` at the run’s left/top, and nudge path Y so ink tops match the editor. Closes residual side-by-side drift where full-width right-aligned paths + flex packing only approximated the shrink-wrapped run.

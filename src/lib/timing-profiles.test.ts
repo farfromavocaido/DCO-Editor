@@ -136,7 +136,12 @@ test('campaign clock profiles keep the same offer/plus choreography', async () =
         if (layer.id.startsWith('plus-')) {
           assert.ok(duration >= 2.5, `${sizeName}/${layer.id} pluses should ease in a touch slower`);
         } else {
-          assert.ok(duration >= 1.8 && duration <= 3, `${sizeName}/${layer.id} offer enter duration out of range`);
+          // 320x50 banners use a longer soft-stagger (6 / 5 / 4); other sizes stay snappier.
+          const maxOfferEnter = sizeName === '320x50' ? 6 : 3;
+          assert.ok(
+            duration >= 1.8 && duration <= maxOfferEnter,
+            `${sizeName}/${layer.id} offer enter duration out of range`,
+          );
         }
       }
       if (layer.id === 'offer-slot-1') {

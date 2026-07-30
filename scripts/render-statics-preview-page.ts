@@ -52,7 +52,7 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
     : '—';
   const generatedIso = latest.generatedAt ? escapeAttr(latest.generatedAt) : '';
   // Query-bust so GH Pages / browser caches cannot keep serving a prior package
-  // under the same HTML paths after a new Export for Preview.
+  // under the same HTML paths after a new Sync Zips.
   const cacheBust = latest.generatedAt
     ? escapeAttr(encodeURIComponent(latest.generatedAt))
     : String(Date.now());
@@ -394,7 +394,7 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
       </div>
       <div class="header-end">
         <p class="header-title">Statics Preview</p>
-        <p class="header-stamp" title="From outputs/latest.json (Export for Preview)">
+        <p class="header-stamp" title="From outputs/latest.json (Sync Zips)">
           Exported
           <time datetime="${generatedIso}">${generatedLabel}</time>
           <span data-export-ago></span>
@@ -413,7 +413,7 @@ export const renderStaticsPreviewPage = (latest: ExportPreviewLatest) => {
           <span>Ad size</span>
           <select id="size" name="size">${sizeOptions}</select>
         </label>
-        <p class="meta">Fixed-copy SVG outline HTML from <strong>Export for Preview</strong>.</p>
+        <p class="meta">Fixed-copy SVG outline HTML from <strong>Sync Zips</strong>.</p>
         <p class="meta">Package: ${zipLabel}<br>Exported: ${generatedLabel} <span data-export-ago></span></p>
         <a class="nav-link" href="../">DCO preview</a>
       </form>

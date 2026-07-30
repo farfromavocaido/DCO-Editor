@@ -78,7 +78,7 @@ const renderStaticsPlaceholderPage = () => `<!DOCTYPE html>
     <header hidden></header>
     <main>
       <h1>Statics preview</h1>
-      <p>No committed package yet. In the editor, run <strong>Export for Preview</strong>, commit <code>outputs/</code>, and push to publish the HTML + ZIP here.</p>
+      <p>No committed package yet. In the editor, run <strong>Sync Zips</strong>, commit <code>outputs/</code>, and push to publish the HTML + ZIP here.</p>
       <p style="margin-top:14px"><a href="../">DCO preview</a></p>
     </main>
   </body>
@@ -102,7 +102,7 @@ const exportStaticsPreviewSite = async (latest: ExportPreviewLatest | null) => {
   if (!hasPackage || !latest) {
     if (process.env.STRICT_STATICS_EXPORT === '1') {
       throw new Error(
-        'outputs/campaigns is empty. Run Export for Preview in the editor, commit outputs/, then re-export the Pages site.',
+        'outputs/campaigns is empty. Run Sync Zips in the editor, commit outputs/, then re-export the Pages site.',
       );
     }
     console.warn('outputs/ has no statics package yet — writing placeholder /statics/ page');
@@ -147,7 +147,7 @@ const main = async () => {
     agencyZipHref = latest.dcoZip;
   } else if (process.env.STRICT_STATICS_EXPORT === '1') {
     throw new Error(
-      'outputs/latest.json is missing dcoZip. Run Export for Preview in the editor, commit outputs/, then re-export the Pages site.',
+      'outputs/latest.json is missing dcoZip. Run Sync Zips in the editor, commit outputs/, then re-export the Pages site.',
     );
   } else {
     console.warn('outputs/ has no DCO agency zip yet — DCO preview download button omitted');

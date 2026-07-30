@@ -10,7 +10,7 @@
 - **Statics preview zoom** — Fit / 1x / 2x plus −/+ stepping (up to **750%**) on the GitHub Pages `/statics/` viewer; zoom persists in `sessionStorage`.
 - **Manual line breaks in multiline feed copy** — headlines, T&Cs, and unit-rate accept authored `\n` in the editor and GitHub client preview (heading controls are textareas). Hard breaks only apply when fit wrap is allowed (`pre-line` / outline wrap); each hard-break line uses the same line-box height as soft wrap. Outline `wrapLines` + presentation snapshots preserve newlines so SVG outline export matches the live preview.
 - **Statics preview (GitHub Pages `/statics/`)** — password-gated host for the three non-DCO campaigns’ Export-for-Static HTML; sidebar is campaign + size only; download link reads `outputs/latest.json`.
-- **Export for Preview** (toolbar) — snapshots each non-DCO campaign on the live editor stage, writes tracked `outputs/campaigns/…`, a timestamped `outputs/downloads/SSE_Statics_*.zip`, and refreshes `outputs/latest.json` for commit/publish.
+- **Sync Zips** (toolbar; formerly Export for Preview) — snapshots each non-DCO campaign on the live editor stage, writes tracked `outputs/campaigns/…`, a timestamped `outputs/downloads/SSE_Statics_*.zip`, the DCO Canonical Agency Zip, and refreshes `outputs/latest.json` for commit/publish.
 - **Static HTML clickTag** — Export for Static / preview packages open `https://www.sseairtricity.com/uk` via IAB `clickTag` (hardcoded default; customisable later).
 - **Zero-offers DCO variant (`offers-0`)** on SSE DCO: TopBar Offers control gains `0` (sse-dco only). Hides offer slots, green wave, blue logo, and T&Cs; blue wave + white logo enter from the start; headlines render white with blank-aware equal screentime before CTA; per-size CTA repositioning via `offers-0|cta` rules. Existing `offers-1/2/3` unchanged.
 - **offers-0 editable rest geometry**: `offers-0|bluewave` and `offers-0|logo-act3` variantRules so wave/logo rest can be tuned without affecting offers 1–3; editor variant merge/write now follows document order (CSS cascade) so `offers-0|cta` wins over `cta-rect` for drag/align.
@@ -26,7 +26,8 @@
 
 ### Changed
 
-- **DCO Pages Canonical Agency Zip download** — **Export for Preview** also bakes the SSE DCO Canonical Agency Zip into `outputs/` (`campaigns/sse-dco/` + `downloads/SSE_DCO_canonical_agency_*.zip`; `latest.json` gains `dco` / `dcoZip`). The hosted DCO client preview keeps its live feed controls and adds a static **Canonical Agency Zip** download (preview field values do not affect the zip).
+- **Toolbar: Sync Zips** — renamed from Export for Preview; same action still syncs non-DCO statics + DCO Canonical Agency Zip into `outputs/`.
+- **DCO Pages agency zip share** — hosted DCO preview offers **Download Agency Zip** plus **Copy link** (absolute direct-download URL for media-agency handoff). **Sync Zips** bakes the zip into `outputs/` (`campaigns/sse-dco/` + `downloads/SSE_DCO_canonical_agency_*.zip`; `latest.json` gains `dco` / `dcoZip`). Preview field values do not affect the zip.
 - **SSE DCO Offer Roundel parity** — offers-2 / offers-3 now carry the same Offer Roundel frame/copy/value placement as the 1-offer baseline on every size (CTA Roundel untouched).
 - **SSE DCO editor sample defaults** — offer counts 1/2/3 share the same demo copy (H1–H4 energy / best plan / switch and save / energy; roundel Save up to €1,080; 15% / 30% / €125 offers). Terms and CTA text left as the prior defaults.
 - **Per-campaign static clickTags** — Export for Static / preview bake product landing URLs: Keypad → `/keypad-electricity`, Welcome Credit → `/electricity-welcome-credit`, Top Discount → `/electricity-top-discount`. SSE DCO still uses the homepage default.

@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const requested = Array.isArray(body.campaigns) ? body.campaigns : [];
     if (!requested.length) {
       return NextResponse.json(
-        { error: 'Export for Preview requires campaigns: [{ id, presentationSnapshots? }]' },
+        { error: 'Sync Zips requires campaigns: [{ id, presentationSnapshots? }]' },
         { status: 400 },
       );
     }
@@ -52,13 +52,13 @@ export async function POST(request: Request) {
       });
     }
 
-    // DCO is always baked as Canonical Agency Zip into outputs/ (Pages root).
+    // DCO is always baked as Canonical Agency Zip into outputs/ (Pages download).
     const dcoDocument = body.dcoDocument || await readCreativeDocumentForCampaign(DEFAULT_CAMPAIGN_ID);
     const result = await buildExportPreviewPackage(inputs, { dcoDocument });
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to export statics preview package' },
+      { error: error instanceof Error ? error.message : 'Failed to sync preview zips' },
       { status: 500 },
     );
   }

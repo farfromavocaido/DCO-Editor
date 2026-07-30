@@ -293,7 +293,7 @@ export function TopBar() {
                   setMoreOpen(false);
                 }}
               >
-                Export for Preview
+                Sync Zips
               </button>
               <button
                 type="button"

@@ -1509,9 +1509,9 @@ export const useEditorStore = create<any>((set, get) => ({
   },
 
   /**
-   * Bake non-DCO Export-for-Static HTML + SSE DCO Canonical Agency Zip into tracked
-   * `outputs/`. Snapshots the live editor stage per non-DCO campaign; DCO uses the
-   * unsaved editor document when that campaign is active, otherwise disk.
+   * Sync Zips: bake non-DCO Export-for-Static HTML + SSE DCO Canonical Agency Zip
+   * into tracked `outputs/`. Snapshots the live editor stage per non-DCO campaign;
+   * DCO uses the unsaved editor document when that campaign is active, otherwise disk.
    */
   exportForPreview: async () => {
     const original = {
@@ -1588,10 +1588,10 @@ export const useEditorStore = create<any>((set, get) => ({
 
     const previewCampaigns = (get().campaigns || []).filter((entry) => entry.id !== 'sse-dco');
     if (!previewCampaigns.length) {
-      throw new Error('No non-DCO campaigns registered for Export for Preview');
+      throw new Error('No non-DCO campaigns registered for Sync Zips');
     }
 
-    get().setStatus('Exporting preview package (statics + DCO agency)…');
+    get().setStatus('Syncing zips (statics + DCO agency)…');
     const payloads = [];
     const dcoDocument = original.activeCampaignId === 'sse-dco'
       ? mergedDocumentForState()
@@ -1612,7 +1612,7 @@ export const useEditorStore = create<any>((set, get) => ({
 
       for (const entry of previewCampaigns) {
         if (alreadySnapshotted.has(entry.id)) continue;
-        get().setStatus(`Snapshotting ${entry.name} for preview export…`);
+        get().setStatus(`Snapshotting ${entry.name} for Sync Zips…`);
         await loadCampaignQuiet(entry.id);
         const document = mergedDocumentForState();
         if (!document) throw new Error(`Failed to load ${entry.id}`);
@@ -1635,11 +1635,11 @@ export const useEditorStore = create<any>((set, get) => ({
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(payload.error || response.statusText || 'Failed to export preview package');
+        throw new Error(payload.error || response.statusText || 'Failed to sync zips');
       }
       const zipName = String(payload.latest?.zip || '').split('/').pop() || 'SSE_Statics.zip';
       const dcoZipName = String(payload.latest?.dcoZip || '').split('/').pop() || 'SSE_DCO_canonical_agency.zip';
-      get().setStatus(`Wrote outputs/ (${zipName} + ${dcoZipName}) — commit to publish`);
+      get().setStatus(`Synced outputs/ (${zipName} + ${dcoZipName}) — commit to publish`);
       return payload;
     } finally {
       set({

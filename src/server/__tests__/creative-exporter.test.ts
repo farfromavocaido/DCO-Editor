@@ -563,7 +563,8 @@ test('client preview page can offer a static Canonical Agency Zip download', asy
   const document = await readCreativeDocument();
   const without = renderClientPreviewPage(document, { includeValidator: false });
   assert.doesNotMatch(without, /class="agency-zip-download"/);
-  assert.doesNotMatch(without, /independent of preview field values/);
+  assert.doesNotMatch(without, /Download Agency Zip/);
+  assert.doesNotMatch(without, /data-agency-zip-copy/);
 
   const withZip = renderClientPreviewPage(document, {
     includeValidator: false,
@@ -571,8 +572,11 @@ test('client preview page can offer a static Canonical Agency Zip download', asy
   });
   assert.match(withZip, /class="agency-zip-download"/);
   assert.match(withZip, /href="downloads\/SSE_DCO_canonical_agency_example\.zip"/);
-  assert.match(withZip, /Canonical Agency Zip/);
-  assert.match(withZip, /independent of preview field values/);
+  assert.match(withZip, /Download Agency Zip/);
+  assert.match(withZip, /Zip to share with the media agency/);
+  assert.match(withZip, /data-agency-zip-copy/);
+  assert.match(withZip, /Copy link/);
+  assert.match(withZip, /navigator\.clipboard\.writeText/);
 });
 
 test('renders the client preview page as one self-contained document shell', async () => {

@@ -1714,11 +1714,11 @@ export const buildExportPreviewPackage = async (
 ) => {
   const allowed = new Map(listStaticPreviewCampaigns().map((entry) => [entry.id, entry]));
   if (!campaigns.length) {
-    throw new Error('Export for Preview requires at least one non-DCO campaign');
+    throw new Error('Sync Zips requires at least one non-DCO campaign');
   }
   const dcoDocument = options.dcoDocument;
   if (!dcoDocument) {
-    throw new Error('Export for Preview requires the SSE DCO creative document');
+    throw new Error('Sync Zips requires the SSE DCO creative document');
   }
   const dcoRegistry = getCampaign('sse-dco');
   const dcoCampaignId = (dcoDocument.campaign as { id?: string } | undefined)?.id;
@@ -2369,13 +2369,17 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
     .join('');
   const agencyZipHref = options.agencyZipHref ? String(options.agencyZipHref) : '';
   const agencyZipLabel = agencyZipHref
-    ? escapeHtml(agencyZipHref.split('/').pop() || 'Canonical Agency Zip')
+    ? escapeHtml(agencyZipHref.split('/').pop() || 'Agency Zip')
     : '';
+  const agencyZipTooltip = 'Zip to share with the media agency (Canonical Agency package). Preview field values do not change this file.';
   const agencyZipDownload = agencyZipHref
-    ? `<a class="agency-zip-download" href="${escapeAttr(agencyZipHref)}" download title="Static Canonical Agency Zip — independent of preview field values">Canonical Agency Zip</a>`
+    ? `<div class="agency-zip-actions">
+              <a class="agency-zip-download" href="${escapeAttr(agencyZipHref)}" download title="${escapeAttr(agencyZipTooltip)}">Download Agency Zip</a>
+              <button type="button" class="agency-zip-copy-link" data-agency-zip-copy title="Copy a direct download link to share with the media agency">Copy link</button>
+            </div>`
     : '';
   const agencyZipNote = agencyZipHref
-    ? `<p class="agency-zip-note">Agency handoff ZIP (<code>${agencyZipLabel}</code>) is a static download — preview fields above do not change it. <a href="statics/">Statics preview</a></p>`
+    ? `<p class="agency-zip-note">Agency zip (<code>${agencyZipLabel}</code>) is the media-agency handoff — preview fields above do not change it. Use <strong>Copy link</strong> to share a direct download URL. <a href="statics/">Statics preview</a></p>`
     : `<p class="agency-zip-note"><a href="statics/">Statics preview</a></p>`;
 
   return `<!DOCTYPE html>
@@ -2660,7 +2664,8 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
       }
       .replay-button,
       .restore-defaults-button,
-      .agency-zip-download {
+      .agency-zip-download,
+      .agency-zip-copy-link {
         border: 1px solid var(--line);
         border-radius: 6px;
         background: #101821;
@@ -2674,6 +2679,12 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         text-decoration: none;
         display: inline-flex;
         align-items: center;
+      }
+      .agency-zip-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
       }
       .agency-zip-download {
         background: var(--teal);
@@ -2697,7 +2708,9 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
       .restore-defaults-button:hover,
       .restore-defaults-button:focus-visible,
       .agency-zip-download:hover,
-      .agency-zip-download:focus-visible {
+      .agency-zip-download:focus-visible,
+      .agency-zip-copy-link:hover,
+      .agency-zip-copy-link:focus-visible {
         border-color: var(--teal);
         outline: none;
       }
@@ -3188,6 +3201,37 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         });
         if (replayButton) replayButton.addEventListener('click', replayAd);
         if (restoreDefaultsButton) restoreDefaultsButton.addEventListener('click', restoreDefaults);
+${agencyZipHref ? `
+        (function bindAgencyZipCopy() {
+          var agencyZipCopyButton = document.querySelector('[data-agency-zip-copy]');
+          var agencyZipDownloadLink = document.querySelector('.agency-zip-download');
+          if (!agencyZipCopyButton || !agencyZipDownloadLink) return;
+          agencyZipCopyButton.addEventListener('click', function() {
+            var href = agencyZipDownloadLink.getAttribute('href') || '';
+            var url = '';
+            try {
+              url = new URL(href, window.location.href).href;
+            } catch (error) {
+              url = href;
+            }
+            var label = agencyZipCopyButton.textContent;
+            var showCopied = function() {
+              agencyZipCopyButton.textContent = 'Copied';
+              window.setTimeout(function() {
+                agencyZipCopyButton.textContent = label;
+              }, 1600);
+            };
+            var fallback = function() {
+              window.prompt('Copy this download link:', url);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(url).then(showCopied).catch(fallback);
+            } else {
+              fallback();
+            }
+          });
+        })();
+` : ''}
         Array.prototype.forEach.call(document.querySelectorAll('[data-zoom-mode]'), function(button) {
           button.addEventListener('click', function() {
             var mode = button.getAttribute('data-zoom-mode');

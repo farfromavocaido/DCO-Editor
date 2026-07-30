@@ -33,7 +33,7 @@ When `download: true`, returns a ZIP attachment of the HTML files plus staged ba
 
 ### `POST /api/creative/export-preview`
 
-Writes the tracked preview package under `outputs/` (not a browser download). Body:
+**Sync Zips** — writes the tracked preview package under `outputs/` (not a browser download). Body:
 
 ```json
 {

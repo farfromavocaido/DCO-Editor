@@ -18,7 +18,7 @@
 | **Export HTML (font)** | Downloads `{exportSlug}_html.zip`; also writes `output/{exportSlug}_{size}.html` (+ WIP variants) |
 | **Export HTML (SVG outlines)** | Snapshots the editor stage (all sizes) then downloads `{exportSlug}_html_outlines.zip`; Studio-shaped fixed-copy outline HTML (Enabler shell); SVGs inlined; nested `assets/…` backgrounds |
 | **Export for Static** | Same editor snapshot bake → `{exportSlug}_html_static.zip`; lean outlined HTML (no Enabler/DV360); inactive layers pruned; flat `assets/<basename>.jpg` backgrounds; IAB `clickTag` is per campaign (Keypad / Welcome Credit / Top Discount product URLs; DCO falls back to `https://www.sseairtricity.com/uk`) |
-| **Export for Preview** | Snapshots all non-DCO campaigns → tracked `outputs/` for `/statics/`, and also bakes the SSE DCO **Canonical Agency Zip** into `outputs/downloads/` for the DCO Pages download button. Commit `outputs/` and push to publish |
+| **Sync Zips** | Snapshots all non-DCO campaigns → tracked `outputs/` for `/statics/`, and also bakes the SSE DCO **Canonical Agency Zip** into `outputs/downloads/` for the DCO Pages download button. Commit `outputs/` and push to publish |
 | **View HTML** | Opens a browser preview of the current size with baked feed row |
 | **HTML source** | Formatted, syntax-highlighted export HTML in the inspector modal |
 | **Client ZIP** | Downloadable preview package with validator (font mode) |
@@ -29,7 +29,7 @@
 
 ## Statics preview publish
 
-1. In the editor, run **Export for Preview** (More menu).
+1. In the editor, run **Sync Zips** (More menu).
 2. Commit the updated `outputs/` tree (`campaigns/`, `downloads/SSE_Statics_*.zip`, `downloads/SSE_DCO_canonical_agency_*.zip`, `latest.json`).
 3. Push to `main`. The Pages workflow rebuilds `site/` including gated `site/statics/` from the committed package, and attaches the DCO agency zip download on the root client preview.
 

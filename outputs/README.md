@@ -10,4 +10,4 @@ Tracked packages for the GitHub Pages preview site:
 | `downloads/SSE_DCO_canonical_agency_*.zip` | Static download on the DCO client preview (independent of preview form values) |
 | `latest.json` | Manifest for statics shell + DCO agency zip href |
 
-Populate via the editor toolbar action **Export for Preview**. Commit this folder when you want the hosted preview updated.
+Populate via the editor toolbar action **Sync Zips**. Commit this folder when you want the hosted preview updated.

@@ -767,7 +767,7 @@
           "group": "Roundel frame",
           "zIndex": 6,
           "base": {
-            "left": 179,
+            "left": 150,
             "top": -5,
             "width": 61,
             "height": 61,
@@ -2224,7 +2224,7 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 179,
+            "left": 149,
             "top": -5,
             "width": 61,
             "height": 61
@@ -2283,7 +2283,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 179,
+            "left": 149,
             "top": -5,
             "width": 61,
             "height": 61

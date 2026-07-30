@@ -2669,9 +2669,24 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         color: var(--muted);
         font-size: 12px;
       }
+      .ad-card-head-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
       .ad-card-head strong {
         color: var(--ink);
         font-weight: 500;
+      }
+      .preview-version {
+        color: var(--muted);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 11px;
+        font-variant-numeric: tabular-nums;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       .replay-button,
       .restore-defaults-button,
@@ -2875,7 +2890,12 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         </div>
         <article class="ad-card">
           <div class="ad-card-head">
-            <strong>Preview</strong>
+            <div class="ad-card-head-label">
+              <strong>Preview</strong>
+              ${cacheBust
+    ? `<span class="preview-version" title="Ad iframe cache-bust (?v=)">version: ${escapeHtml(cacheBust)}</span>`
+    : ''}
+            </div>
             <span data-active-dimensions>${initialSize.width} x ${initialSize.height}</span>
           </div>
           <div class="ad-viewport">

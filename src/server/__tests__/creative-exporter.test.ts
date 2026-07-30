@@ -588,6 +588,7 @@ test('Pages client preview inlines SVGs, keeps Museo CDN, and cache-busts iframe
 
   assert.match(preview, /var cacheBust = "deadbeef1234"/);
   assert.match(preview, /ads\/html\/SSE_DCO_[^"]+\.html\?v=deadbeef1234/);
+  assert.match(preview, /version:\s*deadbeef1234/);
   assert.match(preview, /function adSrcForMeta/);
 });
 

@@ -4,6 +4,7 @@
 
 ### Added
 
+- **Pages DCO preview version stamp** — ad card bar shows `version: <cacheBust>` beside Preview (same `?v=` value on iframe URLs) so you can confirm the deploy stamp without inspecting the network panel.
 - **`campaign.offerPlusLayout`** — `auto` (DCO ink-based `layoutOffers` plus placement) or `manual` (authored CSS / inspector). Non-DCO creative JSONs set `manual`; stage emits `data-offer-plus-layout`.
 - **offers-0 background blur** — editor-controlled `kind: "blur"` layer (`bg-blur`) over the photo (under the scrim/waves). Offers-0 only; knobs: enabled + strength (px → `backdrop-filter`, default **3**). Fades in with the roundel (`frames-4`) or CTA (`frames-3`, including `bn_cta_in` on 320x50) and out with the blue wave (`end`, `fade_pct: 2`). Preview/export honour clip `profiles` for non-headline layers.
 - **offers-0 headline scrim** — editor-controlled dark CSS gradient (`kind: "gradient"`, layer `headline-scrim`) above the background and below the blue wave. Visible only under Offers = 0. Knobs: direction, end %, start opacity (0–1), midpoint along the fade (0–1; mid opacity is half of start). Defaults: top→down 25% on 300x250 / 160x600 / 300x600; left→right 30% on 320x50 / 728x90 / 970x250; start opacity 0.15. Seeded into all campaign creative JSONs; baked into preview and HTML export.

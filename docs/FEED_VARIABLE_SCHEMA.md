@@ -59,7 +59,7 @@ When a field is missing or empty at render time, behaviour depends on context:
 | **Client preview / WIP** | `clientInitialRow()` seeds demo copy, then merges `feed.sampleRows[0]`. Key literals: H1–H4 energy / best plan / switch and save / energy; offers `15%` / `30%` / `€125`; `roundel_text_text` → `'Save up to'`, `roundel_value_text` → `'€1,080'`, `include_roundel_frame_bool` → `true`, `offer_count_num` → `1`, `cta_type_enum` → `'roundel'`, `cta_text` → `'Switch today'`, `tc_type_enum` → `'tcs_units'`. |
 | **Variant row matching** | `rowForClientVariant()` merges sample rows by offer count / T&C / CTA shape, with the same string fallbacks as client preview for CTA, T&C, roundel, and background fields. |
 | **Background image** | Empty per-size `background_image_url_{size}` → packaged size background from creative JSON (`previewBackgroundSrc()` / no `applyBackgroundImage()` call). |
-| **Offer count at runtime** | `deriveOfferCount()`: uses `offer_count_num` if 1–3; else counts non-empty `offerN_value_text`; minimum `1`. |
+| **Offer count at runtime** | `deriveOfferCount()`: uses `offer_count_num` if **0–3**; else counts non-empty `offerN_value_text` (minimum `1`). Explicit `0` is preserved for the brand / no-offers variant. |
 | **T&C mode at runtime** | Any value other than `tcs_units` → `tc-solo` scope (terms-only). |
 | **CTA shape at runtime** | `rectangle` or legacy `rect`, or `include_roundel_frame_bool` → `cta-rect`; otherwise `cta-roundel`. |
 | **Headline 4 display** | When offer roundel frame is off and `heading4_text` is empty/whitespace → display `heading3_text` instead (`headlineAct4DisplayText()`). |
@@ -174,7 +174,7 @@ Validated fields: all headline, offer, CTA, roundel, and T&C copy fields listed 
 | **Description** | Act 3 headline copy over the offer roundel (when roundel frame is enabled); line breaks are preserved when the layer wraps. |
 | **Validation** | Any string. |
 | **Required** | Optional. |
-| **Fallback** | `''`. Also used as **display fallback for heading 4** when roundel frame is off and `heading4_text` is empty. Client preview default: `'A different kind of energy'`. |
+| **Fallback** | `''`. Also used as **display fallback for heading 4** when roundel frame is off and `heading4_text` is empty. Client preview default: `'Switch and save today'`. |
 | **Copy validation** | `#headline-act3` when visible (frames-4 / roundel on). |
 
 #### `heading4_text`
@@ -185,7 +185,7 @@ Validated fields: all headline, offer, CTA, roundel, and T&C copy fields listed 
 | **Description** | Act 4 headline copy over the CTA/end frame; line breaks are preserved when the layer wraps. |
 | **Validation** | Any string. |
 | **Required** | Optional. |
-| **Fallback** | When roundel frame is **off** and this field is empty → runtime shows `heading3_text`. When roundel frame is **on** → empty stays empty. Client preview default: `'Switch and save today'`. |
+| **Fallback** | When roundel frame is **off** and this field is empty → runtime shows `heading3_text`. When roundel frame is **on** → empty stays empty. Client preview default: `'A different kind of energy'`. |
 | **Copy validation** | `#headline-act4` when visible. |
 
 ---
@@ -210,7 +210,7 @@ Validated fields: all headline, offer, CTA, roundel, and T&C copy fields listed 
 | **Description** | Terms display mode. |
 | **Validation** | Must be one of: **`tcs_only`**, **`tcs_units`**. Legacy input aliases (normalized on save): `solo` → `tcs_only`, `prices` → `tcs_units`. |
 | **Required** | Optional on input; invalid values throw on save. |
-| **Fallback** | Runtime: anything other than `tcs_units` → **`tc-solo`** scope (terms line only). `tcs_units` → **`tc-prices`** scope (terms exit before unit-rate line appears). Client preview default: `tcs_only`. |
+| **Fallback** | Runtime: anything other than `tcs_units` → **`tc-solo`** scope (terms line only). `tcs_units` → **`tc-prices`** scope (terms exit before unit-rate line appears). Client preview default: `tcs_units`. |
 
 #### `cta_type_enum`
 
@@ -230,7 +230,7 @@ Validated fields: all headline, offer, CTA, roundel, and T&C copy fields listed 
 | **Description** | Whether the optional Act 3 offer roundel frame is shown (four-act timing). |
 | **Validation** | Coerced boolean. |
 | **Required** | Optional. |
-| **Fallback** | **`false`** (three-act timing, roundel frame off). When `true`: enables `frames-4`, `roundel-frame-on`, shows heading 3 over roundel, and forces rectangular CTA. |
+| **Fallback** | Missing/empty → **`false`** (three-act timing). Client preview / default sample rows seed **`true`**. When `true`: enables `frames-4`, `roundel-frame-on`, shows heading 3 over roundel, and forces rectangular CTA. |
 
 ---
 
@@ -290,7 +290,7 @@ Offer slots 2 and 3 are hidden at runtime when `offer_count_num` is 1 or 2 respe
 | **Description** | Primary value in offer slot 3. |
 | **Validation** | Any string. |
 | **Required** | Optional; only shown when `offer_count_num ≥ 3`. |
-| **Fallback** | `''`. Client preview default: `'100'` (sample row uses `'€125'`). |
+| **Fallback** | `''`. Client preview / sample default: `'€125'`. |
 | **Copy validation** | `#offer3 .offer-value` when slot visible. |
 
 #### `offer3_sub_text`
@@ -421,4 +421,4 @@ These are not separate feed fields; they are computed from the fields above (`co
 
 ## Sample row
 
-The default sample row in `campaign/sse-dco-creative.json` demonstrates triple offers, `tcs_units`, rectangular CTA, roundel frame off, and populated headline/roundel copy. Use it as a working example when authoring new rows.
+Default sample rows for offer counts 1/2/3 in `campaign/sse-dco-creative.json` share the same demo copy: H1–H4 energy / best plan / switch and save / energy; `tcs_units`; roundel CTA; roundel frame on (`Save up to` / `€1,080`); offers `15%` / `30%` / `€125`. An `offers-0` brand row is also present. Use these as working examples when authoring new rows.

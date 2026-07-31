@@ -12,16 +12,21 @@ Local Next.js tool for editing campaign creative JSON documents and exporting St
 
 | Path | Purpose |
 |---|---|
-| `src/server/paths.ts` | Resolves `campaign/`, `output/` — always file-relative, not cwd |
-| `src/server/campaign-registry.ts` | Registered campaigns (id → JSON file + export slug) |
+| `src/server/paths.ts` | Resolves `campaign/`, `output/`, `outputs/` — always file-relative, not cwd |
+| `src/server/campaign-registry.ts` | Registered campaigns (id → JSON file + export slug + optional static `clickTag`) |
 | `src/server/creative-document.ts` | Read/write/validate creative JSON |
-| `src/server/creative-exporter.ts` | HTML and ZIP export (`renderMode: font \| outline`) |
+| `src/server/creative-exporter.ts` | HTML and ZIP export (`renderMode: font \| outline`, `delivery`, base/client packages, Sync Zips) |
 | `src/server/text-outline.ts` | Museo → SVG path outlining for outline export |
+| `src/server/outline-bake.ts` | Server-side outline metrics when no editor `presentationSnapshots` |
+| `src/lib/outline-snapshot.ts` | Editor stage capture for WYSIWYG outline/static bake |
 | `src/lib/text-fit.ts` + `src/lib/text-fit-rules.ts` | The one text-fit engine + rule derivation, shared by preview and font exports — see `docs/TEXT_FITTING.md` |
+| `src/lib/offer-layout.ts` | Post-fit offer gap/plus placement (`campaign.offerPlusLayout`: `auto` \| `manual`) |
 | `src/store/editor-store.ts` | Zustand state + dirty tracking + active campaign |
 | `campaign/sse-dco-creative.json` | Default SSE DCO document (layers, motion, feed) |
-| `campaign/*-creative.json` | Parallel campaign documents (hiker / keepyuppy variants) |
+| `campaign/*-creative.json` | Parallel campaigns: Hiker Keypad, Keepy Uppy Welcome Credit, Keepy Uppy Top Discount |
 | `campaign/assets/` | Backgrounds, SVGs, images, fonts |
+| `output/` | Local scratch HTML/ZIPs (gitignored) |
+| `outputs/` | Tracked Sync Zips package for GitHub Pages (`/statics/` + DCO agency zip) |
 
 ## Conventions
 
@@ -30,8 +35,9 @@ Local Next.js tool for editing campaign creative JSON documents and exporting St
 - Creative/feed/export APIs take `?campaign=<id>` (default `sse-dco`).
 - Exports: `output/{exportSlug}_{size}.html` (e.g. `SSE_DCO_300x250.html`, `SSE_Hiker_Welcome_300x250.html`).
 - Brand font: Museo (`Museo700-Regular.otf`, the slab family) — never Museo Sans, never aliased. See `docs/TEXT_FITTING.md`.
-- Outline export is fixed-copy only (bakes the active sample row); omit OTF from those packages.
-- App docs: `docs/` in this folder.
+- Outline export is fixed-copy only (bakes the active sample row); omit OTF from those packages. Prefer editor `presentationSnapshots`.
+- Non-DCO static HTML uses per-campaign product `clickTag`s from the registry; SSE DCO falls back to `https://www.sseairtricity.com/uk`.
+- App docs: `docs/` in this folder (ignore `docs/superpowers/` design/plan archives unless implementing from them).
 
 ## Commands
 
@@ -39,8 +45,9 @@ Local Next.js tool for editing campaign creative JSON documents and exporting St
 just editor           # from repo root
 npm test              # from repo root
 npm run build
+npm run export:preview-site   # static client preview → site/
 ```
 
 ## Tests
 
-Run `npm test` after changes to `creative-document.ts`, `feed-schema.ts`, `creative-exporter.ts`, or API routes. API tests hit real files under `campaign/`.
+Run `npm test` after changes to `creative-document.ts`, `feed-schema.ts`, `creative-exporter.ts`, outline bake/snapshot, or API routes. API tests hit real files under `campaign/`.

@@ -21,7 +21,7 @@ When roundel frame is **off**, the animation skips Act 3 and runs **1 → 2 → 
 
 ### `heading1_text`
 
-- **Type:** string
+- **Type:** multiline string
 - **Description:** Act 1 opening headline.
 - **Validation:** any string
 - **Required:** optional (empty allowed)
@@ -30,7 +30,7 @@ When roundel frame is **off**, the animation skips Act 3 and runs **1 → 2 → 
 
 ### `heading2_text`
 
-- **Type:** string
+- **Type:** multiline string
 - **Description:** Act 2 headline, shown while offer block(s) are on screen.
 - **Validation:** any string
 - **Required:** optional
@@ -39,21 +39,21 @@ When roundel frame is **off**, the animation skips Act 3 and runs **1 → 2 → 
 
 ### `heading3_text`
 
-- **Type:** string
+- **Type:** multiline string
 - **Description:** Act 3 headline over the **offer roundel frame**. Only visible in the timeline when **`include_roundel_frame_bool` is `true`**. Also used as the **display fallback for Act 4** when roundel frame is off and `heading4_text` is empty.
 - **Validation:** any string
 - **Required:** optional
 - **Default / fallback:** `''`; may appear on `#headline-act4` when roundel off + H4 empty
-- **Sample:** `A different kind of energy`
+- **Sample:** `Switch and save today`
 
 ### `heading4_text`
 
-- **Type:** string
+- **Type:** multiline string
 - **Description:** Act 4 headline, always positioned over the **CTA / end frame** (not the offer roundel). Enters at the CTA beat in both 3-act and 4-act profiles.
 - **Validation:** any string
 - **Required:** optional
 - **Default / fallback:** if roundel frame **off** and empty → show `heading3_text`; if roundel frame **on** → empty stays empty
-- **Sample:** `Switch and save today`
+- **Sample:** `A different kind of energy`
 
 ---
 
@@ -68,7 +68,7 @@ Controlled by **`offer_count_num`** (0–3). Slots above the count are hidden at
 - **Validation:** **0–3**; out-of-range values clamp (no error); explicit `0` is preserved
 - **Required:** optional on input; always coerced to 0–3 (invalid → `1`)
 - **Default / fallback:** `1` if missing/invalid; runtime can also infer from non-empty `offerN_value_text`
-- **Sample:** `3`
+- **Sample:** `1` *(offer-count 2/3 rows share the same demo copy)*
 
 ### `offer1_value_text`
 
@@ -113,7 +113,7 @@ Controlled by **`offer_count_num`** (0–3). Slots above the count are hidden at
 - **Validation:** any string
 - **Required:** optional
 - **Default / fallback:** `''`
-- **Sample:** `€125` *(client preview seeds `100` before sample row merge)*
+- **Sample:** `€125`
 
 ### `offer3_sub_text`
 
@@ -122,7 +122,7 @@ Controlled by **`offer_count_num`** (0–3). Slots above the count are hidden at
 - **Validation:** any string
 - **Required:** optional
 - **Default / fallback:** `''`
-- **Sample:** `OFF YOUR FIRST BILL*` *(client preview seeds `OFF BILL*`)*
+- **Sample:** `OFF YOUR FIRST BILL*`
 
 ---
 
@@ -135,7 +135,7 @@ Controlled by **`offer_count_num`** (0–3). Slots above the count are hidden at
 - **Validation:** must be **`tcs_only`** or **`tcs_units`**. Legacy aliases on save: `solo` → `tcs_only`, `prices` → `tcs_units`.
 - **Required:** optional; invalid values throw on save
 - **Default / fallback:** anything other than `tcs_units` → terms-only mode (`tc-solo`)
-- **Sample:** `tcs_units` *(client preview default before merge: `tcs_only`)*
+- **Sample:** `tcs_units`
 
 **Modes:**
 
@@ -144,7 +144,7 @@ Controlled by **`offer_count_num`** (0–3). Slots above the count are hidden at
 
 ### `tc_terms_text`
 
-- **Type:** string
+- **Type:** multiline string
 - **Description:** Main T&C line (both modes).
 - **Validation:** any string
 - **Required:** optional
@@ -171,7 +171,7 @@ Controlled by **`offer_count_num`** (0–3). Slots above the count are hidden at
 - **Validation:** must be **`roundel`** or **`rectangle`**. Export runtime also accepts legacy **`rect`** as rectangle; feed save does not.
 - **Required:** optional; invalid values throw on save
 - **Default / fallback:** **`roundel`** when unset in preview helpers. Forced to **`rectangle`** when **`include_roundel_frame_bool` is `true`** (editor auto-sets this; runtime always uses rectangular CTA with roundel frame on).
-- **Sample:** `rectangle` *(client preview default before merge: `roundel`)*
+- **Sample:** `roundel` *(runtime forces rectangular CTA when roundel frame is on)*
 
 ### `cta_text`
 
@@ -194,8 +194,8 @@ Separate from the CTA shape. This is the optional **savings roundel** in Act 3, 
 - **Description:** Enables the **four-act** timeline with the optional offer roundel frame and Act 3 headline. When **`false`**, uses **three-act** timing (headlines 1, 2, 4 only; Act 3 layer hidden).
 - **Validation:** `true` | `false`
 - **Required:** optional
-- **Default / fallback:** **`false`**
-- **Sample:** `false`
+- **Default / fallback:** missing → **`false`**; client preview / default sample rows seed **`true`**
+- **Sample:** `true`
 
 When **`true`**: `frames-4` timing, Act 3 headline visible, CTA becomes rectangular, and roundel copy fields apply.
 

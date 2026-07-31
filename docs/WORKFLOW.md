@@ -17,15 +17,15 @@
 |---|---|
 | **Export HTML (font)** | Downloads `{exportSlug}_html.zip`; also writes `output/{exportSlug}_{size}.html` (+ WIP variants) |
 | **Export HTML (SVG outlines)** | Snapshots the editor stage (all sizes) then downloads `{exportSlug}_html_outlines.zip`; Studio-shaped fixed-copy outline HTML (Enabler shell); SVGs inlined; nested `assets/…` backgrounds |
-| **Export for Static** | Same editor snapshot bake → `{exportSlug}_html_static.zip`; lean outlined HTML (no Enabler/DV360); inactive layers pruned; flat `assets/<basename>.jpg` backgrounds; IAB `clickTag` is per campaign (Keypad / Welcome Credit / Top Discount product URLs; DCO falls back to `https://www.sseairtricity.com/uk`) |
+| **Export for Static** | Same editor snapshot bake → `{exportSlug}_html_static.zip`; lean outlined HTML (no Enabler/DV360); inactive layers pruned; flat `assets/<basename>.jpg` backgrounds; IAB `clickTag` from `campaign-registry.ts` (Keypad → `…/keypad-electricity`, Welcome Credit → `…/electricity-welcome-credit`, Top Discount → `…/electricity-top-discount`; DCO → `https://www.sseairtricity.com/uk`) |
 | **Sync Zips** | Snapshots all non-DCO campaigns → tracked `outputs/` for `/statics/`, and also bakes the SSE DCO **Canonical Agency Zip** into `outputs/downloads/` for the DCO Pages download button. Commit `outputs/` and push to publish |
-| **View HTML** | Opens a browser preview of the current size with baked feed row |
-| **HTML source** | Formatted, syntax-highlighted export HTML in the inspector modal |
-| **Client ZIP** | Downloadable preview package with validator (font mode) |
-| **Client ZIP (SVG outlines)** | Fixed-copy outline package without OTF; campaign SVGs inlined |
-| **Canonical Zip** | Flat `{size}.html` + packaged backgrounds; SVGs inlined; Museo CDN |
-| **Canonical Agency Zip** | Agency `ads/{size}/index.html`; SVGs inlined; Museo CDN; backgrounds feed-only (no hiker sample). Also available as a static download on the hosted DCO preview (preview form values do not affect it) |
-| **Base ZIP** | Agency upload package with mapping and HTML shells |
+| **Inspect HTML** | Formatted, syntax-highlighted export HTML in the inspector modal |
+| **Export Canonical Zip** | Flat `{size}.html` + packaged backgrounds; SVGs inlined; Museo CDN |
+| **Export Canonical Agency Zip** | Agency `ads/{size}/index.html`; SVGs inlined; Museo CDN; backgrounds feed-only (no hiker sample). Also available as a static download on the hosted DCO preview (preview form values do not affect it) |
+| **Export base ZIP for agency** | Agency upload package (`assetMode: packaged`) with mapping and HTML shells |
+| **Export agency ZIP with CDN assets** | Agency layout with Studio CDN Museo (+ CDN sample fallbacks where applicable) |
+| **Export client ZIP with/without validation** | Downloadable preview package; validator optional (font mode) |
+| **Export client ZIP (SVG outlines)** | Fixed-copy outline package without OTF; campaign SVGs inlined |
 
 ## Statics preview publish
 
@@ -43,7 +43,7 @@ Place files under `campaign/assets/` and reference them as `assets/...` in the c
 
 ## Adding a new size
 
-Add a new entry under `sizes` in `sse-dco-creative.json` with `canvas`, `layers`, `variantRules`, and optional `manualCss`. The editor will pick it up on reload.
+Add a new entry under `sizes` in the active campaign’s `*-creative.json` (and keep parallel campaigns in sync if they share structure) with `canvas`, `layers`, `variantRules`, and optional `manualCss`. If the size is new to the feed schema, also add it to `CREATIVE_AD_SIZES` in `src/lib/feed-background.ts`. The editor will pick it up on reload.
 
 ## Troubleshooting
 

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Docs sync** — refreshed `docs/` (API, architecture, workflow, feed schema/fields) and `AGENTS.md` / `README.md` against current registry, Sync Zips/`outputs/`, outline bake, export menu labels, sample-row defaults, static `clickTag`s, and Museo-only packaging.
+
 ### Added
 
 - **Pages DCO preview version stamp** — ad card bar shows `version: <cacheBust>` beside Preview (same `?v=` value on iframe URLs) so you can confirm the deploy stamp without inspecting the network panel.

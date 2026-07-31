@@ -26,8 +26,8 @@ Builds HTML for all sizes into `output/`. Optional body: `{ document, renderMode
 
 - `renderMode: 'outline'` bakes fixed-copy SVG text paths, inlines logo/wave/plus SVGs as data URIs, stages background JPEGs, and skips Museo packaging.
 - `presentationSnapshots` (outline): per-size editor capture after fit/symbol-align/layout (`fontSize`, `letterSpacingEm`, `alignOffsetY`, plus/slot positions). Editor exports always send this; without it the server approximates via Museo metrics.
-- `delivery: 'static'` (outline only) strips Enabler/DV360 shell, prunes inactive layers for the baked sample row, and flattens backgrounds to `assets/<basename>.jpg`. Download filename: `{slug}_html_static.zip`.
-- Default `delivery: 'studio'` keeps the Studio-shaped outline ZIP (`{slug}_html_outlines.zip`) with nested `assets/…` paths.
+- `delivery: 'static'` (outline only) strips Enabler/DV360 shell, prunes inactive layers for the baked sample row, flattens backgrounds to `assets/<basename>.jpg`, and wires IAB `clickTag` (per-campaign product URL from `campaign-registry.ts`, else `https://www.sseairtricity.com/uk`). Download filename: `{slug}_html_static.zip`.
+- Default `delivery: 'studio'` keeps the Studio-shaped outline ZIP (`{slug}_html_outlines.zip`) with nested `assets/…` paths (Enabler exit; no static `clickTag`).
 
 When `download: true`, returns a ZIP attachment of the HTML files plus staged backgrounds (outline modes).
 

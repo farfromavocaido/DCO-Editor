@@ -14,6 +14,7 @@ The SSE DCO editor is a Next.js app that reads and writes registered campaign cr
 │  │ switcher    │              │ feed-schema.ts            │  │
 │  └─────────────┘              │ creative-exporter.ts      │  │
 │         │                     │ text-outline.ts           │  │
+│         │                     │ outline-bake.ts           │  │
 │         │  /assets/* proxy    └────────────┬─────────────┘  │
 └─────────┼──────────────────────────────────┼───────────────┘
           │                                  │ fs read/write
@@ -21,7 +22,8 @@ The SSE DCO editor is a Next.js app that reads and writes registered campaign cr
           └────────────────────►│ campaign/                    │
                                 │  *-creative.json             │
                                 │  assets/                     │
-                                │ output/ (generated HTML)     │
+                                │ output/  (local scratch)     │
+                                │ outputs/ (Sync Zips, tracked)│
                                 └──────────────────────────────┘
 ```
 
@@ -33,7 +35,8 @@ All server paths resolve from `src/server/paths.ts` relative to the file locatio
 |---|---|
 | `appRoot` | Repository root |
 | `projectRoot` | `campaign/` |
-| `outputRoot` | `output/` |
+| `outputRoot` | `output/` (gitignored local HTML/ZIP scratch) |
+| `outputsRoot` | `outputs/` (tracked Sync Zips package for GitHub Pages) |
 | `creativeDocumentPath` | Default `campaign/sse-dco-creative.json` |
 | `creativeDocumentPathFor(id)` | Registered campaign JSON via `campaign-registry.ts` |
 
@@ -41,11 +44,11 @@ All server paths resolve from `src/server/paths.ts` relative to the file locatio
 
 ### `campaign-registry.ts`
 
-Maps campaign ids to JSON filenames, display names, and export slugs.
+Maps campaign ids to JSON filenames, display names, export slugs, and optional static `clickTag` product URLs (non-DCO).
 
 ### `creative-document.ts`
 
-Reads, validates, and writes version-1 creative JSON documents for registered campaign ids.
+Reads, validates, and writes version-1 creative JSON documents for registered campaign ids (including `campaign.offerPlusLayout`).
 
 ### `feed-schema.ts`
 
@@ -53,11 +56,15 @@ Reads/writes feed profile data embedded in the creative document. Validates and 
 
 ### `creative-exporter.ts`
 
-Renders Studio-ready HTML, WIP preview variants, client preview ZIPs, and agency base ZIPs from the creative document. Supports `renderMode: 'font' | 'outline'` and outline `delivery: 'studio' | 'static'` (outline inlines logo/wave/plus SVGs as data URIs and omits Museo; static strips Enabler and flattens backgrounds).
+Renders Studio-ready HTML, WIP preview variants, client preview ZIPs, agency base ZIPs, and Sync Zips (`outputs/`) from the creative document. Supports `renderMode: 'font' | 'outline'` and outline `delivery: 'studio' | 'static'` (outline inlines logo/wave/plus SVGs as data URIs and omits Museo; static strips Enabler and flattens backgrounds).
 
 ### `text-outline.ts`
 
 Loads Museo and converts fitted text boxes into inline SVG path markup for outline export, using the CSS line-box model (authored `lineHeight` + half-leading baseline) so path ink matches font-mode layout.
+
+### `outline-bake.ts`
+
+Server-side approximation of fit → symbol align → offer layout when outline/static export has no editor `presentationSnapshots`.
 
 ### `http.ts`
 
@@ -74,6 +81,8 @@ Zustand store holds the active campaign id, loaded creative document, feed draft
 DOM stage mirroring the ad structure with compiled CSS, timeline scrubbing, canvas manipulation, and client-side text fitting.
 
 Preview asset URLs are `/assets/...` — served by the Next route, mapped to `campaign/assets/...`.
+
+Offers-0 layers: `bg-blur` (`kind: "blur"`, `src/lib/blur-layer.ts`) and `headline-scrim` (`kind: "gradient"`, `src/lib/gradient-layer.ts`) — editor-controlled, scoped visibility under `offers-0`.
 
 ### Motion
 
@@ -123,4 +132,4 @@ All handlers use `export const runtime = 'nodejs'` because they touch the filesy
 
 ## Tests
 
-Vitest runs in Node. Suites cover creative compiler/model libs, feed schema validation, exporter output (font + outline), campaign registry, and live API handlers against registered campaign JSON files.
+Vitest runs in Node. Suites cover creative compiler/model libs, feed schema validation, exporter output (font + outline), outline bake/snapshot, campaign registry, and live API handlers against registered campaign JSON files.

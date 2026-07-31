@@ -17,7 +17,7 @@
 |---|---|
 | **Export HTML (font)** | Downloads `{exportSlug}_html.zip`; also writes `output/{exportSlug}_{size}.html` (+ WIP variants) |
 | **Export HTML (SVG outlines)** | Snapshots the editor stage (all sizes) then downloads `{exportSlug}_html_outlines.zip`; Studio-shaped fixed-copy outline HTML (Enabler shell); SVGs inlined; nested `assets/…` backgrounds |
-| **Export for Static** | Same editor snapshot bake → `{exportSlug}_html_static.zip`; lean outlined HTML (no Enabler/DV360); inactive layers pruned; flat `assets/<basename>.jpg` backgrounds; IAB `clickTag` from `campaign-registry.ts` (Keypad → `…/keypad-electricity`, Welcome Credit → `…/electricity-welcome-credit`, Top Discount → `…/electricity-top-discount`; DCO → `https://www.sseairtricity.com/uk`) |
+| **Export for Static** | Same editor snapshot bake → `{exportSlug}_html_static.zip` with `campaigns/{exportSlug}_{size}.zip` units (each: HTML + `assets/<basename>.jpg` for that size); lean outlined HTML (no Enabler/DV360); inactive layers pruned; IAB `clickTag` from `campaign-registry.ts` (Keypad → `…/keypad-electricity`, Welcome Credit → `…/electricity-welcome-credit`, Top Discount → `…/electricity-top-discount`; DCO → `https://www.sseairtricity.com/uk`) |
 | **Sync Zips** | Snapshots all non-DCO campaigns → tracked `outputs/` for `/statics/`, and also bakes the SSE DCO **Canonical Agency Zip** into `outputs/downloads/` for the DCO Pages download button. Commit `outputs/` and push to publish |
 | **Inspect HTML** | Formatted, syntax-highlighted export HTML in the inspector modal |
 | **Export Canonical Zip** | Flat `{size}.html` + packaged backgrounds; SVGs inlined; Museo CDN |

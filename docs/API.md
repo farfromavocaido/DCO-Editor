@@ -26,10 +26,10 @@ Builds HTML for all sizes into `output/`. Optional body: `{ document, renderMode
 
 - `renderMode: 'outline'` bakes fixed-copy SVG text paths, inlines logo/wave/plus SVGs as data URIs, stages background JPEGs, and skips Museo packaging.
 - `presentationSnapshots` (outline): per-size editor capture after fit/symbol-align/layout (`fontSize`, `letterSpacingEm`, `alignOffsetY`, plus/slot positions). Editor exports always send this; without it the server approximates via Museo metrics.
-- `delivery: 'static'` (outline only) strips Enabler/DV360 shell, prunes inactive layers for the baked sample row, flattens backgrounds to `assets/<basename>.jpg`, and wires IAB `clickTag` (per-campaign product URL from `campaign-registry.ts`, else `https://www.sseairtricity.com/uk`). Download filename: `{slug}_html_static.zip`.
+- `delivery: 'static'` (outline only) strips Enabler/DV360 shell, prunes inactive layers for the baked sample row, flattens backgrounds to `assets/<basename>.jpg`, and wires IAB `clickTag` (per-campaign product URL from `campaign-registry.ts`, else `https://www.sseairtricity.com/uk`). Download filename: `{slug}_html_static.zip`, containing `campaigns/{slug}_{size}.zip` units — each with that size’s HTML plus `assets/<basename>.jpg` for that size only.
 - Default `delivery: 'studio'` keeps the Studio-shaped outline ZIP (`{slug}_html_outlines.zip`) with nested `assets/…` paths (Enabler exit; no static `clickTag`).
 
-When `download: true`, returns a ZIP attachment of the HTML files plus staged backgrounds (outline modes).
+When `download: true`, returns a ZIP attachment (static: nested per-size zips; studio outline: HTML + staged backgrounds; font: HTML only).
 
 ### `POST /api/creative/export-preview`
 
@@ -46,7 +46,7 @@ When `download: true`, returns a ZIP attachment of the HTML files plus staged ba
 
 - `campaigns` — only non-DCO ids (`sse-hiker-welcome`, `sse-keepyuppy-welcome`, `sse-keepyuppy-discount`). `document` optional (loaded from disk when omitted). Prefer editor-supplied `presentationSnapshots` for WYSIWYG outline bake.
 - `dcoDocument` optional — SSE DCO creative JSON; when omitted, loaded from disk. Always baked as **Canonical Agency Zip** under `outputs/campaigns/sse-dco/` plus `outputs/downloads/SSE_DCO_canonical_agency_<timestamp>.zip` for the hosted DCO preview download (preview form values do not affect this zip).
-- Replaces `outputs/campaigns/`, writes `outputs/downloads/SSE_Statics_<timestamp>.zip` (non-DCO only), the DCO agency zip, and updates `outputs/latest.json` (`campaigns`, `dco`, `zip`, `dcoZip`).
+- Replaces `outputs/campaigns/` (loose HTML + assets for Pages `/statics/` preview), writes `outputs/downloads/SSE_Statics_<timestamp>.zip` as `campaigns/{slug}_{size}.zip` units (non-DCO only), the DCO agency zip, and updates `outputs/latest.json` (`campaigns`, `dco`, `zip`, `dcoZip`).
 - Returns `{ ok, latest, written, zipBytes, dcoZipBytes }`.
 
 ### `POST /api/creative/{size}/export`

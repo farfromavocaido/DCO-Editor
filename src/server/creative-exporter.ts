@@ -1576,6 +1576,51 @@ const collectOutlineHtmlSidecarAssets = (document: Record<string, unknown>) => (
   collectClientAssetPaths(document).filter((assetPath) => !isSvgAssetPath(assetPath))
 );
 
+/** Non-SVG background assets for a single size (source paths under campaign/). */
+const collectOutlineHtmlSidecarAssetsForSize = (
+  document: Record<string, unknown>,
+  size: string,
+) => {
+  const sizeCreative = (document.sizes as Record<string, Record<string, unknown>> | undefined)?.[size];
+  if (!sizeCreative) return [];
+  const assets = new Set<string>();
+  for (const asset of Object.values(sizeCreative.assets || {})) {
+    const assetPath = String(asset);
+    if (assetPath.startsWith('assets/') && !isSvgAssetPath(assetPath)) assets.add(assetPath);
+  }
+  for (const layer of (sizeCreative.layers || []) as Array<Record<string, unknown>>) {
+    const assetPath = String(layer.asset || '');
+    if (assetPath.startsWith('assets/') && !isSvgAssetPath(assetPath)) assets.add(assetPath);
+  }
+  return [...assets].sort();
+};
+
+/**
+ * One size unit for Export for Static: `{slug}_{size}.html` + `assets/<basename>` for that size only.
+ */
+const buildStaticSizePackageEntries = async (
+  document: Record<string, unknown>,
+  size: string,
+  html: string | Buffer,
+): Promise<PackageEntry[]> => {
+  const slug = exportSlugForDocument(document);
+  const entries: PackageEntry[] = [
+    { path: `${slug}_${size}.html`, data: html },
+  ];
+  for (const assetPath of collectOutlineHtmlSidecarAssetsForSize(document, size)) {
+    entries.push({
+      path: flatAssetEntryPath(assetPath),
+      data: await fs.readFile(path.resolve(projectRoot, assetPath)),
+    });
+  }
+  return entries;
+};
+
+/** Nested per-size zip path inside the static download package. */
+const staticCampaignSizeZipPath = (slug: string, size: string) => (
+  `campaigns/${slug}_${size}.zip`
+);
+
 /**
  * Copy background JPEGs into output/ so outline HTML relative `assets/…` paths resolve.
  * Static delivery flattens to `assets/<basename>`; studio outline keeps nested paths.
@@ -1627,7 +1672,31 @@ export const buildHtmlExportZip = async (
   options: HtmlExportOptions = {},
 ) => {
   const result = await buildAllCreativeHtmlFiles(document, options);
+  const slug = exportSlugForDocument(document);
+  const delivery: DeliveryMode = options.delivery === 'static' ? 'static' : 'studio';
   const entries: PackageEntry[] = [];
+
+  // Static delivery: campaigns/{slug}_{size}.zip → html + assets/<bg for that size>.
+  if (options.renderMode === 'outline' && delivery === 'static') {
+    for (const [size, sizeResult] of Object.entries(result.outputs) as Array<[
+      string,
+      { outPath?: string },
+    ]>) {
+      if (!sizeResult.outPath) continue;
+      const html = await fs.readFile(path.resolve(outputRoot, sizeResult.outPath));
+      const sizeEntries = await buildStaticSizePackageEntries(document, size, html);
+      entries.push({
+        path: staticCampaignSizeZipPath(slug, size),
+        data: createZipBuffer(sizeEntries),
+      });
+    }
+    return {
+      result,
+      zip: createZipBuffer(entries),
+      slug,
+    };
+  }
+
   for (const sizeResult of Object.values(result.outputs) as Array<{
     outPath?: string;
     wip?: Record<string, string>;
@@ -1652,7 +1721,7 @@ export const buildHtmlExportZip = async (
   return {
     result,
     zip: createZipBuffer(entries),
-    slug: exportSlugForDocument(document),
+    slug,
   };
 };
 
@@ -1757,11 +1826,18 @@ export const buildExportPreviewPackage = async (
         delivery: 'static',
         presentationSnapshot: input.presentationSnapshots?.[size] || null,
       });
+      // Loose tree for Pages /statics/ iframe preview.
       const relativePath = `campaigns/${input.id}/${slug}_${size}.html`;
       const entry = { path: relativePath, data: html };
-      staticEntries.push(entry);
       outputEntries.push(entry);
       written.push(relativePath);
+
+      // Download zip: campaigns/{slug}_{size}.zip → html + assets/<bg for that size>.
+      const sizeEntries = await buildStaticSizePackageEntries(document, size, html);
+      staticEntries.push({
+        path: staticCampaignSizeZipPath(slug, size),
+        data: createZipBuffer(sizeEntries),
+      });
     }
 
     for (const assetPath of collectOutlineHtmlSidecarAssets(document)) {
@@ -1771,7 +1847,6 @@ export const buildExportPreviewPackage = async (
         path: relativePath,
         data: await fs.readFile(path.resolve(projectRoot, assetPath)),
       };
-      staticEntries.push(entry);
       outputEntries.push(entry);
       written.push(relativePath);
     }

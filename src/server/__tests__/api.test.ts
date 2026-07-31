@@ -349,6 +349,9 @@ test('POST /api/creative/export-preview writes tracked outputs for statics + DCO
     const zipPath = path.resolve(outputsRoot, payload.latest.zip);
     const zip = await fs.readFile(zipPath);
     assert.equal(zip.subarray(0, 4).toString('binary'), 'PK\u0003\u0004');
+    // Statics download: campaigns/{slug}_{size}.zip units (not loose HTML).
+    assert.ok(zip.includes(Buffer.from('campaigns/SSE_Hiker_Welcome_300x250.zip')));
+    assert.ok(!zip.includes(Buffer.from('campaigns/sse-hiker-welcome/')));
     const dcoZipPath = path.resolve(outputsRoot, payload.latest.dcoZip);
     const dcoZip = await fs.readFile(dcoZipPath);
     assert.equal(dcoZip.subarray(0, 4).toString('binary'), 'PK\u0003\u0004');

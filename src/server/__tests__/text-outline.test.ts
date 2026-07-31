@@ -9,6 +9,26 @@ import {
   buildHtmlExportZip,
 } from '../creative-exporter';
 
+/** List store-only zip local entry names (matches createZipBuffer). */
+const listStoredZipPaths = (buf: Buffer) => {
+  const paths: string[] = [];
+  const entries: Array<{ name: string; data: Buffer }> = [];
+  let i = 0;
+  while (i + 30 <= buf.length) {
+    if (buf.readUInt32LE(i) !== 0x04034b50) break;
+    const nameLen = buf.readUInt16LE(i + 26);
+    const extraLen = buf.readUInt16LE(i + 28);
+    const compSize = buf.readUInt32LE(i + 18);
+    const name = buf.subarray(i + 30, i + 30 + nameLen).toString();
+    const dataStart = i + 30 + nameLen + extraLen;
+    const data = buf.subarray(dataStart, dataStart + compSize);
+    paths.push(name);
+    entries.push({ name, data });
+    i = dataStart + compSize;
+  }
+  return { paths, entries };
+};
+
 test('loads Museo and outlines fitted text as SVG paths', async () => {
   const font = await loadMuseoFont();
   assert.ok(font);
@@ -366,6 +386,18 @@ test('static delivery strips Studio shell, flattens assets, and prunes inactive 
   assert.ok(!result.sidecarAssets?.some((assetPath: string) => assetPath.includes('assets/keepyuppy/')));
   assert.ok(!result.sidecarAssets?.some((assetPath: string) => assetPath.includes('/SVG/') || assetPath.endsWith('.otf')));
   assert.ok(zip.length > 1000);
+  // Outer zip nests one size unit per campaigns/{slug}_{size}.zip
+  const outer = listStoredZipPaths(zip);
+  assert.ok(outer.paths.includes('campaigns/SSE_KeepyUppy_Welcome_160x600.zip'));
+  assert.ok(outer.paths.includes('campaigns/SSE_KeepyUppy_Welcome_970x250.zip'));
+  assert.ok(outer.paths.every((entryPath) => entryPath.startsWith('campaigns/') && entryPath.endsWith('.zip')));
+  const unit = outer.entries.find((entry) => entry.name.endsWith('_160x600.zip'));
+  assert.ok(unit);
+  const inner = listStoredZipPaths(unit.data);
+  assert.deepEqual(inner.paths.sort(), [
+    'SSE_KeepyUppy_Welcome_160x600.html',
+    'assets/keepyuppy_160x600.jpg',
+  ].sort());
 });
 
 test('outline client package omits OTF and uses campaign export slug', async () => {

@@ -4,6 +4,7 @@
 
 ### Changed
 
+- **Export for Static package layout** — download zips (`{slug}_html_static.zip` and Sync Zips’ `SSE_Statics_*.zip`) now nest `campaigns/{slug}_{size}.zip` units; each unit is that size’s HTML plus `assets/<basename>.jpg` for that size only. Pages `/statics/` still uses the loose `outputs/campaigns/<id>/` tree for iframe preview.
 - **Docs sync** — refreshed `docs/` (API, architecture, workflow, feed schema/fields) and `AGENTS.md` / `README.md` against current registry, Sync Zips/`outputs/`, outline bake, export menu labels, sample-row defaults, static `clickTag`s, and Museo-only packaging.
 
 ### Added

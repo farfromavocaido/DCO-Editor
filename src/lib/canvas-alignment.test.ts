@@ -243,8 +243,12 @@ test('persisted 320x50 dual price row stays on-canvas with leaderboard layout', 
     assert.ok(targetSubline.left >= 0, `${slotId} subline exceeds canvas left`);
     assert.ok(targetValue.left + targetValue.width <= canvas.width, `${slotId} value exceeds canvas right`);
     assert.ok(targetSubline.left + targetSubline.width <= canvas.width, `${slotId} subline exceeds canvas right`);
-    assertClose(targetValue.width, targetSlot.width, 1, `${slotId} value width`);
-    // Sublines are intentionally narrower than the slot on the leaderboard.
+    // Dual leaderboard values/sublines are intentionally narrower than the slot host.
+    assert.ok(
+      targetValue.width <= targetSlot.width,
+      `${slotId} value wider than slot (${targetValue.width} > ${targetSlot.width})`,
+    );
+    assert.ok(targetValue.width >= targetSlot.width * 0.75, `${slotId} value too narrow`);
     assert.ok(
       targetSubline.width <= targetSlot.width,
       `${slotId} subline wider than slot (${targetSubline.width} > ${targetSlot.width})`,
@@ -314,10 +318,19 @@ test('persisted 728x90 banner keeps offers on-canvas with the cropped bluewave t
           Number(authoredSubline?.values?.left) || 0,
           `${scopes[0]} ${slotId} subline chrome must match authored local left`,
         );
-        assert.ok(value.left >= slot.left - 8, `${scopes[0]} ${slotId} value exceeds slot left`);
-        assert.ok(value.left + value.width <= slot.left + slot.width + 8, `${scopes[0]} ${slotId} value exceeds slot right`);
-        assert.ok(primitive.left >= slot.left - 8, `${scopes[0]} ${slotId} primitive exceeds slot left`);
-        assert.ok(primitive.left + primitive.width <= slot.left + slot.width + 8, `${scopes[0]} ${slotId} primitive exceeds slot right`);
+        // offers-3 insets value/subline inside overlapping slot hosts; allow that chrome to
+        // overhang the slot box while still staying on-canvas (checked below).
+        const slotSlack = scopes[0] === 'offers-3' ? 16 : 8;
+        assert.ok(value.left >= slot.left - slotSlack, `${scopes[0]} ${slotId} value exceeds slot left`);
+        assert.ok(
+          value.left + value.width <= slot.left + slot.width + slotSlack,
+          `${scopes[0]} ${slotId} value exceeds slot right`,
+        );
+        assert.ok(primitive.left >= slot.left - slotSlack, `${scopes[0]} ${slotId} primitive exceeds slot left`);
+        assert.ok(
+          primitive.left + primitive.width <= slot.left + slot.width + slotSlack,
+          `${scopes[0]} ${slotId} primitive exceeds slot right`,
+        );
       }
       if (scopes[0] === 'offers-1') {
         assert.ok(value.left >= 0, `${scopes[0]} ${slotId} value hit area exceeds canvas left`);

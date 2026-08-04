@@ -350,7 +350,7 @@
         "cta_text": "Switch today",
         "include_roundel_frame_bool": true,
         "roundel_text_text": "switch and save today",
-        "roundel_value_text": "",
+        "roundel_value_text": "999",
         "background_image_url_160x600": {
           "Url": ""
         },
@@ -767,7 +767,7 @@
           "group": "Roundel frame",
           "zIndex": 6,
           "base": {
-            "left": 148,
+            "left": 138,
             "top": -17,
             "width": 90,
             "height": 90,

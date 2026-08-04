@@ -34,7 +34,7 @@
       devDynamicContent.SSE_ROI_Delivery[0].cta_text = "Switch today";
       devDynamicContent.SSE_ROI_Delivery[0].include_roundel_frame_bool = true;
       devDynamicContent.SSE_ROI_Delivery[0].roundel_text_text = "Saving you up to";
-      devDynamicContent.SSE_ROI_Delivery[0].roundel_value_text = "€771";
+      devDynamicContent.SSE_ROI_Delivery[0].roundel_value_text = "€518";
       devDynamicContent.SSE_ROI_Delivery[0].background_image_url_160x600 = {};
       devDynamicContent.SSE_ROI_Delivery[0].background_image_url_160x600.Url = "";
       devDynamicContent.SSE_ROI_Delivery[0].background_image_url_300x250 = {};
@@ -508,36 +508,38 @@
     }
 
     .offers-2 .offer-slot-1 {
-      left: 124px;
-      top: 7px;
+      left: 123px;
+      top: 6px;
       width: 74px;
       height: 37px;
     }
 
     .offers-2 .offer-slot-2 {
-      left: 191px;
-      top: 7px;
+      left: 190px;
+      top: 6px;
       width: 74px;
       height: 35px;
     }
 
     .offers-2 .plus-1 {
-      left: 169px;
-      top: 20px;
+      left: 168px;
+      top: 19px;
       width: 13px;
       height: 13px;
       object-fit: contain;
     }
 
     .offers-2 [data-gwd-group="OfferSlot"] .offer-value {
-      left: -24px;
-      top: 1px;
-      width: 74px;
+      left: -17px;
+      top: 0px;
+      width: 60px;
       height: 25px;
-      font-size: 34px;
+      font-size: 28px;
       line-height: 0.85;
       text-align: center;
       justify-content: center;
+      display: flex;
+      align-items: flex-end;
     }
 
     .offers-2 [data-gwd-group="OfferSlot"] .offer-subline {
@@ -553,28 +555,28 @@
     }
 
     .offers-3 .offer-slot-1 {
-      left: 113px;
+      left: 109px;
       top: 9px;
       width: 76px;
       height: 28px;
     }
 
     .offers-3 .offer-slot-2 {
-      left: 182px;
+      left: 176px;
       top: 9px;
       width: 76px;
       height: 30px;
     }
 
     .offers-3 .offer-slot-3 {
-      left: 233px;
+      left: 237px;
       top: 9px;
       width: 76px;
       height: 33px;
     }
 
     .offers-3 .plus-1 {
-      left: 208px;
+      left: 202px;
       top: 11px;
       width: 13px;
       height: 13px;
@@ -582,7 +584,7 @@
     }
 
     .offers-3 .plus-2 {
-      left: 272px;
+      left: 266px;
       top: 14px;
       height: 13px;
       width: 13px;
@@ -683,7 +685,7 @@
 
     .offers-0 .roundel-frame {
       background-color: rgb(0, 229, 165);
-      left: 149px;
+      left: 137px;
       top: -16px;
     }
 
@@ -704,9 +706,9 @@
     }
 
     .roundel-copy-only .roundel-copy {
-      left: 153px;
-      top: 12px;
-      width: 82px;
+      left: 158px;
+      top: 9px;
+      width: 68px;
       height: 31px;
       font-size: 12px;
       line-height: 1.05;
@@ -747,7 +749,7 @@
       left: 7px;
       top: 7px;
       width: 113px;
-      height: 30px;
+      height: 36px;
       font-size: 15px;
       line-height: 1;
       display: flex;
@@ -755,7 +757,7 @@
     }
 
     .offers-3 .sse-headline {
-      left: 12px;
+      left: 6px;
       width: 101px;
       top: 9px;
       text-align: left;
@@ -833,13 +835,6 @@
       align-items: center;
     }
 
-    .offers-0 .cta {
-      left: 106px;
-      top: 23px;
-      background-color: rgb(0, 229, 165);
-      color: rgb(0, 41, 117);
-    }
-
     .offers-0 .bluewave {
       left: 106px;
       top: -1px;
@@ -852,6 +847,28 @@
       top: 14px;
       width: 55px;
       height: 21px;
+    }
+
+    .offers-0.cta-rect .cta {
+      left: 65px;
+      top: 23px;
+      width: 73px;
+      height: 18px;
+      border-radius: 4px;
+      font-size: 9px;
+      background-color: rgb(0, 229, 165);
+      color: rgb(0, 41, 117);
+    }
+
+    .offers-0.cta-roundel .cta {
+      left: 65px;
+      top: 7px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      font-size: 12px;
+      background-color: rgb(0, 229, 165);
+      color: rgb(0, 41, 117);
     }
 
     @keyframes bg-blur-bg-blur-fade-frames-3 {
@@ -4378,7 +4395,7 @@
     <script>
       (function() {
         var root = null;
-        var textFitRules = [{"cssClass":"sse-headline","shared":true,"wrap":true,"maxLines":2,"minFontSize":13,"allowShrink":true},{"cssClass":"roundel-copy","shared":false,"wrap":false,"minFontSize":8,"maxLines":1,"allowShrink":true,"scopes":{"roundel-copy-only":{"maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18}}},{"cssClass":"roundel-value","shared":false,"wrap":false,"minFontSize":16,"maxLines":1},{"cssClass":"terms-prices","shared":false,"wrap":false,"maxLines":2,"minFontSize":6},{"cssClass":"unit-rate-prices","shared":false,"wrap":false,"minFontSize":5,"maxLines":1,"allowShrink":true},{"cssClass":"terms-solo","shared":false,"wrap":false,"maxLines":2,"minFontSize":6},{"cssClass":"offer-value","shared":true,"wrap":false,"minFontSize":8,"minFontSizeRatio":0.5,"tracking":{"minEm":-0.05},"align":"bottom"},{"cssClass":"offer-subline","shared":true,"wrap":true,"minFontSize":6,"minFontSizeRatio":0.6,"maxLines":2,"allowShrink":true,"scopes":{"offers-2":{"maxLines":2,"allowShrink":true,"wrap":true},"offers-3":{"maxLines":2,"allowShrink":true,"wrap":true}}}];
+        var textFitRules = [{"cssClass":"sse-headline","shared":true,"wrap":true,"maxLines":2,"minFontSize":13,"allowShrink":true},{"cssClass":"roundel-copy","shared":false,"wrap":false,"minFontSize":8,"maxLines":1,"allowShrink":true,"scopes":{"roundel-copy-only":{"maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18}}},{"cssClass":"roundel-value","shared":false,"wrap":false,"minFontSize":16,"maxLines":1},{"cssClass":"terms-prices","shared":false,"wrap":false,"maxLines":2,"minFontSize":6},{"cssClass":"unit-rate-prices","shared":false,"wrap":false,"minFontSize":5,"maxLines":1,"allowShrink":true},{"cssClass":"terms-solo","shared":false,"wrap":false,"maxLines":2,"minFontSize":6},{"cssClass":"offer-value","shared":true,"wrap":false,"minFontSize":8,"minFontSizeRatio":0.5,"tracking":{"minEm":-0.05},"align":"bottom","scopes":{"offers-2":{"minFontSize":24}}},{"cssClass":"offer-subline","shared":true,"wrap":true,"minFontSize":6,"minFontSizeRatio":0.6,"maxLines":2,"allowShrink":true,"scopes":{"offers-2":{"maxLines":2,"allowShrink":true,"wrap":true},"offers-3":{"maxLines":2,"allowShrink":true,"wrap":true}}}];
 
         function fieldValue(value) {
           if (value === undefined || value === null) return '';

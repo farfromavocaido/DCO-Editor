@@ -34,7 +34,7 @@
       devDynamicContent.SSE_ROI_Delivery[0].cta_text = "Switch today";
       devDynamicContent.SSE_ROI_Delivery[0].include_roundel_frame_bool = true;
       devDynamicContent.SSE_ROI_Delivery[0].roundel_text_text = "Saving you up to";
-      devDynamicContent.SSE_ROI_Delivery[0].roundel_value_text = "€771";
+      devDynamicContent.SSE_ROI_Delivery[0].roundel_value_text = "€518";
       devDynamicContent.SSE_ROI_Delivery[0].background_image_url_160x600 = {};
       devDynamicContent.SSE_ROI_Delivery[0].background_image_url_160x600.Url = "";
       devDynamicContent.SSE_ROI_Delivery[0].background_image_url_300x250 = {};
@@ -633,7 +633,7 @@
 
     .offers-0 .roundel-frame {
       background-color: rgb(0, 229, 165);
-      left: 33px;
+      left: 29px;
       top: 80px;
       width: 120px;
       height: 120px;
@@ -648,10 +648,10 @@
     }
 
     .roundel-copy-only .roundel-copy {
-      left: 51px;
-      top: 110px;
-      width: 79px;
-      height: 63px;
+      left: 48px;
+      top: 107px;
+      width: 83px;
+      height: 68px;
       font-size: 22px;
       line-height: 1.05;
       white-space: normal;
@@ -663,10 +663,10 @@
 
     .roundel-split .roundel-copy {
       left: 41px;
-      top: 104px;
-      width: 98px;
-      height: 24px;
-      font-size: 14px;
+      top: 101px;
+      width: 97px;
+      height: 18px;
+      font-size: 16px;
       line-height: 1.05;
       white-space: nowrap;
       display: flex;
@@ -675,14 +675,14 @@
 
     .roundel-split .roundel-value {
       left: 40px;
-      top: 130px;
-      width: 100px;
-      height: 35px;
-      font-size: 42px;
+      top: 122px;
+      width: 101px;
+      height: 48px;
+      font-size: 58px;
       line-height: 1;
       white-space: nowrap;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       text-align: center;
       justify-content: center;
     }
@@ -789,16 +789,6 @@
       justify-content: flex-start;
     }
 
-    .offers-0 .cta {
-      left: 28px;
-      top: 83px;
-      background-color: rgb(0, 229, 165);
-      color: rgb(0, 41, 117);
-      width: 134px;
-      height: 27px;
-      font-size: 14px;
-    }
-
     .offers-0 .bluewave {
       left: 50px;
       top: 54px;
@@ -811,6 +801,28 @@
       top: 214px;
       width: 78px;
       height: 28px;
+    }
+
+    .offers-0.cta-rect .cta {
+      left: 44px;
+      top: 70px;
+      width: 120px;
+      height: 36px;
+      border-radius: 4px;
+      font-size: 12px;
+      background-color: rgb(0, 229, 165);
+      color: rgb(0, 41, 117);
+    }
+
+    .offers-0.cta-roundel .cta {
+      left: 44px;
+      top: 70px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      font-size: 13px;
+      background-color: rgb(0, 229, 165);
+      color: rgb(0, 41, 117);
     }
 
     @keyframes bg-blur-bg-blur-fade-frames-3 {
@@ -4317,7 +4329,7 @@
     <script>
       (function() {
         var root = null;
-        var textFitRules = [{"cssClass":"sse-headline","shared":true,"wrap":true,"maxLines":2,"minFontSize":20,"allowShrink":true},{"cssClass":"roundel-copy","shared":false,"wrap":false,"minFontSize":12,"maxLines":1,"allowShrink":true,"scopes":{"roundel-copy-only":{"maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18}}},{"cssClass":"roundel-value","shared":false,"wrap":false,"minFontSize":28,"maxLines":1},{"cssClass":"terms-prices","shared":false,"wrap":false,"maxLines":2,"minFontSize":8},{"cssClass":"unit-rate-prices","shared":false,"wrap":true,"minFontSize":10,"maxLines":2,"allowShrink":true,"align":"bottom"},{"cssClass":"terms-solo","shared":false,"wrap":false,"maxLines":2,"minFontSize":8},{"cssClass":"offer-value","shared":true,"wrap":false,"minFontSize":8,"minFontSizeRatio":0.5,"tracking":{"minEm":-0.05},"align":"bottom"},{"cssClass":"offer-subline","shared":true,"wrap":true,"minFontSize":6,"minFontSizeRatio":0.6,"maxLines":2,"allowShrink":false,"scopes":{"offers-3":{"maxLines":1,"allowShrink":true,"wrap":false,"minFontSize":10}}}];
+        var textFitRules = [{"cssClass":"sse-headline","shared":true,"wrap":true,"maxLines":2,"minFontSize":20,"allowShrink":true},{"cssClass":"roundel-copy","shared":false,"wrap":false,"minFontSize":1,"maxLines":1,"allowShrink":true,"scopes":{"roundel-copy-only":{"maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18}}},{"cssClass":"roundel-value","shared":false,"wrap":false,"minFontSize":32,"maxLines":1},{"cssClass":"terms-prices","shared":false,"wrap":false,"maxLines":2,"minFontSize":8},{"cssClass":"unit-rate-prices","shared":false,"wrap":true,"minFontSize":10,"maxLines":2,"allowShrink":true,"align":"bottom"},{"cssClass":"terms-solo","shared":false,"wrap":false,"maxLines":2,"minFontSize":8},{"cssClass":"offer-value","shared":true,"wrap":false,"minFontSize":8,"minFontSizeRatio":0.5,"tracking":{"minEm":-0.05},"align":"bottom"},{"cssClass":"offer-subline","shared":true,"wrap":true,"minFontSize":6,"minFontSizeRatio":0.6,"maxLines":2,"allowShrink":false,"scopes":{"offers-3":{"maxLines":1,"allowShrink":true,"wrap":false,"minFontSize":10}}}];
 
         function fieldValue(value) {
           if (value === undefined || value === null) return '';

@@ -42,12 +42,15 @@ Local Next.js tool for editing campaign creative JSON documents and exporting St
 ## Commands
 
 ```bash
-just editor           # from repo root
+just editor           # from repo root → editor + live /qa at http://localhost:5174/qa
 npm test              # from repo root
 npm run build
 npm run export:preview-site   # static client preview → site/
+npm run qa:dco        # canonical-agency stress capture → qa-output/YYYYMMDD-HHMMSS/ (+ archive old, latest symlink)
 ```
 
 ## Tests
 
 Run `npm test` after changes to `creative-document.ts`, `feed-schema.ts`, `creative-exporter.ts`, outline bake/snapshot, or API routes. API tests hit real files under `campaign/`.
+
+DCO visual QA matrix: `docs/QA_DCO_MATRIX.md`, live agency hold review at `/qa` (same shell as capture), harness under `scripts/qa-dco/` (writes `hold-samples.json` from creative JSON plateaus), visual review skill `.cursor/skills/dco-qa-review`.

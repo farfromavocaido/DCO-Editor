@@ -1,0 +1,132 @@
+{
+  "sizes": ["160x600", "300x250", "300x600", "320x50", "728x90", "970x250"],
+  "durationS": 15,
+  "intervalMs": 250,
+  "spritesheetIntervalMs": 1000,
+  "backgroundAssets": {
+    "160x600": "assets/bg_160x600.jpg",
+    "300x250": "assets/bg_image.jpg",
+    "300x600": "assets/bg_300x600.jpg",
+    "320x50": "assets/bg_320x50.jpg",
+    "728x90": "assets/bg_728x90.jpg",
+    "970x250": "assets/bg_970x250.jpg"
+  },
+  "library": {
+    "headlines": {
+      "short": {
+        "heading1_text": "Save",
+        "heading2_text": "Switch",
+        "heading3_text": "Go",
+        "heading4_text": "Save"
+      },
+      "long": {
+        "heading1_text": "A different kind of energy",
+        "heading2_text": "This year's best electricity plan",
+        "heading3_text": "A different kind of energy",
+        "heading4_text": "A different kind of energy"
+      }
+    },
+    "offers": {
+      "short": {
+        "offer1_value_text": "10.5%",
+        "offer1_sub_text": "OFF GAS*",
+        "offer2_value_text": "1%",
+        "offer2_sub_text": "OFF ELECTRICITY*",
+        "offer3_value_text": "€1",
+        "offer3_sub_text": "OFF BILL*"
+      },
+      "long": {
+        "offer1_value_text": "11%",
+        "offer1_sub_text": "OFF ELECTRICITY*",
+        "offer2_value_text": "£8,888",
+        "offer2_sub_text": "OFF ELECTRICITY*",
+        "offer3_value_text": "€1,080",
+        "offer3_sub_text": "OFF YOUR FIRST BILL*"
+      }
+    },
+    "roundel": {
+      "short": {
+        "roundel_text_text": "Up to",
+        "roundel_value_text": "€1"
+      },
+      "long": {
+        "roundel_text_text": "Saving you up to",
+        "roundel_value_text": "£8,888"
+      }
+    },
+    "legal": {
+      "short": {
+        "tc_terms_text": "*T&Cs apply",
+        "tc_units_text": "Elec: 32.64 Inc. Vat"
+      },
+      "long": {
+        "tc_terms_text": "*T&Cs apply. See sseairtricity.com for full terms.",
+        "tc_units_text": "Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat. Gas: 7.12 Inc. Vat"
+      }
+    },
+    "cta": {
+      "offers": "Switch today",
+      "brand": "Find out more"
+    }
+  },
+  "variants": [
+    {
+      "id": "o1_roundel_prices_rect",
+      "offer_count_num": 1,
+      "include_roundel_frame_bool": true,
+      "tc_type_enum": "tcs_units",
+      "cta_type_enum": "rectangle"
+    },
+    {
+      "id": "o2_roundel_prices_rect",
+      "offer_count_num": 2,
+      "include_roundel_frame_bool": true,
+      "tc_type_enum": "tcs_units",
+      "cta_type_enum": "rectangle"
+    },
+    {
+      "id": "o3_roundel_prices_rect",
+      "offer_count_num": 3,
+      "include_roundel_frame_bool": true,
+      "tc_type_enum": "tcs_units",
+      "cta_type_enum": "rectangle"
+    },
+    {
+      "id": "o3_noroundel_solo_circ",
+      "offer_count_num": 3,
+      "include_roundel_frame_bool": false,
+      "tc_type_enum": "tcs_only",
+      "cta_type_enum": "roundel"
+    },
+    {
+      "id": "o0_roundel_rect",
+      "offer_count_num": 0,
+      "include_roundel_frame_bool": true,
+      "tc_type_enum": "tcs_only",
+      "cta_type_enum": "rectangle"
+    },
+    {
+      "id": "o0_noroundel_circ",
+      "offer_count_num": 0,
+      "include_roundel_frame_bool": false,
+      "tc_type_enum": "tcs_only",
+      "cta_type_enum": "roundel"
+    }
+  ],
+  "copySets": [
+    {
+      "id": "short",
+      "headlines": "short",
+      "offers": "short",
+      "roundel": "short",
+      "legal": "short"
+    },
+    {
+      "id": "long",
+      "headlines": "long",
+      "offers": "long",
+      "roundel": "long",
+      "legal": "long"
+    }
+  ]
+}

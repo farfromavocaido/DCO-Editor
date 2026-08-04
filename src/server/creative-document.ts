@@ -3,7 +3,11 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { isBlurLayer, validateBlurConfig } from '@/lib/blur-layer';
-import { ensureBackgroundLayers } from '@/lib/creative-model';
+import {
+  ensureBackgroundLayers,
+  normalizeOffers0CtaRules,
+  stripOfferCountRoundelOverrides,
+} from '@/lib/creative-model';
 import { isGradientLayer, validateGradientConfig } from '@/lib/gradient-layer';
 import { isRegisteredCampaignId } from './campaign-registry';
 import { creativeDocumentPath, creativeDocumentPathFor } from './paths';
@@ -30,6 +34,8 @@ export const validateCreativeDocument = (document: CreativeDocument) => {
   }
   if (!document.sizes || !Object.keys(document.sizes).length) throw new Error('Creative document requires sizes');
   ensureBackgroundLayers(document);
+  stripOfferCountRoundelOverrides(document);
+  normalizeOffers0CtaRules(document);
   for (const [size, sizeCreative] of Object.entries(document.sizes)) {
     if (!/^\d+x\d+$/.test(size)) throw new Error(`Bad size key: ${size}`);
     if (!sizeCreative.canvas?.width || !sizeCreative.canvas?.height) throw new Error(`Size ${size} is missing canvas`);

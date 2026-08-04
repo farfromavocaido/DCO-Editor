@@ -33,3 +33,18 @@ test('renders ordinary layer variants with scoped class selectors', () => {
   assert.match(css, /left: 90px;/);
   assert.match(css, /border-radius: 4px;/);
 });
+
+test('renders compound offers-0 CTA scopes as chained classes', () => {
+  const css = structuredRuleCss({
+    variantRules: [
+      {
+        scope: 'offers-0.cta-rect',
+        cssClass: 'cta',
+        props: { left: 18, width: 120, height: 36 },
+      },
+    ],
+  });
+
+  assert.match(css, /\.offers-0\.cta-rect \.cta/);
+  assert.match(css, /left: 18px;/);
+});

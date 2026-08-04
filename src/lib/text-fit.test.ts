@@ -261,6 +261,60 @@ test('shrink with maxLines 1 forces a single line (no wrap)', () => {
   assert.equal(style.fontSize, '18px');
 });
 
+test('single-line nowrap does not shrink when glyph ink is taller than 1.5 line-heights', () => {
+  // Museo Range ink often lands ~1.6 line-boxes at line-height:1. That must
+  // not look like a maxLines:1 overflow or shrink walks to the floor.
+  const element = makeElement({
+    fontSize: 64,
+    clientHeight: 90,
+    fitsAt: () => true,
+    linesAt: () => 1.6,
+  });
+
+  engine().applyRules(makeRoot([element]), [
+    { cssClass: 'target', wrap: false, allowShrink: true, maxLines: 1, minFontSize: 42 },
+  ]);
+
+  const style = element.style as Record<string, string>;
+  assert.equal(style.whiteSpace, 'nowrap');
+  assert.equal(style.fontSize, '64px');
+  assert.equal(style.maxHeight || '', '');
+  assert.equal(element.getAttribute('data-fit-clipped'), null);
+});
+
+test('single-line nowrap still shrinks for real width overflow', () => {
+  const element = makeElement({
+    fontSize: 64,
+    clientHeight: 90,
+    fitsAt: (size) => size <= 50,
+    linesAt: () => 1.6,
+  });
+
+  engine().applyRules(makeRoot([element]), [
+    { cssClass: 'target', wrap: false, allowShrink: true, maxLines: 1, minFontSize: 42 },
+  ]);
+
+  assert.equal((element.style as Record<string, string>).fontSize, '50px');
+});
+
+test('wrapped maxLines still shrinks when copy exceeds the line budget', () => {
+  const element = makeElement({
+    fontSize: 24,
+    clientHeight: 80,
+    fitsAt: (_size, _tracking, whiteSpace) => whiteSpace === 'pre-line',
+    linesAt: () => 3.2,
+  });
+
+  engine().applyRules(makeRoot([element]), [
+    { cssClass: 'target', wrap: true, allowShrink: true, maxLines: 2, minFontSize: 10 },
+  ]);
+
+  const style = element.style as Record<string, string>;
+  assert.equal(style.whiteSpace, 'pre-line');
+  assert.equal(style.fontSize, '10px');
+  assert.equal(element.getAttribute('data-fit-clipped'), 'true');
+});
+
 test('wrapped multi-line content keeps bottom flex alignment (wraps upward)', () => {
   const wrapped = makeElement({
     fontSize: 18,

@@ -44,6 +44,10 @@ export const BG_IMAGE_STYLE_FIELDS = new Set([
   'opacity',
 ]);
 
+/** Compound scopes: fully independent brand CTAs per shape under offers-0. */
+export const OFFERS_0_CTA_RECT_SCOPE = 'offers-0.cta-rect';
+export const OFFERS_0_CTA_ROUNDEL_SCOPE = 'offers-0.cta-roundel';
+
 export const HEADLINE_LAYOUT_FIELDS = [
   'left',
   'top',
@@ -183,23 +187,46 @@ const ruleMatchesIdentity = (
   )
 );
 
+/** Plain scope token, or compound `offers-0.cta-rect` requiring every part active. */
+export const variantScopeIsActive = (scope: unknown, activeScopes: string[] = []) => {
+  const parts = String(scope || '')
+    .split('.')
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (!parts.length) return false;
+  const active = new Set((activeScopes || []).map(String));
+  return parts.every((part) => active.has(part));
+};
+
+const isCtaIdentity = (identity: { layerId?: string; cssClass?: string }) => (
+  identity.layerId === 'cta' || identity.cssClass === 'cta'
+);
+
 /**
  * Active variant rules in document order (same as structuredRuleCss emission).
  * Later rules win for both merged values and writeSource — matching equal-specificity
- * CSS cascade. Scope-list order must NOT drive this: e.g. `cta-rect` after `offers-0`
- * in activeScopes would otherwise steal CTA edits from the visible offers-0 rule.
+ * CSS cascade. Scope-list order must NOT drive this.
+ *
+ * For the CTA under offers-0, only compound `offers-0.cta-*` rules apply so brand
+ * Rect/Round stay independent of each other and of offers 1–3 `cta-rect` / base.
  */
 const activeVariantRulesForIdentity = (
   sizeCreative: Record<string, unknown>,
   identity: { layerId?: string; cssClass?: string },
   activeScopes: string[] = [],
 ) => {
-  const active = new Set((activeScopes || []).map(String));
-  return (sizeCreative?.variantRules || []).filter((rule: Record<string, unknown>) => (
-    active.has(String(rule.scope || ''))
+  const scopes = (activeScopes || []).map(String);
+  const offers0Cta = scopes.includes('offers-0') && isCtaIdentity(identity);
+  const matched = (sizeCreative?.variantRules || []).filter((rule: Record<string, unknown>) => (
+    variantScopeIsActive(rule.scope, scopes)
     && !propsOnlyHideVisibility(rule.props)
     && ruleMatchesIdentity(rule, identity)
   ));
+  if (!offers0Cta) return matched;
+  const compound = matched.filter((rule: Record<string, unknown>) => (
+    String(rule.scope || '').startsWith('offers-0.')
+  ));
+  return compound.length ? compound : matched;
 };
 
 const findActiveVariantRule = (
@@ -741,6 +768,159 @@ const ensureClassRule = (sizeCreative: Record<string, unknown>, cssClass: string
   return rule;
 };
 
+const isOfferRoundelLayerRef = (value: unknown) => {
+  const text = String(value || '');
+  return text === 'roundel-frame' || text === 'roundel-copy' || text === 'roundel-value'
+    || text.startsWith('roundel-');
+};
+
+/**
+ * Offer Roundel stays linked across offers 1–3: drop offers-2/3 roundel variant
+ * rules so those variants inherit the 1-offer path (base frame + roundel-split).
+ * offers-0 colour rules are kept.
+ */
+export const stripOfferCountRoundelOverrides = (document: Record<string, unknown> | null) => {
+  if (!document?.sizes || typeof document.sizes !== 'object') return document;
+  for (const sizeCreative of Object.values(document.sizes) as Array<Record<string, unknown>>) {
+    if (!sizeCreative || typeof sizeCreative !== 'object') continue;
+    const rules = Array.isArray(sizeCreative.variantRules) ? sizeCreative.variantRules : [];
+    sizeCreative.variantRules = rules.filter((rule: Record<string, unknown>) => {
+      const scope = String(rule?.scope || '');
+      if (scope !== 'offers-2' && scope !== 'offers-3') return true;
+      const id = String(rule?.id || '');
+      return !(
+        id.includes('roundel')
+        || isOfferRoundelLayerRef(rule?.layerId)
+        || isOfferRoundelLayerRef(rule?.cssClass)
+      );
+    });
+  }
+  return document;
+};
+
+const offers0CtaShapeScope = (activeScopes: string[] = []) => (
+  activeScopes.map(String).includes('cta-rect')
+    ? OFFERS_0_CTA_RECT_SCOPE
+    : OFFERS_0_CTA_ROUNDEL_SCOPE
+);
+
+const ensureOffers0CtaShapeRule = (
+  sizeCreative: Record<string, unknown>,
+  compoundScope: string,
+) => {
+  const id = `${compoundScope}|cta`;
+  sizeCreative.variantRules = Array.isArray(sizeCreative.variantRules)
+    ? sizeCreative.variantRules
+    : [];
+  let rule = sizeCreative.variantRules.find((item: Record<string, unknown>) => (
+    String(item?.id || '') === id || String(item?.scope || '') === compoundScope
+  ));
+  if (!rule) {
+    rule = {
+      id,
+      scope: compoundScope,
+      layerId: 'cta',
+      cssClass: 'cta',
+      props: {},
+      editable: true,
+    };
+    sizeCreative.variantRules.push(rule);
+  }
+  rule.id = id;
+  rule.scope = compoundScope;
+  rule.layerId = 'cta';
+  rule.cssClass = 'cta';
+  rule.editable = true;
+  rule.props = rule.props || {};
+  return rule;
+};
+
+const writeOffers0CtaField = (
+  sizeCreative: Record<string, unknown>,
+  activeScopes: string[],
+  field: string,
+  value: unknown,
+) => {
+  const rule = ensureOffers0CtaShapeRule(sizeCreative, offers0CtaShapeScope(activeScopes));
+  rule.props[field] = value;
+};
+
+const pickDefined = (...values: unknown[]) => {
+  for (const value of values) {
+    if (value !== undefined && value !== null && value !== '') return value;
+  }
+  return undefined;
+};
+
+/**
+ * Migrate legacy `offers-0|cta` into independent compound shape rules
+ * (`offers-0.cta-rect` / `offers-0.cta-roundel`). Seeds from brand position/colour
+ * + matching multi-offer geometry once; never rewrites existing compound props.
+ * Leaves offers 1–3 CTA rules untouched.
+ */
+export const normalizeOffers0CtaRules = (document: Record<string, unknown> | null) => {
+  if (!document?.sizes || typeof document.sizes !== 'object') return document;
+  for (const sizeCreative of Object.values(document.sizes) as Array<Record<string, unknown>>) {
+    if (!sizeCreative || typeof sizeCreative !== 'object') continue;
+    const rules = Array.isArray(sizeCreative.variantRules) ? [...sizeCreative.variantRules] : [];
+    sizeCreative.variantRules = rules;
+    const ctaLayer = (sizeCreative.layers || []).find((layer: Record<string, unknown>) => (
+      layer?.id === 'cta'
+    ));
+    if (!ctaLayer) continue;
+    const base = ctaLayer?.base && typeof ctaLayer.base === 'object' ? ctaLayer.base : {};
+    const rectRule = rules.find((rule: Record<string, unknown>) => (
+      String(rule?.id || '') === 'cta-rect|cta' || String(rule?.scope || '') === 'cta-rect'
+    ));
+    const rectProps = rectRule?.props && typeof rectRule.props === 'object' ? rectRule.props : {};
+    const legacy = rules.find((rule: Record<string, unknown>) => (
+      String(rule?.id || '') === 'offers-0|cta'
+      || (String(rule?.scope || '') === 'offers-0'
+        && (String(rule?.layerId || '') === 'cta' || String(rule?.cssClass || '') === 'cta'))
+    ));
+    const legacyProps = legacy?.props && typeof legacy.props === 'object' ? legacy.props : {};
+
+    const rectCompound = ensureOffers0CtaShapeRule(sizeCreative, OFFERS_0_CTA_RECT_SCOPE);
+    const roundCompound = ensureOffers0CtaShapeRule(sizeCreative, OFFERS_0_CTA_ROUNDEL_SCOPE);
+
+    const seedIfEmpty = (rule: Record<string, unknown>, seed: Record<string, unknown>) => {
+      const props = rule.props && typeof rule.props === 'object' ? rule.props : {};
+      if (Object.keys(props).length) return;
+      rule.props = { ...seed };
+    };
+
+    seedIfEmpty(rectCompound, {
+      left: pickDefined(legacyProps.left, rectProps.left, base.left),
+      top: pickDefined(legacyProps.top, rectProps.top, base.top),
+      width: pickDefined(legacyProps.width, rectProps.width, base.width),
+      height: pickDefined(legacyProps.height, rectProps.height, base.height),
+      borderRadius: pickDefined(rectProps.borderRadius, 4),
+      fontSize: pickDefined(legacyProps.fontSize, rectProps.fontSize, base.fontSize),
+      backgroundColor: pickDefined(legacyProps.backgroundColor, 'rgb(0, 229, 165)'),
+      color: pickDefined(legacyProps.color, 'rgb(0, 41, 117)'),
+    });
+    seedIfEmpty(roundCompound, {
+      left: pickDefined(legacyProps.left, base.left),
+      top: pickDefined(legacyProps.top, base.top),
+      width: pickDefined(legacyProps.width, base.width),
+      height: pickDefined(legacyProps.height, base.height),
+      borderRadius: pickDefined(base.borderRadius, '50%'),
+      fontSize: pickDefined(legacyProps.fontSize, base.fontSize),
+      backgroundColor: pickDefined(legacyProps.backgroundColor, 'rgb(0, 229, 165)'),
+      color: pickDefined(legacyProps.color, 'rgb(0, 41, 117)'),
+    });
+
+    sizeCreative.variantRules = sizeCreative.variantRules.filter((rule: Record<string, unknown>) => (
+      !(
+        String(rule?.id || '') === 'offers-0|cta'
+        || (String(rule?.scope || '') === 'offers-0'
+          && (String(rule?.layerId || '') === 'cta' || String(rule?.cssClass || '') === 'cta'))
+      )
+    ));
+  }
+  return document;
+};
+
 /** Ensure each size has a selectable bg-image layer + classRule frame. */
 export const ensureBackgroundLayers = (document: Record<string, unknown> | null) => {
   if (!document?.sizes || typeof document.sizes !== 'object') return document;
@@ -947,6 +1127,13 @@ export const updateCreativeTargetValue = (
     || backgroundIdentity?.cssClass
     || layer.base?.cssClass
     || layer.id;
+  const isCtaLayer = String(layer.id || '') === 'cta' || cssClass === 'cta';
+  const scopes = (activeScopes || []).map(String);
+  if (isCtaLayer && scopes.includes('offers-0') && !headlineIdentity && !backgroundIdentity) {
+    writeOffers0CtaField(sizeCreative, scopes, field, value);
+    return next;
+  }
+
   const variantRule = findActiveVariantRule(
     sizeCreative,
     headlineIdentity || backgroundIdentity || { layerId: layer.id, cssClass },

@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { animationFamilyForLayer, animationIntentDefinitions, timelineSpanForClip } from '@/lib/animation-intents';
 import { compileAnimationClips } from '@/lib/creative-compiler';
 import { currentSizeCreative, isHeadlineLayer } from '@/lib/creative-model';
-import { activeScopesFromControls, fieldInputValue, rowLabel } from '@/lib/feed-model';
+import { activeScopesFromControls } from '@/lib/feed-model';
 import { beatsForScopes } from '@/lib/timing-profiles';
 import { deriveSelectedTarget, OFFERS_BLOCK_ID } from '@/lib/selection-groups';
 import { fitSizeStatus, fitTrackingStatus } from '@/lib/selection-chrome';
@@ -46,13 +46,14 @@ const keyframeText = (keyframe) => {
   return parts.join(' · ');
 };
 
-function FieldControl({ label, value, onChange, type = 'number' }) {
+function FieldControl({ label, value, onChange, type = 'number', disabled = false }) {
   return (
-    <label className="inspector-field">
+    <label className={`inspector-field ${disabled ? 'is-disabled' : ''}`}>
       <span>{label}</span>
       <input
         type={type}
         value={value ?? ''}
+        disabled={disabled}
         onFocus={(event) => event.currentTarget.select()}
         onChange={(event) => onChange(event.target.value)}
       />
@@ -60,11 +61,11 @@ function FieldControl({ label, value, onChange, type = 'number' }) {
   );
 }
 
-function SelectControl({ label, value, onChange, children }) {
+function SelectControl({ label, value, onChange, children, disabled = false }) {
   return (
-    <label className="inspector-field">
+    <label className={`inspector-field ${disabled ? 'is-disabled' : ''}`}>
       <span>{label}</span>
-      <select value={value ?? ''} onChange={(event) => onChange(event.target.value)}>
+      <select value={value ?? ''} disabled={disabled} onChange={(event) => onChange(event.target.value)}>
         {children}
       </select>
     </label>
@@ -117,10 +118,6 @@ export function CreativeInspector() {
   const document = useEditorStore((s) => s.creativeDocument);
   const size = useEditorStore((s) => s.size);
   const percent = useEditorStore((s) => s.percent);
-  const feedFields = useEditorStore((s) => s.feedFields);
-  const feedDraft = useEditorStore((s) => s.feedDraft);
-  const focusFeedFieldRequest = useEditorStore((s) => s.focusFeedFieldRequest);
-  const clearFocusFeedFieldRequest = useEditorStore((s) => s.clearFocusFeedFieldRequest);
   const selectedLayerId = useEditorStore((s) => s.selectedLayerId);
   const selectedTargetId = useEditorStore((s) => s.selectedTargetId);
   const selectedTargetIds = useEditorStore((s) => s.selectedTargetIds);
@@ -136,9 +133,6 @@ export function CreativeInspector() {
   const roundelMode = useEditorStore((s) => s.roundelMode);
   const selectedLayer = useEditorStore((s) => s.selectedLayer());
   const selectedClip = useEditorStore((s) => s.selectedClip());
-  const selectedFeedRow = useEditorStore((s) => s.selectedFeedRow);
-  const setFeedRowIndex = useEditorStore((s) => s.setFeedRowIndex);
-  const updateSelectedFeedField = useEditorStore((s) => s.updateSelectedFeedField);
   const updateTargetValue = useEditorStore((s) => s.updateCreativeTargetValue);
   const updateLayerMetadata = useEditorStore((s) => s.updateCreativeLayerMetadataValue);
   const updateLayerGradient = useEditorStore((s) => s.updateCreativeLayerGradientValue);
@@ -154,7 +148,6 @@ export function CreativeInspector() {
   const addAnimationIntent = useEditorStore((s) => s.addAnimationIntent);
   const copySelectedClipToAnimationFamily = useEditorStore((s) => s.copySelectedClipToAnimationFamily);
   const selectClip = useEditorStore((s) => s.selectClip);
-  const setStatus = useEditorStore((s) => s.setStatus);
 
   const sizeCreative = currentSizeCreative(document, size);
   const activeScopes = useMemo(() => activeScopesFromControls({
@@ -177,7 +170,6 @@ export function CreativeInspector() {
     ),
     [activeScopes, document, offerCount, selectedLayerId, selectedTargetId, selectedTargetIds, size],
   );
-  const row = selectedFeedRow();
   const activeCssClass = selectedTarget?.cssClass || selectedLayer?.base?.cssClass;
   const sharedRule = activeCssClass
     ? (sizeCreative?.classRules || []).find((rule) => rule.cssClass === activeCssClass)
@@ -214,38 +206,6 @@ export function CreativeInspector() {
     setLayerCode(JSON.stringify(selectedLayer, null, 2));
     setCodeError('');
   }, [selectedLayer?.id, selectedLayer]);
-
-  useEffect(() => {
-    if (!focusFeedFieldRequest?.fieldName) return;
-    const fieldName = focusFeedFieldRequest.fieldName;
-    setOpenSections((current) => {
-      if (current.has('sample')) return current;
-      const next = new Set(current);
-      next.add('sample');
-      return next;
-    });
-    const focus = () => {
-      const node = globalThis.document?.querySelector(`[data-feed-field="${CSS.escape(fieldName)}"]`);
-      if (!(node instanceof HTMLElement)) return false;
-      node.focus();
-      if (node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement) {
-        const length = node.value.length;
-        node.setSelectionRange?.(length, length);
-      }
-      return true;
-    };
-    // Section may mount on the next paint after openSections updates.
-    requestAnimationFrame(() => {
-      if (!focus()) {
-        requestAnimationFrame(() => {
-          focus();
-          clearFocusFeedFieldRequest();
-        });
-        return;
-      }
-      clearFocusFeedFieldRequest();
-    });
-  }, [focusFeedFieldRequest, clearFocusFeedFieldRequest]);
 
   const toggleSection = (id) => setOpenSections((current) => {
     const next = new Set(current);
@@ -320,11 +280,8 @@ export function CreativeInspector() {
     updateTargetValue(selectedTarget.id, 'display', 'flex');
     updateTargetValue(selectedTarget.id, 'alignItems', align);
   };
-  const scaleSelectedText = (delta) => {
-    const current = Number(selectedTarget.values?.fontSize || 0);
-    if (!Number.isFinite(current) || current <= 0) return;
-    updateTargetValue(selectedTarget.id, 'fontSize', Math.max(1, Math.round(current + delta)));
-  };
+  const fitMode = activeFit?.mode || 'shrink';
+  const minFontEnabled = canTextFit && fitMode === 'shrink';
 
   return (
     <aside className="creative-inspector" aria-label="Inspector">
@@ -454,6 +411,111 @@ export function CreativeInspector() {
           </InspectorSection>
         ) : null}
 
+        {selectedTargetIsText && !isGroupedSelection ? (
+          <InspectorSection
+            id="type"
+            title="Typography"
+            open={openSections.has('type')}
+            onToggle={() => toggleSection('type')}
+          >
+            <ButtonGroupControl
+              label="Handles"
+              value={resizeMode}
+              options={[
+                { value: 'frame', label: 'Frame', tip: 'Resize the text box without changing the text size' },
+                { value: 'scale', label: 'Scale', tip: 'Resize the text box and text size together' },
+              ]}
+              onChange={setResizeMode}
+            />
+            {fitStatus.state !== 'unknown' ? (
+              <div className={`fit-status fit-status-${fitStatus.state}`}>
+                <strong>{fitStatus.state === 'scaled' ? 'Auto-fitted' : 'Stated size'}</strong>
+                <span>{fitStatus.state === 'scaled'
+                  ? `${fitStatus.fitted}px rendered from ${fitStatus.requested}px`
+                  : `${fitStatus.requested}px rendered as stated`}</span>
+                {trackingStatus.state !== 'unknown' ? (
+                  <span className={`fit-tracking fit-tracking-${trackingStatus.state}`}>
+                    {trackingStatus.state === 'squeezed'
+                      ? `Tracking ${trackingStatus.label} (fit squeeze)`
+                      : `Tracking ${trackingStatus.label} (no squeeze)`}
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+            <div className="inspector-grid">
+              <FieldControl
+                label="Font size"
+                type="text"
+                value={selectedTarget.values?.fontSize ?? ''}
+                onChange={(value) => updateTargetValue(selectedTarget.id, 'fontSize', value)}
+              />
+              {canTextFit ? (
+                <FieldControl
+                  label="Min font size"
+                  type="text"
+                  value={activeFit?.minFontSize ?? ''}
+                  disabled={!minFontEnabled}
+                  onChange={(value) => applyFitUpdate('minFontSize', value)}
+                />
+              ) : null}
+            </div>
+            {canTextFit ? (
+              <div className="inspector-grid">
+                <SelectControl
+                  label="Fit mode"
+                  value={fitMode}
+                  onChange={(value) => applyFitUpdate('mode', value)}
+                >
+                  <option value="shrink">shrink</option>
+                  <option value="wrap">wrap</option>
+                  <option value="clip">clip</option>
+                  <option value="truncate">truncate</option>
+                </SelectControl>
+                <FieldControl
+                  label="Max lines"
+                  type="text"
+                  value={activeFit?.maxLines ?? ''}
+                  onChange={(value) => applyFitUpdate('maxLines', value)}
+                />
+              </div>
+            ) : null}
+            <div className="inspector-grid">
+              <FieldControl
+                label="Line height"
+                type="text"
+                value={selectedTarget.values?.lineHeight ?? ''}
+                onChange={(value) => updateTargetValue(selectedTarget.id, 'lineHeight', value)}
+              />
+              <FieldControl
+                label="Letter spacing"
+                type="text"
+                value={selectedTarget.values?.letterSpacing ?? ''}
+                onChange={(value) => updateTargetValue(selectedTarget.id, 'letterSpacing', value)}
+              />
+            </div>
+            <ButtonGroupControl
+              label="Text x"
+              value={selectedTarget.values?.textAlign || ''}
+              options={[
+                { value: 'left', label: 'Left', icon: 'alignLeft', tip: 'Align text left inside the box' },
+                { value: 'center', label: 'Center', icon: 'alignCenterH', tip: 'Center text horizontally inside the box' },
+                { value: 'right', label: 'Right', icon: 'alignRight', tip: 'Align text right inside the box' },
+              ]}
+              onChange={setTextHorizontalAlign}
+            />
+            <ButtonGroupControl
+              label="Text y"
+              value={selectedTarget.values?.alignItems || ''}
+              options={[
+                { value: 'flex-start', label: 'Top', icon: 'alignTop', tip: 'Align text to the top of the box' },
+                { value: 'center', label: 'Middle', icon: 'alignCenterV', tip: 'Center text vertically inside the box' },
+                { value: 'flex-end', label: 'Bottom', icon: 'alignBottom', tip: 'Align text to the bottom of the box; multi-line wraps upward' },
+              ]}
+              onChange={setTextVerticalAlign}
+            />
+          </InspectorSection>
+        ) : null}
+
         <InspectorSection
           id="style"
           title="Styles"
@@ -514,112 +576,6 @@ export function CreativeInspector() {
             <p className="inspector-note">Use the Offer layouts section above to copy or reset headline placement by offer count.</p>
           )}
         </InspectorSection>
-
-        {selectedTargetIsText && !isGroupedSelection ? (
-          <InspectorSection
-            id="type"
-            title="Typography"
-            open={openSections.has('type')}
-            onToggle={() => toggleSection('type')}
-          >
-            <ButtonGroupControl
-              label="Handles"
-              value={resizeMode}
-              options={[
-                { value: 'frame', label: 'Frame', tip: 'Resize the text box without changing the text size' },
-                { value: 'scale', label: 'Scale', tip: 'Resize the text box and text size together' },
-              ]}
-              onChange={setResizeMode}
-            />
-            {fitStatus.state !== 'unknown' ? (
-              <div className={`fit-status fit-status-${fitStatus.state}`}>
-                <strong>{fitStatus.state === 'scaled' ? 'Auto-fitted' : 'Stated size'}</strong>
-                <span>{fitStatus.state === 'scaled'
-                  ? `${fitStatus.fitted}px rendered from ${fitStatus.requested}px`
-                  : `${fitStatus.requested}px rendered as stated`}</span>
-                {trackingStatus.state !== 'unknown' ? (
-                  <span className={`fit-tracking fit-tracking-${trackingStatus.state}`}>
-                    {trackingStatus.state === 'squeezed'
-                      ? `Tracking ${trackingStatus.label} (fit squeeze)`
-                      : `Tracking ${trackingStatus.label} (no squeeze)`}
-                  </span>
-                ) : null}
-              </div>
-            ) : null}
-            <div className="inspector-grid">
-              {typeFields.map((field) => (
-                <FieldControl
-                  key={field}
-                  label={field}
-                  type="text"
-                  value={selectedTarget.values?.[field] ?? ''}
-                  onChange={(value) => updateTargetValue(selectedTarget.id, field, value)}
-                />
-              ))}
-            </div>
-            <div className="text-scale-row">
-              <button type="button" data-tip="Decrease text size" aria-label="Decrease text size" onClick={() => scaleSelectedText(-1)}>A-</button>
-              <button type="button" data-tip="Increase text size" aria-label="Increase text size" onClick={() => scaleSelectedText(1)}>A+</button>
-            </div>
-            <ButtonGroupControl
-              label="Text x"
-              value={selectedTarget.values?.textAlign || ''}
-              options={[
-                { value: 'left', label: 'Left', icon: 'alignLeft', tip: 'Align text left inside the box' },
-                { value: 'center', label: 'Center', icon: 'alignCenterH', tip: 'Center text horizontally inside the box' },
-                { value: 'right', label: 'Right', icon: 'alignRight', tip: 'Align text right inside the box' },
-              ]}
-              onChange={setTextHorizontalAlign}
-            />
-            <ButtonGroupControl
-              label="Text y"
-              value={selectedTarget.values?.alignItems || ''}
-              options={[
-                { value: 'flex-start', label: 'Top', icon: 'alignTop', tip: 'Align text to the top of the box' },
-                { value: 'center', label: 'Middle', icon: 'alignCenterV', tip: 'Center text vertically inside the box' },
-                { value: 'flex-end', label: 'Bottom', icon: 'alignBottom', tip: 'Align text to the bottom of the box; multi-line wraps upward' },
-              ]}
-              onChange={setTextVerticalAlign}
-            />
-          </InspectorSection>
-        ) : null}
-
-        {canTextFit ? (
-          <InspectorSection
-            id="fit"
-            title="Fit"
-            open={openSections.has('fit')}
-            onToggle={() => toggleSection('fit')}
-          >
-            <p className="inspector-note">
-              Shrink: reduce type until copy fits. Max lines 1 = single line; max lines 2+ = wrap up to that budget, then shrink. Wrap: keep the designed size and wrap only. Clip/truncate: no wrap or shrink — overflow is hidden. Clipped copy shows a red badge on the canvas.
-            </p>
-            <div className="inspector-grid">
-              <SelectControl
-                label="mode"
-                value={activeFit?.mode || 'shrink'}
-                onChange={(value) => applyFitUpdate('mode', value)}
-              >
-                <option value="shrink">shrink</option>
-                <option value="wrap">wrap</option>
-                <option value="clip">clip</option>
-                <option value="truncate">truncate</option>
-              </SelectControl>
-              <FieldControl
-                label="min font"
-                type="text"
-                value={activeFit?.minFontSize ?? ''}
-                onChange={(value) => applyFitUpdate('minFontSize', value)}
-              />
-              <FieldControl
-                label="max lines"
-                type="text"
-                value={activeFit?.maxLines ?? ''}
-                onChange={(value) => applyFitUpdate('maxLines', value)}
-              />
-            </div>
-          </InspectorSection>
-        ) : null}
 
         {!isGradientSelection && !isBlurSelection ? (
         <InspectorSection
@@ -745,78 +701,6 @@ export function CreativeInspector() {
               </div>
             )) : <p className="muted-copy">No layer-specific variant rules.</p>}
           </div>
-        </InspectorSection>
-
-        <InspectorSection
-          id="sample"
-          title="Sample"
-          open={openSections.has('sample')}
-          onToggle={() => toggleSection('sample')}
-        >
-          <label className="inspector-field full">
-            <span>Sample row</span>
-            <select
-              value={feedDraft.selectedIndex}
-              onChange={(event) => setFeedRowIndex(Number(event.target.value) || 0)}
-            >
-              {feedDraft.rows.map((feedRow, index) => (
-                <option key={index} value={index}>{rowLabel(feedRow, index)}</option>
-              ))}
-            </select>
-          </label>
-          {feedFields
-            .filter((field) => ['Creative State', 'Offers', 'Copy'].includes(field.group))
-            .map((field) => {
-              const usesTextarea = field.type === 'multiline'
-                || (field.type === 'string' && ['Copy', 'Offers'].includes(field.group));
-              return (
-              <label key={field.name} className={`sample-field ${usesTextarea ? 'sample-field-multiline' : ''}`}>
-                <span>{field.label}</span>
-                {field.type === 'enum' ? (
-                  <select
-                    data-feed-field={field.name}
-                    value={String(row[field.name] ?? '')}
-                    onChange={(event) => updateSelectedFeedField(field.name, event.target.value)}
-                  >
-                    {field.options?.map((option) => <option key={option} value={option}>{option}</option>)}
-                  </select>
-                ) : field.type === 'boolean' ? (
-                  <input
-                    data-feed-field={field.name}
-                    type="checkbox"
-                    checked={Boolean(row[field.name])}
-                    onChange={(event) => updateSelectedFeedField(field.name, event.target.checked)}
-                  />
-                ) : usesTextarea ? (
-                  <textarea
-                    data-feed-field={field.name}
-                    rows={field.type === 'multiline' || /heading|tc_|sub_text/.test(field.name) ? 3 : 2}
-                    value={fieldInputValue(row, field)}
-                    onChange={(event) => {
-                      try {
-                        updateSelectedFeedField(field.name, event.target.value);
-                      } catch (error) {
-                        setStatus(error instanceof Error ? error.message : String(error), 'error');
-                      }
-                    }}
-                  />
-                ) : (
-                  <input
-                    data-feed-field={field.name}
-                    value={fieldInputValue(row, field)}
-                    onFocus={(event) => event.currentTarget.select()}
-                    onChange={(event) => {
-                      try {
-                        updateSelectedFeedField(field.name, event.target.value);
-                      } catch (error) {
-                        setStatus(error instanceof Error ? error.message : String(error), 'error');
-                      }
-                    }}
-                  />
-                )}
-              </label>
-              );
-            })}
         </InspectorSection>
 
         <InspectorSection

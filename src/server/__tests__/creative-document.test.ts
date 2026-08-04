@@ -86,6 +86,103 @@ test('preserves 728x90 banner assets and partial bluewave treatment', async () =
   assert.ok(headline.height >= 48);
 });
 
+test('strips offers-2/3 roundel overrides so Offer Roundel stays linked to 1-offer', async () => {
+  const document = validateCreativeDocument({
+    version: 1,
+    campaign: { id: 'sse-dco', name: 'SSE DCO' },
+    clock: { durationS: 15, beats: { start: 0, end: 100 } },
+    feed: { profileName: 'SSE_DCO_Offers', sampleRows: [{}] },
+    sizes: {
+      '728x90': {
+        canvas: { width: 728, height: 90 },
+        layers: [
+          {
+            id: 'roundel-frame',
+            kind: 'shape',
+            base: { left: 300, top: -16, width: 130, height: 130, cssClass: 'roundel-frame' },
+            clips: [],
+          },
+          {
+            id: 'bg-image',
+            kind: 'image',
+            base: { left: 0, top: 0, width: 728, height: 90, cssClass: 'bg-image' },
+            clips: [],
+          },
+        ],
+        variantRules: [
+          {
+            id: 'roundel-split|roundel-copy',
+            scope: 'roundel-split',
+            layerId: 'roundel-copy',
+            cssClass: 'roundel-copy',
+            props: { left: 310, top: 9 },
+            editable: true,
+          },
+          {
+            id: 'offers-2|roundel-frame',
+            scope: 'offers-2',
+            layerId: 'roundel-frame',
+            cssClass: 'roundel-frame',
+            when: { offer_count_num: 2 },
+            props: { left: 312, top: -4, width: 101, height: 100 },
+            editable: true,
+          },
+          {
+            id: 'offers-3|roundel-copy',
+            scope: 'offers-3',
+            layerId: 'roundel-copy',
+            cssClass: 'roundel-copy',
+            when: { offer_count_num: 3 },
+            props: { left: 326, top: 24 },
+            editable: true,
+          },
+          {
+            id: 'offers-2|offer-slot-1',
+            scope: 'offers-2',
+            layerId: 'offer-slot-1',
+            when: { offer_count_num: 2 },
+            props: { left: 10 },
+            editable: true,
+          },
+          {
+            id: 'offers-0|roundel-frame',
+            scope: 'offers-0',
+            layerId: 'roundel-frame',
+            cssClass: 'roundel-frame',
+            when: { offer_count_num: 0 },
+            props: { backgroundColor: 'rgb(0, 229, 165)' },
+            editable: true,
+          },
+        ],
+      },
+    },
+  });
+
+  const ids = document.sizes['728x90'].variantRules.map((rule) => rule.id);
+  assert.deepEqual(ids, [
+    'roundel-split|roundel-copy',
+    'offers-2|offer-slot-1',
+    'offers-0|roundel-frame',
+  ]);
+});
+
+test('checked-in creative has no offers-2/3 Offer Roundel overrides', async () => {
+  const document = await readCreativeDocument();
+  for (const [size, sizeCreative] of Object.entries(document.sizes)) {
+    for (const rule of sizeCreative.variantRules || []) {
+      const scope = String(rule.scope || '');
+      if (scope !== 'offers-2' && scope !== 'offers-3') continue;
+      const id = String(rule.id || '');
+      assert.ok(
+        !id.includes('roundel')
+          && !String(rule.layerId || '').startsWith('roundel')
+          && !String(rule.cssClass || '').startsWith('roundel'),
+        `${size} still has linked roundel override ${id}`,
+      );
+    }
+  }
+});
+
 test('preserves per-size layer, variant, and timeline data for 970x250', async () => {
   const document = await readCreativeDocument();
   const size = document.sizes['970x250'];

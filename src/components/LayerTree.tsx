@@ -1,9 +1,10 @@
 // @ts-nocheck
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { EditorIcon } from '@/components/EditorIcon';
+import { SampleFeedPanel } from '@/components/SampleFeedPanel';
 import { editableTargetsForLayer, groupedCreativeLayers, currentSizeCreative, findCreativeTarget, targetIdForLayerChild } from '@/lib/creative-model';
 import { activeScopesFromControls } from '@/lib/feed-model';
 import { isOfferLayerId, offerInteractionTree } from '@/lib/offer-interaction-model';
@@ -32,7 +33,26 @@ export function LayerTree() {
   const [menu, setMenu] = useState(null);
   const [draggingLayerId, setDraggingLayerId] = useState('');
   const [dropTargetLayerId, setDropTargetLayerId] = useState('');
+  const [openSections, setOpenSections] = useState(() => new Set(['sample']));
   const rowRefs = useRef(new Map());
+
+  const toggleSection = (id) => setOpenSections((current) => {
+    const next = new Set(current);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    return next;
+  });
+  const ensureSampleOpen = useCallback(() => {
+    setOpenSections((current) => {
+      if (current.has('sample')) return current;
+      const next = new Set(current);
+      next.add('sample');
+      return next;
+    });
+  }, []);
+  const sampleOpen = openSections.has('sample');
+  const layersOpen = openSections.has('layers');
+  const focusFeedFieldRequest = useEditorStore((s) => s.focusFeedFieldRequest);
   const document = useEditorStore((s) => s.creativeDocument);
   const size = useEditorStore((s) => s.size);
   const selectedLayerId = useEditorStore((s) => s.selectedLayerId);
@@ -58,6 +78,11 @@ export function LayerTree() {
   const moveLayerZ = useEditorStore((s) => s.moveLayerZ);
   const moveLayerToZIndex = useEditorStore((s) => s.moveLayerToZIndex);
   const copySelectedClipToAnimationFamily = useEditorStore((s) => s.copySelectedClipToAnimationFamily);
+
+  // Open Sample before the panel mounts so context-menu "edit feed field" can focus.
+  useEffect(() => {
+    if (focusFeedFieldRequest?.fieldName) ensureSampleOpen();
+  }, [focusFeedFieldRequest, ensureSampleOpen]);
 
   const sizeCreative = currentSizeCreative(document, size);
   const zOrderedLayers = [...(sizeCreative?.layers || [])].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
@@ -495,32 +520,74 @@ export function LayerTree() {
   };
 
   return (
-    <aside className="layer-tree" aria-label="Layers">
-      <div className="workspace-panel-head">
-        <div>
-          <span className="panel-kicker">Structure</span>
-          <h2>Layers</h2>
-        </div>
-        <div className="panel-head-actions">
-          <button type="button" aria-label="Add rectangle layer" data-tip="Add rectangle layer" onClick={() => addShapeLayer()}>
-            <EditorIcon name="add" />
-          </button>
-          <span className="panel-count">{sizeCreative?.layers?.length || 0}</span>
-        </div>
-      </div>
-      <div className="layer-group-list">
-        {groups.map((group) => (
-          <section className="layer-group" key={group.label}>
-            <h3>{group.label}</h3>
-            <div className="layer-list">
-              {offerCount >= 2 && group.layers.some((layer) => isOfferLayerId(layer.id)) ? renderOfferBlockItem(group.layers) : null}
-              {group.layers
-                .filter((layer) => offerCount < 2 || !isOfferLayerId(layer.id))
-                .map((layer) => renderLayerItem(layer))}
+    <aside className="layer-tree" aria-label="Structure">
+      <section className={`sidebar-section ${sampleOpen ? 'is-open' : 'is-collapsed'}`} data-section="sample">
+        <div className="sidebar-section-head">
+          <button
+            type="button"
+            className="sidebar-section-toggle"
+            onClick={() => toggleSection('sample')}
+            aria-expanded={sampleOpen}
+          >
+            <div>
+              <span className="panel-kicker">Feed</span>
+              <h2>Sample</h2>
             </div>
-          </section>
-        ))}
-      </div>
+            <span aria-hidden="true">{sampleOpen ? '-' : '+'}</span>
+          </button>
+        </div>
+        {sampleOpen ? (
+          <div className="sidebar-section-body sample-section-body">
+            <SampleFeedPanel ensureOpen={ensureSampleOpen} />
+          </div>
+        ) : null}
+      </section>
+
+      <section className={`sidebar-section ${layersOpen ? 'is-open' : 'is-collapsed'}`} data-section="layers">
+        <div className="sidebar-section-head">
+          <button
+            type="button"
+            className="sidebar-section-toggle"
+            onClick={() => toggleSection('layers')}
+            aria-expanded={layersOpen}
+          >
+            <div>
+              <span className="panel-kicker">Structure</span>
+              <h2>Layers</h2>
+            </div>
+            <span aria-hidden="true">{layersOpen ? '-' : '+'}</span>
+          </button>
+          <div className="panel-head-actions">
+            <button
+              type="button"
+              aria-label="Add rectangle layer"
+              data-tip="Add rectangle layer"
+              onClick={() => addShapeLayer()}
+            >
+              <EditorIcon name="add" />
+            </button>
+            <span className="panel-count">{sizeCreative?.layers?.length || 0}</span>
+          </div>
+        </div>
+        {layersOpen ? (
+          <div className="sidebar-section-body layer-section-body">
+            <div className="layer-group-list">
+              {groups.map((group) => (
+                <section className="layer-group" key={group.label}>
+                  <h3>{group.label}</h3>
+                  <div className="layer-list">
+                    {offerCount >= 2 && group.layers.some((layer) => isOfferLayerId(layer.id)) ? renderOfferBlockItem(group.layers) : null}
+                    {group.layers
+                      .filter((layer) => offerCount < 2 || !isOfferLayerId(layer.id))
+                      .map((layer) => renderLayerItem(layer))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </section>
+
       {menu ? (
         <div className="canvas-menu layer-menu" style={{ left: menu.x, top: menu.y }}>
           <strong>{menu.title}</strong>

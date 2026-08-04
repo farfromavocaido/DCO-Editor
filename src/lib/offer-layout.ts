@@ -167,13 +167,16 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     if (!el || !ancestor) return fallback;
     var ctx = inkMeasureCtx();
     if (!ctx) return fallback;
-    var sample = String(el.textContent || '').replace(/\s+/g, ' ').trim();
+    // Template-literal source: backslashes must be doubled so the inlined
+    // runtime keeps \\s / \\d (a single \\d cooks to plain "d" and leaves
+    // only "." from values like "1.5", crushing vertical gap/plus layout).
+    var sample = String(el.textContent || '').replace(/\\s+/g, ' ').trim();
     if (!sample) return fallback;
     var cs = window.getComputedStyle(el);
     ctx.font = cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
     var measureSample = sample;
     if (el.classList && el.classList.contains('offer-value-run')) {
-      var digits = sample.replace(/[^\d.]/g, '');
+      var digits = sample.replace(/[^\\d]/g, '');
       if (digits) measureSample = digits;
     }
     var metrics = ctx.measureText(measureSample);

@@ -349,8 +349,8 @@
         "cta_type_enum": "roundel",
         "cta_text": "Switch today",
         "include_roundel_frame_bool": true,
-        "roundel_text_text": "Save up to",
-        "roundel_value_text": "€1,080",
+        "roundel_text_text": "switch and save today",
+        "roundel_value_text": "",
         "background_image_url_160x600": {
           "Url": ""
         },
@@ -378,23 +378,23 @@
         "offer_count_num": 2,
         "Active": true,
         "heading1_text": "A different kind of energy",
-        "heading2_text": "Our very best electricity plan",
+        "heading2_text": "This year's best electricity plan",
         "heading3_text": "Switch and save today",
         "heading4_text": "A different kind of energy",
-        "offer1_value_text": "15%",
+        "offer1_value_text": "1",
         "offer1_sub_text": "OFF ELECTRICITY*",
-        "offer2_value_text": "30%",
+        "offer2_value_text": "10.5%",
         "offer2_sub_text": "OFF GAS*",
-        "offer3_value_text": "€125",
+        "offer3_value_text": "",
         "offer3_sub_text": "OFF YOUR FIRST BILL*",
         "tc_type_enum": "tcs_units",
         "tc_terms_text": "*T&Cs apply",
         "tc_units_text": "Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat",
         "cta_type_enum": "roundel",
         "cta_text": "Switch today",
-        "include_roundel_frame_bool": true,
-        "roundel_text_text": "Save up to",
-        "roundel_value_text": "€1,080",
+        "include_roundel_frame_bool": false,
+        "roundel_text_text": "Saving you up to",
+        "roundel_value_text": "9999",
         "background_image_url_160x600": {
           "Url": ""
         },
@@ -425,20 +425,20 @@
         "heading2_text": "Our very best electricity plan",
         "heading3_text": "Switch and save today",
         "heading4_text": "A different kind of energy",
-        "offer1_value_text": "15%",
+        "offer1_value_text": "8",
         "offer1_sub_text": "OFF ELECTRICITY*",
-        "offer2_value_text": "30%",
+        "offer2_value_text": "8",
         "offer2_sub_text": "OFF GAS*",
-        "offer3_value_text": "€125",
-        "offer3_sub_text": "OFF YOUR FIRST BILL*",
+        "offer3_value_text": "8",
+        "offer3_sub_text": "OFF YOUr next bill*",
         "tc_type_enum": "tcs_units",
         "tc_terms_text": "*T&Cs apply",
         "tc_units_text": "Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat",
-        "cta_type_enum": "roundel",
+        "cta_type_enum": "rectangle",
         "cta_text": "Switch today",
         "include_roundel_frame_bool": true,
-        "roundel_text_text": "Save up to",
-        "roundel_value_text": "€1,080",
+        "roundel_text_text": "Saving you up to",
+        "roundel_value_text": "",
         "background_image_url_160x600": {
           "Url": ""
         },
@@ -481,8 +481,8 @@
         "cta_type_enum": "rectangle",
         "cta_text": "Find out more",
         "include_roundel_frame_bool": true,
-        "roundel_text_text": "Switch and save today",
-        "roundel_value_text": "",
+        "roundel_text_text": "Saving you up to",
+        "roundel_value_text": "999",
         "background_image_url_160x600": {
           "Url": ""
         },
@@ -767,10 +767,10 @@
           "group": "Roundel frame",
           "zIndex": 6,
           "base": {
-            "left": 150,
-            "top": -5,
-            "width": 61,
-            "height": 61,
+            "left": 148,
+            "top": -17,
+            "width": 90,
+            "height": 90,
             "cssClass": "roundel-frame",
             "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
@@ -833,8 +833,8 @@
           ],
           "fit": {
             "mode": "shrink",
-            "minFontSize": 18,
-            "maxLines": 3
+            "minFontSize": 8,
+            "maxLines": 1
           }
         },
         {
@@ -875,7 +875,8 @@
             }
           ],
           "fit": {
-            "minFontSize": 8
+            "minFontSize": 16,
+            "maxLines": 1
           }
         },
         {
@@ -1382,8 +1383,8 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 124,
-            "top": 7,
+            "left": 123,
+            "top": 6,
             "width": 74,
             "height": 37
           },
@@ -1398,8 +1399,8 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 191,
-            "top": 7,
+            "left": 190,
+            "top": 6,
             "width": 74,
             "height": 35
           },
@@ -1414,8 +1415,8 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": 169,
-            "top": 20,
+            "left": 168,
+            "top": 19,
             "width": 13,
             "height": 13,
             "objectFit": "contain"
@@ -1431,16 +1432,21 @@
             "offer_count_num": 2
           },
           "props": {
-            "left": -24,
-            "top": 1,
-            "width": 74,
+            "left": -17,
+            "top": 0,
+            "width": 60,
             "height": 25,
-            "fontSize": 34,
+            "fontSize": 28,
             "lineHeight": 0.85,
             "textAlign": "center",
-            "justifyContent": "center"
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "flex-end"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "minFontSize": 24
+          }
         },
         {
           "id": "offers-2|offer-subline",
@@ -1476,7 +1482,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 113,
+            "left": 109,
             "top": 9,
             "width": 76,
             "height": 28
@@ -1492,7 +1498,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 182,
+            "left": 176,
             "top": 9,
             "width": 76,
             "height": 30
@@ -1508,7 +1514,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 233,
+            "left": 237,
             "top": 9,
             "width": 76,
             "height": 33
@@ -1524,7 +1530,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 208,
+            "left": 202,
             "top": 11,
             "width": 13,
             "height": 13,
@@ -1541,7 +1547,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 272,
+            "left": 266,
             "top": 14,
             "height": 13,
             "width": 13,
@@ -1806,8 +1812,8 @@
           },
           "props": {
             "backgroundColor": "rgb(0, 229, 165)",
-            "left": 149,
-            "top": -5
+            "left": 137,
+            "top": -16
           },
           "editable": true
         },
@@ -1872,11 +1878,11 @@
             "roundel_value_text": ""
           },
           "props": {
-            "left": 139,
-            "top": 14,
-            "width": 32,
-            "height": 24,
-            "fontSize": 24,
+            "left": 158,
+            "top": 9,
+            "width": 68,
+            "height": 31,
+            "fontSize": 12,
             "lineHeight": 1.05,
             "whiteSpace": "normal",
             "textAlign": "center",
@@ -1900,13 +1906,15 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 153,
-            "top": 9,
-            "width": 53,
-            "height": 14,
-            "fontSize": 10,
+            "left": 145,
+            "top": 6,
+            "width": 76,
+            "height": 12,
+            "fontSize": 12,
             "lineHeight": 1.05,
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-end"
           },
           "editable": true
         },
@@ -1920,12 +1928,16 @@
           },
           "props": {
             "left": 145,
-            "top": 23,
-            "width": 70,
-            "height": 25,
-            "fontSize": 17,
+            "top": 19,
+            "width": 76,
+            "height": 30,
+            "fontSize": 28,
             "lineHeight": 1,
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-start",
+            "textAlign": "center",
+            "justifyContent": "center"
           },
           "editable": true
         },
@@ -1940,7 +1952,7 @@
             "left": 7,
             "top": 7,
             "width": 113,
-            "height": 30,
+            "height": 36,
             "fontSize": 15,
             "lineHeight": 1,
             "display": "flex",
@@ -1956,7 +1968,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 12,
+            "left": 6,
             "width": 101,
             "top": 9,
             "textAlign": "left",
@@ -2168,22 +2180,6 @@
           "editable": true
         },
         {
-          "id": "offers-0|cta",
-          "scope": "offers-0",
-          "layerId": "cta",
-          "cssClass": "cta",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "left": 106,
-            "top": 23,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
-          },
-          "editable": true
-        },
-        {
           "id": "offers-0|bluewave",
           "scope": "offers-0",
           "layerId": "bluewave",
@@ -2216,120 +2212,36 @@
           "editable": true
         },
         {
-          "id": "offers-2|roundel-frame",
-          "scope": "offers-2",
-          "layerId": "roundel-frame",
-          "cssClass": "roundel-frame",
-          "when": {
-            "offer_count_num": 2
-          },
+          "id": "offers-0.cta-rect|cta",
+          "scope": "offers-0.cta-rect",
+          "layerId": "cta",
+          "cssClass": "cta",
           "props": {
-            "left": 149,
-            "top": -5,
-            "width": 61,
-            "height": 61
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-2|roundel-copy",
-          "scope": "offers-2",
-          "layerId": "roundel-copy",
-          "cssClass": "roundel-copy",
-          "when": {
-            "offer_count_num": 2
-          },
-          "props": {
-            "left": 153,
-            "top": 9,
-            "width": 53,
-            "height": 14,
-            "fontSize": 10,
-            "lineHeight": 1.05,
-            "whiteSpace": "nowrap",
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-2|roundel-value",
-          "scope": "offers-2",
-          "layerId": "roundel-value",
-          "cssClass": "roundel-value",
-          "when": {
-            "offer_count_num": 2
-          },
-          "props": {
-            "left": 145,
+            "left": 65,
             "top": 23,
-            "width": 70,
-            "height": 25,
-            "fontSize": 17,
-            "lineHeight": 1,
-            "whiteSpace": "nowrap",
-            "textAlign": "center"
+            "width": 73,
+            "height": 18,
+            "borderRadius": 4,
+            "fontSize": 9,
+            "backgroundColor": "rgb(0, 229, 165)",
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
         {
-          "id": "offers-3|roundel-frame",
-          "scope": "offers-3",
-          "layerId": "roundel-frame",
-          "cssClass": "roundel-frame",
-          "when": {
-            "offer_count_num": 3
-          },
+          "id": "offers-0.cta-roundel|cta",
+          "scope": "offers-0.cta-roundel",
+          "layerId": "cta",
+          "cssClass": "cta",
           "props": {
-            "left": 149,
-            "top": -5,
-            "width": 61,
-            "height": 61
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|roundel-copy",
-          "scope": "offers-3",
-          "layerId": "roundel-copy",
-          "cssClass": "roundel-copy",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 153,
-            "top": 9,
-            "width": 53,
-            "height": 14,
-            "fontSize": 10,
-            "lineHeight": 1.05,
-            "whiteSpace": "nowrap",
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|roundel-value",
-          "scope": "offers-3",
-          "layerId": "roundel-value",
-          "cssClass": "roundel-value",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 145,
-            "top": 23,
-            "width": 70,
-            "height": 25,
-            "fontSize": 17,
-            "lineHeight": 1,
-            "whiteSpace": "nowrap",
-            "textAlign": "center"
+            "left": 65,
+            "top": 7,
+            "width": 56,
+            "height": 56,
+            "borderRadius": "50%",
+            "fontSize": 12,
+            "backgroundColor": "rgb(0, 229, 165)",
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         }
@@ -2620,10 +2532,10 @@
           "group": "Roundel frame",
           "zIndex": 6,
           "base": {
-            "left": 312,
-            "top": -4,
-            "width": 101,
-            "height": 100,
+            "left": 300,
+            "top": -16,
+            "width": 130,
+            "height": 130,
             "cssClass": "roundel-frame",
             "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
@@ -2686,7 +2598,7 @@
           ],
           "fit": {
             "mode": "shrink",
-            "minFontSize": 18,
+            "minFontSize": 12,
             "maxLines": 1
           }
         },
@@ -3368,7 +3280,7 @@
           },
           "props": {
             "left": 261,
-            "top": 10,
+            "top": 5,
             "width": 172,
             "height": 68
           },
@@ -3384,7 +3296,7 @@
           },
           "props": {
             "left": 389,
-            "top": 10,
+            "top": 5,
             "width": 172,
             "height": 68
           },
@@ -3400,7 +3312,7 @@
           },
           "props": {
             "left": 400,
-            "top": 24,
+            "top": 19,
             "width": 25,
             "height": 25,
             "objectFit": "contain"
@@ -3459,7 +3371,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 234,
+            "left": 264,
             "top": 17,
             "width": 111,
             "height": 58
@@ -3541,9 +3453,9 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 0,
+            "left": 26,
             "top": 0,
-            "width": 111,
+            "width": 100,
             "height": 42,
             "fontSize": 46,
             "textAlign": "center"
@@ -3559,11 +3471,11 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": -5,
+            "left": 26,
             "top": 40,
-            "width": 121,
+            "width": 100,
             "height": 11,
-            "fontSize": 11,
+            "fontSize": 12,
             "textAlign": "center",
             "justifyContent": "center",
             "display": "flex",
@@ -3572,7 +3484,7 @@
           "editable": true,
           "fit": {
             "maxLines": 1,
-            "minFontSize": 12,
+            "minFontSize": 9,
             "mode": "shrink"
           }
         },
@@ -3694,10 +3606,10 @@
             "roundel_value_text": ""
           },
           "props": {
-            "left": 312,
-            "top": 23,
-            "width": 60,
-            "height": 45,
+            "left": 310,
+            "top": 24,
+            "width": 109,
+            "height": 44,
             "fontSize": 24,
             "lineHeight": 1.05,
             "whiteSpace": "normal",
@@ -3722,17 +3634,17 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 326,
-            "top": 24,
-            "width": 76,
-            "height": 16,
+            "left": 310,
+            "top": 9,
+            "width": 109,
+            "height": 23,
             "fontSize": 15,
             "lineHeight": 1.05,
             "whiteSpace": "nowrap",
             "textAlign": "center",
             "justifyContent": "center",
             "display": "flex",
-            "alignItems": "center"
+            "alignItems": "flex-end"
           },
           "editable": true
         },
@@ -3745,17 +3657,17 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 318,
-            "top": 37,
-            "width": 90,
-            "height": 34,
-            "fontSize": 28,
+            "left": 311,
+            "top": 33,
+            "width": 105,
+            "height": 48,
+            "fontSize": 46,
             "lineHeight": 1,
             "whiteSpace": "nowrap",
             "textAlign": "center",
             "justifyContent": "center",
             "display": "flex",
-            "alignItems": "center"
+            "alignItems": "flex-start"
           },
           "editable": true
         },
@@ -3992,22 +3904,6 @@
           "editable": true
         },
         {
-          "id": "offers-0|cta",
-          "scope": "offers-0",
-          "layerId": "cta",
-          "cssClass": "cta",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "left": 131,
-            "top": 28,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
-          },
-          "editable": true
-        },
-        {
           "id": "offers-0|bluewave",
           "scope": "offers-0",
           "layerId": "bluewave",
@@ -4040,126 +3936,36 @@
           "editable": true
         },
         {
-          "id": "offers-2|roundel-frame",
-          "scope": "offers-2",
-          "layerId": "roundel-frame",
-          "cssClass": "roundel-frame",
-          "when": {
-            "offer_count_num": 2
-          },
+          "id": "offers-0.cta-rect|cta",
+          "scope": "offers-0.cta-rect",
+          "layerId": "cta",
+          "cssClass": "cta",
           "props": {
-            "left": 312,
-            "top": -4,
-            "width": 101,
-            "height": 100
+            "left": 131,
+            "top": 25,
+            "width": 157,
+            "height": 37,
+            "borderRadius": 6,
+            "fontSize": 18,
+            "backgroundColor": "rgb(0, 229, 165)",
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
         {
-          "id": "offers-2|roundel-copy",
-          "scope": "offers-2",
-          "layerId": "roundel-copy",
-          "cssClass": "roundel-copy",
-          "when": {
-            "offer_count_num": 2
-          },
+          "id": "offers-0.cta-roundel|cta",
+          "scope": "offers-0.cta-roundel",
+          "layerId": "cta",
+          "cssClass": "cta",
           "props": {
-            "left": 326,
-            "top": 24,
-            "width": 76,
-            "height": 16,
-            "fontSize": 15,
-            "lineHeight": 1.05,
-            "whiteSpace": "nowrap",
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-2|roundel-value",
-          "scope": "offers-2",
-          "layerId": "roundel-value",
-          "cssClass": "roundel-value",
-          "when": {
-            "offer_count_num": 2
-          },
-          "props": {
-            "left": 318,
-            "top": 37,
-            "width": 90,
-            "height": 34,
-            "fontSize": 28,
-            "lineHeight": 1,
-            "whiteSpace": "nowrap",
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|roundel-frame",
-          "scope": "offers-3",
-          "layerId": "roundel-frame",
-          "cssClass": "roundel-frame",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 312,
-            "top": -4,
-            "width": 101,
-            "height": 100
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|roundel-copy",
-          "scope": "offers-3",
-          "layerId": "roundel-copy",
-          "cssClass": "roundel-copy",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 326,
-            "top": 24,
-            "width": 76,
-            "height": 16,
-            "fontSize": 15,
-            "lineHeight": 1.05,
-            "whiteSpace": "nowrap",
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|roundel-value",
-          "scope": "offers-3",
-          "layerId": "roundel-value",
-          "cssClass": "roundel-value",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 318,
-            "top": 37,
-            "width": 90,
-            "height": 34,
-            "fontSize": 28,
-            "lineHeight": 1,
-            "whiteSpace": "nowrap",
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
+            "left": 131,
+            "top": -11,
+            "width": 115,
+            "height": 115,
+            "borderRadius": "50%",
+            "fontSize": 18,
+            "backgroundColor": "rgb(0, 229, 165)",
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         }
@@ -4467,7 +4273,7 @@
           "zIndex": 6,
           "base": {
             "left": 32,
-            "top": 72,
+            "top": 80,
             "width": 118,
             "height": 118,
             "cssClass": "roundel-frame",
@@ -4532,7 +4338,7 @@
           ],
           "fit": {
             "mode": "shrink",
-            "minFontSize": 16,
+            "minFontSize": 1,
             "maxLines": 1
           }
         },
@@ -4574,7 +4380,7 @@
             }
           ],
           "fit": {
-            "minFontSize": 28,
+            "minFontSize": 32,
             "maxLines": 1
           }
         },
@@ -5464,10 +5270,10 @@
           },
           "props": {
             "backgroundColor": "rgb(0, 229, 165)",
-            "left": 41,
-            "top": 89,
-            "width": 100,
-            "height": 100
+            "left": 29,
+            "top": 80,
+            "width": 120,
+            "height": 120
           },
           "editable": true
         },
@@ -5506,10 +5312,10 @@
             "roundel_value_text": ""
           },
           "props": {
-            "left": 51,
-            "top": 110,
-            "width": 79,
-            "height": 63,
+            "left": 48,
+            "top": 107,
+            "width": 83,
+            "height": 68,
             "fontSize": 22,
             "lineHeight": 1.05,
             "whiteSpace": "normal",
@@ -5535,12 +5341,14 @@
           },
           "props": {
             "left": 41,
-            "top": 105,
-            "width": 98,
-            "height": 24,
-            "fontSize": 20,
+            "top": 101,
+            "width": 97,
+            "height": 18,
+            "fontSize": 16,
             "lineHeight": 1.05,
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-end"
           },
           "editable": true
         },
@@ -5554,12 +5362,16 @@
           },
           "props": {
             "left": 40,
-            "top": 127,
-            "width": 100,
-            "height": 35,
-            "fontSize": 42,
+            "top": 122,
+            "width": 101,
+            "height": 48,
+            "fontSize": 58,
             "lineHeight": 1,
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-start",
+            "textAlign": "center",
+            "justifyContent": "center"
           },
           "editable": true
         },
@@ -5836,25 +5648,6 @@
           "editable": true
         },
         {
-          "id": "offers-0|cta",
-          "scope": "offers-0",
-          "layerId": "cta",
-          "cssClass": "cta",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "left": 28,
-            "top": 83,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)",
-            "width": 134,
-            "height": 27,
-            "fontSize": 14
-          },
-          "editable": true
-        },
-        {
           "id": "offers-0|bluewave",
           "scope": "offers-0",
           "layerId": "bluewave",
@@ -5887,120 +5680,36 @@
           "editable": true
         },
         {
-          "id": "offers-2|roundel-frame",
-          "scope": "offers-2",
-          "layerId": "roundel-frame",
-          "cssClass": "roundel-frame",
-          "when": {
-            "offer_count_num": 2
-          },
+          "id": "offers-0.cta-rect|cta",
+          "scope": "offers-0.cta-rect",
+          "layerId": "cta",
+          "cssClass": "cta",
           "props": {
-            "left": 32,
-            "top": 72,
-            "width": 118,
-            "height": 118
+            "left": 44,
+            "top": 70,
+            "width": 120,
+            "height": 36,
+            "borderRadius": 4,
+            "fontSize": 12,
+            "backgroundColor": "rgb(0, 229, 165)",
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
         {
-          "id": "offers-2|roundel-copy",
-          "scope": "offers-2",
-          "layerId": "roundel-copy",
-          "cssClass": "roundel-copy",
-          "when": {
-            "offer_count_num": 2
-          },
+          "id": "offers-0.cta-roundel|cta",
+          "scope": "offers-0.cta-roundel",
+          "layerId": "cta",
+          "cssClass": "cta",
           "props": {
-            "left": 40,
-            "top": 104,
-            "width": 98,
-            "height": 24,
-            "fontSize": 20,
-            "lineHeight": 1.05,
-            "whiteSpace": "nowrap",
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-2|roundel-value",
-          "scope": "offers-2",
-          "layerId": "roundel-value",
-          "cssClass": "roundel-value",
-          "when": {
-            "offer_count_num": 2
-          },
-          "props": {
-            "left": 38,
-            "top": 126,
-            "width": 106,
-            "height": 35,
-            "fontSize": 42,
-            "lineHeight": 1,
-            "whiteSpace": "nowrap",
-            "textAlign": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|roundel-frame",
-          "scope": "offers-3",
-          "layerId": "roundel-frame",
-          "cssClass": "roundel-frame",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 32,
-            "top": 72,
-            "width": 118,
-            "height": 118
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|roundel-copy",
-          "scope": "offers-3",
-          "layerId": "roundel-copy",
-          "cssClass": "roundel-copy",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 41,
-            "top": 104,
-            "width": 98,
-            "height": 24,
-            "fontSize": 20,
-            "lineHeight": 1.05,
-            "whiteSpace": "nowrap",
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|roundel-value",
-          "scope": "offers-3",
-          "layerId": "roundel-value",
-          "cssClass": "roundel-value",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 37,
-            "top": 126,
-            "width": 107,
-            "height": 35,
-            "fontSize": 42,
-            "lineHeight": 1,
-            "whiteSpace": "nowrap",
-            "textAlign": "center"
+            "left": 44,
+            "top": 70,
+            "width": 80,
+            "height": 80,
+            "borderRadius": "50%",
+            "fontSize": 13,
+            "backgroundColor": "rgb(0, 229, 165)",
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         }
@@ -6284,10 +5993,10 @@
           "group": "Roundel frame",
           "zIndex": 6,
           "base": {
-            "left": 20,
-            "top": 224,
-            "width": 120,
-            "height": 120,
+            "left": 18,
+            "top": 229,
+            "width": 125,
+            "height": 125,
             "cssClass": "roundel-frame",
             "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
@@ -6350,8 +6059,8 @@
           ],
           "fit": {
             "mode": "shrink",
-            "minFontSize": 18,
-            "maxLines": 3
+            "minFontSize": 12,
+            "maxLines": 1
           }
         },
         {
@@ -6392,7 +6101,8 @@
             }
           ],
           "fit": {
-            "minFontSize": 12
+            "minFontSize": 18,
+            "maxLines": 1
           }
         },
         {
@@ -6942,9 +6652,9 @@
           },
           "props": {
             "fontSize": 72,
-            "left": 0,
+            "left": 16,
             "top": 10,
-            "width": 181,
+            "width": 150,
             "height": 61
           },
           "editable": true
@@ -6958,10 +6668,10 @@
             "offer_count_num": 2
           },
           "props": {
-            "top": 72,
+            "top": 73,
             "fontSize": 17,
-            "left": 14,
-            "width": 153,
+            "left": 16,
+            "width": 150,
             "height": 16,
             "whiteSpace": "nowrap"
           },
@@ -7059,9 +6769,9 @@
           },
           "props": {
             "fontSize": 58,
-            "left": -12,
+            "left": 4,
             "top": -3,
-            "width": 182,
+            "width": 150,
             "height": 48
           },
           "editable": true
@@ -7075,12 +6785,16 @@
             "offer_count_num": 3
           },
           "props": {
-            "top": 46,
+            "top": 48,
             "fontSize": 15,
             "left": 7,
             "width": 144,
             "height": 20,
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-start",
+            "textAlign": "center",
+            "justifyContent": "center"
           },
           "editable": true
         },
@@ -7093,9 +6807,9 @@
             "cta_type_enum": "rectangle"
           },
           "props": {
-            "left": 15,
+            "left": 10,
             "top": 268,
-            "width": 130,
+            "width": 140,
             "height": 44,
             "fontSize": 15,
             "borderRadius": 5
@@ -7346,7 +7060,7 @@
           },
           "props": {
             "left": 37,
-            "top": 253,
+            "top": 259,
             "width": 86,
             "height": 65,
             "fontSize": 24,
@@ -7374,12 +7088,14 @@
           },
           "props": {
             "left": 30,
-            "top": 258,
+            "top": 253,
             "width": 100,
             "height": 24,
-            "fontSize": 20,
+            "fontSize": 16,
             "lineHeight": 1.05,
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-end"
           },
           "editable": true
         },
@@ -7392,15 +7108,15 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 12,
-            "top": 268,
-            "width": 136,
-            "height": 60,
-            "fontSize": 28,
+            "left": 20,
+            "top": 279,
+            "width": 118,
+            "height": 59,
+            "fontSize": 42,
             "lineHeight": 1,
             "whiteSpace": "nowrap",
             "display": "flex",
-            "alignItems": "center",
+            "alignItems": "flex-start",
             "textAlign": "center",
             "justifyContent": "center"
           },
@@ -7645,25 +7361,6 @@
           "editable": true
         },
         {
-          "id": "offers-0|cta",
-          "scope": "offers-0",
-          "layerId": "cta",
-          "cssClass": "cta",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "left": 8,
-            "top": 217,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)",
-            "width": 140,
-            "height": 36,
-            "fontSize": 14
-          },
-          "editable": true
-        },
-        {
           "id": "offers-0|bluewave",
           "scope": "offers-0",
           "layerId": "bluewave",
@@ -7696,126 +7393,36 @@
           "editable": true
         },
         {
-          "id": "offers-2|roundel-frame",
-          "scope": "offers-2",
-          "layerId": "roundel-frame",
-          "cssClass": "roundel-frame",
-          "when": {
-            "offer_count_num": 2
-          },
+          "id": "offers-0.cta-rect|cta",
+          "scope": "offers-0.cta-rect",
+          "layerId": "cta",
+          "cssClass": "cta",
           "props": {
-            "left": 20,
-            "top": 224,
-            "width": 120,
-            "height": 120
+            "left": 10,
+            "top": 172,
+            "width": 140,
+            "height": 44,
+            "borderRadius": 5,
+            "fontSize": 15,
+            "backgroundColor": "rgb(0, 229, 165)",
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
         {
-          "id": "offers-2|roundel-copy",
-          "scope": "offers-2",
-          "layerId": "roundel-copy",
-          "cssClass": "roundel-copy",
-          "when": {
-            "offer_count_num": 2
-          },
+          "id": "offers-0.cta-roundel|cta",
+          "scope": "offers-0.cta-roundel",
+          "layerId": "cta",
+          "cssClass": "cta",
           "props": {
             "left": 30,
-            "top": 258,
+            "top": 172,
             "width": 100,
-            "height": 24,
-            "fontSize": 20,
-            "lineHeight": 1.05,
-            "whiteSpace": "nowrap",
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-2|roundel-value",
-          "scope": "offers-2",
-          "layerId": "roundel-value",
-          "cssClass": "roundel-value",
-          "when": {
-            "offer_count_num": 2
-          },
-          "props": {
-            "left": 12,
-            "top": 268,
-            "width": 136,
-            "height": 60,
-            "fontSize": 28,
-            "lineHeight": 1,
-            "whiteSpace": "nowrap",
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|roundel-frame",
-          "scope": "offers-3",
-          "layerId": "roundel-frame",
-          "cssClass": "roundel-frame",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 20,
-            "top": 224,
-            "width": 120,
-            "height": 120
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|roundel-copy",
-          "scope": "offers-3",
-          "layerId": "roundel-copy",
-          "cssClass": "roundel-copy",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 30,
-            "top": 258,
-            "width": 100,
-            "height": 24,
-            "fontSize": 20,
-            "lineHeight": 1.05,
-            "whiteSpace": "nowrap",
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|roundel-value",
-          "scope": "offers-3",
-          "layerId": "roundel-value",
-          "cssClass": "roundel-value",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 12,
-            "top": 268,
-            "width": 136,
-            "height": 60,
-            "fontSize": 28,
-            "lineHeight": 1,
-            "whiteSpace": "nowrap",
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
+            "height": 100,
+            "borderRadius": "50%",
+            "fontSize": 18,
+            "backgroundColor": "rgb(0, 229, 165)",
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         }
@@ -8113,10 +7720,10 @@
           "group": "Roundel frame",
           "zIndex": 7,
           "base": {
-            "left": 75,
-            "top": 180,
-            "width": 150,
-            "height": 150,
+            "left": 56,
+            "top": 176,
+            "width": 188,
+            "height": 188,
             "cssClass": "roundel-frame",
             "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
@@ -8179,8 +7786,8 @@
           ],
           "fit": {
             "mode": "shrink",
-            "minFontSize": 22,
-            "maxLines": 3
+            "minFontSize": 14,
+            "maxLines": 1
           }
         },
         {
@@ -8769,9 +8376,9 @@
           },
           "props": {
             "fontSize": 93,
-            "left": 0,
+            "left": -35,
             "top": 2,
-            "width": 150,
+            "width": 220,
             "height": 78
           },
           "editable": true
@@ -8785,9 +8392,9 @@
             "offer_count_num": 2
           },
           "props": {
-            "top": 80,
+            "top": 82,
             "fontSize": 22,
-            "left": -36,
+            "left": -30,
             "width": 210,
             "height": 43,
             "whiteSpace": "nowrap"
@@ -8796,7 +8403,7 @@
           "fit": {
             "mode": "shrink",
             "minFontSize": 16,
-            "maxLines": 2
+            "maxLines": 1
           }
         },
         {
@@ -8808,7 +8415,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 6,
+            "left": 7,
             "top": 198,
             "width": 140,
             "height": 229
@@ -8824,7 +8431,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 152,
+            "left": 153,
             "top": 198,
             "width": 140,
             "height": 140
@@ -8840,7 +8447,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 76,
+            "left": 77,
             "top": 326,
             "width": 140,
             "height": 127
@@ -8856,7 +8463,7 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 134,
+            "left": 135,
             "top": 281,
             "width": 26,
             "height": 26,
@@ -8874,14 +8481,17 @@
           },
           "props": {
             "fontSize": 76,
-            "left": -40,
+            "left": -5,
             "top": 0,
-            "width": 220,
+            "width": 150,
             "height": 64,
             "textAlign": "center",
             "justifyContent": "center"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "minFontSize": 48
+          }
         },
         {
           "id": "offers-3|offer-subline",
@@ -8894,8 +8504,8 @@
           "props": {
             "top": 64,
             "fontSize": 14,
-            "left": -2,
-            "width": 147,
+            "left": -15,
+            "width": 170,
             "height": 38,
             "textAlign": "center",
             "justifyContent": "center",
@@ -8903,7 +8513,10 @@
             "alignItems": "flex-start",
             "whiteSpace": "nowrap"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "maxLines": 1
+          }
         },
         {
           "id": "cta-rect|cta",
@@ -9115,10 +8728,10 @@
           },
           "props": {
             "backgroundColor": "rgb(0, 229, 165)",
-            "top": 181,
-            "width": 150,
-            "height": 150,
-            "left": 75
+            "top": 173,
+            "width": 188,
+            "height": 188,
+            "left": 55
           },
           "editable": true
         },
@@ -9183,12 +8796,12 @@
             "roundel_value_text": ""
           },
           "props": {
-            "left": 89,
+            "left": 77,
             "top": 213,
-            "width": 123,
-            "height": 82,
-            "fontSize": 24,
-            "lineHeight": 1.05,
+            "width": 147,
+            "height": 94,
+            "fontSize": 28,
+            "lineHeight": 1,
             "whiteSpace": "normal",
             "textAlign": "center",
             "justifyContent": "center",
@@ -9211,13 +8824,15 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 90,
-            "top": 222,
-            "width": 120,
-            "height": 28,
-            "fontSize": 24,
+            "left": 71,
+            "top": 218,
+            "width": 159,
+            "height": 25,
+            "fontSize": 22,
             "lineHeight": 1.05,
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-end"
           },
           "editable": true
         },
@@ -9230,13 +8845,17 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 80,
-            "top": 247,
-            "width": 137,
+            "left": 71,
+            "top": 249,
+            "width": 158,
             "height": 70,
-            "fontSize": 52,
+            "fontSize": 64,
             "lineHeight": 1,
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-start",
+            "textAlign": "center",
+            "justifyContent": "center"
           },
           "editable": true
         },
@@ -9472,23 +9091,6 @@
           "editable": true
         },
         {
-          "id": "offers-0|cta",
-          "scope": "offers-0",
-          "layerId": "cta",
-          "cssClass": "cta",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "left": 65,
-            "top": 157,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)",
-            "fontSize": 18
-          },
-          "editable": true
-        },
-        {
           "id": "offers-0|bluewave",
           "scope": "offers-0",
           "layerId": "bluewave",
@@ -9521,120 +9123,36 @@
           "editable": true
         },
         {
-          "id": "offers-2|roundel-frame",
-          "scope": "offers-2",
-          "layerId": "roundel-frame",
-          "cssClass": "roundel-frame",
-          "when": {
-            "offer_count_num": 2
-          },
+          "id": "offers-0.cta-rect|cta",
+          "scope": "offers-0.cta-rect",
+          "layerId": "cta",
+          "cssClass": "cta",
           "props": {
-            "left": 75,
-            "top": 180,
-            "width": 150,
-            "height": 150
+            "left": 65,
+            "top": 157,
+            "width": 180,
+            "height": 48,
+            "borderRadius": 5,
+            "fontSize": 17,
+            "backgroundColor": "rgb(0, 229, 165)",
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
         {
-          "id": "offers-2|roundel-copy",
-          "scope": "offers-2",
-          "layerId": "roundel-copy",
-          "cssClass": "roundel-copy",
-          "when": {
-            "offer_count_num": 2
-          },
+          "id": "offers-0.cta-roundel|cta",
+          "scope": "offers-0.cta-roundel",
+          "layerId": "cta",
+          "cssClass": "cta",
           "props": {
-            "left": 90,
-            "top": 222,
-            "width": 120,
-            "height": 28,
-            "fontSize": 24,
-            "lineHeight": 1.05,
-            "whiteSpace": "nowrap",
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-2|roundel-value",
-          "scope": "offers-2",
-          "layerId": "roundel-value",
-          "cssClass": "roundel-value",
-          "when": {
-            "offer_count_num": 2
-          },
-          "props": {
-            "left": 80,
-            "top": 247,
-            "width": 137,
-            "height": 70,
-            "fontSize": 52,
-            "lineHeight": 1,
-            "whiteSpace": "nowrap",
-            "textAlign": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|roundel-frame",
-          "scope": "offers-3",
-          "layerId": "roundel-frame",
-          "cssClass": "roundel-frame",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 75,
-            "top": 180,
-            "width": 150,
-            "height": 150
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|roundel-copy",
-          "scope": "offers-3",
-          "layerId": "roundel-copy",
-          "cssClass": "roundel-copy",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 90,
-            "top": 222,
-            "width": 120,
-            "height": 28,
-            "fontSize": 24,
-            "lineHeight": 1.05,
-            "whiteSpace": "nowrap",
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|roundel-value",
-          "scope": "offers-3",
-          "layerId": "roundel-value",
-          "cssClass": "roundel-value",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 80,
-            "top": 247,
-            "width": 137,
-            "height": 70,
-            "fontSize": 52,
-            "lineHeight": 1,
-            "whiteSpace": "nowrap",
-            "textAlign": "center"
+            "left": 65,
+            "top": 157,
+            "width": 130,
+            "height": 130,
+            "borderRadius": "50%",
+            "fontSize": 19,
+            "backgroundColor": "rgb(0, 229, 165)",
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         }
@@ -9929,10 +9447,10 @@
           "group": "Roundel frame",
           "zIndex": 6,
           "base": {
-            "left": 375,
-            "top": 40,
-            "width": 170,
-            "height": 170,
+            "left": 367,
+            "top": 31,
+            "width": 186,
+            "height": 186,
             "cssClass": "roundel-frame",
             "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
@@ -10037,8 +9555,9 @@
             }
           ],
           "fit": {
-            "minFontSize": 12,
-            "maxLines": 1
+            "minFontSize": 42,
+            "maxLines": 1,
+            "mode": "shrink"
           }
         },
         {
@@ -10627,10 +10146,10 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 290,
-            "top": 2,
-            "width": 293,
-            "height": 293
+            "left": 308,
+            "top": 11,
+            "width": 255,
+            "height": 255
           },
           "editable": true
         },
@@ -10643,10 +10162,10 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 526,
-            "top": 2,
-            "width": 293,
-            "height": 241
+            "left": 513,
+            "top": 11,
+            "width": 255,
+            "height": 210
           },
           "editable": true
         },
@@ -10659,10 +10178,10 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 411,
-            "top": 117,
-            "width": 293,
-            "height": 225
+            "left": 413,
+            "top": 124,
+            "width": 255,
+            "height": 196
           },
           "editable": true
         },
@@ -10675,10 +10194,10 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 532,
-            "top": 75,
-            "width": 31,
-            "height": 31,
+            "left": 519,
+            "top": 85,
+            "width": 27,
+            "height": 27,
             "objectFit": "contain"
           },
           "editable": true
@@ -10692,10 +10211,10 @@
             "offer_count_num": 3
           },
           "props": {
-            "left": 1077,
-            "top": -104,
-            "width": 27,
-            "height": 27,
+            "left": 993,
+            "top": -81,
+            "width": 23,
+            "height": 23,
             "objectFit": "contain"
           },
           "editable": true
@@ -10709,11 +10228,11 @@
             "offer_count_num": 3
           },
           "props": {
-            "fontSize": 93,
-            "top": 16,
-            "left": 29,
-            "width": 236,
-            "height": 77,
+            "fontSize": 81,
+            "top": 14,
+            "left": 25,
+            "width": 205,
+            "height": 67,
             "textAlign": "center"
           },
           "editable": true
@@ -10727,11 +10246,11 @@
             "offer_count_num": 3
           },
           "props": {
-            "top": 93,
-            "fontSize": 18,
-            "left": 57,
-            "width": 180,
-            "height": 16,
+            "top": 86,
+            "fontSize": 16,
+            "left": 50,
+            "width": 157,
+            "height": 14,
             "textAlign": "center",
             "justifyContent": "center",
             "whiteSpace": "nowrap",
@@ -11006,11 +10525,11 @@
             "roundel_value_text": ""
           },
           "props": {
-            "left": 399,
-            "top": 81,
-            "width": 122,
-            "height": 92,
-            "fontSize": 24,
+            "left": 391,
+            "top": 86,
+            "width": 138,
+            "height": 79,
+            "fontSize": 28,
             "lineHeight": 1.05,
             "whiteSpace": "normal",
             "textAlign": "center",
@@ -11034,13 +10553,17 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 400,
-            "top": 86,
-            "width": 120,
-            "height": 30,
-            "fontSize": 26,
+            "left": 381,
+            "top": 77,
+            "width": 158,
+            "height": 29,
+            "fontSize": 24,
             "lineHeight": 1.05,
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "flex-end"
           },
           "editable": true
         },
@@ -11053,13 +10576,17 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 386,
-            "top": 117,
-            "width": 148,
-            "height": 46,
+            "left": 380,
+            "top": 107,
+            "width": 159,
+            "height": 68,
             "fontSize": 64,
             "lineHeight": 1,
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "display": "flex",
+            "alignItems": "flex-start",
+            "justifyContent": "center"
           },
           "editable": true
         },
@@ -11297,22 +10824,6 @@
           "editable": true
         },
         {
-          "id": "offers-0|cta",
-          "scope": "offers-0",
-          "layerId": "cta",
-          "cssClass": "cta",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "left": 205,
-            "top": 99,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
-          },
-          "editable": true
-        },
-        {
           "id": "offers-0|bluewave",
           "scope": "offers-0",
           "layerId": "bluewave",
@@ -11345,120 +10856,36 @@
           "editable": true
         },
         {
-          "id": "offers-2|roundel-frame",
-          "scope": "offers-2",
-          "layerId": "roundel-frame",
-          "cssClass": "roundel-frame",
-          "when": {
-            "offer_count_num": 2
-          },
+          "id": "offers-0.cta-rect|cta",
+          "scope": "offers-0.cta-rect",
+          "layerId": "cta",
+          "cssClass": "cta",
           "props": {
-            "left": 375,
-            "top": 40,
+            "left": 201,
+            "top": 96,
+            "width": 220,
+            "height": 56,
+            "borderRadius": 6,
+            "fontSize": 22,
+            "backgroundColor": "rgb(0, 229, 165)",
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.cta-roundel|cta",
+          "scope": "offers-0.cta-roundel",
+          "layerId": "cta",
+          "cssClass": "cta",
+          "props": {
+            "left": 207,
+            "top": 47,
             "width": 170,
-            "height": 170
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-2|roundel-copy",
-          "scope": "offers-2",
-          "layerId": "roundel-copy",
-          "cssClass": "roundel-copy",
-          "when": {
-            "offer_count_num": 2
-          },
-          "props": {
-            "left": 400,
-            "top": 86,
-            "width": 120,
-            "height": 30,
-            "fontSize": 26,
-            "lineHeight": 1.05,
-            "whiteSpace": "nowrap",
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-2|roundel-value",
-          "scope": "offers-2",
-          "layerId": "roundel-value",
-          "cssClass": "roundel-value",
-          "when": {
-            "offer_count_num": 2
-          },
-          "props": {
-            "left": 386,
-            "top": 117,
-            "width": 148,
-            "height": 46,
-            "fontSize": 64,
-            "lineHeight": 1,
-            "whiteSpace": "nowrap",
-            "textAlign": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|roundel-frame",
-          "scope": "offers-3",
-          "layerId": "roundel-frame",
-          "cssClass": "roundel-frame",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 375,
-            "top": 40,
-            "width": 170,
-            "height": 170
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|roundel-copy",
-          "scope": "offers-3",
-          "layerId": "roundel-copy",
-          "cssClass": "roundel-copy",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 400,
-            "top": 86,
-            "width": 120,
-            "height": 30,
-            "fontSize": 26,
-            "lineHeight": 1.05,
-            "whiteSpace": "nowrap",
-            "textAlign": "center",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-3|roundel-value",
-          "scope": "offers-3",
-          "layerId": "roundel-value",
-          "cssClass": "roundel-value",
-          "when": {
-            "offer_count_num": 3
-          },
-          "props": {
-            "left": 386,
-            "top": 117,
-            "width": 148,
-            "height": 46,
-            "fontSize": 64,
-            "lineHeight": 1,
-            "whiteSpace": "nowrap",
-            "textAlign": "center"
+            "height": 170,
+            "borderRadius": "50%",
+            "fontSize": 24,
+            "backgroundColor": "rgb(0, 229, 165)",
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         }

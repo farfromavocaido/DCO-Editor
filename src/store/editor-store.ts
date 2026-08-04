@@ -49,7 +49,7 @@ import {
   nextSelectionForEscape,
   normalizeSelectionState,
 } from '@/lib/selection-state';
-import { activeOfferMemberIds, offerInteractionTree } from '@/lib/offer-interaction-model';
+import { activeOfferMemberIds, isOfferLayerId, offerInteractionTree } from '@/lib/offer-interaction-model';
 import { isOfferTimelineLayer } from '@/lib/timeline-rows';
 import { clipsForProfile } from '@/lib/headline-motion';
 import { activeFrameScope, beatsForFrameScope } from '@/lib/timing-profiles';
@@ -70,6 +70,7 @@ import {
   findCreativeTarget,
   headlineOfferVariantRule,
   moveCreativeLayerToZIndex,
+  parseCreativeTargetId,
   promoteCreativeTargetToSharedStyle,
   reorderCreativeLayerZ,
   resetCreativeHeadlineOfferLayout,
@@ -125,7 +126,11 @@ const writeEditorSession = (patch = {}) => {
   }
 };
 
-const selectedFeedRowFromState = (state) => {
+/** Stable empty fallback — a fresh `{}` each call breaks useSyncExternalStore (infinite loop). */
+const EMPTY_FEED_ROW = Object.freeze({});
+
+/** Zustand selector — subscribe to this (not `s.selectedFeedRow`) so feed edits re-render. */
+export const selectSelectedFeedRow = (state) => {
   const draft = state.feedDraft;
   const row = draft.rows[draft.selectedIndex] || draft.rows[0];
   if (row) return row;
@@ -135,7 +140,7 @@ const selectedFeedRowFromState = (state) => {
     && r.cta_type_enum === state.ctaShape)
     || sampleRows.find((r) => Number(r.offer_count_num) === Number(state.offerCount))
     || sampleRows[0]
-    || {};
+    || EMPTY_FEED_ROW;
 };
 
 // Fit rules come from the same module the exporter embeds into Studio HTML
@@ -233,10 +238,10 @@ export const useEditorStore = create<any>((set, get) => ({
     });
   },
 
-  selectedFeedRow: () => selectedFeedRowFromState(get()),
+  selectedFeedRow: () => selectSelectedFeedRow(get()),
 
   syncControlsFromFeedRow: (row) => {
-    const controls = controlsFromFeedRow(row || selectedFeedRowFromState(get()));
+    const controls = controlsFromFeedRow(row || selectSelectedFeedRow(get()));
     set({
       offerCount: controls.offerCount,
       tcMode: controls.tcMode,
@@ -683,32 +688,42 @@ export const useEditorStore = create<any>((set, get) => ({
     }
 
     const activeScopes = state.activeScopes();
+    // Only reconcile offer-block members. Non-offer selections (roundel,
+    // headline, CTA, …) must survive Sample/feed edits — otherwise every
+    // keystroke called syncControlsFromFeedRow → reconcile and cleared the
+    // inspector back to "No layer".
+    const offerIdsInSelection = state.selectedTargetIds.filter((targetId) => {
+      if (targetId === OFFERS_BLOCK_ID) return true;
+      return isOfferLayerId(parseCreativeTargetId(targetId).layerId);
+    });
+    if (!offerIdsInSelection.length) return;
+
     const activeMembers = filterActiveOfferMembers(
-      state.selectedTargetIds,
+      offerIdsInSelection,
       state.offerCount,
       state.creativeDocument,
       state.size,
       activeScopes,
     );
-    if (activeMembers.length !== state.selectedTargetIds.length) {
-      const selectedTargetId = activeMembers.includes(state.selectedTargetId)
-        ? state.selectedTargetId
-        : (activeMembers[activeMembers.length - 1] || '');
-      const layerId = selectedTargetId ? resolveLayerIdForSelection(selectedTargetId) : '';
-      const layer = layerId ? findCreativeLayer(state.creativeDocument, state.size, layerId) : null;
-      const next = normalizeSelectionState({
-        selectedTargetIds: activeMembers,
-        selectedTargetId,
-        selectedLayerId: layerId,
-        selectedClipId: selectedTargetId ? (layer?.clips?.[0]?.id || state.selectedClipId) : '',
-        isolationPath: state.isolationPath || [],
-        activePathIds: [
-          OFFERS_BLOCK_ID,
-          ...offerBlockTargetIds(state.creativeDocument, state.size, state.offerCount, activeScopes),
-        ],
-      });
-      set(next);
-    }
+    if (activeMembers.length === offerIdsInSelection.length) return;
+
+    const selectedTargetId = activeMembers.includes(state.selectedTargetId)
+      ? state.selectedTargetId
+      : (activeMembers[activeMembers.length - 1] || '');
+    const layerId = selectedTargetId ? resolveLayerIdForSelection(selectedTargetId) : '';
+    const layer = layerId ? findCreativeLayer(state.creativeDocument, state.size, layerId) : null;
+    const next = normalizeSelectionState({
+      selectedTargetIds: activeMembers,
+      selectedTargetId,
+      selectedLayerId: layerId,
+      selectedClipId: selectedTargetId ? (layer?.clips?.[0]?.id || state.selectedClipId) : '',
+      isolationPath: state.isolationPath || [],
+      activePathIds: [
+        OFFERS_BLOCK_ID,
+        ...offerBlockTargetIds(state.creativeDocument, state.size, state.offerCount, activeScopes),
+      ],
+    });
+    set(next);
   },
 
   loadCreativeDocument: async () => {
@@ -1405,7 +1420,7 @@ export const useEditorStore = create<any>((set, get) => ({
   },
 
   loadSize: async (size) => {
-    get().syncControlsFromFeedRow(selectedFeedRowFromState(get()));
+    get().syncControlsFromFeedRow(selectSelectedFeedRow(get()));
     set({
       size,
       history: [],
@@ -1910,7 +1925,7 @@ export const useEditorStore = create<any>((set, get) => ({
     input.name = 'payload';
     input.value = JSON.stringify({
       document: creativeDocument,
-      row: selectedFeedRowFromState(state),
+      row: selectSelectedFeedRow(state),
     });
     form.appendChild(input);
     window.document.body.appendChild(form);

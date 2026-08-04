@@ -24,3 +24,7 @@ preview port="4173":
     npm run export:preview-site
     @echo "Client preview: http://127.0.0.1:{{port}} (password: ssedco)"
     python3 -m http.server {{port}} --directory site
+
+# Capture DCO canonical-agency stress matrix (Playwright → qa-output/YYYYMMDD-HHMMSS/)
+qa-dco *args:
+    npm run qa:dco -- {{args}}

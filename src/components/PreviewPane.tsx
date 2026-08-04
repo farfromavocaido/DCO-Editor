@@ -62,7 +62,7 @@ import { useStageResize } from '@/hooks/useStageResize';
 import { EditorIcon } from '@/components/EditorIcon';
 import { PlayheadReadout } from '@/components/PlayheadReadout';
 import { AlignControls, AlignmentGuides, ViewportRulersFrame } from '@/components/CanvasWorkspace';
-import { useEditorStore } from '@/store/editor-store';
+import { selectSelectedFeedRow, useEditorStore } from '@/store/editor-store';
 const renderLayerRule = (layer: Record<string, unknown>) => {
   if (isHeadlineLayer(layer) || isBackgroundLayer(layer)) return '';
   const base = layer.base || {};
@@ -142,7 +142,7 @@ export function PreviewPane() {
   const includeRoundelFrame = useEditorStore((s) => s.includeRoundelFrame);
   const frameCount = useEditorStore((s) => s.frameCount);
   const roundelMode = useEditorStore((s) => s.roundelMode);
-  const selectedFeedRow = useEditorStore((s) => s.selectedFeedRow);
+  const row = useEditorStore(selectSelectedFeedRow);
   const canvasZoom = useEditorStore((s) => s.canvasZoom);
   const resizeMode = useEditorStore((s) => s.resizeMode);
   const selectTarget = useEditorStore((s) => s.selectTarget);
@@ -203,7 +203,6 @@ export function PreviewPane() {
     [activeScopes, document, offerCount, selectedLayerId, selectedTargetId, selectedTargetIds, size],
   );
 
-  const row = selectedFeedRow();
   const activeBeats = useMemo(() => beatsForScopes(document, activeScopes), [activeScopes, document]);
   const seconds = document?.clock?.durationS ? (percent / 100) * document.clock.durationS : 0;
 

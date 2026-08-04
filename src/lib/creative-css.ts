@@ -35,9 +35,20 @@ export const selectorForClassRule = (cssClass: string) => {
   return `.${cssClass}`;
 };
 
+/** `offers-0.cta-rect` → `.offers-0.cta-rect`; plain scopes stay `.cta-rect`. */
+export const selectorForVariantScope = (scope: unknown) => {
+  const parts = String(scope || '')
+    .split('.')
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (!parts.length) return '';
+  return parts.map((part) => `.${part}`).join('');
+};
+
 export const selectorForVariantRule = (rule: Record<string, unknown>) => {
   const base = selectorForClassRule(String(rule.cssClass || rule.layerId || ''));
-  return `.${rule.scope} ${base}`;
+  const scopeSelector = selectorForVariantScope(rule.scope);
+  return scopeSelector ? `${scopeSelector} ${base}` : base;
 };
 
 export const declarationsForProps = (props: Record<string, unknown> = {}) => (

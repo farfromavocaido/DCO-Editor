@@ -33,6 +33,10 @@ wheels/
 /output/
 /site/
 
+# DCO visual QA harness (canonical-agency shell + screenshots)
+/.qa-work/
+/qa-output/
+
 # stale pre-flattening build dir (repo was flattened to root)
 /editor-app/
 

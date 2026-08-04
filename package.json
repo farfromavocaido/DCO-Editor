@@ -9,7 +9,11 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "export:preview-site": "tsx --tsconfig tsconfig.json scripts/export-client-preview-site.ts"
+    "export:preview-site": "tsx --tsconfig tsconfig.json scripts/export-client-preview-site.ts",
+    "qa:dco": "tsx --tsconfig tsconfig.json scripts/qa-dco/run.ts",
+    "qa:dco:export": "tsx --tsconfig tsconfig.json scripts/qa-dco/export-shell.ts",
+    "qa:dco:holds": "tsx --tsconfig tsconfig.json scripts/qa-dco/hold-samples.ts",
+    "qa:dco:settled": "tsx --tsconfig tsconfig.json scripts/qa-dco/settled-sheets.ts"
   },
   "dependencies": {
     "js-beautify": "^1.15.4",
@@ -29,6 +33,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "jsdom": "^29.1.1",
+    "playwright": "^1.54.2",
+    "sharp": "^0.34.3",
     "tsx": "^4.20.3",
     "typescript": "^5",
     "vitest": "^4.1.8"

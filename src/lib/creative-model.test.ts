@@ -17,6 +17,7 @@ import {
   resolveHeadlineLayoutValues,
   headlineOfferLayoutStatus,
   moveCreativeLayerToZIndex,
+  normalizeOffers0CtaRules,
   reorderCreativeLayerZ,
   updateCreativeLayerBase,
   updateCreativeLayerClip,
@@ -643,7 +644,7 @@ test('merges active variant rules in document order and writes to the last match
   assert.equal(next.sizes['300x250'].variantRules[1].props.top, 22);
 });
 
-test('offers-0 CTA variant wins over cta-rect for values and writes', () => {
+test('offers-0 CTA uses independent compound shape rules, not shared cta-rect/base', () => {
   const doc = {
     version: 1,
     sizes: {
@@ -658,6 +659,7 @@ test('offers-0 CTA variant wins over cta-rect for values and writes', () => {
               top: 100,
               width: 80,
               height: 80,
+              borderRadius: '50%',
               backgroundColor: 'rgb(0, 41, 117)',
               cssClass: 'cta',
             },
@@ -671,15 +673,39 @@ test('offers-0 CTA variant wins over cta-rect for values and writes', () => {
             scope: 'cta-rect',
             layerId: 'cta',
             cssClass: 'cta',
-            props: { left: 90, top: 112, width: 120, height: 36 },
+            props: { left: 90, top: 112, width: 120, height: 36, borderRadius: 4 },
             editable: true,
           },
           {
-            id: 'offers-0|cta',
-            scope: 'offers-0',
+            id: 'offers-0.cta-rect|cta',
+            scope: 'offers-0.cta-rect',
             layerId: 'cta',
             cssClass: 'cta',
-            props: { left: 18, top: 107, backgroundColor: 'rgb(0, 229, 165)' },
+            props: {
+              left: 18,
+              top: 107,
+              width: 130,
+              height: 34,
+              borderRadius: 4,
+              backgroundColor: 'rgb(0, 229, 165)',
+              color: 'rgb(0, 41, 117)',
+            },
+            editable: true,
+          },
+          {
+            id: 'offers-0.cta-roundel|cta',
+            scope: 'offers-0.cta-roundel',
+            layerId: 'cta',
+            cssClass: 'cta',
+            props: {
+              left: 40,
+              top: 90,
+              width: 80,
+              height: 80,
+              borderRadius: '50%',
+              backgroundColor: 'rgb(0, 229, 165)',
+              color: 'rgb(0, 41, 117)',
+            },
             editable: true,
           },
         ],
@@ -687,17 +713,94 @@ test('offers-0 CTA variant wins over cta-rect for values and writes', () => {
     },
   };
 
-  const scopes = ['offers-0', 'tc-solo', 'cta-rect', 'frames-3'];
-  const target = findCreativeTarget(doc, '300x250', 'cta', scopes);
-  assert.equal(target.values.left, 18);
-  assert.equal(target.values.top, 107);
-  assert.equal(target.values.width, 120);
-  assert.equal(target.values.backgroundColor, 'rgb(0, 229, 165)');
-  assert.equal(target.writeSource.ruleId, 'offers-0|cta');
+  const rectScopes = ['offers-0', 'tc-solo', 'cta-rect', 'frames-3'];
+  const rectTarget = findCreativeTarget(doc, '300x250', 'cta', rectScopes);
+  assert.equal(rectTarget.values.left, 18);
+  assert.equal(rectTarget.values.width, 130);
+  assert.equal(rectTarget.writeSource.ruleId, 'offers-0.cta-rect|cta');
 
-  const next = updateCreativeTargetValue(doc, '300x250', 'cta', scopes, 'top', 99);
-  assert.equal(next.sizes['300x250'].variantRules[0].props.top, 112);
-  assert.equal(next.sizes['300x250'].variantRules[1].props.top, 99);
+  const movedRect = updateCreativeTargetValue(doc, '300x250', 'cta', rectScopes, 'left', 22);
+  assert.equal(movedRect.sizes['300x250'].variantRules[0].props.left, 90);
+  assert.equal(movedRect.sizes['300x250'].variantRules[1].props.left, 22);
+  assert.equal(movedRect.sizes['300x250'].variantRules[2].props.left, 40);
+
+  const roundScopes = ['offers-0', 'cta-roundel', 'frames-3'];
+  const roundTarget = findCreativeTarget(doc, '300x250', 'cta', roundScopes);
+  assert.equal(roundTarget.values.left, 40);
+  assert.equal(roundTarget.values.width, 80);
+  assert.equal(roundTarget.writeSource.ruleId, 'offers-0.cta-roundel|cta');
+
+  const movedRound = updateCreativeTargetValue(doc, '300x250', 'cta', roundScopes, 'left', 55);
+  assert.equal(movedRound.sizes['300x250'].variantRules[1].props.left, 18);
+  assert.equal(movedRound.sizes['300x250'].variantRules[2].props.left, 55);
+  assert.equal(movedRound.sizes['300x250'].layers[0].base.left, 49);
+});
+
+test('normalizeOffers0CtaRules migrates legacy offers-0|cta into compound shape rules', () => {
+  const doc = {
+    version: 1,
+    sizes: {
+      '320x50': {
+        layers: [
+          {
+            id: 'cta',
+            kind: 'text',
+            base: {
+              left: 172,
+              top: 7,
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              backgroundColor: 'rgb(0, 41, 117)',
+              cssClass: 'cta',
+              fontSize: 11,
+            },
+            clips: [],
+          },
+        ],
+        classRules: [],
+        variantRules: [
+          {
+            id: 'cta-rect|cta',
+            scope: 'cta-rect',
+            layerId: 'cta',
+            cssClass: 'cta',
+            props: { left: 151, top: 25, width: 73, height: 18, borderRadius: 4, fontSize: 10 },
+            editable: true,
+          },
+          {
+            id: 'offers-0|cta',
+            scope: 'offers-0',
+            layerId: 'cta',
+            cssClass: 'cta',
+            props: {
+              left: 106,
+              top: 23,
+              backgroundColor: 'rgb(0, 229, 165)',
+              color: 'rgb(0, 41, 117)',
+            },
+            editable: true,
+          },
+        ],
+      },
+    },
+  };
+
+  normalizeOffers0CtaRules(doc);
+  const rules = doc.sizes['320x50'].variantRules;
+  assert.equal(rules.some((rule) => rule.id === 'offers-0|cta'), false);
+  const rect = rules.find((rule) => rule.scope === 'offers-0.cta-rect');
+  const round = rules.find((rule) => rule.scope === 'offers-0.cta-roundel');
+  assert.ok(rect);
+  assert.ok(round);
+  assert.equal(rect.props.left, 106);
+  assert.equal(rect.props.width, 73);
+  assert.equal(rect.props.height, 18);
+  assert.equal(round.props.left, 106);
+  assert.equal(round.props.width, 56);
+  assert.equal(round.props.borderRadius, '50%');
+  // Multi-offer rect geometry untouched.
+  assert.equal(rules.find((rule) => rule.id === 'cta-rect|cta').props.left, 151);
 });
 
 test('keeps the optional roundel frame as a simple editable circle layer', () => {

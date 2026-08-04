@@ -19,7 +19,8 @@
 // Fit pipeline per element:
 //   1) set white-space (pre-line when wrap, else nowrap)
 //   2) tracking squeeze (offer values)
-//   3) if allowShrink: reduce font-size until width + maxLines fit
+//   3) if allowShrink: reduce font-size until width fits; when wrap is on,
+//      also until the maxLines budget fits (single-line nowrap is width-only)
 //   4) clip leftover overflow; mark data-fit-clipped when still overflowing
 // Modes come from normalizeFitConfig (text-fit-rules.ts). shared: true
 // equalizes final font size across visible members; tracking stays per-box.
@@ -75,6 +76,10 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
   }
 
   function maxTextHeight(element, rule, cs, fontSize) {
+    // Single-line nowrap: authored box height is the frame. Do not clamp
+    // maxHeight to 1×line-height (Museo ink + that clamp shrunk chrome below
+    // the purple selection box while false line-budget shrink hit the floor).
+    if (!rule.wrap) return null;
     var maxLines = Number(rule.maxLines);
     if (!isFinite(maxLines) || maxLines <= 0) return null;
     var lineHeight = lineHeightPx(cs, fontSize);
@@ -92,6 +97,10 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
   }
 
   function exceedsMaxLines(element, rule, cs, fontSize) {
+    // Single-line nowrap shrinks on width only. Range ink for Museo at
+    // line-height:1 often measures ~1.6 line-boxes — treating that as a
+    // maxLines:1 overflow walked every size down to minFontSize.
+    if (!rule.wrap) return false;
     var maxLines = Number(rule.maxLines);
     if (!isFinite(maxLines) || maxLines <= 0) return false;
     var lineHeight = lineHeightPx(cs, fontSize);

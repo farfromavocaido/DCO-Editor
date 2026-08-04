@@ -37,6 +37,15 @@ const installDom = () => {
   return { dom, document };
 };
 
+test('runtime keeps regex escapes intact for digit/whitespace samples', () => {
+  // LAYOUT_OFFERS_SOURCE is a template literal — \\d/\\s must be double-escaped
+  // or the exported ad measures "." alone for "1.5" and packs offer gaps wrong.
+  assert.match(layoutOffersRuntime, /\.replace\(\/\\s\+\//);
+  assert.match(layoutOffersRuntime, /\.replace\(\/\[\^\\d\]\//);
+  assert.doesNotMatch(layoutOffersRuntime, /\.replace\(\/s\+\//);
+  assert.doesNotMatch(layoutOffersRuntime, /\.replace\(\/\[\^d\.?\]\//);
+});
+
 test('runtime encodes ink-first helpers and per-family plus anchors', () => {
   assert.match(layoutOffersRuntime, /function resolvePlusLayoutMode\(/);
   assert.match(layoutOffersRuntime, /data-offer-plus-layout/);

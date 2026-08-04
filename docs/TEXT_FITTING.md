@@ -13,7 +13,7 @@ Authored **modes** (not a draggable op-order):
 
 | Mode | Behaviour |
 |---|---|
-| **shrink** | Shrink type until copy fits. `maxLines` ≤ 1 (or unset) → single line, no wrap. `maxLines` ≥ 2 → wrap up to that many lines, then shrink. |
+| **shrink** | Shrink type until copy fits. `maxLines` ≤ 1 (or unset) → single line, no wrap, **width-only** shrink. `maxLines` ≥ 2 → wrap up to that many lines, then shrink on width + line budget. |
 | **wrap** | Keep the designed font size; wrap to `maxLines`; never shrink. |
 | **clip** / **truncate** | No wrap or shrink — hide overflow only. |
 
@@ -31,7 +31,12 @@ Pipeline per element:
    neighbour. The inspector Typography panel shows the tightest effective
    tracking for the class next to the auto-fitted font size.
 3. **Shrink** — when allowed: 0.5px steps to a floor of
-   `max(minFontSize, base × minFontSizeRatio)`, until width + line budget fit.
+   `max(minFontSize, base × minFontSizeRatio)`. Single-line nowrap shrinks on
+   **width only** (Museo Range ink often measures taller than `1 × line-height`
+   at `line-height: 1`; that must not count as a `maxLines: 1` overflow).
+   When wrap is on, shrink continues until width **and** the maxLines budget
+   fit. Authored box height is not replaced by a `1 × line-height` max-height
+   clamp on the nowrap path.
 4. **Clip leftover** — if still overflowing at the floor, overflow is hidden and
    the element is marked `data-fit-clipped` (editor shows a small red dot;
    hover for width / max-lines reason).

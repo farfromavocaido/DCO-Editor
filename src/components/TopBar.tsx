@@ -371,6 +371,16 @@ export function TopBar() {
             <EditorIcon name="save" />
           </button>
         </ToolbarTip>
+
+        <ToolbarTip tip="Live agency QA — settled holds in canonical-agency HTML">
+          <a
+            className="icon-button icon-button-compact"
+            href="/qa"
+            aria-label="Open agency QA"
+          >
+            QA
+          </a>
+        </ToolbarTip>
       </div>
     </header>
   );

@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 import { backgroundImageFieldDefinitions, backgroundImageFieldName, backgroundFieldsFromRow } from '@/lib/feed-background';
+import { sizeTextFieldDefinitions } from '@/lib/feed-size-text';
 import { readCreativeDocument } from '../creative-document';
 import {
   FEED_SCHEMA_FIELDS,
@@ -80,6 +81,9 @@ test('defines metadata for every existing Studio profile field', () => {
     'include_roundel_frame_bool',
     'roundel_text_text',
     'roundel_value_text',
+    'include_heading4_enum',
+    'background_image_label',
+    ...sizeTextFieldDefinitions().map((field) => field.name),
     ...backgroundImageFieldDefinitions().map((field) => field.name),
   ]);
   assert.deepEqual(FEED_SCHEMA_FIELDS.find((field) => field.name === 'tc_type_enum').options, ['tcs_only', 'tcs_units']);
@@ -92,8 +96,8 @@ test('reads profile name, rows, and exposes the background image field', async (
   const payload = await readFeedSchema(file);
 
   assert.equal(payload.profileName, 'SSE_DCO_Offers');
-  assert.equal(payload.studioProfileId, 10960467);
-  assert.equal(payload.studioProfileElement, 'SSE_ROI_Delivery');
+  assert.equal(payload.studioProfileId, 10964545);
+  assert.equal(payload.studioProfileElement, 'SSE_DCO_ROI_Delivery');
   assert.equal(payload.rows.length, 1);
   assert.equal(payload.rows[0].background_image_url_300x250.Url, 'https://example.com/bg.jpg');
   assert.equal(payload.fields.find((field) => field.name === 'background_image_url_728x90').type, 'image');

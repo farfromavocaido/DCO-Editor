@@ -1,11 +1,12 @@
 // @ts-nocheck
 import { backgroundImageUrlForSize, imageFieldUrl } from '@/lib/feed-background';
+import { normalizeFeedLineBreaks } from '@/lib/feed-text';
 import { wrapOfferValueSymbolsHtml } from '@/lib/offer-value-symbols';
 
 export const fieldValue = (value: unknown) => {
   if (value && typeof value === 'object' && 'Url' in value) return (value as { Url?: string }).Url || '';
   if (value === undefined || value === null) return '';
-  return String(value);
+  return normalizeFeedLineBreaks(value);
 };
 
 /**

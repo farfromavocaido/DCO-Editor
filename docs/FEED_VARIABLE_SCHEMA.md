@@ -15,6 +15,8 @@ Each field definition is `{ name, label, type, group, description, ...constraint
 
 `CREATIVE_AD_SIZES` (in `feed-background.ts`) is the canonical size list (`160x600`, `300x250`, `300x600`, `320x50`, `728x90`, `970x250`). Generators that need to vary by size key off it.
 
+**Per-size text overrides:** `sizeTextFieldDefinitions()` in `src/lib/feed-size-text.ts` adds optional multiline columns `heading1_text_{size}` … `heading4_text_{size}` and `tc_units_text_{size}`. Empty override → base field. Live Studio profile: `10964545` / `SSE_DCO_ROI_Delivery` (see `campaign/feed-field-map.json`). Studio `<br>` → `\n` via `normalizeFeedLineBreaks()`. Schema also stores `include_heading4_enum` and `background_image_label` for parity. Agency catalogue: [FEED_FIELD_SCHEMA_PROPOSAL.md](./FEED_FIELD_SCHEMA_PROPOSAL.md).
+
 ## Profile
 
 | Property | Value |

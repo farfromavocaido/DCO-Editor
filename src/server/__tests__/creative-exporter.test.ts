@@ -96,6 +96,8 @@ test('exports custom Studio-ready HTML without GWD custom elements', async () =>
   assert.match(html, /https:\/\/s0\.2mdn\.net\/ads\/studio\/Enabler\.js/);
   assert.match(html, /Enabler\.exit\('Main Exit'/);
   assert.match(html, /function applyRuntimeState/);
+  assert.match(html, /function applySizeTextOverrides/);
+  assert.match(html, /function remapStudioRowKeys/);
   assert.match(html, /@keyframes logo-act3-logo-act3-fade/);
   assert.doesNotMatch(html, /<gwd-/);
   assert.doesNotMatch(html, /groups_runtime/);
@@ -362,8 +364,8 @@ test('builds a base agency package with one production html file per size', asyn
   assert.match(html, /data-dco-field="heading1_text"/);
   assert.match(html, /data-dco-field="background_image_url_728x90"/);
   assert.match(html, /id="bg-image" src="" data-packaged-src="" data-dco-field="background_image_url_728x90"/);
-  assert.match(html, /Enabler\.setProfileId\(10960467\)/);
-  assert.match(html, /devDynamicContent\.SSE_ROI_Delivery/);
+  assert.match(html, /Enabler\.setProfileId\(10964545\)/);
+  assert.match(html, /devDynamicContent\.SSE_DCO_ROI_Delivery/);
   assert.match(html, /background_image_url_728x90\.Url/);
   assert.match(html, /728x90_hiker\.jpg/);
   assert.match(html, /Enabler\.setDevDynamicContent\(devDynamicContent\)/);
@@ -374,11 +376,18 @@ test('builds a base agency package with one production html file per size', asyn
   assert.doesNotMatch(html, /SSE_DCO_PREVIEW_STATE/);
   assert.doesNotMatch(html, /triple_elec15_gas30_bill100/);
   assert.match(mapping, /heading1_text\ttext/);
+  assert.match(mapping, /heading1_text_160x600\ttext/);
+  assert.match(mapping, /tc_units_text_320x50\ttext/);
+  assert.match(mapping, /include_heading4_enum\tboolean/);
+  assert.match(mapping, /background_image_label\ttext/);
+  assert.match(html, /replace\(\/<br\\s\*\\\/\?>\/gi/);
   assert.match(mapping, /offer_count_num\tinteger\t0-3/);
   assert.match(mapping, /tc_type_enum\tenum\ttcs_only \| tcs_units/);
   assert.match(mapping, /cta_type_enum\tenum\troundel \| rectangle/);
   assert.match(mapping, /background_image_url_300x250\timage/);
   assert.match(mapping, /background_image_url_728x90\timage/);
+  assert.match(html, /function applySizeTextOverrides/);
+  assert.match(html, /function remapStudioRowKeys/);
   assert.doesNotMatch(mapping, legacyFieldPattern(['Headline', 'Act1']));
   assert.doesNotMatch(mapping, legacyFieldPattern(['Offer', 'Count']));
   assert.doesNotMatch(mapping, legacyFieldPattern(['TC', 'Mode']));

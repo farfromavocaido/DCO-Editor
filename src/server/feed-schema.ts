@@ -1,5 +1,8 @@
 // @ts-nocheck
 import { backgroundImageFieldDefinitions } from '@/lib/feed-background';
+import { remapStudioRowToCanonical } from '@/lib/feed-field-map';
+import { sizeTextFieldDefinitions } from '@/lib/feed-size-text';
+import { normalizeFeedLineBreaks } from '@/lib/feed-text';
 import { readCreativeDocument, writeCreativeDocument } from './creative-document';
 import { normalizeTcTypeEnum } from '@/lib/feed-model';
 
@@ -28,6 +31,10 @@ export const FEED_SCHEMA_FIELDS = [
   { name: 'include_roundel_frame_bool', label: 'Offer roundel frame', type: 'boolean', group: 'Creative State', description: 'Whether the optional Act 3 offer roundel frame is shown.' },
   { name: 'roundel_text_text', label: 'Roundel text', type: 'string', group: 'Copy', description: 'Text shown inside the optional roundel frame.' },
   { name: 'roundel_value_text', label: 'Roundel value', type: 'string', group: 'Copy', description: 'Optional large value shown inside the roundel frame.' },
+  // Studio names this *_enum but serves boolean true/false. Stored for schema parity; runtime does not gate Act 4 on it yet.
+  { name: 'include_heading4_enum', label: 'Include heading 4', type: 'boolean', group: 'Creative State', description: 'Studio flag for Heading 4. Schema parity only — creative timing still follows heading4_text / roundel frame.' },
+  { name: 'background_image_label', label: 'Background label', type: 'string', group: 'Assets', description: 'Studio label for the background set (e.g. diy, hiker). Not used for rendering.' },
+  ...sizeTextFieldDefinitions(),
   ...backgroundImageFieldDefinitions(),
 ] as const;
 
@@ -78,15 +85,17 @@ const coerceField = (field: FeedField, value: unknown) => {
     }
     return normalized;
   }
-  return String(value ?? '');
+  // string + multiline (and any other scalar text): normalize Studio <br> → \n
+  return normalizeFeedLineBreaks(value);
 };
 
 export const validateFeedRows = (rows: Record<string, unknown>[]) => rows.map((row, index) => {
+  const remapped = remapStudioRowToCanonical(row);
   const out: Record<string, unknown> = {};
   for (const field of FEED_SCHEMA_FIELDS) {
-    out[field.name] = coerceField(field, row[field.name]);
+    out[field.name] = coerceField(field, remapped[field.name]);
   }
-  if (!Object.prototype.hasOwnProperty.call(row, '_id')) out._id = index;
+  if (!Object.prototype.hasOwnProperty.call(remapped, '_id')) out._id = index;
   return out;
 });
 
@@ -99,9 +108,15 @@ const normalizeFeedFields = (fields) => fields.map((field) => (
 export const readFeedSchema = async (documentPath?: string) => {
   const document = await readCreativeDocument(documentPath);
   const feed = document.feed || {};
-  const rawFields = Array.isArray(feed.fields) && feed.fields.length
-    ? feed.fields
-    : FEED_SCHEMA_FIELDS.map((field) => ({ ...field }));
+  // FEED_SCHEMA_FIELDS is source of truth (includes provisional size-text overrides).
+  // Overlay document field metadata when present so legacy label tweaks still apply.
+  const fromDocument = Array.isArray(feed.fields) && feed.fields.length
+    ? new Map(feed.fields.map((field) => [field.name, field]))
+    : new Map();
+  const rawFields = FEED_SCHEMA_FIELDS.map((field) => {
+    const overlay = fromDocument.get(field.name);
+    return overlay ? { ...field, ...overlay, name: field.name, type: field.type } : { ...field };
+  });
   return {
     profileName: feed.profileName,
     studioProfileId: feed.studioProfileId,

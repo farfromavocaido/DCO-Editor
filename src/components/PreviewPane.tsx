@@ -54,6 +54,7 @@ import {
 import { resizeHandlesForSelection, selectionChromeKind } from '@/lib/selection-chrome';
 import { activeFrameScope, beatsForScopes } from '@/lib/timing-profiles';
 import { activeScopesFromControls } from '@/lib/feed-model';
+import { applySizeTextOverridesToRow } from '@/lib/feed-size-text';
 import {
   offerTargetAtPoint as resolveOfferTargetAtPoint,
   shouldBypassOfferCapture,
@@ -143,6 +144,7 @@ export function PreviewPane() {
   const frameCount = useEditorStore((s) => s.frameCount);
   const roundelMode = useEditorStore((s) => s.roundelMode);
   const row = useEditorStore(selectSelectedFeedRow);
+  const displayRow = useMemo(() => applySizeTextOverridesToRow(row, size), [row, size]);
   const canvasZoom = useEditorStore((s) => s.canvasZoom);
   const resizeMode = useEditorStore((s) => s.resizeMode);
   const selectTarget = useEditorStore((s) => s.selectTarget);
@@ -249,7 +251,7 @@ export function PreviewPane() {
       cancelled = true;
       window.cancelAnimationFrame(frame);
     };
-  }, [activeScopes, applyPreviewTextFitting, document, offerCount, row, size]);
+  }, [activeScopes, applyPreviewTextFitting, document, offerCount, displayRow, size]);
 
   const startSelectionDrag = useCallback((event: React.PointerEvent, deepestTargetId: string) => {
     if (event.button !== 0) return;
@@ -640,7 +642,7 @@ export function PreviewPane() {
   const frameStyle = (layer: Record<string, unknown>, targetId = layer.id) => {
     const profile = activeFrameScope(activeScopes);
     const keyframes = layer.id?.startsWith('headline-act')
-      ? compileHeadlineKeyframes(layer, sizeCreative?.layers || [], row, profile, activeBeats)
+      ? compileHeadlineKeyframes(layer, sizeCreative?.layers || [], displayRow, profile, activeBeats)
       : compileAnimationClips(clipsForProfile(layer.clips || [], profile), activeBeats);
     const frame = frameAtPercent(keyframes, percent);
     const transform = [
@@ -820,12 +822,12 @@ export function PreviewPane() {
       /terms|unit-rate/.test(layer.id) ? 'sse-text sse-bottom-line' : '',
     ].filter(Boolean).join(' ');
     const boundField = layer.binding?.field;
-    const text = boundField ? fieldValue(row[boundField])
-      : layer.id === 'headline-act1' ? fieldValue(row.heading1_text)
-        : layer.id === 'headline-act2' ? fieldValue(row.heading2_text)
-          : layer.id === 'headline-act3' ? fieldValue(row.heading3_text)
-            : layer.id === 'headline-act4' ? headlineAct4DisplayText(row, includeRoundelFrame)
-            : layer.id === 'cta' ? fieldValue(row.cta_text)
+    const text = boundField ? fieldValue(displayRow[boundField])
+      : layer.id === 'headline-act1' ? fieldValue(displayRow.heading1_text)
+        : layer.id === 'headline-act2' ? fieldValue(displayRow.heading2_text)
+          : layer.id === 'headline-act3' ? fieldValue(displayRow.heading3_text)
+            : layer.id === 'headline-act4' ? headlineAct4DisplayText(displayRow, includeRoundelFrame)
+            : layer.id === 'cta' ? fieldValue(displayRow.cta_text)
               : '';
     return (
       <Tag

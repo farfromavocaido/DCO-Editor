@@ -26,7 +26,13 @@ import {
   imageFieldUrl,
   studioDevBackgroundUrl,
 } from '@/lib/feed-background';
+import { studioToCanonicalFieldMap } from '@/lib/feed-field-map';
 import { activeScopesFromControls, clampOfferCount, controlsFromFeedRow } from '@/lib/feed-model';
+import {
+  SIZE_OVERRIDABLE_TEXT_FIELDS,
+  sizeTextFieldDefinitions,
+  textFieldForSize,
+} from '@/lib/feed-size-text';
 import { visibilityForLayer } from '@/lib/offer-interaction-model';
 import { layoutOffersRuntime } from '@/lib/offer-layout';
 import {
@@ -424,6 +430,14 @@ const dynamicFieldMapping = () => [
   ['include_roundel_frame_bool', 'boolean', 'true | false', 'Show optional roundel frame; false keeps the three-act timing'],
   ['roundel_text_text', 'text', '', 'Optional roundel frame copy'],
   ['roundel_value_text', 'text', '', 'Optional large roundel value'],
+  ['include_heading4_enum', 'boolean', 'true | false', 'Studio Heading 4 flag (schema parity; not used for timing yet)'],
+  ['background_image_label', 'text', '', 'Studio background set label'],
+  ...sizeTextFieldDefinitions().map((field) => [
+    field.name,
+    'text',
+    '',
+    field.description,
+  ] as const),
   ...backgroundImageFieldDefinitions().map((field) => [
     field.name,
     'image',
@@ -457,6 +471,9 @@ const STUDIO_DEV_DYNAMIC_SCALAR_FIELDS = [
   'include_roundel_frame_bool',
   'roundel_text_text',
   'roundel_value_text',
+  'include_heading4_enum',
+  'background_image_label',
+  ...sizeTextFieldDefinitions().map((field) => field.name),
 ] as const;
 
 const studioDevDynamicLiteral = (fieldName: string, value: unknown) => {
@@ -470,8 +487,8 @@ export const renderStudioDynamicContentScript = (
   sampleRow: Record<string, unknown> = {},
   options: { backgroundUrlForSize?: (size: string) => string } = {},
 ) => {
-  const profileId = Number(document.feed?.studioProfileId || 10960467);
-  const profileElement = String(document.feed?.studioProfileElement || 'SSE_ROI_Delivery');
+  const profileId = Number(document.feed?.studioProfileId || 10964545);
+  const profileElement = String(document.feed?.studioProfileElement || 'SSE_DCO_ROI_Delivery');
   const row = { ...(document.feed?.sampleRows?.[0] || {}), ...sampleRow };
   const lines = [
     '    <script type="text/javascript">',
@@ -666,14 +683,18 @@ const sampleRowForDocument = (document: Record<string, unknown>) => (
   || {}
 );
 
-const textForLayerFromRow = (layerId: string, row: Record<string, unknown>) => {
-  if (layerId === 'headline-act1') return String(row.heading1_text || '');
-  if (layerId === 'headline-act2') return String(row.heading2_text || '');
-  if (layerId === 'headline-act3') return String(row.heading3_text || '');
-  if (layerId === 'headline-act4') return String(row.heading4_text || '');
+const textForLayerFromRow = (
+  layerId: string,
+  row: Record<string, unknown>,
+  size: string | null | undefined = '',
+) => {
+  if (layerId === 'headline-act1') return textFieldForSize(row, 'heading1_text', size);
+  if (layerId === 'headline-act2') return textFieldForSize(row, 'heading2_text', size);
+  if (layerId === 'headline-act3') return textFieldForSize(row, 'heading3_text', size);
+  if (layerId === 'headline-act4') return textFieldForSize(row, 'heading4_text', size);
   if (layerId === 'cta') return String(row.cta_text || '');
   if (layerId === 'terms-prices' || layerId === 'terms-solo') return String(row.tc_terms_text || '');
-  if (layerId === 'unit-rate-prices') return String(row.tc_units_text || '');
+  if (layerId === 'unit-rate-prices') return textFieldForSize(row, 'tc_units_text', size);
   if (layerId === 'roundel-copy') return String(row.roundel_text_text || '');
   if (layerId === 'roundel-value') return String(row.roundel_value_text || '');
   return '';
@@ -772,7 +793,7 @@ const renderOutlinedLayer = async (
   if (isGradientLayer(layer) || isBlurLayer(layer)) {
     return `          <div class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}"${positionAttr}></div>`;
   }
-  const text = textForLayerFromRow(String(layer.id), row);
+  const text = textForLayerFromRow(String(layer.id), row, size);
   const svg = await outlinedSvgMarkup({
     document,
     size,
@@ -1028,7 +1049,8 @@ const runtimeScript = (
 
         function fieldValue(value) {
           if (value === undefined || value === null) return '';
-          return String(value);
+          // Studio sometimes encodes breaks as <br>; creative uses textContent + \\n.
+          return String(value).replace(/<br\\s*\\/?>/gi, '\\n');
         }
 
         function imageFieldValue(value) {
@@ -1048,8 +1070,25 @@ const runtimeScript = (
           return imageFieldValue(data.background_image_url);
         }
 
-        function normalizeProfileRow(row) {
+        function remapStudioRowKeys(row) {
           row = row || {};
+          var aliases = ${JSON.stringify(studioToCanonicalFieldMap())};
+          var out = {};
+          for (var key in row) {
+            if (!Object.prototype.hasOwnProperty.call(row, key)) continue;
+            out[key] = row[key];
+          }
+          Object.keys(aliases).forEach(function(studioName) {
+            var canonical = aliases[studioName];
+            if (!Object.prototype.hasOwnProperty.call(row, studioName)) return;
+            if (Object.prototype.hasOwnProperty.call(row, canonical)) return;
+            out[canonical] = row[studioName];
+          });
+          return out;
+        }
+
+        function normalizeProfileRow(row) {
+          row = remapStudioRowKeys(row || {});
           var out = {};
           [
             'heading1_text', 'heading2_text', 'heading3_text', 'heading4_text',
@@ -1060,15 +1099,30 @@ const runtimeScript = (
             'tc_type_enum', 'tc_terms_text', 'tc_units_text',
             'cta_type_enum', 'cta_text',
             'include_roundel_frame_bool', 'include_roundel_frame',
-            'roundel_text_text', 'roundel_value_text'
+            'roundel_text_text', 'roundel_value_text',
+            'include_heading4_enum', 'background_image_label'
           ].forEach(function(key) {
             out[key] = fieldValue(row[key]);
+          });
+          ${JSON.stringify([...SIZE_OVERRIDABLE_TEXT_FIELDS])}.forEach(function(base) {
+            ${JSON.stringify([...CREATIVE_AD_SIZES])}.forEach(function(size) {
+              var key = base + '_' + size;
+              out[key] = fieldValue(row[key]);
+            });
           });
           out.background_image_url = imageFieldValue(row.background_image_url);
           ${JSON.stringify(CREATIVE_AD_SIZES)}.forEach(function(size) {
             out[backgroundFieldNameForSize(size)] = imageFieldValue(row[backgroundFieldNameForSize(size)]);
           });
           return out;
+        }
+
+        function applySizeTextOverrides(data, size) {
+          ${JSON.stringify([...SIZE_OVERRIDABLE_TEXT_FIELDS])}.forEach(function(base) {
+            var sized = fieldValue(data[base + '_' + size]);
+            if (sized !== '') data[base] = sized;
+          });
+          return data;
         }
 
         function deriveOfferCount(data) {
@@ -1187,6 +1241,8 @@ const runtimeScript = (
           root = root || document.getElementById('page-content');
           if (!root) return;
           var data = normalizeProfileRow(row);
+          var size = root.getAttribute('data-size') || '';
+          applySizeTextOverrides(data, size);
           var includeRoundel = booleanValue(data.include_roundel_frame_bool)
             || booleanValue(data.include_roundel_frame);
           root.classList.remove(

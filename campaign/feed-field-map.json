@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "updated": "2026-08-12",
+  "notes": "Studio profile 10964545 / SSE_DCO_ROI_Delivery. Override field names match creative canonical names — studioToCanonical stays empty. Empty size-override cells fall back to the base field. Studio may encode line breaks as <br>; creative normalizes to \\n on read.",
+  "studioProfileId": 10964545,
+  "studioProfileElement": "SSE_DCO_ROI_Delivery",
+  "sizeOverridableTextFields": [
+    "heading1_text",
+    "heading2_text",
+    "heading3_text",
+    "heading4_text",
+    "tc_units_text"
+  ],
+  "sizes": [
+    "160x600",
+    "300x250",
+    "300x600",
+    "320x50",
+    "728x90",
+    "970x250"
+  ],
+  "studioToCanonical": {}
+}

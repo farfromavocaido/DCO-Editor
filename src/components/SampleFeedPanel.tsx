@@ -4,6 +4,10 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { fieldInputValue, rowLabel } from '@/lib/feed-model';
+import {
+  SIZE_OVERRIDABLE_TEXT_FIELDS,
+  sizeOverrideFieldNamesForSize,
+} from '@/lib/feed-size-text';
 import { selectSelectedFeedRow, useEditorStore } from '@/store/editor-store';
 
 type SampleFeedPanelProps = {
@@ -46,6 +50,13 @@ const STRUCTURED_FIELD_NAMES = new Set([
   ...CTA_FIELD_NAMES,
 ]);
 
+/** `{base}_{WxH}` size-override columns — edited in the Size overrides section. */
+const isSizeOverrideFieldName = (name: string) => (
+  SIZE_OVERRIDABLE_TEXT_FIELDS.some((base) => (
+    name.startsWith(`${base}_`) && /\d+x\d+$/.test(name.slice(base.length + 1))
+  ))
+);
+
 function fieldByName(fields, name) {
   return fields.find((field) => field.name === name) || null;
 }
@@ -56,11 +67,13 @@ function textareaRowsFor(value) {
 
 export function SampleFeedPanel({ ensureOpen }: SampleFeedPanelProps) {
   const [overallOpen, setOverallOpen] = useState(false);
+  const [sizeOverridesOpen, setSizeOverridesOpen] = useState(false);
   const feedFields = useEditorStore((s) => s.feedFields);
   const feedDraft = useEditorStore((s) => s.feedDraft);
   const focusFeedFieldRequest = useEditorStore((s) => s.focusFeedFieldRequest);
   const clearFocusFeedFieldRequest = useEditorStore((s) => s.clearFocusFeedFieldRequest);
   const row = useEditorStore(selectSelectedFeedRow);
+  const size = useEditorStore((s) => s.size);
   const setFeedRowIndex = useEditorStore((s) => s.setFeedRowIndex);
   const updateSelectedFeedField = useEditorStore((s) => s.updateSelectedFeedField);
   const setStatus = useEditorStore((s) => s.setStatus);
@@ -83,6 +96,9 @@ export function SampleFeedPanel({ ensureOpen }: SampleFeedPanelProps) {
     ensureOpen?.();
     if (OVERALL_FIELD_SET.has(fieldName)) {
       setOverallOpen(true);
+    }
+    if (isSizeOverrideFieldName(fieldName)) {
+      setSizeOverridesOpen(true);
     }
     const focus = () => {
       const node = globalThis.document?.querySelector(`[data-feed-field="${CSS.escape(fieldName)}"]`);
@@ -336,10 +352,44 @@ export function SampleFeedPanel({ ensureOpen }: SampleFeedPanelProps) {
         {fields.cta.map((field) => renderControl(field))}
       </section>
 
+      <div className="sample-divider" role="separator" />
+
+      <section className={`sample-overall ${sizeOverridesOpen ? 'is-open' : 'is-collapsed'}`}>
+        <button
+          type="button"
+          className="sample-overall-toggle"
+          onClick={() => setSizeOverridesOpen((open) => !open)}
+          aria-expanded={sizeOverridesOpen}
+        >
+          <span>Size overrides ({size || '—'})</span>
+          <span aria-hidden="true">{sizeOverridesOpen ? '−' : '+'}</span>
+        </button>
+        {sizeOverridesOpen ? (
+          <div className="sample-overall-body">
+            <p style={{ margin: '0 0 8px', opacity: 0.7, fontSize: 12, lineHeight: 1.35 }}>
+              Blank = use the base headline / unit-rate field. Only the active size is shown.
+            </p>
+            {sizeOverrideFieldNamesForSize(size || '').map((fieldName) => {
+              const field = fields.map.get(fieldName) || {
+                name: fieldName,
+                label: fieldName,
+                type: 'multiline',
+              };
+              return (
+                <div key={fieldName}>
+                  {renderControl(field)}
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
+      </section>
+
       {/* Keep unknown/extra Creative State·Offers·Copy fields reachable if schema grows. */}
       {feedFields
         .filter((field) => ['Creative State', 'Offers', 'Copy'].includes(field.group)
-          && !STRUCTURED_FIELD_NAMES.has(field.name))
+          && !STRUCTURED_FIELD_NAMES.has(field.name)
+          && !isSizeOverrideFieldName(field.name))
         .map((field) => renderControl(field))}
     </div>
   );

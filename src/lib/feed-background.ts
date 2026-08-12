@@ -53,7 +53,7 @@ export const backgroundFieldsFromRow = (row: Record<string, unknown> = {}) => {
   return out;
 };
 
-/** Agency Studio dev-sample backgrounds (Profile 10960467 / hiker set). Used in export snippets when feed Url is blank. */
+/** Agency Studio dev-sample backgrounds (legacy hiker CDN set). Used in export snippets when feed Url is blank. */
 export const STUDIO_DEV_SAMPLE_BACKGROUND_URLS: Partial<Record<CreativeAdSize, string>> = {
   '160x600': 'https://s0.2mdn.net/creatives/assets/5656026/160x600_hiker.jpg',
   '300x250': 'https://s0.2mdn.net/creatives/assets/5656026/300x250_hiker.jpg',

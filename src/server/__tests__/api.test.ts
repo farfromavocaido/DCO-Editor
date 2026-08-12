@@ -218,8 +218,8 @@ test('POST /api/creative/base-package returns the agency upload zip', async () =
   assert.ok(bytes.includes(Buffer.from('mapping.txt')));
   assert.ok(bytes.includes(Buffer.from('background_image_url_728x90')));
   assert.ok(bytes.includes(Buffer.from('ads/728x90/index.html')));
-  assert.ok(bytes.includes(Buffer.from('Enabler.setProfileId(10960467)')));
-  assert.ok(bytes.includes(Buffer.from('devDynamicContent.SSE_ROI_Delivery')));
+  assert.ok(bytes.includes(Buffer.from('Enabler.setProfileId(10964545)')));
+  assert.ok(bytes.includes(Buffer.from('devDynamicContent.SSE_DCO_ROI_Delivery')));
   assert.ok(!bytes.includes(Buffer.from('ads/assets/bg_728x90.jpg')));
   assert.ok(!bytes.includes(Buffer.from('preview-page.html')));
   assert.ok(!bytes.includes(Buffer.from('preview-validator.js')));

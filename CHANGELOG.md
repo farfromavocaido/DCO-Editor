@@ -23,6 +23,7 @@
 
 ### Changed
 
+- **SSE DCO ads loop** — `clock.loop: true` on the DCO document; font/Studio HTML replays the 15s timeline (`infinite`) instead of holding the end frame. Hiker / Keepy Uppy statics stay play-once. Re-export (or Sync Zips) to refresh tracked `outputs/` DCO HTML.
 - **QA capture concurrency default** — `npm run qa:dco` defaults to **12** parallel Playwright pages (`--concurrency` / `-j` still override; `--headed` still forces 1).
 - **QA copy matrix** — long stress aligned to real maxes (ADKOE + `This year's best electricity plan`; subs `OFF ELECTRICITY*` / `OFF YOUR FIRST BILL*`; mixed values `11%` / `£8,888` / `€1,080` for comma vs no-comma spacing; roundel `Saving you up to` / `£8,888`). Short offers: `10.5%` / `OFF GAS*` with `1%` / `OFF ELECTRICITY*` (short value + long sub; uneven pair lengths). See `scripts/qa-dco/copy-matrix.json`.
 - **QA capture run folders** — each `npm run qa:dco` writes `qa-output/YYYYMMDD-HHMMSS/` (local time), moves prior stamps into `qa-output/archive/` (relative review links stay valid), and points `qa-output/latest` at the new run.

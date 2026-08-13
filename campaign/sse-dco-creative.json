@@ -6,6 +6,7 @@
   },
   "clock": {
     "durationS": 15,
+    "loop": true,
     "beats": {
       "start": 0,
       "act1_begin": 11,

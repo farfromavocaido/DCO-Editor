@@ -760,6 +760,26 @@ test('local QA exports embed the packaged Museo so they measure what Studio serv
   assert.doesNotMatch(html, /MuseoSans_700\.otf/);
 });
 
+test('SSE DCO font exports loop the 15s timeline', async () => {
+  const document = await readCreativeDocument();
+  const html = await renderStudioReadyHtml(document, '300x250');
+
+  assert.match(html, /animation: 15s linear 0s infinite normal forwards running /);
+  assert.doesNotMatch(html, /animation: 15s linear 0s 1 normal forwards running /);
+  assert.match(html, /var __headlineMotionIteration = "infinite"/);
+});
+
+test('non-DCO statics still play the timeline once', async () => {
+  const document = await readCreativeDocumentForCampaign('sse-hiker-welcome');
+  const html = await renderStudioReadyHtml(document, '300x250', {
+    renderMode: 'outline',
+    delivery: 'static',
+  });
+
+  assert.match(html, /animation: 15s linear 0s 1 normal forwards running /);
+  assert.doesNotMatch(html, /animation: 15s linear 0s infinite normal forwards running /);
+});
+
 test('holds the motion clock until fonts and offer layout settle', async () => {
   const document = await readCreativeDocument();
   const html = await renderStudioReadyHtml(document, '320x50');

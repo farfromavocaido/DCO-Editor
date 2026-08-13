@@ -89,6 +89,8 @@ Offers-0 layers: `bg-blur` (`kind: "blur"`, `src/lib/blur-layer.ts`) and `headli
 - Clip → keyframe compilation lives in `src/lib/creative-compiler.ts`. Multi-clip
   layers merge raw frames, forward-fill missing channels, then pad to 0%/100%
   (so an opacity-only fadeOut cannot invent early translate motion).
+  `clock.loop: true` (SSE DCO) emits `animation-iteration-count: infinite`;
+  other campaigns play once and hold the end frame.
 - Offer slots micro-stagger via shared beats (`offer1_in` → `offer2_in` →
   `offer3_in`, ~1.1% apart) after `act1_in` so the first headline settles
   first. Pluses share one beat (`plus1_in` === `plus2_in`) just after the

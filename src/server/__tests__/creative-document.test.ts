@@ -31,6 +31,7 @@ test('loads the checked-in SSE DCO creative document', async () => {
 
   assert.equal(document.version, 1);
   assert.equal(document.campaign.id, 'sse-dco');
+  assert.equal(document.clock.loop, true);
   assert.deepEqual(Object.keys(document.sizes).sort(), [
     '160x600',
     '300x250',

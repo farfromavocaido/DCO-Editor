@@ -29,6 +29,9 @@ export const validateCreativeDocument = (document: CreativeDocument) => {
     throw new Error(`campaign.offerPlusLayout must be "auto" or "manual" (got ${String(offerPlusLayout)})`);
   }
   if (!document.clock?.durationS || !document.clock?.beats) throw new Error('Creative document requires clock data');
+  if (document.clock.loop !== undefined && typeof document.clock.loop !== 'boolean') {
+    throw new Error('clock.loop must be a boolean');
+  }
   if (!document.feed?.profileName || !Array.isArray(document.feed?.sampleRows)) {
     throw new Error('Creative document requires feed profile data');
   }

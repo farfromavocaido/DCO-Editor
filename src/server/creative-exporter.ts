@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+import { clockLoops, layerAnimationShorthand } from '@/lib/animation-css';
 import { compileAnimationClips } from '@/lib/creative-compiler';
 import { structuredRuleCss } from '@/lib/creative-css';
 import { clipsForProfile, headlineTransitionRuntimeBlock } from '@/lib/headline-motion';
@@ -638,7 +639,7 @@ const animationCssForLayer = (
   layer: Record<string, unknown>,
   beats: Record<string, number>,
   durationS: number,
-  options: { suffix?: string; selectorPrefix?: string; profile?: string } = {},
+  options: { suffix?: string; selectorPrefix?: string; profile?: string; loop?: boolean } = {},
 ) => {
   const profile = options.profile || 'frames-3';
   if (isBlurLayer(layer) && !blurIsActive(layer.blur)) return '';
@@ -652,7 +653,7 @@ const animationCssForLayer = (
     : `${options.selectorPrefix || ''}.${cssClass}`;
   return `${renderKeyframes(name, keyframes)}
     ${selector} {
-      animation: ${durationS}s linear 0s 1 normal forwards running ${name};
+      animation: ${layerAnimationShorthand(durationS, name, { loop: Boolean(options.loop) })};
     }`;
 };
 
@@ -1025,7 +1026,7 @@ const stateClasses = (row: Record<string, unknown>) => {
 const runtimeScript = (
   fitRules: Array<Record<string, unknown>> = [],
   options: RenderOptions = {},
-  headlineRuntime: { layers?: Array<Record<string, unknown>>; beatsProfiles?: Record<string, Record<string, number>>; durationS?: number } = {},
+  headlineRuntime: { layers?: Array<Record<string, unknown>>; beatsProfiles?: Record<string, Record<string, number>>; durationS?: number; loop?: boolean } = {},
 ) => {
   const includePreviewBridge = options.includePreviewBridge !== false;
   const previewRowFallback = includePreviewBridge
@@ -1150,6 +1151,7 @@ const runtimeScript = (
           headlineRuntime.layers || [],
           headlineRuntime.beatsProfiles || {},
           headlineRuntime.durationS || 15,
+          Boolean(headlineRuntime.loop),
         )}
 
         function bindOfferTexts(data) {
@@ -1341,10 +1343,11 @@ ${includePreviewBridge ? `
 const cssForSize = (document: Record<string, unknown>, size: string, options: RenderOptions = {}) => {
   const sizeCreative = document.sizes[size];
   const duration = document.clock.durationS;
+  const loop = clockLoops(document.clock);
   const defaultBeats = beatsForFrameScope(document, 'frames-3');
   const layerCss = sizeCreative.layers.map((layer) => staticRuleForLayer(layer, defaultBeats)).join('\n\n');
   const defaultAnimationCss = sizeCreative.layers
-    .map((layer) => animationCssForLayer(layer, defaultBeats, duration))
+    .map((layer) => animationCssForLayer(layer, defaultBeats, duration, { loop }))
     .filter(Boolean)
     .join('\n\n');
   // Static frames-3 bakes skip unused frames-4 profile CSS; frames-4 still needs
@@ -1364,6 +1367,7 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
           suffix: scope,
           selectorPrefix: `.${scope} `,
           profile: scope,
+          loop,
         }))
         .filter(Boolean);
     })
@@ -1393,6 +1397,7 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
         suffix: item.suffix,
         selectorPrefix: item.selectorPrefix,
         profile: item.profile,
+        loop,
       }))
       .filter(Boolean))
     .join('\n\n');
@@ -1545,6 +1550,7 @@ export const renderStudioReadyHtml = async (
         'frames-4': beatsForFrameScope(document, 'frames-4'),
       },
       durationS: document.clock.durationS,
+      loop: clockLoops(document.clock),
     });
   const body = await renderBody(document, size, resolvedOptions);
   const title = `${escapeHtml(document.campaign?.name || 'SSE DCO')} ${escapeHtml(size)}`;

@@ -1,5 +1,6 @@
 // @ts-nocheck
 
+import { layerAnimationShorthand } from '@/lib/animation-css';
 import {
   compileAnimationClips,
   resolveTimeRef,
@@ -355,6 +356,7 @@ export const headlineSkipOverrideCss = (
   profile = 'frames-3',
   beats: Record<string, number> = {},
   durationS = 15,
+  loop = false,
 ) => {
   const plan = buildHeadlineMotionPlan(layers, row, profile, beats);
   const blocks: string[] = [];
@@ -366,7 +368,7 @@ export const headlineSkipOverrideCss = (
       blocks.push(`    #${item.layerId} { visibility: hidden !important; animation: none !important; }`);
       continue;
     }
-    blocks.push(`    #${item.layerId} { animation: ${durationS}s linear 0s 1 normal forwards running ${name} !important; }`);
+    blocks.push(`    #${item.layerId} { animation: ${layerAnimationShorthand(durationS, name, { loop, important: true })}; }`);
   }
 
   return blocks.join('\n\n');
@@ -391,12 +393,15 @@ export const headlineTransitionRuntimeBlock = (
   layers: Array<Record<string, unknown>> = [],
   beatsProfiles: Record<string, Record<string, number>> = {},
   durationS = 15,
+  loop = false,
 ) => {
   const headlineLayers = serializeHeadlineMotionLayers(layers);
+  const iteration = loop ? 'infinite' : 1;
   return `
         var __headlineMotionLayers = ${JSON.stringify(headlineLayers)};
         var __headlineMotionBeats = ${JSON.stringify(beatsProfiles)};
         var __headlineMotionDuration = ${Number(durationS) || 15};
+        var __headlineMotionIteration = ${JSON.stringify(iteration)};
 
         function __normalizeHeadlineText(value) {
           return String(value || '').trim();
@@ -670,7 +675,7 @@ export const headlineTransitionRuntimeBlock = (
             if (item.hidden) {
               return block + '\\n#' + item.layerId + ' { visibility: hidden !important; animation: none !important; }';
             }
-            return block + '\\n#' + item.layerId + ' { animation: ' + __headlineMotionDuration + 's linear 0s 1 normal forwards running ' + name + ' !important; }';
+            return block + '\\n#' + item.layerId + ' { animation: ' + __headlineMotionDuration + 's linear 0s ' + __headlineMotionIteration + ' normal forwards running ' + name + ' !important; }';
           }).join('\\n\\n');
           style.textContent = css;
         }`;

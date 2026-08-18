@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { readCreativeDocument } from '../src/server/creative-document';
+import { listDcoMarkets } from '../src/lib/dco-markets';
 import {
   buildClientPreviewPackageEntries,
   type ExportPreviewLatest,
@@ -158,14 +159,23 @@ const exportStaticsPreviewSite = async (latest: ExportPreviewLatest | null) => {
 const main = async () => {
   const document = await readCreativeDocument();
   const latest = await readLatest();
-  let agencyZipHref: string | undefined;
-  if (latest?.dcoZip) {
-    agencyZipHref = latest.dcoZip;
-  } else if (process.env.STRICT_STATICS_EXPORT === '1') {
-    throw new Error(
-      'outputs/latest.json is missing dcoZip. Run Sync Zips in the editor, commit outputs/, then re-export the Pages site.',
-    );
-  } else {
+  const agencyZips = (latest?.dcoZips
+    ? listDcoMarkets()
+      .map((market) => ({
+        id: market.id,
+        label: market.label,
+        href: latest.dcoZips[market.id],
+      }))
+      .filter((zip) => zip.href)
+    : latest?.dcoZip
+      ? [{ id: 'agency', label: 'Agency Zip', href: latest.dcoZip }]
+      : []);
+  if (!agencyZips.length) {
+    if (process.env.STRICT_STATICS_EXPORT === '1') {
+      throw new Error(
+        'outputs/latest.json is missing dcoZip. Run Sync Zips in the editor, commit outputs/, then re-export the Pages site.',
+      );
+    }
     console.warn('outputs/ has no DCO agency zip yet — DCO preview download button omitted');
   }
 
@@ -176,7 +186,7 @@ const main = async () => {
     assetMode: 'cdn',
     inlineSvgs: true,
     cacheBust,
-    ...(agencyZipHref ? { agencyZipHref } : {}),
+    ...(agencyZips.length ? { agencyZips } : {}),
   });
 
   await fs.rm(siteRoot, { recursive: true, force: true });
@@ -199,9 +209,9 @@ const main = async () => {
     throw new Error('Client preview export did not produce preview-page.html');
   }
 
-  if (agencyZipHref && latest?.dcoZip) {
-    const zipSource = path.resolve(outputsRoot, latest.dcoZip);
-    const zipTarget = path.resolve(siteRoot, latest.dcoZip);
+  for (const zip of agencyZips) {
+    const zipSource = path.resolve(outputsRoot, zip.href);
+    const zipTarget = path.resolve(siteRoot, zip.href);
     await fs.mkdir(path.dirname(zipTarget), { recursive: true });
     await fs.copyFile(zipSource, zipTarget);
     totalBytes += (await fs.stat(zipTarget)).size;

@@ -1653,8 +1653,10 @@ export const useEditorStore = create<any>((set, get) => ({
         throw new Error(payload.error || response.statusText || 'Failed to sync zips');
       }
       const zipName = String(payload.latest?.zip || '').split('/').pop() || 'SSE_Statics.zip';
-      const dcoZipName = String(payload.latest?.dcoZip || '').split('/').pop() || 'SSE_DCO_canonical_agency.zip';
-      get().setStatus(`Synced outputs/ (${zipName} + ${dcoZipName}) — commit to publish`);
+      const dcoZipNames = payload.latest?.dcoZips
+        ? Object.values(payload.latest.dcoZips).map((href) => String(href).split('/').pop()).filter(Boolean).join(' + ')
+        : (String(payload.latest?.dcoZip || '').split('/').pop() || 'SSE_DCO_canonical_agency.zip');
+      get().setStatus(`Synced outputs/ (${zipName} + ${dcoZipNames}) — commit to publish`);
       return payload;
     } finally {
       set({

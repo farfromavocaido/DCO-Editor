@@ -45,9 +45,9 @@ When `download: true`, returns a ZIP attachment (static: nested per-size zips; s
 ```
 
 - `campaigns` — only non-DCO ids (`sse-hiker-welcome`, `sse-keepyuppy-welcome`, `sse-keepyuppy-discount`). `document` optional (loaded from disk when omitted). Prefer editor-supplied `presentationSnapshots` for WYSIWYG outline bake.
-- `dcoDocument` optional — SSE DCO creative JSON; when omitted, loaded from disk. Always baked as **Canonical Agency Zip** under `outputs/campaigns/sse-dco/` plus `outputs/downloads/SSE_DCO_canonical_agency_<timestamp>.zip` for the hosted DCO preview download (preview form values do not affect this zip).
-- Replaces `outputs/campaigns/` (loose HTML + assets for Pages `/statics/` preview), writes `outputs/downloads/SSE_Statics_<timestamp>.zip` as `campaigns/{slug}_{size}.zip` units (non-DCO only), the DCO agency zip, and updates `outputs/latest.json` (`campaigns`, `dco`, `zip`, `dcoZip`).
-- Returns `{ ok, latest, written, zipBytes, dcoZipBytes }`.
+- `dcoDocument` optional — SSE DCO creative JSON; when omitted, loaded from disk. Always baked as **two Canonical Agency Zips** (ROI + NIR) under `outputs/campaigns/sse-dco/` and `outputs/campaigns/sse-dco-nir/` plus `outputs/downloads/SSE_DCO_{ROI,NIR}_canonical_agency_<timestamp>.zip`. Preview form values do not affect these zips. Schema is identical; profile id / element / sample row differ.
+- Replaces `outputs/campaigns/` (loose HTML + assets for Pages `/statics/` preview), writes `outputs/downloads/SSE_Statics_<timestamp>.zip` as `campaigns/{slug}_{size}.zip` units (non-DCO only), both DCO agency zips, and updates `outputs/latest.json` (`campaigns`, `dco`, `dcoMarkets`, `zip`, `dcoZip`, `dcoZips`).
+- Returns `{ ok, latest, written, zipBytes, dcoZipBytes }` (`dcoZip` is the ROI zip; `dcoZipBytes` is ROI + NI).
 
 ### `POST /api/creative/{size}/export`
 
@@ -84,7 +84,7 @@ Returns the agency base upload ZIP. Optional body: `{ document, assetMode, rende
 | `packaged` (default) | `ads/{size}/index.html` | Local OTF in ZIP | Files in ZIP | Feed-only (not packaged) |
 | `cdn` | `ads/{size}/index.html` | Studio CDN Museo | Studio CDN (+ plus data URI) | Feed-only (hiker CDN sample fallback) |
 | `embed` (canonical) | `{size}.html` + `assets/` at zip root | Studio CDN Museo only | Inlined data URIs | Relative `assets/bg_*.jpg` (no asset CDNs) |
-| `canonical-agency` | `ads/{size}/index.html` | Studio CDN Museo only | Inlined data URIs | Feed-only (empty; no packaged JPEGs, no hiker sample) |
+| `canonical-agency` | `ads/{size}/index.html` | Studio CDN Museo only | Inlined data URIs | Feed-only (no packaged JPEGs); Studio snippet uses the official market sample URLs |
 
 Download filenames: `{slug}_canonical_zip.zip`, `{slug}_canonical_agency_zip.zip`, `{slug}_base_cdn_zip.zip`, `{slug}_base_zip.zip`.
 

@@ -326,7 +326,10 @@ test('POST /api/creative/export-preview writes tracked outputs for statics + DCO
     const payload = await response.json();
     assert.equal(payload.ok, true);
     assert.ok(payload.latest?.zip?.startsWith('downloads/SSE_Statics_'));
-    assert.ok(payload.latest?.dcoZip?.startsWith('downloads/SSE_DCO_canonical_agency_'));
+    assert.ok(payload.latest?.dcoZip?.startsWith('downloads/SSE_DCO_ROI_canonical_agency_'));
+    assert.ok(payload.latest?.dcoZips?.roi?.startsWith('downloads/SSE_DCO_ROI_canonical_agency_'));
+    assert.ok(payload.latest?.dcoZips?.ni?.startsWith('downloads/SSE_DCO_NIR_canonical_agency_'));
+    assert.equal(payload.latest.dcoMarkets?.length, 2);
     assert.equal(payload.latest.campaigns.length, 3);
     assert.equal(payload.latest.dco?.id, 'sse-dco');
     assert.equal(payload.latest.dco?.packageKind, 'canonical-agency');
@@ -356,6 +359,18 @@ test('POST /api/creative/export-preview writes tracked outputs for statics + DCO
     const dcoZip = await fs.readFile(dcoZipPath);
     assert.equal(dcoZip.subarray(0, 4).toString('binary'), 'PK\u0003\u0004');
     assert.ok(dcoZip.includes(Buffer.from('ads/300x250/index.html')));
+    assert.ok(dcoZip.includes(Buffer.from('SSE_DCO_ROI_Delivery')));
+    const niZipPath = path.resolve(outputsRoot, payload.latest.dcoZips.ni);
+    const niZip = await fs.readFile(niZipPath);
+    assert.equal(niZip.subarray(0, 4).toString('binary'), 'PK\u0003\u0004');
+    assert.ok(niZip.includes(Buffer.from('SSE_DCO_NIR_Delivery')));
+    const niHtml = await fs.readFile(
+      path.resolve(outputsRoot, 'campaigns/sse-dco-nir/ads/300x250/index.html'),
+      'utf8',
+    );
+    assert.match(niHtml, /devDynamicContent\.SSE_DCO_NIR_Delivery/);
+    assert.match(niHtml, /Region = \["NIR"\]/);
+    assert.match(niHtml, /Enabler\.setProfileId\(10962603\)/);
   } finally {
     await fs.rm(path.resolve(outputsRoot, 'campaigns'), { recursive: true, force: true });
     await fs.rm(path.resolve(outputsRoot, 'downloads'), { recursive: true, force: true });

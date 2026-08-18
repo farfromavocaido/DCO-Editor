@@ -18,10 +18,10 @@
 | **Export HTML (font)** | Downloads `{exportSlug}_html.zip`; also writes `output/{exportSlug}_{size}.html` (+ WIP variants) |
 | **Export HTML (SVG outlines)** | Snapshots the editor stage (all sizes) then downloads `{exportSlug}_html_outlines.zip`; Studio-shaped fixed-copy outline HTML (Enabler shell); SVGs inlined; nested `assets/…` backgrounds |
 | **Export for Static** | Same editor snapshot bake → `{exportSlug}_html_static.zip` with `campaigns/{exportSlug}_{size}.zip` units (each: HTML + `assets/<basename>.jpg` for that size); lean outlined HTML (no Enabler/DV360); inactive layers pruned; IAB `clickTag` from `campaign-registry.ts` (Keypad → `…/keypad-electricity`, Welcome Credit → `…/electricity-welcome-credit`, Top Discount → `…/electricity-top-discount`; DCO → `https://www.sseairtricity.com/uk`) |
-| **Sync Zips** | Snapshots all non-DCO campaigns → tracked `outputs/` for `/statics/`, and also bakes the SSE DCO **Canonical Agency Zip** into `outputs/downloads/` for the DCO Pages download button. Commit `outputs/` and push to publish |
+| **Sync Zips** | Snapshots all non-DCO campaigns → tracked `outputs/` for `/statics/`, and bakes **ROI + NI** SSE DCO Canonical Agency Zips into `outputs/downloads/` for the DCO Pages **Download ROI** / **Download NI** buttons. Commit `outputs/` and push to publish |
 | **Inspect HTML** | Formatted, syntax-highlighted export HTML in the inspector modal |
 | **Export Canonical Zip** | Flat `{size}.html` + packaged backgrounds; SVGs inlined; Museo CDN |
-| **Export Canonical Agency Zip** | Agency `ads/{size}/index.html`; SVGs inlined; Museo CDN; backgrounds feed-only (no hiker sample). Also available as a static download on the hosted DCO preview (preview form values do not affect it) |
+| **Export Canonical Agency Zip** | Agency `ads/{size}/index.html`; SVGs inlined; Museo CDN; official Studio sample in the enable snippet (ROI by default). **Sync Zips** also writes the NI twin. Hosted DCO preview offers **Download ROI** / **Download NI** (preview form values do not affect them) |
 | **Export base ZIP for agency** | Agency upload package (`assetMode: packaged`) with mapping and HTML shells |
 | **Export agency ZIP with CDN assets** | Agency layout with Studio CDN Museo (+ CDN sample fallbacks where applicable) |
 | **Export client ZIP with/without validation** | Downloadable preview package; validator optional (font mode) |
@@ -30,7 +30,7 @@
 ## Statics preview publish
 
 1. In the editor, run **Sync Zips** (More menu).
-2. Commit the updated `outputs/` tree (`campaigns/`, `downloads/SSE_Statics_*.zip`, `downloads/SSE_DCO_canonical_agency_*.zip`, `latest.json`).
+2. Commit the updated `outputs/` tree (`campaigns/`, `downloads/SSE_Statics_*.zip`, `downloads/SSE_DCO_ROI_canonical_agency_*.zip`, `downloads/SSE_DCO_NIR_canonical_agency_*.zip`, `latest.json`).
 3. Push to `main`. The Pages workflow rebuilds `site/` including gated `site/statics/` from the committed package, and attaches the DCO agency zip download on the root client preview.
 
 Local check: `npm run export:preview-site` then serve `site/` (`just preview`). Statics URL path: `/statics/`.

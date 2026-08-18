@@ -4,6 +4,7 @@
 
 ### Added
 
+- **ROI + NIR agency packages** — one DCO creative, two Studio profiles. Agency export bakes Brian’s official enable rows. Sync Zips writes `SSE_DCO_ROI_canonical_agency_*.zip` and `SSE_DCO_NIR_canonical_agency_*.zip`; Pages preview offers **Download ROI** and **Download NI**. ROI is `10964545` / `SSE_DCO_ROI_Delivery`. NIR is `10962603` / `SSE_DCO_NIR_Delivery` (same schema; sample copy + naming differ). Runtime uses `Enabler.exitOverride` from `_00_Exit_URL`. See `src/lib/dco-markets.ts`.
 - **Studio profile 10964545 / SSE_DCO_ROI_Delivery** — campaigns + export defaults + `clientfiles/CodeSnippet-html5.txt` point at Brian’s new dynamic profile. Size-override columns match 1:1 (no remap). Schema parity fields: `include_heading4_enum`, `background_image_label` (stored; Act 4 timing unchanged). Studio `<br>` line breaks normalize to `\n` on feed save, preview, and export runtime.
 - **Per-size text overrides (provisional)** — optional `heading1–4_text_{size}` and `tc_units_text_{size}` feed columns (blank → base). Resolver shared by preview, outline bake, and export runtime. Studio renames via sidecar `campaign/feed-field-map.json` (`studioToCanonical`). Sample panel: collapsed “Size overrides” for the active size. See `docs/FEED_FIELD_SCHEMA_PROPOSAL.md`.
 - **Agency feed schema proposal doc** — `docs/FEED_FIELD_SCHEMA_PROPOSAL.md` catalogues every creative feed field (name / type / description) and the proposed per-size headline + unit-rate text overrides (`{field}_{size}`, blank → base).

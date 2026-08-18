@@ -1,7 +1,7 @@
 {
   "version": 1,
   "updated": "2026-08-12",
-  "notes": "Studio profile 10964545 / SSE_DCO_ROI_Delivery. Override field names match creative canonical names — studioToCanonical stays empty. Empty size-override cells fall back to the base field. Studio may encode line breaks as <br>; creative normalizes to \\n on read.",
+  "notes": "Default / editor profile is 10964545 / SSE_DCO_ROI_Delivery. Agency export also emits NIR (10962603 / SSE_DCO_NIR_Delivery) from src/lib/dco-markets.ts. Override field names match creative canonical names — studioToCanonical stays empty. Empty size-override cells fall back to the base field. Studio may encode line breaks as <br>; creative normalizes to \\n on read.",
   "studioProfileId": 10964545,
   "studioProfileElement": "SSE_DCO_ROI_Delivery",
   "sizeOverridableTextFields": [

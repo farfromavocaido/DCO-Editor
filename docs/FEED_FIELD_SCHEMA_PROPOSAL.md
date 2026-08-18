@@ -4,7 +4,7 @@ Profile: **`SSE_DCO_Offers`** (Studio dynamic content profile for the DCO HTML5 
 
 This document lists **every creative feed field** used by the ad, with **name**, **type**, and **description**. It includes **per-size text overrides** so headlines and unit-rate copy can differ by format (line breaks, wording, etc.).
 
-**Implementation status:** wired to Studio profile **`10964545`** / **`SSE_DCO_ROI_Delivery`**. Size-override names match the live profile (no remap). Studio `<br>` line breaks normalize to `\n` on read. `include_heading4_enum` and `background_image_label` are stored for schema parity (Act 4 timing still follows `heading4_text` / roundel frame).
+**Implementation status:** wired to Studio profile **`10964545`** / **`SSE_DCO_ROI_Delivery`**, with a parallel NIR agency package (`10962603` / `SSE_DCO_NIR_Delivery`) from `src/lib/dco-markets.ts`. Size-override names match the live profile (no remap). Studio `<br>` line breaks normalize to `\n` on read. `include_heading4_enum` and `background_image_label` are stored for schema parity (Act 4 timing still follows `heading4_text` / roundel frame).
 
 **Status key**
 

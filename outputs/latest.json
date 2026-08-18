@@ -1,7 +1,11 @@
 {
-  "generatedAt": "2026-08-13T11:31:27.691Z",
-  "zip": "downloads/SSE_Statics_20260813-123127.zip",
-  "dcoZip": "downloads/SSE_DCO_canonical_agency_20260813-123127.zip",
+  "generatedAt": "2026-08-18T15:16:15.405Z",
+  "zip": "downloads/SSE_Statics_20260818-161615.zip",
+  "dcoZip": "downloads/SSE_DCO_ROI_canonical_agency_20260818-161615.zip",
+  "dcoZips": {
+    "roi": "downloads/SSE_DCO_ROI_canonical_agency_20260818-161615.zip",
+    "ni": "downloads/SSE_DCO_NIR_canonical_agency_20260818-161615.zip"
+  },
   "campaigns": [
     {
       "id": "sse-hiker-welcome",
@@ -56,5 +60,21 @@
       "970x250"
     ],
     "packageKind": "canonical-agency"
-  }
+  },
+  "dcoMarkets": [
+    {
+      "id": "roi",
+      "label": "ROI",
+      "profileId": 10964545,
+      "profileElement": "SSE_DCO_ROI_Delivery",
+      "zip": "downloads/SSE_DCO_ROI_canonical_agency_20260818-161615.zip"
+    },
+    {
+      "id": "ni",
+      "label": "NI",
+      "profileId": 10962603,
+      "profileElement": "SSE_DCO_NIR_Delivery",
+      "zip": "downloads/SSE_DCO_NIR_canonical_agency_20260818-161615.zip"
+    }
+  ]
 }

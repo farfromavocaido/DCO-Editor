@@ -42,6 +42,10 @@ All server paths resolve from `src/server/paths.ts` relative to the file locatio
 
 ## Server modules
 
+### `dco-markets.ts`
+
+ROI / NIR Studio profile bindings and the official enable-snippet sample rows used by agency font exports. Same creative schema; profile id, feed element, and sample copy differ.
+
 ### `campaign-registry.ts`
 
 Maps campaign ids to JSON filenames, display names, export slugs, and optional static `clickTag` product URLs (non-DCO).

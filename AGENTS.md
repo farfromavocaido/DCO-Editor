@@ -13,6 +13,7 @@ Local Next.js tool for editing campaign creative JSON documents and exporting St
 | Path | Purpose |
 |---|---|
 | `src/server/paths.ts` | Resolves `campaign/`, `output/`, `outputs/` — always file-relative, not cwd |
+| `src/lib/dco-markets.ts` | ROI / NI Studio profile bindings + official enable-snippet sample (agency export) |
 | `src/server/campaign-registry.ts` | Registered campaigns (id → JSON file + export slug + optional static `clickTag`) |
 | `src/server/creative-document.ts` | Read/write/validate creative JSON |
 | `src/server/feed-schema.ts` | Feed field schema + row validation (incl. size-text overrides) |

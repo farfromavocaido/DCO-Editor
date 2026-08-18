@@ -25,8 +25,15 @@ import {
   backgroundImageFieldName,
   backgroundImageFieldDefinitions,
   imageFieldUrl,
-  studioDevBackgroundUrl,
 } from '@/lib/feed-background';
+import {
+  DEFAULT_DCO_MARKET_ID,
+  getDcoMarket,
+  listDcoMarkets,
+  STUDIO_DEV_DYNAMIC_FIELD_ORDER,
+  type DcoMarket,
+  type DcoMarketId,
+} from '@/lib/dco-markets';
 import { studioToCanonicalFieldMap } from '@/lib/feed-field-map';
 import { activeScopesFromControls, clampOfferCount, controlsFromFeedRow } from '@/lib/feed-model';
 import {
@@ -94,10 +101,12 @@ type RenderOptions = {
   includePackagedBackground?: boolean;
   includePreviewBridge?: boolean;
   includeStudioDynamicContent?: boolean;
+  /** Studio market whose profile + enable snippet is baked into font HTML. */
+  market?: DcoMarketId | DcoMarket;
   /**
    * Override Studio `devDynamicContent` background `.Url` values (per size).
-   * Canonical/embed packages pass packaged relative paths so blank feed rows
-   * do not fall back to the hiker CDN sample set.
+   * Embed packages pass packaged relative paths. Agency/font defaults use the
+   * official market sample URLs (diy CDN set).
    */
   studioBackgroundUrlForSize?: (size: string) => string;
   previewValidatorScriptPath?: string;
@@ -141,8 +150,11 @@ type ClientPreviewPackageOptions = {
   /**
    * Optional Canonical Agency Zip href for the Pages DCO preview download button.
    * Preview form values do not affect this package — it is a static handoff zip.
+   * Prefer `agencyZips` when ROI and NI are both available.
    */
   agencyZipHref?: string;
+  /** Per-market agency zip downloads (ROI / NI). */
+  agencyZips?: AgencyZipLink[];
   /** Appended as `?v=` on iframe ad URLs so deploys bust stale browser caches. */
   cacheBust?: string;
 };
@@ -154,11 +166,20 @@ type BasePackageOptions = {
    * `embed` (canonical) — `{size}.html` + `assets/` at zip root; SVGs inlined;
    *   Museo from CDN only; backgrounds as relative file refs (no other asset CDNs).
    * `canonical-agency` — agency `ads/{size}/index.html`; Museo CDN; SVGs inlined;
-   *   backgrounds feed-only (empty src, no packaged JPEGs, no hiker CDN sample).
+   *   backgrounds feed-only (no packaged JPEGs); Studio snippet uses the official
+   *   market sample URLs (diy CDN set).
    */
   assetMode?: PackageAssetMode;
   renderMode?: RenderMode;
   presentationSnapshots?: PresentationSnapshots;
+  /** Which Studio profile snippet to bake. Defaults to ROI. */
+  market?: DcoMarketId | DcoMarket;
+};
+
+type AgencyZipLink = {
+  id: string;
+  label: string;
+  href: string;
 };
 
 const clientFontSourcePath = (filename: string) => (
@@ -447,71 +468,70 @@ const dynamicFieldMapping = () => [
   ] as const),
 ];
 
-const STUDIO_DEV_DYNAMIC_SCALAR_FIELDS = [
-  '_id',
-  'Unique_ID',
-  'Reporting_label',
-  'Active',
-  'Default',
-  'heading1_text',
-  'heading2_text',
-  'heading3_text',
-  'heading4_text',
-  'offer_count_num',
-  'offer1_value_text',
-  'offer1_sub_text',
-  'offer2_value_text',
-  'offer2_sub_text',
-  'offer3_value_text',
-  'offer3_sub_text',
-  'tc_type_enum',
-  'tc_terms_text',
-  'tc_units_text',
-  'cta_type_enum',
-  'cta_text',
-  'include_roundel_frame_bool',
-  'roundel_text_text',
-  'roundel_value_text',
-  'include_heading4_enum',
-  'background_image_label',
-  ...sizeTextFieldDefinitions().map((field) => field.name),
-] as const;
-
-const studioDevDynamicLiteral = (fieldName: string, value: unknown) => {
+const studioDevDynamicLiteral = (value: unknown) => {
   if (typeof value === 'boolean') return value ? 'true' : 'false';
   if (typeof value === 'number' && Number.isFinite(value)) return String(value);
   return jsString(String(value ?? ''));
 };
 
-export const renderStudioDynamicContentScript = (
-  document: Record<string, unknown>,
-  sampleRow: Record<string, unknown> = {},
-  options: { backgroundUrlForSize?: (size: string) => string } = {},
+const resolveStudioMarket = (market?: DcoMarketId | DcoMarket | null) => (
+  market && typeof market === 'object' ? market : getDcoMarket(market)
+);
+
+const studioDevDynamicAssignments = (
+  profileElement: string,
+  fieldName: string,
+  value: unknown,
 ) => {
-  const profileId = Number(document.feed?.studioProfileId || 10964545);
-  const profileElement = String(document.feed?.studioProfileElement || 'SSE_DCO_ROI_Delivery');
-  const row = { ...(document.feed?.sampleRows?.[0] || {}), ...sampleRow };
+  const prefix = `      devDynamicContent.${profileElement}[0].${fieldName}`;
+  if (Array.isArray(value)) {
+    return [`${prefix} = ${JSON.stringify(value)};`];
+  }
+  if (value && typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    if ('RawValue' in record && 'UtcValue' in record) {
+      return [
+        `${prefix} = {};`,
+        `${prefix}.RawValue = ${jsString(String(record.RawValue ?? ''))};`,
+        `${prefix}.UtcValue = ${Number(record.UtcValue) || 0};`,
+      ];
+    }
+    if ('Url' in record) {
+      return [
+        `${prefix} = {};`,
+        `${prefix}.Url = ${jsString(String(record.Url ?? ''))};`,
+      ];
+    }
+  }
+  return [`${prefix} = ${studioDevDynamicLiteral(value)};`];
+};
+
+export const renderStudioDynamicContentScript = (
+  _document: Record<string, unknown>,
+  sampleRow: Record<string, unknown> = {},
+  options: {
+    backgroundUrlForSize?: (size: string) => string;
+    market?: DcoMarketId | DcoMarket;
+  } = {},
+) => {
+  const market = resolveStudioMarket(options.market);
+  const row = { ...market.studioSample, ...sampleRow };
   const lines = [
     '    <script type="text/javascript">',
-    '      Enabler.setProfileId(' + profileId + ');',
+    `      Enabler.setProfileId(${market.profileId});`,
     '      var devDynamicContent = {};',
-    `      devDynamicContent.${profileElement} = [{}];`,
+    `      devDynamicContent.${market.profileElement} = [{}];`,
   ];
 
-  for (const fieldName of STUDIO_DEV_DYNAMIC_SCALAR_FIELDS) {
-    if (!Object.prototype.hasOwnProperty.call(row, fieldName)) continue;
-    lines.push(
-      `      devDynamicContent.${profileElement}[0].${fieldName} = ${studioDevDynamicLiteral(fieldName, row[fieldName])};`,
-    );
-  }
-
-  for (const size of CREATIVE_AD_SIZES) {
-    const fieldName = backgroundImageFieldName(size);
-    const url = options.backgroundUrlForSize
-      ? options.backgroundUrlForSize(size)
-      : studioDevBackgroundUrl(size, row[fieldName] ?? row.background_image_url);
-    lines.push(`      devDynamicContent.${profileElement}[0].${fieldName} = {};`);
-    lines.push(`      devDynamicContent.${profileElement}[0].${fieldName}.Url = ${jsString(url)};`);
+  for (const fieldName of STUDIO_DEV_DYNAMIC_FIELD_ORDER) {
+    if (fieldName.startsWith('background_image_url_') && options.backgroundUrlForSize) {
+      const size = fieldName.replace('background_image_url_', '');
+      lines.push(...studioDevDynamicAssignments(market.profileElement, fieldName, {
+        Url: options.backgroundUrlForSize(size),
+      }));
+      continue;
+    }
+    lines.push(...studioDevDynamicAssignments(market.profileElement, fieldName, row[fieldName]));
   }
 
   lines.push('      Enabler.setDevDynamicContent(devDynamicContent);');
@@ -1219,9 +1239,19 @@ const runtimeScript = (
         ${alignOfferValueSymbolsRuntime}
         ${layoutOffersRuntime}
 
-        function wireExit() {
+        function exitUrlFromRow(data) {
+          if (!data || data._00_Exit_URL == null) return '';
+          if (typeof data._00_Exit_URL === 'object') return String(data._00_Exit_URL.Url || '');
+          return String(data._00_Exit_URL);
+        }
+
+        function wireExit(data) {
+          var exitUrl = exitUrlFromRow(data);
           root.addEventListener('click', function() {
-            if (typeof Enabler !== 'undefined' && Enabler.exit) {
+            if (typeof Enabler === 'undefined') return;
+            if (exitUrl && Enabler.exitOverride) {
+              Enabler.exitOverride('Main Exit', exitUrl);
+            } else if (Enabler.exit) {
               Enabler.exit('Main Exit');
             }
           }, { once: true });
@@ -1277,7 +1307,7 @@ const runtimeScript = (
           // Immediate layout for feed swaps after motion has started; cold boot
           // still holds the clock until startMotionWhenReady releases it.
           commitOfferLayout();
-          wireExit();
+          wireExit(data);
           startMotionWhenReady();
           window.__SSE_DCO_READY__ = true;
         }
@@ -1539,6 +1569,7 @@ export const renderStudioReadyHtml = async (
   const studioDynamicContentScript = options.includeStudioDynamicContent && renderMode === 'font'
     ? `\n${renderStudioDynamicContentScript(document, {}, {
       backgroundUrlForSize: options.studioBackgroundUrlForSize,
+      market: options.market,
     })}\n`
     : '';
   const scripts = renderMode === 'outline'
@@ -1802,12 +1833,22 @@ export type ExportPreviewDcoPackage = {
   packageKind: 'canonical-agency';
 };
 
+export type ExportPreviewDcoMarketZip = {
+  id: DcoMarketId;
+  label: string;
+  profileId: number;
+  profileElement: string;
+  zip: string;
+};
+
 export type ExportPreviewLatest = {
   generatedAt: string;
   /** Non-DCO statics tree zip under downloads/ (Pages `/statics/`). */
   zip: string;
-  /** SSE DCO Canonical Agency Zip (same entries as toolbar Export Canonical Agency Zip). */
+  /** ROI Canonical Agency Zip (back-compat; same as `dcoZips.roi`). */
   dcoZip: string;
+  /** Per-market Canonical Agency Zips (ROI + NI). */
+  dcoZips?: Record<DcoMarketId, string>;
   /** Non-DCO Export-for-Static campaigns (Pages `/statics/`). */
   campaigns: Array<{
     id: string;
@@ -1817,6 +1858,8 @@ export type ExportPreviewLatest = {
   }>;
   /** SSE DCO Canonical Agency Zip metadata (Pages root download; preview form is unrelated). */
   dco: ExportPreviewDcoPackage;
+  /** ROI + NI agency zip metadata. */
+  dcoMarkets?: ExportPreviewDcoMarketZip[];
 };
 
 const formatStaticsZipTimestamp = (date = new Date()) => {
@@ -1921,16 +1964,41 @@ export const buildExportPreviewPackage = async (
     });
   }
 
-  // Exact Export Canonical Agency Zip tree under campaigns/sse-dco/.
-  const agencyEntries = await buildBasePackageEntries(dcoDocument, {
-    assetMode: 'canonical-agency',
-    renderMode: 'font',
-  });
-  for (const entry of agencyEntries) {
-    const relativePath = `campaigns/${dcoRegistry.id}/${entry.path}`;
-    outputEntries.push({ path: relativePath, data: entry.data });
-    written.push(relativePath);
+  const generatedAt = new Date().toISOString();
+  const stamp = formatStaticsZipTimestamp();
+  const zipName = `SSE_Statics_${stamp}.zip`;
+  const zipRelative = `downloads/${zipName}`;
+  const zipBuffer = createZipBuffer(staticEntries);
+  const dcoZips = {} as Record<DcoMarketId, string>;
+  const dcoZipBuffers: Array<{ relative: string; buffer: Buffer }> = [];
+  const dcoMarkets: ExportPreviewDcoMarketZip[] = [];
+  let primaryDcoZip = '';
+
+  for (const market of listDcoMarkets()) {
+    const agencyEntries = await buildBasePackageEntries(dcoDocument, {
+      assetMode: 'canonical-agency',
+      renderMode: 'font',
+      market: market.id,
+    });
+    for (const entry of agencyEntries) {
+      const relativePath = `campaigns/${market.outputsDir}/${entry.path}`;
+      outputEntries.push({ path: relativePath, data: entry.data });
+      written.push(relativePath);
+    }
+    const dcoZipRelative = `downloads/${market.zipPrefix}_${stamp}.zip`;
+    const dcoZipBuffer = createZipBuffer(agencyEntries);
+    dcoZips[market.id] = dcoZipRelative;
+    dcoZipBuffers.push({ relative: dcoZipRelative, buffer: dcoZipBuffer });
+    dcoMarkets.push({
+      id: market.id,
+      label: market.label,
+      profileId: market.profileId,
+      profileElement: market.profileElement,
+      zip: dcoZipRelative,
+    });
+    if (market.id === DEFAULT_DCO_MARKET_ID) primaryDcoZip = dcoZipRelative;
   }
+
   const dcoMeta: ExportPreviewDcoPackage = {
     id: dcoRegistry.id,
     name: dcoRegistry.name,
@@ -1939,20 +2007,14 @@ export const buildExportPreviewPackage = async (
     packageKind: 'canonical-agency',
   };
 
-  const generatedAt = new Date().toISOString();
-  const stamp = formatStaticsZipTimestamp();
-  const zipName = `SSE_Statics_${stamp}.zip`;
-  const zipRelative = `downloads/${zipName}`;
-  const dcoZipName = `SSE_DCO_canonical_agency_${stamp}.zip`;
-  const dcoZipRelative = `downloads/${dcoZipName}`;
-  const zipBuffer = createZipBuffer(staticEntries);
-  const dcoZipBuffer = createZipBuffer(agencyEntries);
   const latest: ExportPreviewLatest = {
     generatedAt,
     zip: zipRelative,
-    dcoZip: dcoZipRelative,
+    dcoZip: primaryDcoZip,
+    dcoZips,
     campaigns: campaignMeta,
     dco: dcoMeta,
+    dcoMarkets,
   };
 
   const campaignsDir = path.resolve(outputsRoot, 'campaigns');
@@ -1963,19 +2025,22 @@ export const buildExportPreviewPackage = async (
   await fs.mkdir(downloadsDir, { recursive: true });
   await writeTreeEntries(outputsRoot, outputEntries);
   await fs.writeFile(path.resolve(outputsRoot, zipRelative), zipBuffer);
-  await fs.writeFile(path.resolve(outputsRoot, dcoZipRelative), dcoZipBuffer);
+  for (const { relative, buffer } of dcoZipBuffers) {
+    await fs.writeFile(path.resolve(outputsRoot, relative), buffer);
+    written.push(relative);
+  }
   await fs.writeFile(
     path.resolve(outputsRoot, 'latest.json'),
     `${JSON.stringify(latest, null, 2)}\n`,
   );
-  written.push(zipRelative, dcoZipRelative, 'latest.json');
+  written.push(zipRelative, 'latest.json');
 
   return {
     ok: true as const,
     latest,
     written,
     zipBytes: zipBuffer.length,
-    dcoZipBytes: dcoZipBuffer.length,
+    dcoZipBytes: dcoZipBuffers.reduce((sum, entry) => sum + entry.buffer.length, 0),
   };
 };
 
@@ -2515,19 +2580,22 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
   const offerCountOptions = (documentHasZeroOffers(document) ? [0, 1, 2, 3] : [1, 2, 3])
     .map((count) => `<option value="${count}">${count}</option>`)
     .join('');
-  const agencyZipHref = options.agencyZipHref ? String(options.agencyZipHref) : '';
-  const agencyZipLabel = agencyZipHref
-    ? escapeHtml(agencyZipHref.split('/').pop() || 'Agency Zip')
-    : '';
+  const agencyZips: AgencyZipLink[] = options.agencyZips?.length
+    ? options.agencyZips
+    : (options.agencyZipHref
+      ? [{ id: 'agency', label: 'Agency Zip', href: String(options.agencyZipHref) }]
+      : []);
   const agencyZipTooltip = 'Zip to share with the media agency (Canonical Agency package). Preview field values do not change this file.';
-  const agencyZipDownload = agencyZipHref
+  const agencyZipDownloadLabel = (zip: AgencyZipLink) => `Download ${zip.label}`;
+  const agencyZipDownload = agencyZips.length
     ? `<div class="agency-zip-actions">
-              <a class="agency-zip-download" href="${escapeAttr(agencyZipHref)}" download title="${escapeAttr(agencyZipTooltip)}">Download Agency Zip</a>
-              <button type="button" class="agency-zip-copy-link" data-agency-zip-copy title="Copy a direct download link to share with the media agency">Copy link</button>
+              ${agencyZips.map((zip) => `
+              <a class="agency-zip-download" data-agency-zip-id="${escapeAttr(zip.id)}" href="${escapeAttr(zip.href)}" download title="${escapeAttr(agencyZipTooltip)}">${escapeHtml(agencyZipDownloadLabel(zip))}</a>
+              <button type="button" class="agency-zip-copy-link" data-agency-zip-copy="${escapeAttr(zip.id)}" title="Copy a direct download link to share with the media agency">Copy ${escapeHtml(zip.label)} link</button>`).join('')}
             </div>`
     : '';
-  const agencyZipNote = agencyZipHref
-    ? `<p class="agency-zip-note">Agency zip (<code>${agencyZipLabel}</code>) is the media-agency handoff — preview fields above do not change it. Use <strong>Copy link</strong> to share a direct download URL. <a href="statics/">Statics preview</a></p>`
+  const agencyZipNote = agencyZips.length
+    ? `<p class="agency-zip-note">Agency zips (${agencyZips.map((zip) => `<code>${escapeHtml(zip.href.split('/').pop() || zip.label)}</code>`).join(' · ')}) are the media-agency handoff — identical creatives, different Studio profiles. Preview fields above do not change them. Use <strong>Copy link</strong> to share a direct download URL. <a href="statics/">Statics preview</a></p>`
     : `<p class="agency-zip-note"><a href="statics/">Statics preview</a></p>`;
 
   return `<!DOCTYPE html>
@@ -3377,34 +3445,36 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         });
         if (replayButton) replayButton.addEventListener('click', replayAd);
         if (restoreDefaultsButton) restoreDefaultsButton.addEventListener('click', restoreDefaults);
-${agencyZipHref ? `
+${agencyZips.length ? `
         (function bindAgencyZipCopy() {
-          var agencyZipCopyButton = document.querySelector('[data-agency-zip-copy]');
-          var agencyZipDownloadLink = document.querySelector('.agency-zip-download');
-          if (!agencyZipCopyButton || !agencyZipDownloadLink) return;
-          agencyZipCopyButton.addEventListener('click', function() {
-            var href = agencyZipDownloadLink.getAttribute('href') || '';
-            var url = '';
-            try {
-              url = new URL(href, window.location.href).href;
-            } catch (error) {
-              url = href;
-            }
-            var label = agencyZipCopyButton.textContent;
-            var showCopied = function() {
-              agencyZipCopyButton.textContent = 'Copied';
-              window.setTimeout(function() {
-                agencyZipCopyButton.textContent = label;
-              }, 1600);
-            };
-            var fallback = function() {
-              window.prompt('Copy this download link:', url);
-            };
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-              navigator.clipboard.writeText(url).then(showCopied).catch(fallback);
-            } else {
-              fallback();
-            }
+          Array.prototype.forEach.call(document.querySelectorAll('[data-agency-zip-copy]'), function(agencyZipCopyButton) {
+            var zipId = agencyZipCopyButton.getAttribute('data-agency-zip-copy') || '';
+            var agencyZipDownloadLink = document.querySelector('.agency-zip-download[data-agency-zip-id="' + zipId + '"]');
+            if (!agencyZipDownloadLink) return;
+            agencyZipCopyButton.addEventListener('click', function() {
+              var href = agencyZipDownloadLink.getAttribute('href') || '';
+              var url = '';
+              try {
+                url = new URL(href, window.location.href).href;
+              } catch (error) {
+                url = href;
+              }
+              var label = agencyZipCopyButton.textContent;
+              var showCopied = function() {
+                agencyZipCopyButton.textContent = 'Copied';
+                window.setTimeout(function() {
+                  agencyZipCopyButton.textContent = label;
+                }, 1600);
+              };
+              var fallback = function() {
+                window.prompt('Copy this download link:', url);
+              };
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(showCopied).catch(fallback);
+              } else {
+                fallback();
+              }
+            });
           });
         })();
 ` : ''}
@@ -3511,6 +3581,7 @@ export const buildClientPreviewPackageEntries = async (document: Record<string, 
     path: 'preview-page.html',
     data: renderClientPreviewPage(document, {
       includeValidator,
+      ...(options.agencyZips?.length ? { agencyZips: options.agencyZips } : {}),
       ...(options.agencyZipHref ? { agencyZipHref: options.agencyZipHref } : {}),
       ...(options.cacheBust ? { cacheBust: options.cacheBust } : {}),
     }),
@@ -3572,8 +3643,8 @@ export const buildBasePackageEntries = async (document: Record<string, unknown>,
         includePackagedBackground: useEmbedAssets,
         includePreviewBridge: false,
         includeStudioDynamicContent: renderMode === 'font',
-        // Embed: packaged relative bg paths. Canonical-agency: empty (feed only).
-        // Packaged/CDN: default hiker CDN sample for Studio preview.
+        market: options.market,
+        // Embed: packaged relative bg paths. Agency/font: official market sample URLs.
         studioBackgroundUrlForSize: useEmbedAssets
           ? (adSize) => {
             const sizeCreative = (document.sizes || {})[adSize] as
@@ -3581,9 +3652,7 @@ export const buildBasePackageEntries = async (document: Record<string, unknown>,
               | undefined;
             return String(sizeCreative?.assets?.background || '');
           }
-          : useCanonicalAgency
-            ? () => ''
-            : undefined,
+          : undefined,
         renderMode,
         presentationSnapshot: options.presentationSnapshots?.[size] || null,
       }),

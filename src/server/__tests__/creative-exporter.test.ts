@@ -8,6 +8,7 @@ import {
   createZipBuffer,
   DEFAULT_STATIC_CLICK_TAG,
   renderClientPreviewPage,
+  renderStudioDynamicContentScript,
   renderStudioReadyHtml,
   renderWipHtml,
 } from '../creative-exporter';
@@ -107,8 +108,10 @@ test('exports click handling without the legacy dynamic URL field', async () => 
   const document = await readCreativeDocument();
   const html = await renderStudioReadyHtml(document, '300x600');
 
+  assert.match(html, /Enabler\.exitOverride\('Main Exit'/);
   assert.match(html, /Enabler\.exit\('Main Exit'\)/);
-  assert.doesNotMatch(html, legacyFieldPattern(['Exit', 'URL']));
+  assert.match(html, /_00_Exit_URL/);
+  assert.doesNotMatch(html, /data-dco-field="[^"]*Exit_URL"/);
   assert.doesNotMatch(html, /exitUrlFromProfile/);
   assert.doesNotMatch(html, /window\.open\(exitUrl/);
 });
@@ -367,8 +370,12 @@ test('builds a base agency package with one production html file per size', asyn
   assert.match(html, /Enabler\.setProfileId\(10964545\)/);
   assert.match(html, /devDynamicContent\.SSE_DCO_ROI_Delivery/);
   assert.match(html, /background_image_url_728x90\.Url/);
-  assert.match(html, /728x90_hiker\.jpg/);
+  assert.match(html, /728x90_diy\.jpg/);
+  assert.match(html, /Unique_ID = "Adsu_ROI_Prospecting-Main-1_diy"/);
+  assert.match(html, /Region = \["ROI"\]/);
+  assert.match(html, /_00_Exit_URL\.Url/);
   assert.match(html, /Enabler\.setDevDynamicContent\(devDynamicContent\)/);
+  assert.match(html, /Enabler\.exitOverride\('Main Exit'/);
   assert.doesNotMatch(html, /\.\.\/assets\/bg_728x90\.jpg/);
   assert.doesNotMatch(html, /preview-validator\.js/);
   assert.doesNotMatch(html, /<script id="sse-dco-preview-feed">/);
@@ -452,6 +459,7 @@ test('builds a canonical agency zip with inlined SVGs, CDN font, and feed-only b
     assert.ok(!html.includes(url), `canonical agency must not use CDN SVG ${url}`);
   }
   assert.doesNotMatch(html, /_hiker\.jpg/, 'must not fall back to Studio hiker CDN backgrounds');
+  assert.match(html, /5648161\/728x90_diy\.jpg/, 'official Studio diy sample backgrounds');
   assert.match(html, /id="logo-act1"[^>]*src="data:image\/svg\+xml/);
   assert.match(html, /id="plus-1"[^>]*src="data:image\/svg\+xml/);
   assert.doesNotMatch(html, /src="(?:\.\.\/)?assets\/SVG\//);
@@ -466,7 +474,7 @@ test('builds a canonical agency zip with inlined SVGs, CDN font, and feed-only b
     html728,
     /id="bg-image" src="" data-packaged-src="" data-dco-field="background_image_url_728x90"/,
   );
-  assert.match(html728, /background_image_url_728x90\.Url = ""/);
+  assert.match(html728, /background_image_url_728x90\.Url = "https:\/\/s0\.2mdn\.net\/creatives\/assets\/5648161\/728x90_diy\.jpg"/);
   assert.match(html, /Enabler\.setDevDynamicContent\(devDynamicContent\)/);
 });
 
@@ -617,8 +625,45 @@ test('client preview page can offer a static Canonical Agency Zip download', asy
   assert.match(withZip, /Download Agency Zip/);
   assert.match(withZip, /Zip to share with the media agency/);
   assert.match(withZip, /data-agency-zip-copy/);
-  assert.match(withZip, /Copy link/);
+  assert.match(withZip, /Copy Agency Zip link/);
   assert.match(withZip, /navigator\.clipboard\.writeText/);
+});
+
+test('client preview page offers ROI and NI agency zip downloads', async () => {
+  const document = await readCreativeDocument();
+  const html = renderClientPreviewPage(document, {
+    includeValidator: false,
+    agencyZips: [
+      { id: 'roi', label: 'ROI', href: 'downloads/SSE_DCO_ROI_canonical_agency_example.zip' },
+      { id: 'ni', label: 'NI', href: 'downloads/SSE_DCO_NIR_canonical_agency_example.zip' },
+    ],
+  });
+  assert.match(html, /Download ROI/);
+  assert.match(html, /Download NI/);
+  assert.match(html, /data-agency-zip-id="roi"/);
+  assert.match(html, /data-agency-zip-id="ni"/);
+  assert.match(html, /Copy ROI link/);
+  assert.match(html, /Copy NI link/);
+});
+
+test('Studio enable snippet follows the official ROI row and Brian’s NIR profile', () => {
+  const document = { feed: {} };
+  const roi = renderStudioDynamicContentScript(document, {}, { market: 'roi' });
+  const ni = renderStudioDynamicContentScript(document, {}, { market: 'ni' });
+  assert.match(roi, /Enabler\.setProfileId\(10964545\)/);
+  assert.match(roi, /devDynamicContent\.SSE_DCO_ROI_Delivery/);
+  assert.match(roi, /Unique_ID = "Adsu_ROI_Prospecting-Main-1_diy"/);
+  assert.match(roi, /Region = \["ROI"\]/);
+  assert.match(roi, /sseairtricity\.com\/ie\//);
+  assert.match(roi, /heading2_text_320x50 = "A different kind <br> of energy"/);
+  assert.match(ni, /Enabler\.setProfileId\(10962603\)/);
+  assert.match(ni, /devDynamicContent\.SSE_DCO_NIR_Delivery/);
+  assert.match(ni, /Unique_ID = "Adsu_NIR_Prospecting-Main-1_diy"/);
+  assert.match(ni, /Region = \["NIR"\]/);
+  assert.match(ni, /heading1_text = "Our very best discount"/);
+  assert.match(ni, /heading4_text_320x50 = "A different kind <br> of energy"/);
+  assert.doesNotMatch(ni, /SSE_DCO_ROI_Delivery/);
+  assert.doesNotMatch(ni, /SSE_DCO_NI_Delivery/);
 });
 
 test('renders the client preview page as one self-contained document shell', async () => {

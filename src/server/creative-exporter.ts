@@ -569,7 +569,12 @@ const cssDecl = (prop: string, value: unknown, unit = '') => (
 const formatTransform = (keyframe: Record<string, unknown>) => {
   const parts = [];
   if (keyframe.translate) parts.push(`translate3d(${px(keyframe.translate[0])}, ${px(keyframe.translate[1])}, 0px)`);
-  if (keyframe.scale !== undefined) parts.push(`scale3d(${keyframe.scale}, ${keyframe.scale}, 1)`);
+  const scale = keyframe.scale;
+  if (scale !== undefined) {
+    const sx = Array.isArray(scale) ? scale[0] : scale;
+    const sy = Array.isArray(scale) ? scale[1] : scale;
+    if (sx !== 1 || sy !== 1) parts.push(`scale3d(${sx}, ${sy}, 1)`);
+  }
   return parts.length ? parts.join(' ') : null;
 };
 
@@ -579,6 +584,10 @@ ${keyframes.map((keyframe) => {
     return `      ${keyframe.at}% {
 ${[
         transform ? `        transform: ${transform};` : '',
+        keyframe.left !== undefined ? `        left: ${px(keyframe.left)};` : '',
+        keyframe.top !== undefined ? `        top: ${px(keyframe.top)};` : '',
+        keyframe.width !== undefined ? `        width: ${px(keyframe.width)};` : '',
+        keyframe.height !== undefined ? `        height: ${px(keyframe.height)};` : '',
         keyframe.opacity !== undefined ? `        opacity: ${keyframe.opacity};` : '',
         keyframe.easing ? `        animation-timing-function: ${keyframe.easing};` : '',
       ].filter(Boolean).join('\n')}

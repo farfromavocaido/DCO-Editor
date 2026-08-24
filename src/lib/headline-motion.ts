@@ -3,6 +3,7 @@
 import { layerAnimationShorthand } from '@/lib/animation-css';
 import {
   compileAnimationClips,
+  formatScale3d,
   resolveTimeRef,
   type AnimationClip,
   type CreativeKeyframe,
@@ -373,9 +374,9 @@ export const compileHeadlineKeyframes = (
 
 const formatTransform = (frame: CreativeKeyframe) => {
   const [x = 0, y = 0] = frame.translate || [0, 0];
-  const scale = frame.scale ?? 1;
   const parts = [`translate3d(${x}px, ${y}px, 0px)`];
-  if (scale !== 1) parts.push(`scale3d(${scale}, ${scale}, 1)`);
+  const scalePart = formatScale3d(frame.scale);
+  if (scalePart) parts.push(scalePart);
   return parts.join(' ');
 };
 
@@ -560,7 +561,16 @@ export const headlineTransitionRuntimeBlock = (
           var translate = frame.translate || [0, 0];
           var scale = frame.scale == null ? 1 : frame.scale;
           var parts = ['translate3d(' + translate[0] + 'px, ' + translate[1] + 'px, 0px)'];
-          if (scale !== 1) parts.push('scale3d(' + scale + ', ' + scale + ', 1)');
+          var sx;
+          var sy;
+          if (Array.isArray(scale)) {
+            sx = scale[0];
+            sy = scale[1];
+          } else {
+            sx = scale;
+            sy = scale;
+          }
+          if (sx !== 1 || sy !== 1) parts.push('scale3d(' + sx + ', ' + sy + ', 1)');
           return parts.join(' ');
         }
 

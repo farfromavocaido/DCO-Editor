@@ -202,7 +202,7 @@ Validated fields: all headline, offer, CTA, roundel, and T&C copy fields listed 
 | **Description** | Number of visible offer slots (`0`–`3`). `0` is the brand / no-offers variant (SSE DCO only in the editor). |
 | **Validation** | Integer clamped to **min 0, max 3**. Non-numeric → `1`. Values above 3 clamp to 3; values below 0 clamp to 0. Explicit `0` is preserved. |
 | **Required** | Optional on input; always coerced to 0–3 (invalid → `1`). |
-| **Fallback** | `1` if missing/invalid. Runtime also derives count from non-empty `offerN_value_text` if explicit count is outside 0–3. Controls `offers-0` / `offers-1` / `offers-2` / `offers-3` CSS scope. Under `offers-0`: offer slots hidden; photo acts keep offers-0 headline geometry with white or navy ink (`navy_headlines_bool`); blue wave stays at its corner-peek for the whole ad; green wave settles by Act 4; Act 4 is navy over green; CTA is navy fill with white text; T&Cs unlocked (`tc_type_enum`); Act 4 still uses `heading4_text` + `include_heading4_enum`. |
+| **Fallback** | `1` if missing/invalid. Runtime also derives count from non-empty `offerN_value_text` if explicit count is outside 0–3. Controls `offers-0` / `offers-1` / `offers-2` / `offers-3` CSS scope. Under `offers-0`: offer slots hidden; photo acts keep offers-0 headline geometry with white or navy ink (`navy_headlines_bool`); blue wave enters to stage1 then moves to stage2 while green fades in; green wave fades in at rest by Act 4; Act 4 is navy over green; CTA is navy fill with white text; T&Cs unlocked (`tc_type_enum`) and fade out at `green_in`; Act 4 still uses `heading4_text` + `include_heading4_enum`. |
 
 #### `tc_type_enum`
 

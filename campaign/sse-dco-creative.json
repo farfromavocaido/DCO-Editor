@@ -792,21 +792,40 @@
               ]
             },
             {
-              "id": "bluewave-hold-offers-0",
-              "label": "Bluewave hold (offers-0 corner peek)",
-              "preset": "waveSweep",
-              "start": "start",
-              "end": "end",
+              "id": "bluewave-entry-offers-0",
+              "label": "Bluewave stage1 hold (offers-0)",
+              "preset": "custom",
               "scopes": [
                 "offers-0"
               ],
-              "params": {
-                "start_x": 0,
-                "end_x": 0,
-                "hold_y": 0,
-                "fade_pct": 2,
-                "sweep_duration_pct": 1
-              }
+              "keyframes": [
+                {
+                  "at": "start",
+                  "left": -80,
+                  "top": -20,
+                  "width": 584,
+                  "height": 90,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "end",
+                  "left": -80,
+                  "top": -20,
+                  "width": 584,
+                  "height": 90,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                }
+              ]
             }
           ]
         },
@@ -1113,7 +1132,12 @@
               "params": {
                 "enter_duration_pct": 5,
                 "fade_pct": 2
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
             }
           ]
         },
@@ -1141,6 +1165,25 @@
               "params": {
                 "fade_pct": 4,
                 "enter_duration_pct": 2
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "logo-act3-hold-offers-0",
+              "label": "Logo Act3 fade-in (offers-0, mid bluewave)",
+              "preset": "fade",
+              "start": "start+5",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 5,
+                "fade_pct": 4
               }
             }
           ]
@@ -1323,6 +1366,26 @@
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out"
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-prices-fade-offers-0",
+              "label": "terms-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
           ],
@@ -1359,6 +1422,26 @@
               "preset": "fade",
               "start": "act1_out",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "unit-rate-prices-fade-offers-0",
+              "label": "unit-rate-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "act1_out",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -1400,6 +1483,26 @@
               "preset": "fade",
               "start": "terms_in",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-solo-fade-offers-0",
+              "label": "terms-solo fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -2198,7 +2301,9 @@
           },
           "props": {
             "color": "rgb(255, 255, 255)",
-            "top": 9
+            "top": 9,
+            "width": 217,
+            "height": 34
           },
           "editable": true
         },
@@ -2315,14 +2420,14 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 151,
+            "left": 121,
             "top": 25,
             "width": 73,
             "height": 18,
             "fontSize": 9,
             "borderRadius": 4,
-            "backgroundColor": "rgb(0, 41, 117)",
-            "color": "rgb(255, 255, 255)"
+            "backgroundColor": "rgb(0, 229, 165)",
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -2338,8 +2443,8 @@
             "height": 56,
             "fontSize": 12,
             "borderRadius": "50%",
-            "backgroundColor": "rgb(0, 41, 117)",
-            "color": "rgb(255, 255, 255)"
+            "backgroundColor": "rgb(0, 229, 165)",
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -2714,21 +2819,81 @@
               ]
             },
             {
-              "id": "bluewave-hold-offers-0",
-              "label": "Bluewave hold (offers-0 corner peek)",
-              "preset": "waveSweep",
-              "start": "start",
-              "end": "end",
+              "id": "bluewave-entry-offers-0",
+              "label": "Bluewave stage1\u2194stage2 (offers-0)",
+              "preset": "custom",
               "scopes": [
                 "offers-0"
               ],
-              "params": {
-                "start_x": 0,
-                "end_x": 0,
-                "hold_y": 0,
-                "fade_pct": 2,
-                "sweep_duration_pct": 1
-              }
+              "keyframes": [
+                {
+                  "at": "start",
+                  "left": 490,
+                  "top": -55,
+                  "width": 1000,
+                  "height": 200,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "green_in",
+                  "left": 490,
+                  "top": -55,
+                  "width": 1000,
+                  "height": 200,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1,
+                  "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+                },
+                {
+                  "at": "act4_in",
+                  "left": 455,
+                  "top": -99,
+                  "width": 1000,
+                  "height": 296,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "end-3.3",
+                  "left": 455,
+                  "top": -99,
+                  "width": 1000,
+                  "height": 296,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1,
+                  "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+                },
+                {
+                  "at": "end",
+                  "left": 490,
+                  "top": -55,
+                  "width": 1000,
+                  "height": 200,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                }
+              ]
             }
           ]
         },
@@ -3029,7 +3194,12 @@
               "params": {
                 "enter_duration_pct": 5,
                 "fade_pct": 2
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
             }
           ]
         },
@@ -3057,6 +3227,25 @@
               "params": {
                 "fade_pct": 4,
                 "enter_duration_pct": 2
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "logo-act3-hold-offers-0",
+              "label": "Logo Act3 fade-in (offers-0, mid bluewave)",
+              "preset": "fade",
+              "start": "start+5",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 5,
+                "fade_pct": 4
               }
             }
           ]
@@ -3239,6 +3428,26 @@
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out"
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-prices-fade-offers-0",
+              "label": "terms-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
           ]
@@ -3271,6 +3480,26 @@
               "preset": "fade",
               "start": "act1_out",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "unit-rate-prices-fade-offers-0",
+              "label": "unit-rate-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "act1_out",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -3309,6 +3538,26 @@
               "preset": "fade",
               "start": "terms_in",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-solo-fade-offers-0",
+              "label": "terms-solo fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -4160,10 +4409,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 455,
-            "top": -99,
+            "left": 490,
+            "top": -55,
             "width": 1000,
-            "height": 296
+            "height": 200
           },
           "editable": true
         },
@@ -4176,10 +4425,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 574,
-            "top": 26,
-            "width": 124,
-            "height": 45
+            "left": 621,
+            "top": 28,
+            "width": 97,
+            "height": 38
           },
           "editable": true
         },
@@ -4269,9 +4518,9 @@
           },
           "props": {
             "left": 20,
-            "top": 69,
-            "width": 696,
-            "height": 19,
+            "top": 77,
+            "width": 413,
+            "height": 11,
             "fontSize": 8,
             "visibility": "visible",
             "display": "flex",
@@ -4601,21 +4850,81 @@
               ]
             },
             {
-              "id": "bluewave-hold-offers-0",
-              "label": "Bluewave hold (offers-0 corner peek)",
-              "preset": "waveSweep",
-              "start": "start",
-              "end": "end",
+              "id": "bluewave-entry-offers-0",
+              "label": "Bluewave stage1\u2194stage2 (offers-0)",
+              "preset": "custom",
               "scopes": [
                 "offers-0"
               ],
-              "params": {
-                "start_x": 88,
-                "end_x": 88,
-                "hold_y": 0,
-                "fade_pct": 2,
-                "sweep_duration_pct": 1
-              }
+              "keyframes": [
+                {
+                  "at": "start",
+                  "left": 26,
+                  "top": 38,
+                  "width": 185,
+                  "height": 221,
+                  "translate": [
+                    88,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "green_in",
+                  "left": 26,
+                  "top": 38,
+                  "width": 185,
+                  "height": 221,
+                  "translate": [
+                    88,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1,
+                  "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+                },
+                {
+                  "at": "act4_in",
+                  "left": -1,
+                  "top": 0,
+                  "width": 214,
+                  "height": 253,
+                  "translate": [
+                    88,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "end-3.3",
+                  "left": -1,
+                  "top": 0,
+                  "width": 214,
+                  "height": 253,
+                  "translate": [
+                    88,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1,
+                  "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+                },
+                {
+                  "at": "end",
+                  "left": 26,
+                  "top": 38,
+                  "width": 185,
+                  "height": 221,
+                  "translate": [
+                    88,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                }
+              ]
             }
           ]
         },
@@ -4926,7 +5235,12 @@
               "params": {
                 "enter_duration_pct": 8,
                 "fade_pct": 7
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
             }
           ]
         },
@@ -4954,6 +5268,25 @@
               "params": {
                 "fade_pct": 4,
                 "enter_duration_pct": 7
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "logo-act3-hold-offers-0",
+              "label": "Logo Act3 fade-in (offers-0, mid bluewave)",
+              "preset": "fade",
+              "start": "start+5",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 5,
+                "fade_pct": 4
               }
             }
           ]
@@ -5136,9 +5469,34 @@
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out"
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-prices-fade-offers-0",
+              "label": "terms-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
-          ]
+          ],
+          "fit": {
+            "maxLines": 4,
+            "mode": "shrink",
+            "minFontSize": 6
+          }
         },
         {
           "id": "unit-rate-prices",
@@ -5168,6 +5526,26 @@
               "preset": "fade",
               "start": "act1_out",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "unit-rate-prices-fade-offers-0",
+              "label": "unit-rate-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "act1_out",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -5206,6 +5584,26 @@
               "preset": "fade",
               "start": "terms_in",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-solo-fade-offers-0",
+              "label": "terms-solo fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -5966,7 +6364,9 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(255, 255, 255)",
+            "width": 229,
+            "height": 56
           },
           "editable": true
         },
@@ -6054,10 +6454,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": -1,
-            "top": 0,
-            "width": 214,
-            "height": 253
+            "left": 26,
+            "top": 38,
+            "width": 185,
+            "height": 221
           },
           "editable": true
         },
@@ -6070,10 +6470,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 175,
-            "top": 200,
-            "width": 110,
-            "height": 40
+            "left": 206,
+            "top": 208,
+            "width": 83,
+            "height": 36
           },
           "editable": true
         },
@@ -6162,11 +6562,11 @@
             "tc_type_enum": "tcs_only"
           },
           "props": {
-            "left": 10,
-            "top": 215,
-            "width": 135,
-            "height": 29,
-            "fontSize": 10,
+            "left": 6,
+            "top": 210,
+            "width": 102,
+            "height": 43,
+            "fontSize": 6,
             "visibility": "visible",
             "display": "flex",
             "alignItems": "flex-end",
@@ -6474,22 +6874,40 @@
               ]
             },
             {
-              "id": "bluewave-hold-offers-0",
-              "label": "Bluewave hold (offers-0 corner peek)",
-              "preset": "waveSweep",
-              "start": "start",
-              "end": "end",
+              "id": "bluewave-entry-offers-0",
+              "label": "Bluewave stage1 hold (offers-0)",
+              "preset": "custom",
               "scopes": [
                 "offers-0"
               ],
-              "params": {
-                "start_x": 0,
-                "end_x": 0,
-                "fade_pct": 2,
-                "sweep_duration_pct": 1,
-                "start_y": 0,
-                "end_y": 0
-              }
+              "keyframes": [
+                {
+                  "at": "start",
+                  "left": -49,
+                  "top": 316,
+                  "width": 240,
+                  "height": 284,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "end",
+                  "left": -49,
+                  "top": 316,
+                  "width": 240,
+                  "height": 284,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                }
+              ]
             }
           ]
         },
@@ -6795,7 +7213,12 @@
               "params": {
                 "enter_duration_pct": 5,
                 "fade_pct": 2
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
             }
           ]
         },
@@ -6823,6 +7246,25 @@
               "params": {
                 "fade_pct": 4,
                 "enter_duration_pct": 2
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "logo-act3-hold-offers-0",
+              "label": "Logo Act3 fade-in (offers-0, mid bluewave)",
+              "preset": "fade",
+              "start": "start+5",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 5,
+                "fade_pct": 4
               }
             }
           ]
@@ -7005,9 +7447,34 @@
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out"
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-prices-fade-offers-0",
+              "label": "terms-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
-          ]
+          ],
+          "fit": {
+            "minFontSize": 5,
+            "mode": "shrink",
+            "maxLines": 3
+          }
         },
         {
           "id": "unit-rate-prices",
@@ -7037,6 +7504,26 @@
               "preset": "fade",
               "start": "act1_out",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "unit-rate-prices-fade-offers-0",
+              "label": "unit-rate-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "act1_out",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -7075,6 +7562,26 @@
               "preset": "fade",
               "start": "terms_in",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-solo-fade-offers-0",
+              "label": "terms-solo fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -7918,8 +8425,8 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": -40,
-            "top": 320,
+            "left": -49,
+            "top": 316,
             "width": 240,
             "height": 284
           },
@@ -7935,7 +8442,7 @@
           },
           "props": {
             "left": 30,
-            "top": 550,
+            "top": 537,
             "width": 100,
             "height": 36
           },
@@ -8027,10 +8534,10 @@
           },
           "props": {
             "left": 8,
-            "top": 563,
-            "width": 126,
-            "height": 29,
-            "fontSize": 10,
+            "top": 574,
+            "width": 146,
+            "height": 26,
+            "fontSize": 5,
             "visibility": "visible",
             "display": "flex",
             "alignItems": "flex-end",
@@ -8352,22 +8859,81 @@
               ]
             },
             {
-              "id": "bluewave-hold-offers-0",
-              "label": "Bluewave hold (offers-0 corner peek)",
-              "preset": "waveSweep",
-              "start": "start",
-              "end": "end",
+              "id": "bluewave-entry-offers-0",
+              "label": "Bluewave stage1\u2194stage2 (offers-0)",
+              "preset": "custom",
               "scopes": [
                 "offers-0"
               ],
-              "params": {
-                "start_x": 0,
-                "end_x": 0,
-                "fade_pct": 2,
-                "sweep_duration_pct": 1,
-                "start_y": 0,
-                "end_y": 0
-              }
+              "keyframes": [
+                {
+                  "at": "start",
+                  "left": 77,
+                  "top": 312,
+                  "width": 259,
+                  "height": 317,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "green_in",
+                  "left": 77,
+                  "top": 312,
+                  "width": 259,
+                  "height": 317,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1,
+                  "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+                },
+                {
+                  "at": "act4_in",
+                  "left": -38,
+                  "top": 232,
+                  "width": 340,
+                  "height": 400,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "end-3.3",
+                  "left": -38,
+                  "top": 232,
+                  "width": 340,
+                  "height": 400,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1,
+                  "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+                },
+                {
+                  "at": "end",
+                  "left": 77,
+                  "top": 312,
+                  "width": 259,
+                  "height": 317,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                }
+              ]
             }
           ]
         },
@@ -8670,7 +9236,12 @@
               "params": {
                 "enter_duration_pct": 5,
                 "fade_pct": 9
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
             }
           ]
         },
@@ -8698,6 +9269,25 @@
               "params": {
                 "fade_pct": 4,
                 "enter_duration_pct": 9
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "logo-act3-hold-offers-0",
+              "label": "Logo Act3 fade-in (offers-0, mid bluewave)",
+              "preset": "fade",
+              "start": "start+5",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 5,
+                "fade_pct": 4
               }
             }
           ]
@@ -8880,9 +9470,34 @@
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out"
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-prices-fade-offers-0",
+              "label": "terms-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
-          ]
+          ],
+          "fit": {
+            "maxLines": 6,
+            "minFontSize": 6,
+            "mode": "shrink"
+          }
         },
         {
           "id": "unit-rate-prices",
@@ -8912,6 +9527,26 @@
               "preset": "fade",
               "start": "act1_out",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "unit-rate-prices-fade-offers-0",
+              "label": "unit-rate-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "act1_out",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -8950,6 +9585,26 @@
               "preset": "fade",
               "start": "terms_in",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-solo-fade-offers-0",
+              "label": "terms-solo fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -9799,10 +10454,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": -38,
-            "top": 232,
-            "width": 340,
-            "height": 400
+            "left": 77,
+            "top": 312,
+            "width": 259,
+            "height": 317
           },
           "editable": true
         },
@@ -9815,10 +10470,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 80,
-            "top": 534,
-            "width": 140,
-            "height": 50
+            "left": 172,
+            "top": 555,
+            "width": 124,
+            "height": 39
           },
           "editable": true
         },
@@ -9907,11 +10562,11 @@
             "tc_type_enum": "tcs_only"
           },
           "props": {
-            "left": 12,
-            "top": 569,
-            "width": 276,
-            "height": 23,
-            "fontSize": 10,
+            "left": 5,
+            "top": 542,
+            "width": 64,
+            "height": 50,
+            "fontSize": 6,
             "visibility": "visible",
             "display": "flex",
             "alignItems": "flex-end",
@@ -10231,21 +10886,81 @@
               ]
             },
             {
-              "id": "bluewave-hold-offers-0",
-              "label": "Bluewave hold (offers-0 corner peek)",
-              "preset": "waveSweep",
-              "start": "start",
-              "end": "end",
+              "id": "bluewave-entry-offers-0",
+              "label": "Bluewave stage1\u2194stage2 (offers-0)",
+              "preset": "custom",
               "scopes": [
                 "offers-0"
               ],
-              "params": {
-                "start_x": 0,
-                "end_x": 0,
-                "hold_y": 0,
-                "fade_pct": 2,
-                "sweep_duration_pct": 1
-              }
+              "keyframes": [
+                {
+                  "at": "start",
+                  "left": 691,
+                  "top": -43,
+                  "width": 330,
+                  "height": 300,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "green_in",
+                  "left": 691,
+                  "top": -43,
+                  "width": 330,
+                  "height": 300,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1,
+                  "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+                },
+                {
+                  "at": "act4_in",
+                  "left": 662,
+                  "top": -119,
+                  "width": 330,
+                  "height": 391,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "end-3.3",
+                  "left": 662,
+                  "top": -119,
+                  "width": 330,
+                  "height": 391,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1,
+                  "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+                },
+                {
+                  "at": "end",
+                  "left": 691,
+                  "top": -43,
+                  "width": 330,
+                  "height": 300,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                }
+              ]
             }
           ]
         },
@@ -10547,7 +11262,12 @@
               "params": {
                 "enter_duration_pct": 5,
                 "fade_pct": 7
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
             }
           ]
         },
@@ -10575,6 +11295,25 @@
               "params": {
                 "fade_pct": 4,
                 "enter_duration_pct": 7
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "logo-act3-hold-offers-0",
+              "label": "Logo Act3 fade-in (offers-0, mid bluewave)",
+              "preset": "fade",
+              "start": "start+5",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 5,
+                "fade_pct": 4
               }
             }
           ]
@@ -10757,6 +11496,26 @@
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out"
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-prices-fade-offers-0",
+              "label": "terms-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
           ]
@@ -10789,6 +11548,26 @@
               "preset": "fade",
               "start": "act1_out",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "unit-rate-prices-fade-offers-0",
+              "label": "unit-rate-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "act1_out",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -10827,6 +11606,26 @@
               "preset": "fade",
               "start": "terms_in",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-solo-fade-offers-0",
+              "label": "terms-solo fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -11682,10 +12481,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 662,
-            "top": -119,
+            "left": 691,
+            "top": -43,
             "width": 330,
-            "height": 391
+            "height": 300
           },
           "editable": true
         },
@@ -11698,10 +12497,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 796,
-            "top": 172,
-            "width": 160,
-            "height": 58
+            "left": 823,
+            "top": 194,
+            "width": 136,
+            "height": 47
           },
           "editable": true
         },

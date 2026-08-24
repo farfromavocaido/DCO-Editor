@@ -78,10 +78,15 @@ export const snapToIntervalMs = (timeMs: number, intervalMs: number) => {
   return Math.round(timeMs / intervalMs) * intervalMs;
 };
 
-const isSettledPose = (frame: { opacity?: number; scale?: number }) => {
+const isSettledPose = (frame: { opacity?: number; scale?: number | [number, number] }) => {
   const opacity = frame.opacity ?? 1;
+  if (opacity < OPACITY_SETTLED) return false;
   const scale = frame.scale ?? 1;
-  return opacity >= OPACITY_SETTLED && Math.abs(scale - 1) <= SCALE_SETTLED_TOLERANCE;
+  // Explicit scale tuple is an authored rest pose; uniform scale≈1 is the default rest.
+  if (Array.isArray(scale)) {
+    return Number.isFinite(scale[0]) && Number.isFinite(scale[1]);
+  }
+  return Math.abs(scale - 1) <= SCALE_SETTLED_TOLERANCE;
 };
 
 const offerCountFromScopes = (scopes: string[]) => {

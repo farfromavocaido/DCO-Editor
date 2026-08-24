@@ -2,14 +2,55 @@
 
 export type TimeRef = number | string;
 
+/** Uniform scale number, or `[scaleX, scaleY]` if ever needed. Prefer uniform for image assets. */
+export type KeyframeScale = number | [number, number];
+
 export type CreativeKeyframe = {
   at: number;
   translate?: [number, number];
-  scale?: number;
+  scale?: KeyframeScale;
   opacity?: number;
+  /** Optional layout channels (px) — used when a clip must change box geometry mid-timeline. */
+  left?: number;
+  top?: number;
+  width?: number;
+  height?: number;
   /** Optional ink color (e.g. skip-hold endframe handoff). Not interpolated. */
   color?: string;
   easing?: string;
+};
+
+export const normalizeScale = (scale: KeyframeScale | undefined): [number, number] => {
+  if (Array.isArray(scale)) {
+    return [Number(scale[0]) || 1, Number(scale[1]) || 1];
+  }
+  const n = scale === undefined ? 1 : Number(scale);
+  const v = Number.isFinite(n) ? n : 1;
+  return [v, v];
+};
+
+export const scalesEqual = (a: KeyframeScale | undefined, b: KeyframeScale | undefined) => {
+  const [ax, ay] = normalizeScale(a);
+  const [bx, by] = normalizeScale(b);
+  return ax === bx && ay === by;
+};
+
+export const formatScale3d = (scale: KeyframeScale | undefined) => {
+  const [sx, sy] = normalizeScale(scale);
+  if (sx === 1 && sy === 1) return '';
+  return `scale3d(${sx}, ${sy}, 1)`;
+};
+
+export const lerpScale = (
+  from: KeyframeScale | undefined,
+  to: KeyframeScale | undefined,
+  t: number,
+): KeyframeScale => {
+  const [ax, ay] = normalizeScale(from);
+  const [bx, by] = normalizeScale(to);
+  const sx = lerp(ax, bx, t);
+  const sy = lerp(ay, by, t);
+  return sx === sy ? sx : [sx, sy];
 };
 
 export type AnimationClip = {
@@ -97,20 +138,31 @@ const normalizeKeyframes = (keyframes: CreativeKeyframe[]) => {
   return out;
 };
 
-/** Forward-fill missing translate/scale/opacity so multi-clip merges never invent [0,0]. */
+/** Forward-fill missing translate/scale/opacity/layout so multi-clip merges never invent [0,0]. */
+const LAYOUT_KEYS = ['left', 'top', 'width', 'height'] as const;
+
 const fillMotionChannels = (keyframes: CreativeKeyframe[]) => {
   let translate: [number, number] | undefined;
-  let scale: number | undefined;
+  let scale: KeyframeScale | undefined;
   let opacity: number | undefined;
+  const layout: Partial<Record<(typeof LAYOUT_KEYS)[number], number>> = {};
   return keyframes.map((frame) => {
     if (frame.translate) translate = [frame.translate[0], frame.translate[1]];
     if (frame.scale !== undefined) scale = frame.scale;
     if (frame.opacity !== undefined) opacity = frame.opacity;
+    for (const key of LAYOUT_KEYS) {
+      if (frame[key] !== undefined) layout[key] = Number(frame[key]);
+    }
     return {
       ...frame,
       translate: translate ? [translate[0], translate[1]] as [number, number] : [0, 0],
       scale: scale !== undefined ? scale : 1,
       opacity: opacity !== undefined ? opacity : 1,
+      ...Object.fromEntries(
+        LAYOUT_KEYS
+          .filter((key) => layout[key] !== undefined)
+          .map((key) => [key, layout[key]]),
+      ),
     };
   });
 };
@@ -355,8 +407,17 @@ export const frameAtPercent = (keyframes: CreativeKeyframe[] = [], percent = 0) 
       lerp(prevTranslate[0], nextTranslate[0], ratio),
       lerp(prevTranslate[1], nextTranslate[1], ratio),
     ],
-    scale: lerp(prev.scale ?? 1, next.scale ?? prev.scale ?? 1, ratio),
+    scale: lerpScale(prev.scale, next.scale ?? prev.scale, ratio),
     opacity: lerp(prev.opacity ?? 1, next.opacity ?? prev.opacity ?? 1, ratio),
+    ...Object.fromEntries(
+      LAYOUT_KEYS
+        .filter((key) => prev[key] !== undefined || next[key] !== undefined)
+        .map((key) => {
+          const from = prev[key] ?? next[key] ?? 0;
+          const to = next[key] ?? prev[key] ?? from;
+          return [key, lerp(Number(from), Number(to), ratio)];
+        }),
+    ),
     ...(color !== undefined ? { color } : {}),
   };
 };

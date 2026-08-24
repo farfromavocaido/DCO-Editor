@@ -3,7 +3,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { compileAnimationClips, frameAtPercent } from '@/lib/creative-compiler';
+import { compileAnimationClips, formatScale3d, frameAtPercent } from '@/lib/creative-compiler';
 import { blurBackdropFilter, blurIsActive, isBlurLayer } from '@/lib/blur-layer';
 import { cssName, cssValue, structuredRuleCss } from '@/lib/creative-css';
 import {
@@ -647,7 +647,7 @@ export function PreviewPane() {
     const frame = frameAtPercent(keyframes, percent);
     const transform = [
       `translate3d(${frame.translate[0]}px, ${frame.translate[1]}px, 0px)`,
-      frame.scale === 1 ? '' : `scale3d(${frame.scale}, ${frame.scale}, 1)`,
+      formatScale3d(frame.scale),
     ].filter(Boolean).join(' ');
     const opacity = isBlurLayer(layer) && !blurIsActive(layer.blur)
       ? 0
@@ -657,6 +657,10 @@ export function PreviewPane() {
       opacity,
       pointerEvents: opacity <= 0.03 ? 'none' : 'auto',
       ...(frame.color ? { color: frame.color } : {}),
+      ...(frame.left !== undefined ? { left: frame.left } : {}),
+      ...(frame.top !== undefined ? { top: frame.top } : {}),
+      ...(frame.width !== undefined ? { width: frame.width } : {}),
+      ...(frame.height !== undefined ? { height: frame.height } : {}),
     };
   };
 

@@ -17,7 +17,7 @@
 
 ### Changed
 
-- **offers-0 last frame** — blue wave holds at the multi-offer corner-peek for the whole ad; green wave **fades in** at rest over ~0.5s before Act 4 (`green_in` → `act4_in`), then fades out at the end (no sweep). Photo headlines end at `green_in`. Ink (White/Navy) drives photo-act headlines **and T&Cs**; Act 4 stays navy; CTA and Act-3 offer roundel are navy fill with white text. Sample row uses the SEAI grants legal line.
+- **offers-0 last frame** — blue wave starts already at **stage1** (no entry sweep); moves to the exact last-committed **stage2** settle during the green fade (`green_in` → `act4_in`); returns to stage1 at the end (`end-3.3` → `end`, no opacity fade). **160×600** / **320×50** stay on stage1 throughout. Green wave **fades in** at rest over ~0.5s before Act 4, then out at the end. White logo fades in from mid-open (`start+5`, `enter_duration_pct: 5`); blue logo hidden. T&C (`terms-prices` / solo / unit-rate) stay through the photo acts and fade out at `green_in`. Photo headlines end at `green_in`. Ink (White/Navy) drives photo-act headlines **and T&Cs**; Act 4 stays navy; CTA is navy fill with white text except **320×50** offers-0 (SSE green fill, navy text). Sample row uses the SEAI grants legal line.
 - **Client preview Ink** — GitHub Pages DCO preview exposes White/Navy when Offers = 0 (`navy_headlines_bool`).
 
 - **offers-0 T&Cs unlocked** — TopBar / QA / scopes honour `tc_type_enum`. Solo apply line uses the unit-rate box via `offers-0.tc-solo|terms-prices`.

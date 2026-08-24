@@ -56,13 +56,12 @@ test('seeds an offers-0 headline scrim gradient on every size', async () => {
     assert.equal(scrim.kind, 'gradient');
     assert.equal(scrim.base.visibility, 'hidden');
     assert.ok(sizeCreative.variantRules.some((rule) => rule.id === 'white-headlines|headline-scrim|visibility'));
-    if (['300x250', '160x600', '300x600'].includes(size)) {
-      assert.equal(scrim.gradient.direction, 'to-bottom');
-    } else {
-      assert.equal(scrim.gradient.direction, 'to-right');
-    }
+    assert.equal(scrim.gradient.direction, 'to-top');
     assert.ok(Number(scrim.gradient.endPct) > 0);
     assert.ok(Number(scrim.gradient.startOpacity) > 0);
+    const blue = sizeCreative.layers.find((layer) => layer.id === 'bluewave');
+    assert.ok(blue);
+    assert.ok(scrim.zIndex < blue.zIndex);
   }
 });
 

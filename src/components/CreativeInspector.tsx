@@ -359,6 +359,7 @@ export function CreativeInspector() {
               >
                 <option value="to-bottom">to bottom</option>
                 <option value="to-right">to right</option>
+                <option value="to-top">to top</option>
               </SelectControl>
               <FieldControl
                 label="end %"

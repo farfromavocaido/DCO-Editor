@@ -15,10 +15,10 @@ test('mid-stop percent is endPct × midpoint', () => {
   assert.equal(gradientMidStopPct(100, 0.1), 10);
 });
 
-test('default directions split portrait-ish vs landscape sizes', () => {
-  assert.equal(headlineScrimDefaultsForSize('300x250').direction, 'to-bottom');
+test('default scrim direction is bottom-up (to-top)', () => {
+  assert.equal(headlineScrimDefaultsForSize('300x250').direction, 'to-top');
   assert.equal(headlineScrimDefaultsForSize('160x600').endPct, 25);
-  assert.equal(headlineScrimDefaultsForSize('320x50').direction, 'to-right');
+  assert.equal(headlineScrimDefaultsForSize('320x50').direction, 'to-top');
   assert.equal(headlineScrimDefaultsForSize('970x250').endPct, 30);
 });
 
@@ -40,9 +40,15 @@ test('compiles a three-stop black gradient with derived mid opacity', () => {
     startOpacity: 0.4,
     midpoint: 0.1,
   });
+  const up = gradientBackgroundImage({
+    direction: 'to-top',
+    endPct: 40,
+    startOpacity: 0.5,
+    midpoint: 0.5,
+  });
   assert.equal(
-    left,
-    'linear-gradient(to right, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 3%, rgba(0, 0, 0, 0) 30%)',
+    up,
+    'linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.25) 20%, rgba(0, 0, 0, 0) 40%)',
   );
 });
 
@@ -68,5 +74,5 @@ test('builds a full-bleed scrim layer for a size', () => {
   assert.equal(layer.zIndex, 1);
   assert.equal(layer.base.visibility, 'hidden');
   assert.equal(layer.base.width, 300);
-  assert.equal(layer.gradient.direction, 'to-bottom');
+  assert.equal(layer.gradient.direction, 'to-top');
 });

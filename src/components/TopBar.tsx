@@ -170,8 +170,8 @@ export function TopBar() {
             tip="Headline + T&C colour on photo acts (offers-0 only)"
             value={navyHeadlines ? 'navy' : 'white'}
             options={[
-              { value: 'white', label: 'White', tip: 'White headlines and T&Cs (default)' },
-              { value: 'navy', label: 'Navy', tip: 'Navy headlines and T&Cs for brighter imagery' },
+              { value: 'white', label: 'White', tip: 'White photo-act headlines (default); T&Cs stay white' },
+              { value: 'navy', label: 'Navy', tip: 'Navy photo-act headlines; T&Cs stay white' },
             ]}
             onChange={(value) => setVariantControl('navy_headlines_bool', value === 'navy' ? 'true' : 'false')}
           />

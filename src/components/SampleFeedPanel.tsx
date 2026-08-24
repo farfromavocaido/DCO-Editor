@@ -212,7 +212,7 @@ export function SampleFeedPanel({ ensureOpen }: SampleFeedPanelProps) {
     const navy = Boolean(row?.navy_headlines_bool);
     return (
       <label key="navy_headlines_bool" className="sample-field">
-        <span>Ink (headlines + T&Cs)</span>
+        <span>Ink (headlines)</span>
         <select
           data-feed-field="navy_headlines_bool"
           value={navy ? 'navy' : 'white'}

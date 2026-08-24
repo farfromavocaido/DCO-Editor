@@ -454,7 +454,7 @@ const dynamicFieldMapping = () => [
   ['roundel_text_text', 'text', '', 'Optional roundel frame copy'],
   ['roundel_value_text', 'text', '', 'Optional large roundel value'],
   ['include_heading4_enum', 'boolean', 'true | false', 'Whether Act 4 / endframe headline is shown when heading4_text is set'],
-  ['navy_headlines_bool', 'boolean', 'true | false', 'Offers-0 only: navy (true) or white (false) photo-act headlines and T&Cs'],
+  ['navy_headlines_bool', 'boolean', 'true | false', 'Offers-0 only: navy (true) or white (false) photo-act headlines; T&Cs stay white'],
   ['background_image_label', 'text', '', 'Studio background set label'],
   ...sizeTextFieldDefinitions().map((field) => [
     field.name,

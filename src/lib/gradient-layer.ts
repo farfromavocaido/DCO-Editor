@@ -1,4 +1,4 @@
-export type GradientDirection = 'to-bottom' | 'to-right';
+export type GradientDirection = 'to-bottom' | 'to-right' | 'to-top';
 
 export type GradientConfig = {
   direction: GradientDirection;
@@ -10,15 +10,17 @@ export type GradientConfig = {
 export const HEADLINE_SCRIM_LAYER_ID = 'headline-scrim';
 export const HEADLINE_SCRIM_CSS_CLASS = 'headline-scrim';
 
-export const GRADIENT_DIRECTIONS = ['to-bottom', 'to-right'] as const;
+export const GRADIENT_DIRECTIONS = ['to-bottom', 'to-right', 'to-top'] as const;
 
 export const isGradientLayer = (layer: Record<string, unknown> | null | undefined) => (
   String(layer?.kind || '') === 'gradient'
 );
 
-export const cssGradientDirection = (direction: GradientDirection | string) => (
-  direction === 'to-right' ? 'to right' : 'to bottom'
-);
+export const cssGradientDirection = (direction: GradientDirection | string) => {
+  if (direction === 'to-right') return 'to right';
+  if (direction === 'to-top') return 'to top';
+  return 'to bottom';
+};
 
 const clampNumber = (value: unknown, min: number, max: number) => {
   const numeric = Number(value);
@@ -86,18 +88,18 @@ export const gradientBackgroundImage = (raw: GradientConfig | Record<string, unk
   ].join(' ');
 };
 
-/** Defaults for the offers-0 headline scrim by size. */
+/** Defaults for the offers-0 headline scrim by size (bottom-up behind the blue wave). */
 export const headlineScrimDefaultsForSize = (size: string): GradientConfig => {
   if (size === '300x250' || size === '160x600' || size === '300x600') {
     return {
-      direction: 'to-bottom',
+      direction: 'to-top',
       endPct: 25,
       startOpacity: 0.15,
       midpoint: 0.5,
     };
   }
   return {
-    direction: 'to-right',
+    direction: 'to-top',
     endPct: 30,
     startOpacity: 0.15,
     midpoint: 0.5,

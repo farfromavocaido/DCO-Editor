@@ -86,7 +86,7 @@ DOM stage mirroring the ad structure with compiled CSS, timeline scrubbing, canv
 
 Preview asset URLs are `/assets/...` — served by the Next route, mapped to `campaign/assets/...`.
 
-Offers-0 layers: `bg-blur` (`kind: "blur"`, `src/lib/blur-layer.ts`; stays hidden). Bluewave begins at stage1, moves to the exact prior committed settle (stage2) while green fades in, then returns to stage1 at the end (no opacity fade). Greenwave fades in at rest ~0.5s before Act 4 via offer-scoped clips. White logo (`logo-act3`) fades in from mid-open over 5%; blue logo (`logo-act1`) stays hidden. T&C lines fade out at `green_in`. Photo headlines keep offers-0 box geometry (white/navy ink); Act 4 + CTA are navy over green. `headline-scrim` (`kind: "gradient"`, `src/lib/gradient-layer.ts`) — visible under `white-headlines` only.
+Offers-0 layers: `bg-blur` (`kind: "blur"`, `src/lib/blur-layer.ts`; stays hidden). Bluewave begins at stage1, moves to the exact prior committed settle (stage2) while green fades in, then returns to stage1 at the end (no opacity fade). Greenwave fades in at rest ~0.5s before Act 4 via offer-scoped clips. White logo (`logo-act3`) fades in from mid-open over 5%; blue logo (`logo-act1`) stays hidden. T&C lines are always white and fade out at `green_in`. Photo headlines keep offers-0 box geometry (white/navy ink); Act 4 + CTA are navy over green. `headline-scrim` (`kind: "gradient"`, `src/lib/gradient-layer.ts`) — bottom-up (`to-top`), under the blue wave; visible under `white-headlines` only.
 
 ### Motion
 

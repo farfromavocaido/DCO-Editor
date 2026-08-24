@@ -171,7 +171,7 @@ test('offers-0 white logo from start; blue logo hidden with no multi fade', () =
   }
 });
 
-test('offers-0 headlines restore shared geometry; Act 4 colour only; T&Cs follow ink', () => {
+test('offers-0 headlines restore shared geometry; Act 4 colour only; T&Cs always white', () => {
   for (const size of Object.keys(creative.sizes)) {
     const sizeCreative = creative.sizes[size];
     assert.ok(
@@ -194,16 +194,31 @@ test('offers-0 headlines restore shared geometry; Act 4 colour only; T&Cs follow
       assert.equal(ctaRect?.props?.backgroundColor, NAVY, `${size} CTA navy fill`);
       assert.equal(ctaRect?.props?.color, 'rgb(255, 255, 255)', `${size} CTA white text`);
     }
-    const whiteTc = sizeCreative.variantRules.find((rule) => rule.id === 'white-headlines|terms-prices');
+    const whiteTc = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|terms-prices|color');
     const navyTc = sizeCreative.variantRules.find((rule) => rule.id === 'navy-headlines|terms-prices');
-    assert.equal(whiteTc?.props?.color, 'rgb(255, 255, 255)', `${size} white T&Cs`);
-    assert.equal(navyTc?.props?.color, NAVY, `${size} navy T&Cs`);
+    assert.equal(whiteTc?.props?.color, 'rgb(255, 255, 255)', `${size} offers-0 T&Cs always white`);
+    assert.equal(navyTc, undefined, `${size} T&Cs detached from navy ink`);
+    assert.ok(
+      !sizeCreative.variantRules.some((rule) => rule.id === 'white-headlines|terms-prices'),
+      `${size} no white-headlines T&C colour rule`,
+    );
     const roundelFrame = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|roundel-frame');
     const roundelCopy = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|roundel-copy');
     const roundelValue = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|roundel-value');
     assert.equal(roundelFrame?.props?.backgroundColor, NAVY, `${size} roundel navy fill`);
     assert.equal(roundelCopy?.props?.color, 'rgb(255, 255, 255)', `${size} roundel copy white`);
     assert.equal(roundelValue?.props?.color, 'rgb(255, 255, 255)', `${size} roundel value white`);
+  }
+});
+
+test('offers-0 headline scrim is bottom-up and under the bluewave', () => {
+  for (const size of Object.keys(creative.sizes)) {
+    const sizeCreative = creative.sizes[size];
+    const scrim = sizeCreative.layers.find((layer) => layer.id === 'headline-scrim');
+    const blue = sizeCreative.layers.find((layer) => layer.id === 'bluewave');
+    assert.ok(scrim && blue, size);
+    assert.equal(scrim.gradient?.direction, 'to-top', `${size} scrim to-top`);
+    assert.ok(scrim.zIndex < blue.zIndex, `${size} scrim behind bluewave`);
   }
 });
 

@@ -64,7 +64,7 @@ When roundel frame is **off**, the animation skips Act 3 and runs **1 → 2 → 
 ### `navy_headlines_bool`
 
 - **Type:** boolean
-- **Description:** **Offers-0 only.** When `true`, photo-act headlines **and T&Cs** use brand navy; when `false` (default), white. Act 4 is always navy over the green wave. Scrim shows only with white headlines.
+- **Description:** **Offers-0 only.** When `true`, photo-act headlines use brand navy; when `false` (default), white. T&Cs stay white. Act 4 is always navy over the green wave. Scrim shows only with white headlines.
 - **Default / fallback:** `false`
 - **Studio:** not yet on live ROI/NIR profiles — editor/preview ready; production feed cannot flip until Studio adds the column.
 

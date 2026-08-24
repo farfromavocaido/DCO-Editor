@@ -350,6 +350,7 @@ const clientInitialRow = (document: Record<string, unknown>) => {
     tc_type_enum: 'tcs_units',
     tc_terms_text: '*T&Cs apply',
     tc_units_text: 'Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat',
+    navy_headlines_bool: false,
     ...backgroundFieldsFromRow({}),
     ...fallback,
   };
@@ -2802,6 +2803,9 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
       .offer-block.is-hidden {
         display: none;
       }
+      [data-ink-field].is-hidden {
+        display: none;
+      }
       .preview-head {
         display: flex;
         align-items: center;
@@ -3051,6 +3055,12 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
             ${offerCountOptions}
           </select>
         </label>
+        <label data-ink-field class="${Number(initialRow.offer_count_num) === 0 ? '' : 'is-hidden'}"><span>Ink</span>
+          <select name="navy_headlines_bool">
+            <option value="false">White</option>
+            <option value="true">Navy</option>
+          </select>
+        </label>
 
         ${[1, 2, 3].map((index) => `
         <section class="offer-block" data-offer-block="${index}">
@@ -3210,6 +3220,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
               if (!isFinite(parsed)) return 1;
               return Math.min(3, Math.max(0, parsed));
             })(field('offer_count_num')),
+            navy_headlines_bool: field('navy_headlines_bool') === 'true',
             offer1_value_text: field('offer1_value_text'),
             offer1_sub_text: field('offer1_sub_text'),
             offer2_value_text: field('offer2_value_text'),
@@ -3237,6 +3248,13 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           });
         }
 
+        function syncInkControl(row) {
+          var inkField = document.querySelector('[data-ink-field]');
+          if (inkField) {
+            inkField.classList.toggle('is-hidden', Number(row.offer_count_num) !== 0);
+          }
+        }
+
         function syncHeadlineControls(row) {
           var heading3Field = document.querySelector('[data-heading3-field]');
           var heading3Input = document.querySelector('[name="heading3_text"]');
@@ -3258,6 +3276,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           setControl('heading3_text', row.heading3_text);
           setControl('heading4_text', row.heading4_text);
           setControl('offer_count_num', row.offer_count_num);
+          setControl('navy_headlines_bool', row.navy_headlines_bool === true || row.navy_headlines_bool === 'true' ? 'true' : 'false');
           setControl('offer1_value_text', row.offer1_value_text);
           setControl('offer1_sub_text', row.offer1_sub_text);
           setControl('offer2_value_text', row.offer2_value_text);
@@ -3274,6 +3293,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           setControl('tc_units_text', row.tc_units_text);
           syncBackgroundControl();
           syncOfferControls(row);
+          syncInkControl(row);
           syncHeadlineControls(row);
         }
 
@@ -3429,6 +3449,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         function updateAds() {
           var row = rowFromControls();
           syncOfferControls(row);
+          syncInkControl(row);
           syncHeadlineControls(row);
           loadActiveAd(false);
           fitAdFrames();

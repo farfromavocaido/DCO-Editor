@@ -694,6 +694,9 @@ test('renders the client preview page as one self-contained document shell', asy
   assert.match(html, /linear-gradient/);
   assert.match(html, /grid-template-columns: 82px minmax\(0, 1fr\)/);
   assert.match(html, /DCO Preview/);
+  assert.match(html, /name="navy_headlines_bool"/);
+  assert.match(html, /data-ink-field/);
+  assert.match(html, /function syncInkControl/);
   assert.match(html, /brand\/BGlogo_SVG\.svg/);
   assert.match(html, /use\.typekit\.net\/grv2rfu\.css/);
   assert.match(html, /font-family: "museo-sans"/);

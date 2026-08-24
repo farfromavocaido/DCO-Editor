@@ -17,7 +17,8 @@
 
 ### Changed
 
-- **offers-0 last frame** — blue wave holds at the multi-offer corner-peek for the whole ad; green wave starts at derived `green_in` (settles by Act 4). Photo headlines end at `green_in` so the last act is gone before the sweep. Ink (White/Navy) drives photo-act headlines **and T&Cs**; Act 4 stays navy; CTA is navy fill with white text. Sample row uses the SEAI grants legal line.
+- **offers-0 last frame** — blue wave holds at the multi-offer corner-peek for the whole ad; green wave starts at derived `green_in` (settles by Act 4). Photo headlines end at `green_in` so the last act is gone before the sweep. Ink (White/Navy) drives photo-act headlines **and T&Cs**; Act 4 stays navy; CTA and Act-3 offer roundel are navy fill with white text. Sample row uses the SEAI grants legal line.
+- **Client preview Ink** — GitHub Pages DCO preview exposes White/Navy when Offers = 0 (`navy_headlines_bool`).
 
 - **offers-0 T&Cs unlocked** — TopBar / QA / scopes honour `tc_type_enum`. Solo apply line uses the unit-rate box via `offers-0.tc-solo|terms-prices`.
 
@@ -104,7 +105,7 @@
 - **Statics preview cache bust** — ad iframe + ZIP URLs carry `?v=<generatedAt>`; shell polls `latest.json` (`cache: no-store`) and shows a banner when a newer package is on the server; **Reload latest** forces a fresh shell load so clients don’t need a manual hard refresh.
 - **Keepy Uppy Welcome layout = Hiker Welcome** — copied object positioning / boxes / classRules / variantRules / manualCss from Hiker across the full size suite; Keepy feed copy, background JPEGs, campaign id, and motion clips/timing kept.
 - **Hiker / Keepy Uppy Welcome sublines** — centred under each offer slot (`left: 0`, slot width, `textAlign`/`justifyContent: center`) across all sizes and offer counts. Top Discount and SSE DCO unchanged.
-- **offers-0 CTA / roundel colours** — CTA text navy on green fill for both rectangle and circular shapes; when the roundel is included, frame is green with navy copy/value (SSE DCO `offers-0|*` variantRules).
+- **offers-0 CTA / roundel colours** — CTA and Act-3 offer roundel use navy fill with white text (SSE DCO `offers-0|*` / `offers-0.cta-*` variantRules).
 - **Roundel copy text** — centred (H+V), shrink fit, font 24 / min 18 / maxLines 3 on the roundel-copy layer + `roundel-copy-only` rule (all sizes); offers-0 only keeps navy colour.
 - **Keepy Uppy Welcome Credit timing (pilot):** `durationS` **12**; second-based spine (wave ~0.5–0.7s / ~1s sweep; H1+offers ~1.2s then ~2s hold; H2 ~2s hold; H4+CTA ~3s; fade to 12s). Enter/sweep percents scaled so transition absolute times stay ~0.5s / ~1s (not sped up by the shorter clock). Roundel off / frames-3 path. Green/blue `waveSweep` and CTA pop/pulse use a sharper ease-out (`cubic-bezier(0.12, 0.92, 0.2, 1)` / pulse `0.15, 0.95, 0.25, 1`) so motion dashes in then settles without shortening durations. H2→H4 handoff mirrors H1→H2 (`act4_in` = `offers_exit` at **54%**); CTA starts as H4 settles (`cta_in` **58.2%**). **728x90** offers/pluses now end on `offers_exit` with H2 (was `wave2_in+5`, clashing with bluewave). **320x50** white logo (`logo-act3`) enters on `bn_blue_in` with the bluewave (was a stale absolute %). Same clock + motion timing applied to **Hiker Welcome** and **Keepy Uppy Top Discount** (geometry/layout preserved per campaign).
 - Hiker Welcome + Keepy Uppy Welcome/Discount: offer-slot enters now start with `act1_in` (stagger preserved), `enter_duration_pct` 5, and a softer ease-out (`cubic-bezier(0.25, 0.5, 0.35, 1)`). SSE DCO baseline unchanged.

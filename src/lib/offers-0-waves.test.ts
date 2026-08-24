@@ -86,6 +86,12 @@ test('offers-0 headlines restore shared geometry; Act 4 colour only; T&Cs follow
     const navyTc = sizeCreative.variantRules.find((rule) => rule.id === 'navy-headlines|terms-prices');
     assert.equal(whiteTc?.props?.color, 'rgb(255, 255, 255)', `${size} white T&Cs`);
     assert.equal(navyTc?.props?.color, NAVY, `${size} navy T&Cs`);
+    const roundelFrame = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|roundel-frame');
+    const roundelCopy = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|roundel-copy');
+    const roundelValue = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|roundel-value');
+    assert.equal(roundelFrame?.props?.backgroundColor, NAVY, `${size} roundel navy fill`);
+    assert.equal(roundelCopy?.props?.color, 'rgb(255, 255, 255)', `${size} roundel copy white`);
+    assert.equal(roundelValue?.props?.color, 'rgb(255, 255, 255)', `${size} roundel value white`);
   }
 });
 

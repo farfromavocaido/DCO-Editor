@@ -281,7 +281,7 @@ const clientVariantMatrix = (document: Record<string, unknown> = {}) => {
   const offerCounts = documentHasZeroOffers(document) ? [0, 1, 2, 3] : [1, 2, 3];
   const rows = [];
   for (const offerCount of offerCounts) {
-    const tcModes = offerCount === 0 ? ['tcs_only'] : ['tcs_only', 'tcs_units'];
+    const tcModes = ['tcs_only', 'tcs_units'];
     for (const tcMode of tcModes) {
       for (const ctaShape of ['roundel', 'rectangle']) {
         rows.push({ offerCount, tcMode, ctaShape });
@@ -452,7 +452,8 @@ const dynamicFieldMapping = () => [
   ['include_roundel_frame_bool', 'boolean', 'true | false', 'Show optional roundel frame; false keeps the three-act timing'],
   ['roundel_text_text', 'text', '', 'Optional roundel frame copy'],
   ['roundel_value_text', 'text', '', 'Optional large roundel value'],
-  ['include_heading4_enum', 'boolean', 'true | false', 'Studio Heading 4 flag (schema parity; not used for timing yet)'],
+  ['include_heading4_enum', 'boolean', 'true | false', 'Whether Act 4 / endframe headline is shown when heading4_text is set'],
+  ['navy_headlines_bool', 'boolean', 'true | false', 'Offers-0 only: navy (true) or white (false) photo-act headlines and T&Cs'],
   ['background_image_label', 'text', '', 'Studio background set label'],
   ...sizeTextFieldDefinitions().map((field) => [
     field.name,
@@ -584,15 +585,18 @@ ${[
   }).join('\n')}
     }`;
 
+const MULTI_OFFER_CLIP_SCOPES = ['offers-1', 'offers-2', 'offers-3'];
+
 const layerClipsForProfile = (
   layer: Record<string, unknown>,
   profile = 'frames-3',
-) => clipsForProfile(layer.clips, profile);
+  activeScopes: string[] = MULTI_OFFER_CLIP_SCOPES,
+) => clipsForProfile(layer.clips, profile, activeScopes);
 
 const staticRuleForLayer = (
   layer: Record<string, unknown>,
   beats: Record<string, number>,
-  options: { profile?: string; selectorPrefix?: string } = {},
+  options: { profile?: string; selectorPrefix?: string; activeScopes?: string[] } = {},
 ) => {
   // Gradients are static (no clips). Scoped re-emits under `.offers-0` would
   // restate base `visibility: hidden` and override the offers-0 show rule.
@@ -600,7 +604,7 @@ const staticRuleForLayer = (
   const profile = options.profile || 'frames-3';
   const clips = isBlurLayer(layer) && !blurIsActive(layer.blur)
     ? []
-    : layerClipsForProfile(layer, profile);
+    : layerClipsForProfile(layer, profile, options.activeScopes);
   const firstKeyframe = clips.length ? compileAnimationClips(clips, beats)[0] : null;
   if (isHeadlineLayer(layer)) {
     const initialTransform = firstKeyframe ? formatTransform(firstKeyframe) : null;
@@ -659,11 +663,17 @@ const animationCssForLayer = (
   layer: Record<string, unknown>,
   beats: Record<string, number>,
   durationS: number,
-  options: { suffix?: string; selectorPrefix?: string; profile?: string; loop?: boolean } = {},
+  options: {
+    suffix?: string;
+    selectorPrefix?: string;
+    profile?: string;
+    loop?: boolean;
+    activeScopes?: string[];
+  } = {},
 ) => {
   const profile = options.profile || 'frames-3';
   if (isBlurLayer(layer) && !blurIsActive(layer.blur)) return '';
-  const clips = layerClipsForProfile(layer, profile);
+  const clips = layerClipsForProfile(layer, profile, options.activeScopes);
   if (!clips.length) return '';
   const name = animationNameForLayer({ ...layer, clips }, options.suffix || '');
   const keyframes = compileAnimationClips(clips, beats);
@@ -1030,18 +1040,9 @@ const outlinedTextCss = `
     }
 `;
 
-const stateClasses = (row: Record<string, unknown>) => {
-  const count = clampOfferCount(row.offer_count_num);
-  const tc = count === 0 || row.tc_type_enum !== 'tcs_units' ? 'tc-solo' : 'tc-prices';
-  const includeRoundel = row.include_roundel_frame_bool === true
-    || row.include_roundel_frame === true
-    || ['true', '1', 'yes', 'on'].includes(String(row.include_roundel_frame_bool || row.include_roundel_frame || '').trim().toLowerCase());
-  const cta = includeRoundel || ['rectangle', 'rect'].includes(String(row.cta_type_enum || '')) ? 'cta-rect' : 'cta-roundel';
-  const frame = includeRoundel ? 'frames-4' : 'frames-3';
-  const roundelFrame = includeRoundel ? 'roundel-frame-on' : 'roundel-frame-off';
-  const roundelMode = includeRoundel && String(row.roundel_value_text || '').trim() ? 'roundel-split' : 'roundel-copy-only';
-  return `offers-${count} ${tc} ${cta} ${frame} ${roundelFrame} ${roundelMode}`;
-};
+const stateClasses = (row: Record<string, unknown>) => (
+  activeScopesFromControls(controlsFromFeedRow(row)).join(' ')
+);
 
 const runtimeScript = (
   fitRules: Array<Record<string, unknown>> = [],
@@ -1121,7 +1122,7 @@ const runtimeScript = (
             'cta_type_enum', 'cta_text',
             'include_roundel_frame_bool', 'include_roundel_frame',
             'roundel_text_text', 'roundel_value_text',
-            'include_heading4_enum', 'background_image_label'
+            'include_heading4_enum', 'navy_headlines_bool', 'background_image_label'
           ].forEach(function(key) {
             out[key] = fieldValue(row[key]);
           });
@@ -1283,15 +1284,23 @@ const runtimeScript = (
             'cta-roundel', 'cta-rect',
             'frames-3', 'frames-4',
             'roundel-frame-off', 'roundel-frame-on',
-            'roundel-copy-only', 'roundel-split'
+            'roundel-copy-only', 'roundel-split',
+            'navy-headlines', 'white-headlines'
           );
           var offerCount = deriveOfferCount(data);
           root.classList.add('offers-' + offerCount);
-          root.classList.add(offerCount === 0 || data.tc_type_enum !== 'tcs_units' ? 'tc-solo' : 'tc-prices');
+          root.classList.add(data.tc_type_enum !== 'tcs_units' ? 'tc-solo' : 'tc-prices');
           root.classList.add(includeRoundel || data.cta_type_enum === 'rectangle' || data.cta_type_enum === 'rect' ? 'cta-rect' : 'cta-roundel');
           root.classList.add(includeRoundel ? 'frames-4' : 'frames-3');
           root.classList.add(includeRoundel ? 'roundel-frame-on' : 'roundel-frame-off');
           root.classList.add(includeRoundel && data.roundel_value_text.trim() ? 'roundel-split' : 'roundel-copy-only');
+          if (offerCount === 0) {
+            var navyHeadlines = data.navy_headlines_bool === true
+              || data.navy_headlines_bool === 'true'
+              || data.navy_headlines_bool === 1
+              || data.navy_headlines_bool === '1';
+            root.classList.add(navyHeadlines ? 'navy-headlines' : 'white-headlines');
+          }
           setText('#headline-act1', data.heading1_text);
           setText('#headline-act2', data.heading2_text);
           setText('#headline-act3', data.heading3_text);
@@ -1413,8 +1422,8 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
         .filter(Boolean);
     })
     .join('\n\n');
-  // Zero-offers remaps blue-wave / logo / early headline beats; emit scoped
-  // animation overrides so exported HTML matches editor preview.
+  // Zero-offers remaps early headline beats + offer-scoped wave clips; emit
+  // scoped animation overrides so exported HTML matches editor preview.
   const offers0Scopes = documentHasZeroOffers(document)
     ? [
       { suffix: 'offers-0', selectorPrefix: '.offers-0 ', profile: 'frames-3', beats: applyOffers0BeatOverlay(beatsForFrameScope(document, 'frames-3')) },
@@ -1428,6 +1437,7 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
         selectorPrefix: item.selectorPrefix,
         profile: item.profile,
         loop,
+        activeScopes: ['offers-0'],
       }))
       .filter(Boolean))
     .join('\n\n');
@@ -1436,6 +1446,7 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
       .map((layer) => staticRuleForLayer(layer, item.beats, {
         profile: item.profile,
         selectorPrefix: item.selectorPrefix,
+        activeScopes: ['offers-0'],
       }))
       .filter(Boolean))
     .join('\n\n');

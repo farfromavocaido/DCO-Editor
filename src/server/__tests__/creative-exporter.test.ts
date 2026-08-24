@@ -32,7 +32,7 @@ const truthyFeedBool = (value: unknown) => value === true
 const expectedStatePatternForRow = (row: Record<string, unknown>) => {
   const parsed = Number.parseInt(String(row.offer_count_num ?? ''), 10);
   const offerCount = Number.isFinite(parsed) ? Math.min(3, Math.max(0, parsed)) : 1;
-  const tcScope = offerCount === 0 || row.tc_type_enum !== 'tcs_units' ? 'tc-solo' : 'tc-prices';
+  const tcScope = row.tc_type_enum !== 'tcs_units' ? 'tc-solo' : 'tc-prices';
   const includeRoundel = truthyFeedBool(row.include_roundel_frame_bool);
   const ctaScope = includeRoundel || ['rectangle', 'rect'].includes(String(row.cta_type_enum || ''))
     ? 'cta-rect'
@@ -41,7 +41,10 @@ const expectedStatePatternForRow = (row: Record<string, unknown>) => {
   const roundelCopyScope = includeRoundel && String(row.roundel_value_text || '').trim()
     ? 'roundel-split'
     : 'roundel-copy-only';
-  return new RegExp(`offers-${offerCount} ${tcScope} ${ctaScope} ${frameScope} ${roundelCopyScope}`);
+  const headlineInk = offerCount === 0
+    ? (truthyFeedBool(row.navy_headlines_bool) ? ' navy-headlines' : ' white-headlines')
+    : '';
+  return new RegExp(`offers-${offerCount} ${tcScope} ${ctaScope} ${frameScope} ${roundelCopyScope}${headlineInk}`);
 };
 
 test('static outline delivery wires IAB clickTag and omits Enabler exit', async () => {
@@ -167,7 +170,7 @@ test('exports offers-0 headline scrim gradient above bg and below waves', async 
 
   assert.match(htmlPortrait, /id="headline-scrim"/);
   assert.match(htmlPortrait, /linear-gradient\(to bottom, rgba\(0, 0, 0,/);
-  assert.match(htmlPortrait, /\.offers-0 \.headline-scrim\s*\{[^}]*visibility:\s*visible/);
+  assert.match(htmlPortrait, /\.white-headlines \.headline-scrim\s*\{[^}]*visibility:\s*visible/);
   assert.match(htmlPortrait, /\.headline-scrim\s*\{[^}]*visibility:\s*hidden/);
 
   assert.match(htmlLandscape, /linear-gradient\(to right, rgba\(0, 0, 0,/);
@@ -179,7 +182,7 @@ test('exports offers-0 headline scrim gradient above bg and below waves', async 
   assert.ok(byId.bluewave.zIndex > byId['headline-scrim'].zIndex);
 });
 
-test('exports offers-0 background blur over the photo with profile fades', async () => {
+test('exports offers-0 background blur layer but keeps it hidden', async () => {
   const document = await readCreativeDocument();
   const html = await renderStudioReadyHtml(document, '300x250');
   const htmlBanner = await renderStudioReadyHtml(document, '320x50');
@@ -187,11 +190,7 @@ test('exports offers-0 background blur over the photo with profile fades', async
   assert.match(html, /id="bg-blur"/);
   assert.match(html, /backdrop-filter:\s*blur\(3px\)/);
   assert.match(html, /-webkit-backdrop-filter:\s*blur\(3px\)/);
-  assert.match(html, /\.offers-0 \.bg-blur\s*\{[^}]*visibility:\s*visible/);
-  // frames-4 enter with roundel; frames-3 enter with CTA
-  assert.match(html, /\.frames-4 \.bg-blur/);
-  assert.match(html, /@keyframes bg-blur-bg-blur-fade-frames-4/);
-  assert.match(html, /@keyframes bg-blur-bg-blur-fade-frames-3/);
+  assert.match(html, /\.offers-0 \.bg-blur\s*\{[^}]*visibility:\s*hidden/);
 
   assert.match(htmlBanner, /id="bg-blur"/);
 

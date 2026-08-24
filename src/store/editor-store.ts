@@ -173,6 +173,7 @@ export const useEditorStore = create<any>((set, get) => ({
   includeRoundelFrame: false,
   frameCount: 3,
   roundelMode: 'copy-only',
+  navyHeadlines: false,
   percent: 19,
   isPlaying: false,
   feedProfileName: '',
@@ -227,7 +228,7 @@ export const useEditorStore = create<any>((set, get) => ({
   togglePlaying: () => set({ isPlaying: !get().isPlaying }),
 
   activeScopes: () => {
-    const { offerCount, tcMode, ctaShape, includeRoundelFrame, frameCount, roundelMode } = get();
+    const { offerCount, tcMode, ctaShape, includeRoundelFrame, frameCount, roundelMode, navyHeadlines } = get();
     return activeScopesFromControls({
       offerCount,
       tcMode,
@@ -235,6 +236,7 @@ export const useEditorStore = create<any>((set, get) => ({
       includeRoundelFrame,
       frameCount,
       roundelMode,
+      navyHeadlines,
     });
   },
 
@@ -249,6 +251,7 @@ export const useEditorStore = create<any>((set, get) => ({
       includeRoundelFrame: controls.includeRoundelFrame,
       frameCount: controls.frameCount,
       roundelMode: controls.roundelMode,
+      navyHeadlines: controls.navyHeadlines,
     });
     get().reconcileOfferSelection();
   },
@@ -389,8 +392,9 @@ export const useEditorStore = create<any>((set, get) => ({
     const state = get();
     const layer = state.selectedLayer();
     if (!layer) return null;
-    const profile = activeFrameScope(state.activeScopes());
-    const clips = clipsForProfile(layer.clips || [], profile);
+    const scopes = state.activeScopes();
+    const profile = activeFrameScope(scopes);
+    const clips = clipsForProfile(layer.clips || [], profile, scopes);
     return clips.find((clip) => clip.id === state.selectedClipId) || clips[0] || null;
   },
 
@@ -1544,6 +1548,7 @@ export const useEditorStore = create<any>((set, get) => ({
       includeRoundelFrame: get().includeRoundelFrame,
       frameCount: get().frameCount,
       roundelMode: get().roundelMode,
+      navyHeadlines: get().navyHeadlines,
       selectedLayerId: get().selectedLayerId,
       selectedTargetId: get().selectedTargetId,
       selectedTargetIds: get().selectedTargetIds,
@@ -1674,6 +1679,7 @@ export const useEditorStore = create<any>((set, get) => ({
         includeRoundelFrame: original.includeRoundelFrame,
         frameCount: original.frameCount,
         roundelMode: original.roundelMode,
+        navyHeadlines: original.navyHeadlines,
         selectedLayerId: original.selectedLayerId,
         selectedTargetId: original.selectedTargetId,
         selectedTargetIds: original.selectedTargetIds,

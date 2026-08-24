@@ -171,17 +171,18 @@ export function QaReviewApp() {
 
   // Roundel-on forces rectangular CTA at runtime (same as agency HTML).
   const effectiveCtaShape: CtaShape = includeRoundelFrame ? 'rectangle' : ctaShape;
-  const effectiveTcMode: TcMode = offerCount === 0 ? 'tcs_only' : tcMode;
+  const [navyHeadlines, setNavyHeadlines] = useState(false);
 
   const sessionKey = useMemo(() => (
     [
       viewSize,
       `o${offerCount}`,
       includeRoundelFrame ? 'roundel' : '3acts',
-      effectiveTcMode,
+      tcMode,
       effectiveCtaShape,
-    ].join('__')
-  ), [viewSize, offerCount, includeRoundelFrame, effectiveTcMode, effectiveCtaShape]);
+      offerCount === 0 ? (navyHeadlines ? 'navy' : 'white') : '',
+    ].filter(Boolean).join('__')
+  ), [viewSize, offerCount, includeRoundelFrame, tcMode, effectiveCtaShape, navyHeadlines]);
 
   const samples = viewSize ? (holdsBySize[viewSize]?.samples || []) : [];
   const hold = samples[Math.min(holdIndex, Math.max(0, samples.length - 1))] || null;
@@ -199,9 +200,11 @@ export function QaReviewApp() {
       Default: false,
       offer_count_num: offerCount,
       include_roundel_frame_bool: includeRoundelFrame,
-      tc_type_enum: effectiveTcMode,
+      tc_type_enum: tcMode,
       cta_type_enum: effectiveCtaShape,
       cta_text: copyFields.cta_text || ctaFallback,
+      navy_headlines_bool: offerCount === 0 ? navyHeadlines : false,
+      include_heading4_enum: true,
       ...copyFields,
     };
     for (const size of CREATIVE_AD_SIZES) {
@@ -217,8 +220,9 @@ export function QaReviewApp() {
     sessionKey,
     offerCount,
     includeRoundelFrame,
-    effectiveTcMode,
+    tcMode,
     effectiveCtaShape,
+    navyHeadlines,
     copyFields,
   ]);
 
@@ -631,17 +635,27 @@ export function QaReviewApp() {
 
             <QaSegmentedControl
               label="T&Cs"
-              tip={offerCount === 0
-                ? 'T&Cs are hidden for the zero-offers variant'
-                : 'Terms and conditions layout'}
-              value={effectiveTcMode}
-              disabled={offerCount === 0}
+              tip="Terms and conditions layout"
+              value={tcMode}
               options={[
                 { value: 'tcs_only', label: 'Solo', tip: 'T&Cs only' },
                 { value: 'tcs_units', label: 'Prices', tip: 'T&Cs with unit rates' },
               ]}
               onChange={(value) => setTcMode(value as TcMode)}
             />
+
+            {offerCount === 0 ? (
+              <QaSegmentedControl
+                label="Ink"
+                tip="Headline + T&C colour on photo acts (offers-0 only)"
+                value={navyHeadlines ? 'navy' : 'white'}
+                options={[
+                  { value: 'white', label: 'White', tip: 'White headlines and T&Cs (default)' },
+                  { value: 'navy', label: 'Navy', tip: 'Navy headlines and T&Cs for brighter imagery' },
+                ]}
+                onChange={(value) => setNavyHeadlines(value === 'navy')}
+              />
+            ) : null}
 
             <QaSegmentedControl
               label="CTA"

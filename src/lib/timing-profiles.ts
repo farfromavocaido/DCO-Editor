@@ -55,20 +55,33 @@ export const beatsForFrameScope = (
   };
 };
 
-/** Zero-offers: blue wave + white logo from start; headlines no longer wait on greenwave. */
+/**
+ * Zero-offers: early photo headlines only. Wave motion is offer-scoped on
+ * greenwave/bluewave clips (corner bluewave hold + Act 4 greenwave enter) —
+ * do not zero wave2_in / bn_blue_in here.
+ *
+ * `green_in` is derived so the greenwave sweep finishes at Act 4 (`act4_in`).
+ * Photo headlines equal-split ends at `green_in` so the last act is gone
+ * before the sweep starts.
+ */
 export const OFFERS_0_BEAT_OVERLAY = {
-  bn_blue_in: 0,
-  wave2_in: 0,
-  bn_white_in: 6,
   act1_begin: 4,
   act1_in: 7,
 };
 
-export const applyOffers0BeatOverlay = (beats: Record<string, number> = {}) => ({
-  ...beats,
-  ...OFFERS_0_BEAT_OVERLAY,
-});
+/** Max greenwave sweep used to derive `green_in` (matches largest size clip). */
+export const OFFERS_0_GREEN_SWEEP_PCT = 7;
 
+export const applyOffers0BeatOverlay = (beats: Record<string, number> = {}) => {
+  const next = {
+    ...beats,
+    ...OFFERS_0_BEAT_OVERLAY,
+  };
+  const act4 = Number(next.act4_in ?? next.bn_cta_in ?? next.cta_in ?? 100);
+  const greenIn = Math.round((act4 - OFFERS_0_GREEN_SWEEP_PCT) * 1000) / 1000;
+  next.green_in = Math.max(0, Math.min(100, greenIn));
+  return next;
+};
 export const beatsForScopes = (
   document: Record<string, unknown> | null,
   activeScopes: string[] = [],

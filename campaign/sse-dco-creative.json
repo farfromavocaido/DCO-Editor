@@ -324,6 +324,16 @@
         "type": "image",
         "group": "Assets",
         "description": "Optional background image URL for 970x250. Leave blank to use the packaged default."
+      },
+      {
+        "name": "include_heading4_enum",
+        "type": "boolean",
+        "label": "Include heading 4"
+      },
+      {
+        "name": "navy_headlines_bool",
+        "type": "boolean",
+        "label": "Navy headlines"
       }
     ],
     "sampleRows": [
@@ -468,7 +478,7 @@
         "heading1_text": "Your 'how hard can it be' energy",
         "heading2_text": "deserves a different kind of energy",
         "heading3_text": "",
-        "heading4_text": "",
+        "heading4_text": "A different kind of energy",
         "offer_count_num": 0,
         "offer1_value_text": "",
         "offer1_sub_text": "",
@@ -477,11 +487,11 @@
         "offer3_value_text": "",
         "offer3_sub_text": "",
         "tc_type_enum": "tcs_only",
-        "tc_terms_text": "",
+        "tc_terms_text": "Grants are provided by the Government of Ireland through the Sustainable Energy Authority of Ireland (SEAI).",
         "tc_units_text": "",
         "cta_type_enum": "rectangle",
         "cta_text": "Find out more",
-        "include_roundel_frame_bool": true,
+        "include_roundel_frame_bool": false,
         "roundel_text_text": "Saving you up to",
         "roundel_value_text": "999",
         "background_image_url_160x600": {
@@ -501,7 +511,9 @@
         },
         "background_image_url_970x250": {
           "Url": ""
-        }
+        },
+        "include_heading4_enum": true,
+        "navy_headlines_bool": false
       }
     ],
     "studioProfileId": 10964545,
@@ -691,7 +703,28 @@
                 "end_x": -50,
                 "hold_y": 0,
                 "sweep_duration_pct": 6
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "greenwave-waveSweep-offers-0",
+              "label": "Greenwave waveSweep (offers-0 Act 4)",
+              "preset": "waveSweep",
+              "start": "green_in",
+              "end": "end-2",
+              "params": {
+                "start_x": 370,
+                "end_x": -50,
+                "hold_y": 0,
+                "sweep_duration_pct": 6
+              },
+              "scopes": [
+                "offers-0"
+              ]
             }
           ]
         },
@@ -722,6 +755,28 @@
                 "hold_y": 0,
                 "fade_pct": 2,
                 "sweep_duration_pct": 7
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "bluewave-hold-offers-0",
+              "label": "Bluewave hold (offers-0 corner peek)",
+              "preset": "waveSweep",
+              "start": "start",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "start_x": 0,
+                "end_x": 0,
+                "hold_y": 0,
+                "fade_pct": 2,
+                "sweep_duration_pct": 1
               }
             }
           ]
@@ -1241,7 +1296,11 @@
                 "ease_in": "ease-out"
               }
             }
-          ]
+          ],
+          "fit": {
+            "maxLines": 1,
+            "minFontSize": 4
+          }
         },
         {
           "id": "unit-rate-prices",
@@ -1943,6 +2002,24 @@
           "editable": true
         },
         {
+          "id": "offers-0|sse-headline",
+          "scope": "offers-0",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "left": 8,
+            "top": 12,
+            "width": 125,
+            "height": 34,
+            "fontSize": 14,
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
           "id": "offers-2|sse-headline",
           "scope": "offers-2",
           "cssClass": "sse-headline",
@@ -2045,21 +2122,8 @@
           "editable": true
         },
         {
-          "id": "offers-0|greenwave|visibility",
-          "scope": "offers-0",
-          "layerId": "greenwave",
-          "cssClass": "greenwave",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|headline-scrim|visibility",
-          "scope": "offers-0",
+          "id": "white-headlines|headline-scrim|visibility",
+          "scope": "white-headlines",
           "layerId": "headline-scrim",
           "cssClass": "headline-scrim",
           "when": {
@@ -2079,7 +2143,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "visibility": "visible"
+            "visibility": "hidden"
           },
           "editable": true
         },
@@ -2097,86 +2161,90 @@
           "editable": true
         },
         {
-          "id": "offers-0|terms-solo|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-solo",
-          "cssClass": "terms-solo",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|terms-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-prices",
-          "cssClass": "terms-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|unit-rate-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "unit-rate-prices",
-          "cssClass": "unit-rate-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-solo-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-solo-group",
-          "cssClass": "tc-solo-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-prices-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-prices-group",
-          "cssClass": "tc-prices-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|sse-headline",
-          "scope": "offers-0",
+          "id": "white-headlines|sse-headline",
+          "scope": "white-headlines",
           "cssClass": "sse-headline",
           "when": {
             "offer_count_num": 0
           },
           "props": {
             "color": "rgb(255, 255, 255)",
-            "left": 8,
-            "top": 12,
-            "width": 125,
-            "height": 34,
-            "fontSize": 14,
-            "display": "flex",
-            "alignItems": "center"
+            "top": 9
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|sse-headline",
+          "scope": "navy-headlines",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|terms-prices",
+          "scope": "white-headlines",
+          "cssClass": "terms-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|terms-prices",
+          "scope": "navy-headlines",
+          "cssClass": "terms-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|terms-solo",
+          "scope": "white-headlines",
+          "cssClass": "terms-solo",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|terms-solo",
+          "scope": "navy-headlines",
+          "cssClass": "terms-solo",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|unit-rate-prices",
+          "scope": "white-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|unit-rate-prices",
+          "scope": "navy-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|headline-act4",
+          "scope": "offers-0",
+          "layerId": "headline-act4",
+          "props": {
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -2189,10 +2257,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 106,
-            "top": -1,
-            "width": 574,
-            "height": 60
+            "left": -80,
+            "top": -20,
+            "width": 584,
+            "height": 90
           },
           "editable": true
         },
@@ -2205,10 +2273,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 260,
-            "top": 14,
-            "width": 55,
-            "height": 21
+            "left": 275,
+            "top": 15,
+            "width": 40,
+            "height": 20
           },
           "editable": true
         },
@@ -2218,14 +2286,14 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 65,
-            "top": 23,
+            "left": 151,
+            "top": 25,
             "width": 73,
             "height": 18,
-            "borderRadius": 4,
             "fontSize": 9,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "borderRadius": 4,
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -2235,16 +2303,86 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 65,
+            "left": 172,
             "top": 7,
             "width": 56,
             "height": 56,
-            "borderRadius": "50%",
             "fontSize": 12,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "borderRadius": "50%",
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
+        },
+        {
+          "id": "navy-headlines|headline-scrim|visibility",
+          "scope": "navy-headlines",
+          "layerId": "headline-scrim",
+          "cssClass": "headline-scrim",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-solo|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-solo",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|tc-solo-group|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "tc-solo-group",
+          "cssClass": "tc-solo-group",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-prices",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-prices",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "left": 6,
+            "top": 41,
+            "width": 305,
+            "height": 9,
+            "fontSize": 6,
+            "visibility": "visible",
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 1,
+            "minFontSize": 5,
+            "align": "bottom"
+          }
         }
       ],
       "classRules": [
@@ -2459,7 +2597,28 @@
                 "end_x": -110,
                 "hold_y": 0,
                 "sweep_duration_pct": 7
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "greenwave-waveSweep-offers-0",
+              "label": "Greenwave waveSweep (offers-0 Act 4)",
+              "preset": "waveSweep",
+              "start": "green_in",
+              "end": "end-2",
+              "params": {
+                "start_x": 840,
+                "end_x": -110,
+                "hold_y": 0,
+                "sweep_duration_pct": 7
+              },
+              "scopes": [
+                "offers-0"
+              ]
             }
           ]
         },
@@ -2489,6 +2648,28 @@
                 "end_x": 0,
                 "hold_y": 0,
                 "fade_pct": 2
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "bluewave-hold-offers-0",
+              "label": "Bluewave hold (offers-0 corner peek)",
+              "preset": "waveSweep",
+              "start": "start",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "start_x": 0,
+                "end_x": 0,
+                "hold_y": 0,
+                "fade_pct": 2,
+                "sweep_duration_pct": 1
               }
             }
           ]
@@ -3673,6 +3854,20 @@
           "editable": true
         },
         {
+          "id": "offers-0|sse-headline",
+          "scope": "offers-0",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "left": 19,
+            "top": 16,
+            "fontSize": 22
+          },
+          "editable": true
+        },
+        {
           "id": "offers-2|sse-headline",
           "scope": "offers-2",
           "cssClass": "sse-headline",
@@ -3773,21 +3968,8 @@
           "editable": true
         },
         {
-          "id": "offers-0|greenwave|visibility",
-          "scope": "offers-0",
-          "layerId": "greenwave",
-          "cssClass": "greenwave",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|headline-scrim|visibility",
-          "scope": "offers-0",
+          "id": "white-headlines|headline-scrim|visibility",
+          "scope": "white-headlines",
           "layerId": "headline-scrim",
           "cssClass": "headline-scrim",
           "when": {
@@ -3807,7 +3989,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "visibility": "visible"
+            "visibility": "hidden"
           },
           "editable": true
         },
@@ -3825,82 +4007,89 @@
           "editable": true
         },
         {
-          "id": "offers-0|terms-solo|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-solo",
-          "cssClass": "terms-solo",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|terms-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-prices",
-          "cssClass": "terms-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|unit-rate-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "unit-rate-prices",
-          "cssClass": "unit-rate-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-solo-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-solo-group",
-          "cssClass": "tc-solo-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-prices-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-prices-group",
-          "cssClass": "tc-prices-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|sse-headline",
-          "scope": "offers-0",
+          "id": "white-headlines|sse-headline",
+          "scope": "white-headlines",
           "cssClass": "sse-headline",
           "when": {
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)",
-            "left": 19,
-            "top": 16,
-            "fontSize": 22
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|sse-headline",
+          "scope": "navy-headlines",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|terms-prices",
+          "scope": "white-headlines",
+          "cssClass": "terms-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|terms-prices",
+          "scope": "navy-headlines",
+          "cssClass": "terms-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|terms-solo",
+          "scope": "white-headlines",
+          "cssClass": "terms-solo",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|terms-solo",
+          "scope": "navy-headlines",
+          "cssClass": "terms-solo",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|unit-rate-prices",
+          "scope": "white-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|unit-rate-prices",
+          "scope": "navy-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|headline-act4",
+          "scope": "offers-0",
+          "layerId": "headline-act4",
+          "props": {
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -3913,7 +4102,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 416,
+            "left": 455,
             "top": -99,
             "width": 1000,
             "height": 296
@@ -3942,14 +4131,14 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 131,
-            "top": 25,
+            "left": 279,
+            "top": 27,
             "width": 157,
             "height": 37,
-            "borderRadius": 6,
             "fontSize": 18,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "borderRadius": 6,
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -3959,16 +4148,86 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 131,
-            "top": -11,
+            "left": 293,
+            "top": -12,
             "width": 115,
             "height": 115,
+            "fontSize": 24,
             "borderRadius": "50%",
-            "fontSize": 18,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
+        },
+        {
+          "id": "navy-headlines|headline-scrim|visibility",
+          "scope": "navy-headlines",
+          "layerId": "headline-scrim",
+          "cssClass": "headline-scrim",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-solo|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-solo",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|tc-solo-group|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "tc-solo-group",
+          "cssClass": "tc-solo-group",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-prices",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-prices",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "left": 20,
+            "top": 69,
+            "width": 696,
+            "height": 19,
+            "fontSize": 8,
+            "visibility": "visible",
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 8,
+            "align": "bottom"
+          }
         }
       ],
       "classRules": [
@@ -4196,7 +4455,28 @@
                 "start_x": 0,
                 "end_x": -700,
                 "hold_y": 0
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "greenwave-waveSweep-offers-0",
+              "label": "Greenwave waveSweep (offers-0 Act 4)",
+              "preset": "waveSweep",
+              "start": "green_in",
+              "end": "end-2",
+              "params": {
+                "start_x": 0,
+                "end_x": -700,
+                "hold_y": 0,
+                "sweep_duration_pct": 7
+              },
+              "scopes": [
+                "offers-0"
+              ]
             }
           ]
         },
@@ -4226,6 +4506,28 @@
                 "end_x": 88,
                 "hold_y": 0,
                 "fade_pct": 2
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "bluewave-hold-offers-0",
+              "label": "Bluewave hold (offers-0 corner peek)",
+              "preset": "waveSweep",
+              "start": "start",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "start_x": 88,
+                "end_x": 88,
+                "hold_y": 0,
+                "fade_pct": 2,
+                "sweep_duration_pct": 1
               }
             }
           ]
@@ -5403,6 +5705,24 @@
           "editable": true
         },
         {
+          "id": "offers-0|sse-headline",
+          "scope": "offers-0",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "top": 14,
+            "left": 15,
+            "width": 232,
+            "height": 66,
+            "fontSize": 24,
+            "textAlign": "left",
+            "justifyContent": "flex-start"
+          },
+          "editable": true
+        },
+        {
           "id": "offers-2|sse-headline",
           "scope": "offers-2",
           "cssClass": "sse-headline",
@@ -5513,21 +5833,8 @@
           "editable": true
         },
         {
-          "id": "offers-0|greenwave|visibility",
-          "scope": "offers-0",
-          "layerId": "greenwave",
-          "cssClass": "greenwave",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|headline-scrim|visibility",
-          "scope": "offers-0",
+          "id": "white-headlines|headline-scrim|visibility",
+          "scope": "white-headlines",
           "layerId": "headline-scrim",
           "cssClass": "headline-scrim",
           "when": {
@@ -5547,7 +5854,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "visibility": "visible"
+            "visibility": "hidden"
           },
           "editable": true
         },
@@ -5565,86 +5872,89 @@
           "editable": true
         },
         {
-          "id": "offers-0|terms-solo|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-solo",
-          "cssClass": "terms-solo",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|terms-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-prices",
-          "cssClass": "terms-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|unit-rate-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "unit-rate-prices",
-          "cssClass": "unit-rate-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-solo-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-solo-group",
-          "cssClass": "tc-solo-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-prices-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-prices-group",
-          "cssClass": "tc-prices-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|sse-headline",
-          "scope": "offers-0",
+          "id": "white-headlines|sse-headline",
+          "scope": "white-headlines",
           "cssClass": "sse-headline",
           "when": {
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)",
-            "top": 14,
-            "left": 15,
-            "width": 232,
-            "height": 66,
-            "fontSize": 24,
-            "textAlign": "left",
-            "justifyContent": "flex-start"
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|sse-headline",
+          "scope": "navy-headlines",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|terms-prices",
+          "scope": "white-headlines",
+          "cssClass": "terms-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|terms-prices",
+          "scope": "navy-headlines",
+          "cssClass": "terms-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|terms-solo",
+          "scope": "white-headlines",
+          "cssClass": "terms-solo",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|terms-solo",
+          "scope": "navy-headlines",
+          "cssClass": "terms-solo",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|unit-rate-prices",
+          "scope": "white-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|unit-rate-prices",
+          "scope": "navy-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|headline-act4",
+          "scope": "offers-0",
+          "layerId": "headline-act4",
+          "props": {
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -5657,10 +5967,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 50,
-            "top": 54,
-            "width": 173,
-            "height": 205
+            "left": -1,
+            "top": 0,
+            "width": 214,
+            "height": 253
           },
           "editable": true
         },
@@ -5673,10 +5983,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 211,
-            "top": 214,
-            "width": 78,
-            "height": 28
+            "left": 175,
+            "top": 200,
+            "width": 110,
+            "height": 40
           },
           "editable": true
         },
@@ -5686,14 +5996,14 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 44,
-            "top": 70,
+            "left": 90,
+            "top": 112,
             "width": 120,
             "height": 36,
-            "borderRadius": 4,
             "fontSize": 12,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "borderRadius": 4,
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -5703,16 +6013,86 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 44,
-            "top": 70,
+            "left": 49,
+            "top": 100,
             "width": 80,
             "height": 80,
-            "borderRadius": "50%",
             "fontSize": 13,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "borderRadius": "50%",
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
+        },
+        {
+          "id": "navy-headlines|headline-scrim|visibility",
+          "scope": "navy-headlines",
+          "layerId": "headline-scrim",
+          "cssClass": "headline-scrim",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-solo|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-solo",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|tc-solo-group|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "tc-solo-group",
+          "cssClass": "tc-solo-group",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-prices",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-prices",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "left": 10,
+            "top": 215,
+            "width": 135,
+            "height": 29,
+            "fontSize": 10,
+            "visibility": "visible",
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 10,
+            "align": "bottom"
+          }
         }
       ],
       "classRules": [
@@ -5916,7 +6296,28 @@
                 "end_x": -350,
                 "hold_y": 0,
                 "sweep_duration_pct": 6
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "greenwave-waveSweep-offers-0",
+              "label": "Greenwave waveSweep (offers-0 Act 4)",
+              "preset": "waveSweep",
+              "start": "green_in",
+              "end": "end-2",
+              "params": {
+                "start_x": 430,
+                "end_x": -350,
+                "hold_y": 0,
+                "sweep_duration_pct": 6
+              },
+              "scopes": [
+                "offers-0"
+              ]
             }
           ]
         },
@@ -5949,6 +6350,29 @@
                 "start_y": 280,
                 "end_y": 0,
                 "sweep_duration_pct": 9
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "bluewave-hold-offers-0",
+              "label": "Bluewave hold (offers-0 corner peek)",
+              "preset": "waveSweep",
+              "start": "start",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "start_x": 0,
+                "end_x": 0,
+                "fade_pct": 2,
+                "sweep_duration_pct": 1,
+                "start_y": 0,
+                "end_y": 0
               }
             }
           ]
@@ -7124,6 +7548,19 @@
           "editable": true
         },
         {
+          "id": "offers-0|sse-headline",
+          "scope": "offers-0",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "left": 11,
+            "top": 17
+          },
+          "editable": true
+        },
+        {
           "id": "offers-2|sse-headline",
           "scope": "offers-2",
           "cssClass": "sse-headline",
@@ -7231,21 +7668,8 @@
           "editable": true
         },
         {
-          "id": "offers-0|greenwave|visibility",
-          "scope": "offers-0",
-          "layerId": "greenwave",
-          "cssClass": "greenwave",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|headline-scrim|visibility",
-          "scope": "offers-0",
+          "id": "white-headlines|headline-scrim|visibility",
+          "scope": "white-headlines",
           "layerId": "headline-scrim",
           "cssClass": "headline-scrim",
           "when": {
@@ -7265,7 +7689,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "visibility": "visible"
+            "visibility": "hidden"
           },
           "editable": true
         },
@@ -7283,81 +7707,89 @@
           "editable": true
         },
         {
-          "id": "offers-0|terms-solo|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-solo",
-          "cssClass": "terms-solo",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|terms-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-prices",
-          "cssClass": "terms-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|unit-rate-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "unit-rate-prices",
-          "cssClass": "unit-rate-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-solo-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-solo-group",
-          "cssClass": "tc-solo-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-prices-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-prices-group",
-          "cssClass": "tc-prices-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|sse-headline",
-          "scope": "offers-0",
+          "id": "white-headlines|sse-headline",
+          "scope": "white-headlines",
           "cssClass": "sse-headline",
           "when": {
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)",
-            "left": 11,
-            "top": 17
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|sse-headline",
+          "scope": "navy-headlines",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|terms-prices",
+          "scope": "white-headlines",
+          "cssClass": "terms-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|terms-prices",
+          "scope": "navy-headlines",
+          "cssClass": "terms-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|terms-solo",
+          "scope": "white-headlines",
+          "cssClass": "terms-solo",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|terms-solo",
+          "scope": "navy-headlines",
+          "cssClass": "terms-solo",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|unit-rate-prices",
+          "scope": "white-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|unit-rate-prices",
+          "scope": "navy-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|headline-act4",
+          "scope": "offers-0",
+          "layerId": "headline-act4",
+          "props": {
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -7370,9 +7802,9 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": -32,
-            "top": 342,
-            "width": 200,
+            "left": -40,
+            "top": 320,
+            "width": 240,
             "height": 284
           },
           "editable": true
@@ -7387,7 +7819,7 @@
           },
           "props": {
             "left": 30,
-            "top": 556,
+            "top": 550,
             "width": 100,
             "height": 36
           },
@@ -7400,13 +7832,13 @@
           "cssClass": "cta",
           "props": {
             "left": 10,
-            "top": 172,
+            "top": 268,
             "width": 140,
             "height": 44,
-            "borderRadius": 5,
             "fontSize": 15,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "borderRadius": 5,
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -7417,15 +7849,85 @@
           "cssClass": "cta",
           "props": {
             "left": 30,
-            "top": 172,
+            "top": 240,
             "width": 100,
             "height": 100,
+            "fontSize": 15,
             "borderRadius": "50%",
-            "fontSize": 18,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
+        },
+        {
+          "id": "navy-headlines|headline-scrim|visibility",
+          "scope": "navy-headlines",
+          "layerId": "headline-scrim",
+          "cssClass": "headline-scrim",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-solo|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-solo",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|tc-solo-group|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "tc-solo-group",
+          "cssClass": "tc-solo-group",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-prices",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-prices",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "left": 8,
+            "top": 563,
+            "width": 126,
+            "height": 29,
+            "fontSize": 10,
+            "visibility": "visible",
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 8,
+            "align": "bottom"
+          }
         }
       ],
       "classRules": [
@@ -7643,7 +8145,28 @@
                 "end_x": -400,
                 "hold_y": 0,
                 "sweep_duration_pct": 6
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "greenwave-waveSweep-offers-0",
+              "label": "Greenwave waveSweep (offers-0 Act 4)",
+              "preset": "waveSweep",
+              "start": "green_in",
+              "end": "end-2",
+              "params": {
+                "start_x": 520,
+                "end_x": -400,
+                "hold_y": 0,
+                "sweep_duration_pct": 6
+              },
+              "scopes": [
+                "offers-0"
+              ]
             }
           ]
         },
@@ -7676,6 +8199,29 @@
                 "start_y": 420,
                 "end_y": 0,
                 "sweep_duration_pct": 6
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "bluewave-hold-offers-0",
+              "label": "Bluewave hold (offers-0 corner peek)",
+              "preset": "waveSweep",
+              "start": "start",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "start_x": 0,
+                "end_x": 0,
+                "fade_pct": 2,
+                "sweep_duration_pct": 1,
+                "start_y": 0,
+                "end_y": 0
               }
             }
           ]
@@ -8861,6 +9407,22 @@
           "editable": true
         },
         {
+          "id": "offers-0|sse-headline",
+          "scope": "offers-0",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "top": 30,
+            "left": 15,
+            "width": 270,
+            "height": 100,
+            "fontSize": 28
+          },
+          "editable": true
+        },
+        {
           "id": "offers-2|sse-headline",
           "scope": "offers-2",
           "cssClass": "sse-headline",
@@ -8958,21 +9520,8 @@
           "editable": true
         },
         {
-          "id": "offers-0|greenwave|visibility",
-          "scope": "offers-0",
-          "layerId": "greenwave",
-          "cssClass": "greenwave",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|headline-scrim|visibility",
-          "scope": "offers-0",
+          "id": "white-headlines|headline-scrim|visibility",
+          "scope": "white-headlines",
           "layerId": "headline-scrim",
           "cssClass": "headline-scrim",
           "when": {
@@ -8992,7 +9541,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "visibility": "visible"
+            "visibility": "hidden"
           },
           "editable": true
         },
@@ -9010,84 +9559,89 @@
           "editable": true
         },
         {
-          "id": "offers-0|terms-solo|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-solo",
-          "cssClass": "terms-solo",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|terms-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-prices",
-          "cssClass": "terms-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|unit-rate-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "unit-rate-prices",
-          "cssClass": "unit-rate-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-solo-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-solo-group",
-          "cssClass": "tc-solo-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-prices-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-prices-group",
-          "cssClass": "tc-prices-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|sse-headline",
-          "scope": "offers-0",
+          "id": "white-headlines|sse-headline",
+          "scope": "white-headlines",
           "cssClass": "sse-headline",
           "when": {
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)",
-            "top": 30,
-            "left": 15,
-            "width": 270,
-            "height": 100,
-            "fontSize": 28
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|sse-headline",
+          "scope": "navy-headlines",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|terms-prices",
+          "scope": "white-headlines",
+          "cssClass": "terms-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|terms-prices",
+          "scope": "navy-headlines",
+          "cssClass": "terms-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|terms-solo",
+          "scope": "white-headlines",
+          "cssClass": "terms-solo",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|terms-solo",
+          "scope": "navy-headlines",
+          "cssClass": "terms-solo",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|unit-rate-prices",
+          "scope": "white-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|unit-rate-prices",
+          "scope": "navy-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|headline-act4",
+          "scope": "offers-0",
+          "layerId": "headline-act4",
+          "props": {
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -9100,10 +9654,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": -48,
-            "top": 245,
-            "width": 356,
-            "height": 409
+            "left": -38,
+            "top": 232,
+            "width": 340,
+            "height": 400
           },
           "editable": true
         },
@@ -9116,10 +9670,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 183,
-            "top": 554,
-            "width": 105,
-            "height": 38
+            "left": 80,
+            "top": 534,
+            "width": 140,
+            "height": 50
           },
           "editable": true
         },
@@ -9129,14 +9683,14 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 65,
-            "top": 157,
+            "left": 60,
+            "top": 230,
             "width": 180,
             "height": 48,
-            "borderRadius": 5,
             "fontSize": 17,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "borderRadius": 5,
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -9146,16 +9700,86 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 65,
-            "top": 157,
+            "left": 85,
+            "top": 202,
             "width": 130,
             "height": 130,
-            "borderRadius": "50%",
             "fontSize": 19,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "borderRadius": "50%",
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
+        },
+        {
+          "id": "navy-headlines|headline-scrim|visibility",
+          "scope": "navy-headlines",
+          "layerId": "headline-scrim",
+          "cssClass": "headline-scrim",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-solo|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-solo",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|tc-solo-group|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "tc-solo-group",
+          "cssClass": "tc-solo-group",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-prices",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-prices",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "left": 12,
+            "top": 569,
+            "width": 276,
+            "height": 23,
+            "fontSize": 10,
+            "visibility": "visible",
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 8,
+            "align": "bottom"
+          }
         }
       ],
       "classRules": [
@@ -9374,7 +9998,28 @@
                 "end_x": -500,
                 "hold_y": 0,
                 "sweep_duration_pct": 7
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "greenwave-waveSweep-offers-0",
+              "label": "Greenwave waveSweep (offers-0 Act 4)",
+              "preset": "waveSweep",
+              "start": "green_in",
+              "end": "end-2",
+              "params": {
+                "start_x": 1080,
+                "end_x": -500,
+                "hold_y": 0,
+                "sweep_duration_pct": 7
+              },
+              "scopes": [
+                "offers-0"
+              ]
             }
           ]
         },
@@ -9404,6 +10049,28 @@
                 "end_x": 0,
                 "hold_y": 0,
                 "fade_pct": 2
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "bluewave-hold-offers-0",
+              "label": "Bluewave hold (offers-0 corner peek)",
+              "preset": "waveSweep",
+              "start": "start",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "start_x": 0,
+                "end_x": 0,
+                "hold_y": 0,
+                "fade_pct": 2,
+                "sweep_duration_pct": 1
               }
             }
           ]
@@ -10592,6 +11259,22 @@
           "editable": true
         },
         {
+          "id": "offers-0|sse-headline",
+          "scope": "offers-0",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "top": 82,
+            "width": 307,
+            "height": 88,
+            "left": 20,
+            "fontSize": 32
+          },
+          "editable": true
+        },
+        {
           "id": "offers-2|sse-headline",
           "scope": "offers-2",
           "cssClass": "sse-headline",
@@ -10691,21 +11374,8 @@
           "editable": true
         },
         {
-          "id": "offers-0|greenwave|visibility",
-          "scope": "offers-0",
-          "layerId": "greenwave",
-          "cssClass": "greenwave",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|headline-scrim|visibility",
-          "scope": "offers-0",
+          "id": "white-headlines|headline-scrim|visibility",
+          "scope": "white-headlines",
           "layerId": "headline-scrim",
           "cssClass": "headline-scrim",
           "when": {
@@ -10725,7 +11395,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "visibility": "visible"
+            "visibility": "hidden"
           },
           "editable": true
         },
@@ -10743,84 +11413,89 @@
           "editable": true
         },
         {
-          "id": "offers-0|terms-solo|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-solo",
-          "cssClass": "terms-solo",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|terms-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-prices",
-          "cssClass": "terms-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|unit-rate-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "unit-rate-prices",
-          "cssClass": "unit-rate-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-solo-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-solo-group",
-          "cssClass": "tc-solo-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-prices-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-prices-group",
-          "cssClass": "tc-prices-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|sse-headline",
-          "scope": "offers-0",
+          "id": "white-headlines|sse-headline",
+          "scope": "white-headlines",
           "cssClass": "sse-headline",
           "when": {
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)",
-            "top": 82,
-            "width": 307,
-            "height": 88,
-            "left": 20,
-            "fontSize": 32
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|sse-headline",
+          "scope": "navy-headlines",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|terms-prices",
+          "scope": "white-headlines",
+          "cssClass": "terms-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|terms-prices",
+          "scope": "navy-headlines",
+          "cssClass": "terms-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|terms-solo",
+          "scope": "white-headlines",
+          "cssClass": "terms-solo",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|terms-solo",
+          "scope": "navy-headlines",
+          "cssClass": "terms-solo",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|unit-rate-prices",
+          "scope": "white-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|unit-rate-prices",
+          "scope": "navy-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|headline-act4",
+          "scope": "offers-0",
+          "layerId": "headline-act4",
+          "props": {
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -10833,8 +11508,8 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 646,
-            "top": -104,
+            "left": 662,
+            "top": -119,
             "width": 330,
             "height": 391
           },
@@ -10862,14 +11537,14 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 201,
-            "top": 96,
+            "left": 375,
+            "top": 97,
             "width": 220,
             "height": 56,
+            "fontSize": 20,
             "borderRadius": 6,
-            "fontSize": 22,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -10879,16 +11554,86 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 207,
-            "top": 47,
+            "left": 400,
+            "top": 40,
             "width": 170,
             "height": 170,
-            "borderRadius": "50%",
             "fontSize": 24,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "borderRadius": "50%",
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
+        },
+        {
+          "id": "navy-headlines|headline-scrim|visibility",
+          "scope": "navy-headlines",
+          "layerId": "headline-scrim",
+          "cssClass": "headline-scrim",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-solo|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-solo",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|tc-solo-group|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "tc-solo-group",
+          "cssClass": "tc-solo-group",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-prices",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-prices",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "left": 17,
+            "top": 223,
+            "width": 653,
+            "height": 22,
+            "fontSize": 11,
+            "visibility": "visible",
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 12,
+            "align": "bottom"
+          }
         }
       ],
       "classRules": [

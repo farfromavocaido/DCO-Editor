@@ -405,8 +405,11 @@ test('headline geometry lives on shared sse-headline class, not per-act layers',
     }
 
     const perActVariants = (sizeCreative.variantRules || []).filter((rule) => (
-      String(rule.layerId || '').startsWith('headline-act')
-      || String(rule.cssClass || '').startsWith('headline-act')
+      (String(rule.layerId || '').startsWith('headline-act')
+        || String(rule.cssClass || '').startsWith('headline-act'))
+      // offers-0 Act 4 is intentionally a smaller endframe tagline (layerId-only).
+      && String(rule.id || '') !== 'offers-0|headline-act4'
+      && String(rule.scope || '') !== 'offers-0'
     ));
     assert.equal(perActVariants.length, 0, `${size} should not have per-act headline variant rules`);
   }

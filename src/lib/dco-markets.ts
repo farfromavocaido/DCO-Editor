@@ -45,6 +45,7 @@ export type DcoStudioSample = {
   roundel_text_text: string;
   roundel_value_text: string;
   include_heading4_enum: boolean;
+  navy_headlines_bool: boolean;
   background_image_label: string;
   [key: string]: unknown;
 };
@@ -130,6 +131,7 @@ const ROI_STUDIO_SAMPLE: DcoStudioSample = {
   roundel_text_text: 'Up to',
   roundel_value_text: '\u20AC518',
   include_heading4_enum: true,
+  navy_headlines_bool: false,
   background_image_label: 'diy',
   ...diyBackgroundUrls(),
   ...emptySizeTextOverrides(),
@@ -179,6 +181,7 @@ const NIR_STUDIO_SAMPLE: DcoStudioSample = {
   roundel_text_text: '',
   roundel_value_text: '',
   include_heading4_enum: true,
+  navy_headlines_bool: false,
   background_image_label: 'diy',
   ...diyBackgroundUrls(),
   ...emptySizeTextOverrides(),
@@ -262,6 +265,7 @@ export const STUDIO_DEV_DYNAMIC_FIELD_ORDER = [
   'roundel_value_text',
   'heading4_text',
   'include_heading4_enum',
+  'navy_headlines_bool',
   'background_image_label',
   ...CREATIVE_AD_SIZES.map((size) => `background_image_url_${size}`),
   ...['heading1_text', 'heading2_text', 'heading3_text', 'heading4_text', 'tc_units_text']

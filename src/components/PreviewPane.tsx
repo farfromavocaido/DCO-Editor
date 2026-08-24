@@ -643,7 +643,7 @@ export function PreviewPane() {
     const profile = activeFrameScope(activeScopes);
     const keyframes = layer.id?.startsWith('headline-act')
       ? compileHeadlineKeyframes(layer, sizeCreative?.layers || [], displayRow, profile, activeBeats)
-      : compileAnimationClips(clipsForProfile(layer.clips || [], profile), activeBeats);
+      : compileAnimationClips(clipsForProfile(layer.clips || [], profile, activeScopes), activeBeats);
     const frame = frameAtPercent(keyframes, percent);
     const transform = [
       `translate3d(${frame.translate[0]}px, ${frame.translate[1]}px, 0px)`,

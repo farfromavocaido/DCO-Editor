@@ -209,6 +209,7 @@ function TimelineLayerRow({
   offerCount,
   beats,
   frameScope,
+  activeScopes = [],
   selectedLayerId,
   selectedTargetId,
   selectedTargetIds,
@@ -236,7 +237,7 @@ function TimelineLayerRow({
     isolatedGroupId,
   ) || (selectedLayerId === layerId && selectedTargetId === layerId);
   const label = timelineLayerLabel(layer, offerCount, activeOfferIds);
-  const visibleClips = clipsForProfile(layer.clips || [], frameScope);
+  const visibleClips = clipsForProfile(layer.clips || [], frameScope, activeScopes);
 
   return (
     <div
@@ -545,6 +546,7 @@ export function TimelinePanel() {
                       activeOfferIds={timelineActiveOfferIds}
                       beats={beats}
                       frameScope={frameScope}
+                      activeScopes={activeScopes}
                       selectedLayerId={selectedLayerId}
                       selectedTargetId={selectedTargetId}
                       selectedTargetIds={selectedTargetIds}
@@ -573,6 +575,7 @@ export function TimelinePanel() {
                           activeOfferIds={timelineActiveOfferIds}
                           beats={beats}
                           frameScope={frameScope}
+                          activeScopes={activeScopes}
                           selectedLayerId={selectedLayerId}
                           selectedTargetId={selectedTargetId}
                           selectedTargetIds={selectedTargetIds}
@@ -604,6 +607,7 @@ export function TimelinePanel() {
               activeOfferIds={timelineActiveOfferIds}
               beats={beats}
               frameScope={frameScope}
+              activeScopes={activeScopes}
               selectedLayerId={selectedLayerId}
               selectedTargetId={selectedTargetId}
               selectedTargetIds={selectedTargetIds}

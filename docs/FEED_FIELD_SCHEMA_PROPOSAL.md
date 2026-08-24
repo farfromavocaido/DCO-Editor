@@ -4,7 +4,7 @@ Profile: **`SSE_DCO_Offers`** (Studio dynamic content profile for the DCO HTML5 
 
 This document lists **every creative feed field** used by the ad, with **name**, **type**, and **description**. It includes **per-size text overrides** so headlines and unit-rate copy can differ by format (line breaks, wording, etc.).
 
-**Implementation status:** wired to Studio profile **`10964545`** / **`SSE_DCO_ROI_Delivery`**, with a parallel NIR agency package (`10962603` / `SSE_DCO_NIR_Delivery`) from `src/lib/dco-markets.ts`. Size-override names match the live profile (no remap). Studio `<br>` line breaks normalize to `\n` on read. `include_heading4_enum` and `background_image_label` are stored for schema parity (Act 4 timing still follows `heading4_text` / roundel frame).
+**Implementation status:** wired to Studio profile **`10964545`** / **`SSE_DCO_ROI_Delivery`**, with a parallel NIR agency package (`10962603` / `SSE_DCO_NIR_Delivery`) from `src/lib/dco-markets.ts`. Size-override names match the live profile (no remap). Studio `<br>` line breaks normalize to `\n` on read. `include_heading4_enum` gates Act 4 visibility when copy is set. `navy_headlines_bool` is editor-ready (offers-0 ink); add the column in Studio when Brian can.
 
 **Status key**
 
@@ -128,7 +128,8 @@ Blank override → use the matching base field above.
 | `tc_type_enum` | enum (`tcs_only` \| `tcs_units`) | Terms display mode. `tcs_only` = terms line only; `tcs_units` = terms then unit-rate line. | Current |
 | `cta_type_enum` | enum (`roundel` \| `rectangle`) | CTA button shape (circle / round vs rectangle). Rectangular CTA is forced when the offer roundel frame is on. | Current |
 | `include_roundel_frame_bool` | boolean | Whether the optional Act 3 offer roundel frame is shown (enables four-act timing). | Current |
-| `include_heading4_enum` | boolean | Studio Heading 4 flag (named `*_enum`, served as boolean). Schema parity — not used to gate Act 4 timing yet. | Current |
+| `include_heading4_enum` | boolean | Studio Heading 4 flag (named `*_enum`, served as boolean). Gates Act 4 / endframe headline when `heading4_text` is set. | Current |
+| `navy_headlines_bool` | boolean | Offers-0 only: navy (`true`) or white (`false`, default) ink on photo-act headlines. Not yet on live Studio profiles. | Current (local) |
 
 ---
 

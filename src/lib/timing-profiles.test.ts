@@ -52,13 +52,15 @@ test('applies offers-0 beat overlay without changing offers-1 beats', () => {
   const zero = beatsForScopes(document, ['offers-0', 'frames-3']);
 
   assert.deepEqual(beatsForScopes(document, ['offers-1', 'frames-3']), baseline);
-  assert.equal(zero.bn_blue_in, OFFERS_0_BEAT_OVERLAY.bn_blue_in);
-  assert.equal(zero.wave2_in, OFFERS_0_BEAT_OVERLAY.wave2_in);
   assert.equal(zero.act1_in, OFFERS_0_BEAT_OVERLAY.act1_in);
+  assert.equal(zero.act1_begin, OFFERS_0_BEAT_OVERLAY.act1_begin);
   assert.equal(zero.cta_in, baseline.cta_in);
   assert.equal(zero.swap, baseline.swap);
-  assert.equal(zero.act1_in, OFFERS_0_BEAT_OVERLAY.act1_in);
-  assert.equal(zero.bn_white_in, OFFERS_0_BEAT_OVERLAY.bn_white_in);
+  assert.equal(zero.green_in, Number((baseline.act4_in - 7).toFixed(3)));
+  // Blue-wave / logo beats stay on the multi-offer timeline (sweep at wave2_in).
+  assert.equal(zero.wave2_in, baseline.wave2_in);
+  assert.equal(zero.bn_blue_in, baseline.bn_blue_in);
+  assert.equal(zero.bn_white_in, baseline.bn_white_in);
 });
 
 test('resolves frames-4 timing from the profile beats', () => {

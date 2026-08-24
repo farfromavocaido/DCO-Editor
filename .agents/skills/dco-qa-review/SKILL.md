@@ -79,8 +79,8 @@ Do **not** deep-dive other timestamps on the default pass unless a listed hold i
 | `o2_roundel_prices_rect` | 2 | on | prices | rect |
 | `o3_roundel_prices_rect` | 3 | on | prices | rect |
 | `o3_noroundel_solo_circ` | 3 | off | solo | circular |
-| `o0_roundel_rect` | 0 | on | n/a | rect |
-| `o0_noroundel_circ` | 0 | off | n/a | circular |
+| `o0_roundel_rect` | 0 | on | solo | rect |
+| `o0_noroundel_circ` | 0 | off | solo | circular |
 
 ## Expected copy
 

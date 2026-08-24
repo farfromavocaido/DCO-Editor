@@ -139,7 +139,7 @@ test('offers-0 beat overlay changes hold samples vs offers-1', () => {
 
   assert.notDeepEqual(offers0.holdsMs, offers1.holdsMs);
   assert.ok(!offers0.samples.some((sample) => sample.labels.includes('offer')));
-  assert.ok(!offers0.samples.some((sample) => sample.labels.includes('legal')));
+  assert.ok(offers0.samples.some((sample) => sample.labels.includes('legal')));
 });
 
 test('hold midpoints land inside settled opacity plateaus (not fade edges)', () => {
@@ -158,7 +158,7 @@ test('hold midpoints land inside settled opacity plateaus (not fade edges)', () 
   assert.equal(legalLayers.length, 2);
 
   const legalKeyframes = legalLayers.map((layer) => compileAnimationClips(
-    clipsForProfile((layer.clips || []) as never[], profile),
+    clipsForProfile((layer.clips || []) as never[], profile, scopes),
     beats,
   ));
 

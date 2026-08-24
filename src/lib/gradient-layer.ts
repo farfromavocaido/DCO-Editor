@@ -129,8 +129,8 @@ export const buildHeadlineScrimLayer = (
 };
 
 export const headlineScrimVisibilityRule = () => ({
-  id: 'offers-0|headline-scrim|visibility',
-  scope: 'offers-0',
+  id: 'white-headlines|headline-scrim|visibility',
+  scope: 'white-headlines',
   layerId: HEADLINE_SCRIM_LAYER_ID,
   cssClass: HEADLINE_SCRIM_CSS_CLASS,
   when: { offer_count_num: 0 },

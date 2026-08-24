@@ -20,6 +20,10 @@ export type AnimationClip = {
   durationPct?: number;
   params?: Record<string, unknown>;
   keyframes?: CreativeKeyframe[];
+  /** When set, clip applies only for these frame profiles (frames-3 / frames-4). */
+  profiles?: string[];
+  /** When set, clip applies only when any listed offer/CSS scope is active. */
+  scopes?: string[];
 };
 
 export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;

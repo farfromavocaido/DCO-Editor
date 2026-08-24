@@ -92,6 +92,8 @@ export const buildFeedRow = (
     tc_type_enum: variant.tc_type_enum,
     cta_type_enum: variant.cta_type_enum,
     cta_text: ctaText,
+    include_heading4_enum: true,
+    navy_headlines_bool: false,
     ...headlines,
     ...offers,
     ...roundel,

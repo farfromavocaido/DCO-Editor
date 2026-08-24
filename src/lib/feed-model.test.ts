@@ -71,6 +71,7 @@ test('derives layout controls from the selected sample row', () => {
     includeRoundelFrame: true,
     frameCount: 4,
     roundelMode: 'split',
+    navyHeadlines: false,
   });
 });
 
@@ -213,11 +214,12 @@ test('preserves explicit offer count 0 and derives offers-0 scope', () => {
     include_roundel_frame_bool: false,
   }), {
     offerCount: 0,
-    tcMode: 'tcs_only',
+    tcMode: 'tcs_units',
     ctaShape: 'roundel',
     includeRoundelFrame: false,
     frameCount: 3,
     roundelMode: 'copy-only',
+    navyHeadlines: false,
   });
 
   assert.deepEqual(activeScopesFromControls({
@@ -226,6 +228,24 @@ test('preserves explicit offer count 0 and derives offers-0 scope', () => {
     ctaShape: 'roundel',
     includeRoundelFrame: false,
     roundelMode: 'copy-only',
+    navyHeadlines: false,
+  }), [
+    'offers-0',
+    'tc-prices',
+    'cta-roundel',
+    'frames-3',
+    'roundel-frame-off',
+    'roundel-copy-only',
+    'white-headlines',
+  ]);
+
+  assert.deepEqual(activeScopesFromControls({
+    offerCount: 0,
+    tcMode: 'tcs_only',
+    ctaShape: 'roundel',
+    includeRoundelFrame: false,
+    roundelMode: 'copy-only',
+    navyHeadlines: true,
   }), [
     'offers-0',
     'tc-solo',
@@ -233,6 +253,7 @@ test('preserves explicit offer count 0 and derives offers-0 scope', () => {
     'frames-3',
     'roundel-frame-off',
     'roundel-copy-only',
+    'navy-headlines',
   ]);
 
   assert.equal(rowLabel({ offer_count_num: 0, Unique_ID: 'none' }), 'None · none');

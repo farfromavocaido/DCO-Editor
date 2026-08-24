@@ -70,6 +70,27 @@ test('filters headline clips by active profile', () => {
   assert.equal(clipsForProfile(layer.clips, 'frames-4').length, 2);
 });
 
+test('filters clips by offer scopes when activeScopes provided', () => {
+  const clips = [
+    { id: 'multi', preset: 'waveSweep', start: 'start+7', end: 'end', scopes: ['offers-1', 'offers-2', 'offers-3'] },
+    { id: 'zero', preset: 'waveSweep', start: 'wave2_in', end: 'end', scopes: ['offers-0'] },
+    { id: 'any', preset: 'fade', start: 'cta_in', end: 'end' },
+  ];
+  assert.deepEqual(
+    clipsForProfile(clips, 'frames-3', ['offers-0']).map((clip) => clip.id),
+    ['zero', 'any'],
+  );
+  assert.deepEqual(
+    clipsForProfile(clips, 'frames-3', ['offers-1']).map((clip) => clip.id),
+    ['multi', 'any'],
+  );
+  // Without activeScopes, offer-scoped clips are excluded; unscoped remain.
+  assert.deepEqual(
+    clipsForProfile(clips, 'frames-3').map((clip) => clip.id),
+    ['any'],
+  );
+});
+
 test('does not skip when identical headlines are not consecutive', () => {
   assert.deepEqual(
     [...skippedHeadlineActs(['Same', 'Different', 'Same', 'Other'], true)],
@@ -311,7 +332,7 @@ test('falls back to heading3 for act4 display when roundel is off', () => {
   );
 });
 
-test('offers-0 equal-splits non-blank headlines and keeps CTA beat fixed', () => {
+test('offers-0 equal-splits pre-CTA headlines and keeps Act 4 on CTA beat', () => {
   const layers = [
     {
       id: 'headline-act1',
@@ -336,6 +357,7 @@ test('offers-0 equal-splits non-blank headlines and keeps CTA beat fixed', () =>
     act2_in: 32.5,
     offers_exit: 66,
     act4_in: 65.1,
+    green_in: 58.1,
     cta_in: 69,
     act3_exit: 96,
   };
@@ -359,11 +381,11 @@ test('offers-0 equal-splits non-blank headlines and keeps CTA beat fixed', () =>
   assert.equal(act2?.hidden, false);
   assert.equal(act4?.hidden, true);
   assert.equal(act1?.start, 7);
-  assert.equal(act1?.end, 38);
-  assert.equal(act2?.start, 38);
-  assert.equal(act2?.end, 69);
-  assert.ok((act1?.end ?? 100) <= zeroBeats.cta_in);
-  assert.ok((act2?.end ?? 100) <= zeroBeats.cta_in);
+  assert.equal(act1?.end, 32.55);
+  assert.equal(act2?.start, 32.55);
+  assert.equal(act2?.end, 58.1);
+  assert.ok((act1?.end ?? 100) <= zeroBeats.green_in);
+  assert.ok((act2?.end ?? 100) <= zeroBeats.green_in);
 });
 
 test('offers-0 blank middle headline still equal-splits remaining acts', () => {
@@ -388,6 +410,7 @@ test('offers-0 blank middle headline still equal-splits remaining acts', () => {
     act2_in: 32.5,
     offers_exit: 66,
     act4_in: 65.1,
+    green_in: 58.1,
     cta_in: 69,
     act3_exit: 96,
   };
@@ -407,7 +430,46 @@ test('offers-0 blank middle headline still equal-splits remaining acts', () => {
   const act4 = plan.find((item) => item.layerId === 'headline-act4');
   assert.equal(act2?.hidden, true);
   assert.equal(act1?.start, 7);
-  assert.equal(act1?.end, 38);
-  assert.equal(act4?.start, 38);
-  assert.equal(act4?.end, 69);
+  assert.equal(act1?.end, 58.1);
+  assert.equal(act4?.hidden, false);
+  assert.equal(act4?.start, 65.1);
+  assert.equal(act4?.end, 95);
+});
+
+test('offers-0 include_heading4_enum false hides Act 4 even with copy', () => {
+  const layers = [
+    {
+      id: 'headline-act1',
+      clips: [{ id: 'h1', preset: 'slideInRight', start: 'act1_in', end: 'act1_out', params: { enter_duration_pct: 4 } }],
+    },
+    {
+      id: 'headline-act2',
+      clips: [{ id: 'h2', preset: 'slideInRight', start: 'act2_in', end: 'offers_exit', profiles: ['frames-3'], params: { enter_duration_pct: 4 } }],
+    },
+    { id: 'headline-act3', clips: [] },
+    {
+      id: 'headline-act4',
+      clips: [{ id: 'h4', preset: 'slideInRight', start: 'act4_in', end: 'act3_exit-1', profiles: ['frames-3'], params: { enter_duration_pct: 4 } }],
+    },
+  ];
+  const plan = buildHeadlineMotionPlan(
+    layers,
+    {
+      offer_count_num: 0,
+      heading1_text: 'One',
+      heading4_text: 'Tagline',
+      include_heading4_enum: false,
+    },
+    'frames-3',
+    {
+      act1_in: 7,
+      act1_out: 32.5,
+      act2_in: 32.5,
+      offers_exit: 66,
+      act4_in: 65.1,
+      cta_in: 69,
+      act3_exit: 96,
+    },
+  );
+  assert.equal(plan.find((item) => item.layerId === 'headline-act4')?.hidden, true);
 });

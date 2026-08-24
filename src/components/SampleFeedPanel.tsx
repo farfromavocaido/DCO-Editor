@@ -20,6 +20,8 @@ const OVERALL_FIELD_NAMES = [
   'tc_type_enum',
   'cta_type_enum',
   'include_roundel_frame_bool',
+  'include_heading4_enum',
+  'navy_headlines_bool',
 ] as const;
 
 const HEADLINE_FIELD_NAMES = [
@@ -200,6 +202,28 @@ export function SampleFeedPanel({ ensureOpen }: SampleFeedPanelProps) {
   const tcModeField = fieldByName(feedFields, 'tc_type_enum');
   const ctaShapeField = fieldByName(feedFields, 'cta_type_enum');
   const roundelFrameField = fieldByName(feedFields, 'include_roundel_frame_bool');
+  const heading4Field = fieldByName(feedFields, 'include_heading4_enum');
+  const navyHeadlinesField = fieldByName(feedFields, 'navy_headlines_bool');
+  const offerCount = Number(row?.offer_count_num ?? 1);
+  const showInkControl = offerCount === 0 && navyHeadlinesField;
+
+  const renderInkControl = () => {
+    if (!showInkControl) return null;
+    const navy = Boolean(row?.navy_headlines_bool);
+    return (
+      <label key="navy_headlines_bool" className="sample-field">
+        <span>Ink (headlines + T&Cs)</span>
+        <select
+          data-feed-field="navy_headlines_bool"
+          value={navy ? 'navy' : 'white'}
+          onChange={(event) => writeField('navy_headlines_bool', event.target.value === 'navy')}
+        >
+          <option value="white">White</option>
+          <option value="navy">Navy</option>
+        </select>
+      </label>
+    );
+  };
 
   return (
     <div className="sample-feed-panel">
@@ -214,6 +238,12 @@ export function SampleFeedPanel({ ensureOpen }: SampleFeedPanelProps) {
           ))}
         </select>
       </label>
+
+      {showInkControl ? (
+        <div className="sample-block" aria-label="Ink">
+          {renderInkControl()}
+        </div>
+      ) : null}
 
       <section className={`sample-overall ${overallOpen ? 'is-open' : 'is-collapsed'}`}>
         <button
@@ -232,6 +262,7 @@ export function SampleFeedPanel({ ensureOpen }: SampleFeedPanelProps) {
             {renderControl(ctaShapeField)}
             <div className="sample-divider sample-divider-soft" role="separator" />
             {renderControl(roundelFrameField, { compactCheckbox: true, shortLabel: 'Roundel frame' })}
+            {renderControl(heading4Field, { compactCheckbox: true, shortLabel: 'Include heading 4' })}
           </div>
         ) : null}
       </section>

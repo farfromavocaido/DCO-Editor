@@ -46,7 +46,22 @@ export const selectorForVariantScope = (scope: unknown) => {
 };
 
 export const selectorForVariantRule = (rule: Record<string, unknown>) => {
-  const base = selectorForClassRule(String(rule.cssClass || rule.layerId || ''));
+  const layerId = String(rule.layerId || '');
+  const cssClass = String(rule.cssClass || rule.layerId || '');
+  const scope = String(rule.scope || '');
+  // Photo-act ink scopes must not paint Act 4 (always navy over green on offers-0).
+  if (
+    (scope === 'white-headlines' || scope === 'navy-headlines')
+    && cssClass === 'sse-headline'
+    && !layerId
+  ) {
+    const scopeSelector = selectorForVariantScope(scope);
+    return `${scopeSelector} .sse-headline:not(#headline-act4)`.trim();
+  }
+  // Headline acts share .sse-headline; act-specific overrides target the element id.
+  const base = layerId.startsWith('headline-act')
+    ? `#${layerId}`
+    : selectorForClassRule(cssClass);
   const scopeSelector = selectorForVariantScope(rule.scope);
   return scopeSelector ? `${scopeSelector} ${base}` : base;
 };

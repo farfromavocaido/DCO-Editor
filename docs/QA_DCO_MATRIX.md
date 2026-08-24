@@ -21,8 +21,8 @@ Definition: [`scripts/qa-dco/copy-matrix.json`](../scripts/qa-dco/copy-matrix.js
 | `o2_roundel_prices_rect` | 2 | on | `tcs_units` | rectangle |
 | `o3_roundel_prices_rect` | 3 | on | `tcs_units` | rectangle |
 | `o3_noroundel_solo_circ` | 3 | off | `tcs_only` | roundel |
-| `o0_roundel_rect` | 0 | on | n/a | rectangle |
-| `o0_noroundel_circ` | 0 | off | n/a | roundel |
+| `o0_roundel_rect` | 0 | on | `tcs_only` | rectangle |
+| `o0_noroundel_circ` | 0 | off | `tcs_only` | roundel |
 
 ## Live in-app review (`/qa`)
 

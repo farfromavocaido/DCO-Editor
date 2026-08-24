@@ -301,7 +301,7 @@ export const findCreativeTarget = (
 
   if (isHeadlineLayer(layer)) {
     const classRule = findClassRule(sizeCreative, HEADLINE_CSS_CLASS);
-    const identity = { cssClass: HEADLINE_CSS_CLASS };
+    const identity = { cssClass: HEADLINE_CSS_CLASS, layerId: layer.id };
     const variantRule = findActiveVariantRule(sizeCreative, identity, activeScopes);
     const variantProps = mergedActiveVariantProps(sizeCreative, identity, activeScopes);
     const values = {
@@ -316,9 +316,11 @@ export const findCreativeTarget = (
       parentLayerId: '',
       cssClass: HEADLINE_CSS_CLASS,
       coordinateScope: 'canvas',
-      description: variantRule
-        ? `Editing ${variantRule.scope} headline overrides (shared by all acts).`
-        : 'Shared headline placement for acts 1–3.',
+      description: variantRule?.layerId === layer.id
+        ? `Editing ${variantRule.scope} ${layer.id} overrides.`
+        : variantRule
+          ? `Editing ${variantRule.scope} headline overrides (shared by acts).`
+          : 'Shared headline placement for acts 1–3.',
       values,
       base: values,
       fit: {
@@ -896,8 +898,8 @@ export const normalizeOffers0CtaRules = (document: Record<string, unknown> | nul
       height: pickDefined(legacyProps.height, rectProps.height, base.height),
       borderRadius: pickDefined(rectProps.borderRadius, 4),
       fontSize: pickDefined(legacyProps.fontSize, rectProps.fontSize, base.fontSize),
-      backgroundColor: pickDefined(legacyProps.backgroundColor, 'rgb(0, 229, 165)'),
-      color: pickDefined(legacyProps.color, 'rgb(0, 41, 117)'),
+      backgroundColor: pickDefined(legacyProps.backgroundColor, 'rgb(0, 41, 117)'),
+      color: pickDefined(legacyProps.color, 'rgb(255, 255, 255)'),
     });
     seedIfEmpty(roundCompound, {
       left: pickDefined(legacyProps.left, base.left),
@@ -906,8 +908,8 @@ export const normalizeOffers0CtaRules = (document: Record<string, unknown> | nul
       height: pickDefined(legacyProps.height, base.height),
       borderRadius: pickDefined(base.borderRadius, '50%'),
       fontSize: pickDefined(legacyProps.fontSize, base.fontSize),
-      backgroundColor: pickDefined(legacyProps.backgroundColor, 'rgb(0, 229, 165)'),
-      color: pickDefined(legacyProps.color, 'rgb(0, 41, 117)'),
+      backgroundColor: pickDefined(legacyProps.backgroundColor, 'rgb(0, 41, 117)'),
+      color: pickDefined(legacyProps.color, 'rgb(255, 255, 255)'),
     });
 
     sizeCreative.variantRules = sizeCreative.variantRules.filter((rule: Record<string, unknown>) => (

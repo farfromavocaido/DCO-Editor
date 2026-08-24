@@ -49,11 +49,24 @@ When roundel frame is **off**, the animation skips Act 3 and runs **1 → 2 → 
 ### `heading4_text`
 
 - **Type:** multiline string
-- **Description:** Act 4 headline, always positioned over the **CTA / end frame** (not the offer roundel). Enters at the CTA beat in both 3-act and 4-act profiles.
+- **Description:** Act 4 headline, always positioned over the **CTA / end frame** (not the offer roundel). Enters at the CTA beat in both 3-act and 4-act profiles. On **offers-0**, same box as acts 1–3; colour is navy over the green wave.
 - **Validation:** any string
 - **Required:** optional
-- **Default / fallback:** if roundel frame **off** and empty → show `heading3_text`; if roundel frame **on** → empty stays empty
+- **Default / fallback:** if roundel frame **off** and empty → show `heading3_text`; if roundel frame **on** → empty stays empty. Also gated by **`include_heading4_enum`** (missing → treat as on).
 - **Sample:** `A different kind of energy`
+
+### `include_heading4_enum`
+
+- **Type:** boolean (Studio names it `*_enum`)
+- **Description:** Whether Act 4 / endframe headline is shown when `heading4_text` is set.
+- **Default / fallback:** missing → `true`
+
+### `navy_headlines_bool`
+
+- **Type:** boolean
+- **Description:** **Offers-0 only.** When `true`, photo-act headlines **and T&Cs** use brand navy; when `false` (default), white. Act 4 is always navy over the green wave. Scrim shows only with white headlines.
+- **Default / fallback:** `false`
+- **Studio:** not yet on live ROI/NIR profiles — editor/preview ready; production feed cannot flip until Studio adds the column.
 
 ---
 

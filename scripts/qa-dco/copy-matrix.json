@@ -1,5 +1,12 @@
 {
-  "sizes": ["160x600", "300x250", "300x600", "320x50", "728x90", "970x250"],
+  "sizes": [
+    "160x600",
+    "300x250",
+    "300x600",
+    "320x50",
+    "728x90",
+    "970x250"
+  ],
   "durationS": 15,
   "intervalMs": 250,
   "spritesheetIntervalMs": 1000,
@@ -32,26 +39,26 @@
         "offer1_sub_text": "OFF GAS*",
         "offer2_value_text": "1%",
         "offer2_sub_text": "OFF ELECTRICITY*",
-        "offer3_value_text": "€1",
+        "offer3_value_text": "\u20ac1",
         "offer3_sub_text": "OFF BILL*"
       },
       "long": {
         "offer1_value_text": "11%",
         "offer1_sub_text": "OFF ELECTRICITY*",
-        "offer2_value_text": "£8,888",
+        "offer2_value_text": "\u00a38,888",
         "offer2_sub_text": "OFF ELECTRICITY*",
-        "offer3_value_text": "€1,080",
+        "offer3_value_text": "\u20ac1,080",
         "offer3_sub_text": "OFF YOUR FIRST BILL*"
       }
     },
     "roundel": {
       "short": {
         "roundel_text_text": "Up to",
-        "roundel_value_text": "€1"
+        "roundel_value_text": "\u20ac1"
       },
       "long": {
         "roundel_text_text": "Saving you up to",
-        "roundel_value_text": "£8,888"
+        "roundel_value_text": "\u00a38,888"
       }
     },
     "legal": {
@@ -60,7 +67,7 @@
         "tc_units_text": "Elec: 32.64 Inc. Vat"
       },
       "long": {
-        "tc_terms_text": "*T&Cs apply. See sseairtricity.com for full terms.",
+        "tc_terms_text": "Grants are provided by the Government of Ireland through the Sustainable Energy Authority of Ireland (SEAI).",
         "tc_units_text": "Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat. Gas: 7.12 Inc. Vat"
       }
     },

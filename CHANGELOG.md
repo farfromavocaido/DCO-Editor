@@ -4,6 +4,8 @@
 
 ### Added
 
+- **`navy_headlines_bool`** — offers-0 photo-act ink toggle (default white). Scopes `white-headlines` / `navy-headlines`; scrim only with white. Not yet on live Studio profiles.
+- **offers-0 endframe H4** — Act 4 stays on the CTA beat as a smaller tagline; `include_heading4_enum` now gates visibility.
 - **ROI + NIR agency packages** — one DCO creative, two Studio profiles. Agency export bakes Brian’s official enable rows. Sync Zips writes `SSE_DCO_ROI_canonical_agency_*.zip` and `SSE_DCO_NIR_canonical_agency_*.zip`; Pages preview offers **Download ROI** and **Download NI**. ROI is `10964545` / `SSE_DCO_ROI_Delivery`. NIR is `10962603` / `SSE_DCO_NIR_Delivery` (same schema; sample copy + naming differ). Runtime uses `Enabler.exitOverride` from `_00_Exit_URL`. See `src/lib/dco-markets.ts`.
 - **Studio profile 10964545 / SSE_DCO_ROI_Delivery** — campaigns + export defaults + `clientfiles/CodeSnippet-html5.txt` point at Brian’s new dynamic profile. Size-override columns match 1:1 (no remap). Schema parity fields: `include_heading4_enum`, `background_image_label` (stored; Act 4 timing unchanged). Studio `<br>` line breaks normalize to `\n` on feed save, preview, and export runtime.
 - **Per-size text overrides (provisional)** — optional `heading1–4_text_{size}` and `tc_units_text_{size}` feed columns (blank → base). Resolver shared by preview, outline bake, and export runtime. Studio renames via sidecar `campaign/feed-field-map.json` (`studioToCanonical`). Sample panel: collapsed “Size overrides” for the active size. See `docs/FEED_FIELD_SCHEMA_PROPOSAL.md`.
@@ -12,6 +14,12 @@
 - **QA hold-samples.json** — `npm run qa:dco` derives settled review timestamps from creative JSON clip plateaus (`src/lib/hold-samples.ts` → `compileAnimationClips` / `frameAtPercent`), per session × size, snapped to the 250ms capture grid. Regenerate with `npm run qa:dco:holds -- --output qa-output/<run>`. The dco-qa-review skill reads this list instead of hardcoded `t4000`/`t7000`/….
 - **QA settled/ scan sheets** — each run also writes `settled/{size}/{sessionId}.png` spritesheets containing **only** derived hold frames (grouped by size for scanning). Rebuild with `npm run qa:dco:settled -- --output qa-output/<run>`.
 - **DCO visual QA matrix** — local Playwright pipeline (`npm run qa:dco`) exports canonical-agency HTML into `.qa-work/`, injects **12** stress feed rows (6 layout variants × `short`/`long`) across all sizes, captures the 15s timeline at **4 fps** with **1 fps** spritesheets under `qa-output/<YYYYMMDD-HHMMSS>/`, plus a deduped on-stage DOM flag report. Capture uses a page pool (`--concurrency` / `-j`). Visual review via Cursor skill `.cursor/skills/dco-qa-review`. See `docs/QA_DCO_MATRIX.md`.
+
+### Changed
+
+- **offers-0 last frame** — blue wave holds at the multi-offer corner-peek for the whole ad; green wave starts at derived `green_in` (settles by Act 4). Photo headlines end at `green_in` so the last act is gone before the sweep. Ink (White/Navy) drives photo-act headlines **and T&Cs**; Act 4 stays navy; CTA is navy fill with white text. Sample row uses the SEAI grants legal line.
+
+- **offers-0 T&Cs unlocked** — TopBar / QA / scopes honour `tc_type_enum`. Solo apply line uses the unit-rate box via `offers-0.tc-solo|terms-prices`.
 
 ### Fixed
 

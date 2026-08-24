@@ -57,6 +57,7 @@ export function TopBar() {
   const tcMode = useEditorStore((s) => s.tcMode);
   const ctaShape = useEditorStore((s) => s.ctaShape);
   const includeRoundelFrame = useEditorStore((s) => s.includeRoundelFrame);
+  const navyHeadlines = useEditorStore((s) => s.navyHeadlines);
   const historyIndex = useEditorStore((s) => s.historyIndex);
   const history = useEditorStore((s) => s.history);
   const creativeDirty = useEditorStore((s) => s.creativeDirty);
@@ -155,17 +156,26 @@ export function TopBar() {
         />
         <SegmentedControl
           label="T&Cs"
-          tip={Number(offerCount) === 0
-            ? 'T&Cs are hidden for the zero-offers variant'
-            : 'Terms and conditions layout'}
-          value={Number(offerCount) === 0 ? 'tcs_only' : tcMode}
-          disabled={Number(offerCount) === 0}
+          tip="Terms and conditions layout"
+          value={tcMode}
           options={[
             { value: 'tcs_only', label: 'Solo', tip: 'T&Cs only' },
             { value: 'tcs_units', label: 'Prices', tip: 'T&Cs with unit rates' },
           ]}
           onChange={(value) => setVariantControl('tc_type_enum', value)}
         />
+        {Number(offerCount) === 0 ? (
+          <SegmentedControl
+            label="Ink"
+            tip="Headline + T&C colour on photo acts (offers-0 only)"
+            value={navyHeadlines ? 'navy' : 'white'}
+            options={[
+              { value: 'white', label: 'White', tip: 'White headlines and T&Cs (default)' },
+              { value: 'navy', label: 'Navy', tip: 'Navy headlines and T&Cs for brighter imagery' },
+            ]}
+            onChange={(value) => setVariantControl('navy_headlines_bool', value === 'navy' ? 'true' : 'false')}
+          />
+        ) : null}
         <SegmentedControl
           label="CTA"
           tip="Call-to-action button shape"

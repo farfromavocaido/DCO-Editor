@@ -15,7 +15,7 @@ Each field definition is `{ name, label, type, group, description, ...constraint
 
 `CREATIVE_AD_SIZES` (in `feed-background.ts`) is the canonical size list (`160x600`, `300x250`, `300x600`, `320x50`, `728x90`, `970x250`). Generators that need to vary by size key off it.
 
-**Per-size text overrides:** `sizeTextFieldDefinitions()` in `src/lib/feed-size-text.ts` adds optional multiline columns `heading1_text_{size}` … `heading4_text_{size}` and `tc_units_text_{size}`. Empty override → base field. Live Studio profiles: ROI `10964545` / `SSE_DCO_ROI_Delivery` and NIR `10962603` / `SSE_DCO_NIR_Delivery` (see `src/lib/dco-markets.ts`). Studio `<br>` → `\n` via `normalizeFeedLineBreaks()`. Schema also stores `include_heading4_enum` and `background_image_label` for parity. Agency catalogue: [FEED_FIELD_SCHEMA_PROPOSAL.md](./FEED_FIELD_SCHEMA_PROPOSAL.md).
+**Per-size text overrides:** `sizeTextFieldDefinitions()` in `src/lib/feed-size-text.ts` adds optional multiline columns `heading1_text_{size}` … `heading4_text_{size}` and `tc_units_text_{size}`. Empty override → base field. Live Studio profiles: ROI `10964545` / `SSE_DCO_ROI_Delivery` and NIR `10962603` / `SSE_DCO_NIR_Delivery` (see `src/lib/dco-markets.ts`). Studio `<br>` → `\n` via `normalizeFeedLineBreaks()`. `include_heading4_enum` gates Act 4; `navy_headlines_bool` is local/editor-ready. Agency catalogue: [FEED_FIELD_SCHEMA_PROPOSAL.md](./FEED_FIELD_SCHEMA_PROPOSAL.md).
 
 ## Profile
 
@@ -202,7 +202,7 @@ Validated fields: all headline, offer, CTA, roundel, and T&C copy fields listed 
 | **Description** | Number of visible offer slots (`0`–`3`). `0` is the brand / no-offers variant (SSE DCO only in the editor). |
 | **Validation** | Integer clamped to **min 0, max 3**. Non-numeric → `1`. Values above 3 clamp to 3; values below 0 clamp to 0. Explicit `0` is preserved. |
 | **Required** | Optional on input; always coerced to 0–3 (invalid → `1`). |
-| **Fallback** | `1` if missing/invalid. Runtime also derives count from non-empty `offerN_value_text` if explicit count is outside 0–3. Controls `offers-0` / `offers-1` / `offers-2` / `offers-3` CSS scope. Under `offers-0`: all offer slots hidden, green wave hidden, blue wave enters at start with white logo only, T&Cs forced off, white headlines, and blank headline acts share screentime evenly before CTA. |
+| **Fallback** | `1` if missing/invalid. Runtime also derives count from non-empty `offerN_value_text` if explicit count is outside 0–3. Controls `offers-0` / `offers-1` / `offers-2` / `offers-3` CSS scope. Under `offers-0`: offer slots hidden; photo acts keep offers-0 headline geometry with white or navy ink (`navy_headlines_bool`); blue wave stays at its corner-peek for the whole ad; green wave settles by Act 4; Act 4 is navy over green; CTA is navy fill with white text; T&Cs unlocked (`tc_type_enum`); Act 4 still uses `heading4_text` + `include_heading4_enum`. |
 
 #### `tc_type_enum`
 
@@ -402,7 +402,8 @@ These are not separate feed fields; they are computed from the fields above (`co
 
 | Scope class | When applied |
 |---|---|
-| `offers-0` … `offers-3` | From `offer_count_num` (or derived offer values). `offers-0` also forces `tc-solo` and hides T&C layers. |
+| `offers-0` … `offers-3` | From `offer_count_num` (or derived offer values). |
+| `white-headlines` / `navy-headlines` | Offers-0 only, from `navy_headlines_bool` (default white). |
 | `tc-solo` / `tc-prices` | From `tc_type_enum` (forced `tc-solo` when `offer_count_num` is `0`) |
 | `cta-roundel` / `cta-rect` | From `cta_type_enum`, or always rect when roundel frame on |
 | `frames-3` / `frames-4` | From `include_roundel_frame_bool` |

@@ -82,6 +82,7 @@ test('defines metadata for every existing Studio profile field', () => {
     'roundel_text_text',
     'roundel_value_text',
     'include_heading4_enum',
+    'navy_headlines_bool',
     'background_image_label',
     ...sizeTextFieldDefinitions().map((field) => field.name),
     ...backgroundImageFieldDefinitions().map((field) => field.name),

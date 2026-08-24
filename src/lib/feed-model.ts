@@ -114,25 +114,24 @@ export const controlsFromFeedRow = (row = {}) => {
   const offerCount = clampOfferCount(row.offer_count_num);
   return {
     offerCount,
-    // Zero-offers locks T&Cs off (Solo scope + hidden layers).
-    tcMode: offerCount === 0
-      ? 'tcs_only'
-      : (normalizeTcTypeEnum(row.tc_type_enum) === 'tcs_units' ? 'tcs_units' : 'tcs_only'),
+    tcMode: normalizeTcTypeEnum(row.tc_type_enum) === 'tcs_units' ? 'tcs_units' : 'tcs_only',
     ctaShape: includeRoundelFrame ? 'rectangle' : normalizeCtaShape(row.cta_type_enum),
     includeRoundelFrame,
     frameCount: includeRoundelFrame ? 4 : 3,
     roundelMode: includeRoundelFrame && String(row.roundel_value_text || '').trim()
       ? 'split'
       : 'copy-only',
+    // Offers-0 only: white headlines by default; navy when feed flag is true.
+    navyHeadlines: offerCount === 0 && coerceBoolean(row.navy_headlines_bool),
   };
 };
 
 export const activeScopesFromControls = (controls = {}) => {
   const offerCount = clampOfferCount(controls.offerCount);
-  const tcScope = offerCount === 0 || controls.tcMode !== 'tcs_units' ? 'tc-solo' : 'tc-prices';
+  const tcScope = controls.tcMode !== 'tcs_units' ? 'tc-solo' : 'tc-prices';
   const includeRoundelFrame = Boolean(controls.includeRoundelFrame || Number(controls.frameCount) === 4);
   const ctaScope = includeRoundelFrame || normalizeCtaShape(controls.ctaShape) === 'rectangle' ? 'cta-rect' : 'cta-roundel';
-  return [
+  const scopes = [
     `offers-${offerCount}`,
     tcScope,
     ctaScope,
@@ -140,6 +139,10 @@ export const activeScopesFromControls = (controls = {}) => {
     includeRoundelFrame ? 'roundel-frame-on' : 'roundel-frame-off',
     controls.roundelMode === 'split' ? 'roundel-split' : 'roundel-copy-only',
   ];
+  if (offerCount === 0) {
+    scopes.push(controls.navyHeadlines ? 'navy-headlines' : 'white-headlines');
+  }
+  return scopes;
 };
 
 const controlKeyForField = {
@@ -147,6 +150,7 @@ const controlKeyForField = {
   tc_type_enum: 'tcMode',
   cta_type_enum: 'ctaShape',
   include_roundel_frame_bool: 'includeRoundelFrame',
+  navy_headlines_bool: 'navyHeadlines',
 };
 
 export const selectFeedDraftVariant = (draft, fields, fieldName, value) => {

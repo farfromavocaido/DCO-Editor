@@ -111,6 +111,6 @@ export const bgBlurVisibilityRule = () => ({
   layerId: BG_BLUR_LAYER_ID,
   cssClass: BG_BLUR_CSS_CLASS,
   when: { offer_count_num: 0 },
-  props: { visibility: 'visible' },
+  props: { visibility: 'hidden' },
   editable: true,
 });

@@ -103,8 +103,8 @@ export const qaHoldLayerIdsForScopes = (scopes: string[]): string[] => {
     }
     if (id === 'plus-1') return offerCount >= 2;
     if (id === 'plus-2') return offerCount >= 3;
-    if (id === 'terms-prices' || id === 'unit-rate-prices') return tcPrices && offerCount > 0;
-    if (id === 'terms-solo') return !tcPrices && offerCount > 0;
+    if (id === 'terms-prices' || id === 'unit-rate-prices') return tcPrices;
+    if (id === 'terms-solo') return !tcPrices;
     if (id.startsWith('roundel-')) return roundelOn;
     return true;
   });
@@ -152,12 +152,13 @@ const keyframesForLayer = (
   row: Record<string, unknown>,
   profile: string,
   beats: Record<string, number>,
+  activeScopes: string[] = [],
 ): CreativeKeyframe[] => {
   const clips = (layer.clips || []) as AnimationClip[];
   if (HEADLINE_IDS.has(String(layer.id))) {
     return compileHeadlineKeyframes(layer, layers, row, profile, beats);
   }
-  const profileClips = clipsForProfile(clips, profile);
+  const profileClips = clipsForProfile(clips, profile, activeScopes);
   if (!profileClips.length) return [];
   return compileAnimationClips(profileClips, beats);
 };
@@ -219,7 +220,7 @@ export const holdSamplesForSize = (
   for (const layerId of wantedIds) {
     const layer = layerById.get(layerId);
     if (!layer) continue;
-    const keyframes = keyframesForLayer(layer, layers, row, profile, beats);
+    const keyframes = keyframesForLayer(layer, layers, row, profile, beats, activeScopes);
     if (!keyframes.length) continue;
     // Always-on (no motion after normalize) still yields opacity 1 everywhere — skip flat full-timeline.
     const plateaus = findSettledPlateaus(keyframes);

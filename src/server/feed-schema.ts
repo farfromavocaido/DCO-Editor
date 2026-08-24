@@ -31,8 +31,8 @@ export const FEED_SCHEMA_FIELDS = [
   { name: 'include_roundel_frame_bool', label: 'Offer roundel frame', type: 'boolean', group: 'Creative State', description: 'Whether the optional Act 3 offer roundel frame is shown.' },
   { name: 'roundel_text_text', label: 'Roundel text', type: 'string', group: 'Copy', description: 'Text shown inside the optional roundel frame.' },
   { name: 'roundel_value_text', label: 'Roundel value', type: 'string', group: 'Copy', description: 'Optional large value shown inside the roundel frame.' },
-  // Studio names this *_enum but serves boolean true/false. Stored for schema parity; runtime does not gate Act 4 on it yet.
-  { name: 'include_heading4_enum', label: 'Include heading 4', type: 'boolean', group: 'Creative State', description: 'Studio flag for Heading 4. Schema parity only — creative timing still follows heading4_text / roundel frame.' },
+  { name: 'include_heading4_enum', label: 'Include heading 4', type: 'boolean', group: 'Creative State', description: 'Whether Act 4 / endframe headline is shown when heading4_text is set.' },
+  { name: 'navy_headlines_bool', label: 'Navy ink', type: 'boolean', group: 'Creative State', description: 'Offers-0 only: navy (true) or white (false, default) ink on photo-act headlines and T&Cs.' },
   { name: 'background_image_label', label: 'Background label', type: 'string', group: 'Assets', description: 'Studio label for the background set (e.g. diy, hiker). Not used for rendering.' },
   ...sizeTextFieldDefinitions(),
   ...backgroundImageFieldDefinitions(),

@@ -30,11 +30,24 @@ export const headlineAct4DisplayText = (
   return normalizeHeadlineText(row.heading3_text);
 };
 
-export const clipsForProfile = (clips: AnimationClip[] = [], profile = 'frames-3') => (
+/**
+ * Filter layer clips by frame profile and optional active offer/CSS scopes.
+ * Missing/empty `profiles` or `scopes` on a clip → matches all.
+ * When `activeScopes` is omitted, offer-scoped clips are excluded (callers that
+ * compile multi-offer vs offers-0 motion must pass scopes explicitly).
+ */
+export const clipsForProfile = (
+  clips: AnimationClip[] = [],
+  profile = 'frames-3',
+  activeScopes?: string[] | null,
+) => (
   (clips || []).filter((clip: Record<string, unknown>) => {
-    const profiles = clip.profiles;
-    if (!profiles?.length) return true;
-    return profiles.includes(profile);
+    const profiles = clip.profiles as string[] | undefined;
+    if (profiles?.length && !profiles.includes(profile)) return false;
+    const scopes = clip.scopes as string[] | undefined;
+    if (!scopes?.length) return true;
+    if (!activeScopes?.length) return false;
+    return scopes.some((scope) => activeScopes.includes(scope));
   })
 );
 
@@ -72,19 +85,22 @@ export const isZeroOffersRow = (row: Record<string, unknown> = {}) => {
 };
 
 /**
- * Policy B for offers-0: blank acts are omitted; remaining acts share
- * [act1_in, cta_in) evenly. A blank endframe (act 4) does not stretch earlier
- * headlines into the CTA window.
+ * Policy B for offers-0: blank pre-CTA acts are omitted; remaining acts 1–3
+ * share [act1_in, green_in) evenly so the last photo headline is gone when
+ * greenwave starts sweeping. Act 4 keeps its authored CTA-window clips.
  */
 export const equalHeadlineWindowsForZeroOffers = (
   headings: string[],
   includeRoundelFrame = false,
   beats: Record<string, number> = {},
 ) => {
-  const eligible = eligibleHeadlineActs(includeRoundelFrame);
+  const eligible = eligibleHeadlineActs(includeRoundelFrame).filter((act) => act !== 4);
   const activeActs = eligible.filter((act) => Boolean(headings[act - 1]));
   const windowStart = Number(beats.act1_in ?? 0);
-  const windowEnd = Number(beats.cta_in ?? beats.bn_cta_in ?? 100);
+  const windowEnd = Number(
+    beats.green_in
+    ?? ((beats.act4_in ?? beats.bn_cta_in ?? beats.cta_in ?? 100) - 7),
+  );
   const span = Math.max(0.01, windowEnd - windowStart);
   const slice = activeActs.length ? span / activeActs.length : span;
   const windows = new Map();
@@ -94,6 +110,16 @@ export const equalHeadlineWindowsForZeroOffers = (
     windows.set(act, { start, end });
   });
   return { activeActs, windows, windowStart, windowEnd };
+};
+
+/** Studio include_heading4_enum: missing/undefined → true (show when copy present). */
+export const isHeading4Enabled = (row: Record<string, unknown> = {}) => {
+  if (row.include_heading4_enum === undefined || row.include_heading4_enum === null) return true;
+  if (typeof row.include_heading4_enum === 'boolean') return row.include_heading4_enum;
+  const normalized = String(row.include_heading4_enum).trim().toLowerCase();
+  if (['false', '0', 'no', 'off', ''].includes(normalized)) return false;
+  if (['true', '1', 'yes', 'on'].includes(normalized)) return true;
+  return true;
 };
 
 const hiddenKeyframes = (): CreativeKeyframe[] => ([
@@ -268,6 +294,7 @@ export const buildHeadlineMotionPlan = (
   });
 
   if (zeroOffers) {
+    const heading4Enabled = isHeading4Enabled(row);
     const { activeActs, windows: equalWindows } = equalHeadlineWindowsForZeroOffers(
       headings,
       includeRoundelFrame,
@@ -275,6 +302,15 @@ export const buildHeadlineMotionPlan = (
     );
     const eligible = new Set(eligibleHeadlineActs(includeRoundelFrame));
     for (const window of windows) {
+      // Act 4 stays on its authored CTA clips when copy is present and enabled.
+      if (window.act === 4) {
+        const showAct4 = heading4Enabled && Boolean(headings[3]);
+        if (!showAct4) {
+          window.hidden = true;
+          window.keyframes = hiddenKeyframes();
+        }
+        continue;
+      }
       if (!eligible.has(window.act) || !activeActs.includes(window.act)) {
         window.hidden = true;
         window.keyframes = hiddenKeyframes();
@@ -558,12 +594,23 @@ export const headlineTransitionRuntimeBlock = (
 
         function __applyOffers0BeatOverlay(beats) {
           var next = Object.assign({}, beats || {});
-          next.bn_blue_in = 0;
-          next.wave2_in = 0;
-          next.bn_white_in = 6;
           next.act1_begin = 4;
           next.act1_in = 7;
+          var act4 = Number(
+            next.act4_in != null ? next.act4_in
+              : (next.bn_cta_in != null ? next.bn_cta_in : (next.cta_in != null ? next.cta_in : 100))
+          );
+          var greenIn = Math.round((act4 - 7) * 1000) / 1000;
+          next.green_in = Math.max(0, Math.min(100, greenIn));
           return next;
+        }
+
+        function __isHeading4Enabled(data) {
+          if (!data || data.include_heading4_enum === undefined || data.include_heading4_enum === null) return true;
+          if (typeof data.include_heading4_enum === 'boolean') return data.include_heading4_enum;
+          var normalized = String(data.include_heading4_enum).trim().toLowerCase();
+          if (normalized === 'false' || normalized === '0' || normalized === 'no' || normalized === 'off' || normalized === '') return false;
+          return true;
         }
 
         function __buildHeadlineMotionPlan(data, profile) {
@@ -598,15 +645,27 @@ export const headlineTransitionRuntimeBlock = (
             };
           });
           if (zeroOffers) {
-            var eligible = __eligibleHeadlineActs(includeRoundel);
+            var eligible = __eligibleHeadlineActs(includeRoundel).filter(function(act) { return act !== 4; });
             var activeActs = eligible.filter(function(act) { return headings[act - 1]; });
             var windowStart = Number(beats.act1_in || 0);
-            var windowEnd = Number(beats.cta_in != null ? beats.cta_in : (beats.bn_cta_in || 100));
+            var windowEnd = Number(
+              beats.green_in != null ? beats.green_in
+                : ((beats.act4_in != null ? beats.act4_in
+                  : (beats.bn_cta_in != null ? beats.bn_cta_in : (beats.cta_in || 100))) - 7)
+            );
             var span = Math.max(0.01, windowEnd - windowStart);
             var slice = activeActs.length ? span / activeActs.length : span;
             var activeSet = {};
             activeActs.forEach(function(act) { activeSet[act] = true; });
+            var heading4Enabled = __isHeading4Enabled(data);
             windows.forEach(function(window) {
+              if (window.act === 4) {
+                if (!(heading4Enabled && headings[3])) {
+                  window.hidden = true;
+                  window.keyframes = [{ at: 0, translate: [0, 0], opacity: 0 }, { at: 100, translate: [0, 0], opacity: 0 }];
+                }
+                return;
+              }
               if (!activeSet[window.act]) {
                 window.hidden = true;
                 window.keyframes = [{ at: 0, translate: [0, 0], opacity: 0 }, { at: 100, translate: [0, 0], opacity: 0 }];

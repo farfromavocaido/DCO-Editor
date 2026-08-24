@@ -711,19 +711,48 @@
               ]
             },
             {
-              "id": "greenwave-waveSweep-offers-0",
-              "label": "Greenwave waveSweep (offers-0 Act 4)",
-              "preset": "waveSweep",
+              "id": "greenwave-fade-offers-0",
+              "label": "Greenwave fade (offers-0 Act 4)",
+              "preset": "custom",
               "start": "green_in",
-              "end": "end-2",
-              "params": {
-                "start_x": 370,
-                "end_x": -50,
-                "hold_y": 0,
-                "sweep_duration_pct": 6
-              },
+              "end": "end",
               "scopes": [
                 "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "green_in",
+                  "translate": [
+                    -50,
+                    0
+                  ],
+                  "opacity": 0,
+                  "easing": "ease-out"
+                },
+                {
+                  "at": "act4_in",
+                  "translate": [
+                    -50,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end-2",
+                  "translate": [
+                    -50,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end",
+                  "translate": [
+                    -50,
+                    0
+                  ],
+                  "opacity": 0
+                }
               ]
             }
           ]
@@ -2605,19 +2634,48 @@
               ]
             },
             {
-              "id": "greenwave-waveSweep-offers-0",
-              "label": "Greenwave waveSweep (offers-0 Act 4)",
-              "preset": "waveSweep",
+              "id": "greenwave-fade-offers-0",
+              "label": "Greenwave fade (offers-0 Act 4)",
+              "preset": "custom",
               "start": "green_in",
-              "end": "end-2",
-              "params": {
-                "start_x": 840,
-                "end_x": -110,
-                "hold_y": 0,
-                "sweep_duration_pct": 7
-              },
+              "end": "end",
               "scopes": [
                 "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "green_in",
+                  "translate": [
+                    -110,
+                    0
+                  ],
+                  "opacity": 0,
+                  "easing": "ease-out"
+                },
+                {
+                  "at": "act4_in",
+                  "translate": [
+                    -110,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end-2",
+                  "translate": [
+                    -110,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end",
+                  "translate": [
+                    -110,
+                    0
+                  ],
+                  "opacity": 0
+                }
               ]
             }
           ]
@@ -4463,19 +4521,48 @@
               ]
             },
             {
-              "id": "greenwave-waveSweep-offers-0",
-              "label": "Greenwave waveSweep (offers-0 Act 4)",
-              "preset": "waveSweep",
+              "id": "greenwave-fade-offers-0",
+              "label": "Greenwave fade (offers-0 Act 4)",
+              "preset": "custom",
               "start": "green_in",
-              "end": "end-2",
-              "params": {
-                "start_x": 0,
-                "end_x": -700,
-                "hold_y": 0,
-                "sweep_duration_pct": 7
-              },
+              "end": "end",
               "scopes": [
                 "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "green_in",
+                  "translate": [
+                    -700,
+                    0
+                  ],
+                  "opacity": 0,
+                  "easing": "ease-out"
+                },
+                {
+                  "at": "act4_in",
+                  "translate": [
+                    -700,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end-2",
+                  "translate": [
+                    -700,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end",
+                  "translate": [
+                    -700,
+                    0
+                  ],
+                  "opacity": 0
+                }
               ]
             }
           ]
@@ -6304,19 +6391,48 @@
               ]
             },
             {
-              "id": "greenwave-waveSweep-offers-0",
-              "label": "Greenwave waveSweep (offers-0 Act 4)",
-              "preset": "waveSweep",
+              "id": "greenwave-fade-offers-0",
+              "label": "Greenwave fade (offers-0 Act 4)",
+              "preset": "custom",
               "start": "green_in",
-              "end": "end-2",
-              "params": {
-                "start_x": 430,
-                "end_x": -350,
-                "hold_y": 0,
-                "sweep_duration_pct": 6
-              },
+              "end": "end",
               "scopes": [
                 "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "green_in",
+                  "translate": [
+                    -350,
+                    0
+                  ],
+                  "opacity": 0,
+                  "easing": "ease-out"
+                },
+                {
+                  "at": "act4_in",
+                  "translate": [
+                    -350,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end-2",
+                  "translate": [
+                    -350,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end",
+                  "translate": [
+                    -350,
+                    0
+                  ],
+                  "opacity": 0
+                }
               ]
             }
           ]
@@ -8153,19 +8269,48 @@
               ]
             },
             {
-              "id": "greenwave-waveSweep-offers-0",
-              "label": "Greenwave waveSweep (offers-0 Act 4)",
-              "preset": "waveSweep",
+              "id": "greenwave-fade-offers-0",
+              "label": "Greenwave fade (offers-0 Act 4)",
+              "preset": "custom",
               "start": "green_in",
-              "end": "end-2",
-              "params": {
-                "start_x": 520,
-                "end_x": -400,
-                "hold_y": 0,
-                "sweep_duration_pct": 6
-              },
+              "end": "end",
               "scopes": [
                 "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "green_in",
+                  "translate": [
+                    -400,
+                    0
+                  ],
+                  "opacity": 0,
+                  "easing": "ease-out"
+                },
+                {
+                  "at": "act4_in",
+                  "translate": [
+                    -400,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end-2",
+                  "translate": [
+                    -400,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end",
+                  "translate": [
+                    -400,
+                    0
+                  ],
+                  "opacity": 0
+                }
               ]
             }
           ]
@@ -10006,19 +10151,48 @@
               ]
             },
             {
-              "id": "greenwave-waveSweep-offers-0",
-              "label": "Greenwave waveSweep (offers-0 Act 4)",
-              "preset": "waveSweep",
+              "id": "greenwave-fade-offers-0",
+              "label": "Greenwave fade (offers-0 Act 4)",
+              "preset": "custom",
               "start": "green_in",
-              "end": "end-2",
-              "params": {
-                "start_x": 1080,
-                "end_x": -500,
-                "hold_y": 0,
-                "sweep_duration_pct": 7
-              },
+              "end": "end",
               "scopes": [
                 "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "green_in",
+                  "translate": [
+                    -500,
+                    0
+                  ],
+                  "opacity": 0,
+                  "easing": "ease-out"
+                },
+                {
+                  "at": "act4_in",
+                  "translate": [
+                    -500,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end-2",
+                  "translate": [
+                    -500,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end",
+                  "translate": [
+                    -500,
+                    0
+                  ],
+                  "opacity": 0
+                }
               ]
             }
           ]

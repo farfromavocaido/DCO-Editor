@@ -57,20 +57,20 @@ export const beatsForFrameScope = (
 
 /**
  * Zero-offers: early photo headlines only. Wave motion is offer-scoped on
- * greenwave/bluewave clips (corner bluewave hold + Act 4 greenwave enter) —
+ * greenwave/bluewave clips (corner bluewave hold + Act 4 greenwave fade) —
  * do not zero wave2_in / bn_blue_in here.
  *
- * `green_in` is derived so the greenwave sweep finishes at Act 4 (`act4_in`).
- * Photo headlines equal-split ends at `green_in` so the last act is gone
- * before the sweep starts.
+ * `green_in` is ~0.5s before Act 4 on the 15s clock so the greenwave can
+ * fade in at rest and be opaque by `act4_in`. Photo headlines equal-split
+ * ends at `green_in` so the last act is gone before the fade starts.
  */
 export const OFFERS_0_BEAT_OVERLAY = {
   act1_begin: 4,
   act1_in: 7,
 };
 
-/** Max greenwave sweep used to derive `green_in` (matches largest size clip). */
-export const OFFERS_0_GREEN_SWEEP_PCT = 7;
+/** Greenwave fade-in window before Act 4 (~0.5s of a 15s timeline). */
+export const OFFERS_0_GREEN_FADE_PCT = 3.3;
 
 export const applyOffers0BeatOverlay = (beats: Record<string, number> = {}) => {
   const next = {
@@ -78,7 +78,7 @@ export const applyOffers0BeatOverlay = (beats: Record<string, number> = {}) => {
     ...OFFERS_0_BEAT_OVERLAY,
   };
   const act4 = Number(next.act4_in ?? next.bn_cta_in ?? next.cta_in ?? 100);
-  const greenIn = Math.round((act4 - OFFERS_0_GREEN_SWEEP_PCT) * 1000) / 1000;
+  const greenIn = Math.round((act4 - OFFERS_0_GREEN_FADE_PCT) * 1000) / 1000;
   next.green_in = Math.max(0, Math.min(100, greenIn));
   return next;
 };

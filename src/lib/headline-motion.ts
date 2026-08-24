@@ -87,7 +87,7 @@ export const isZeroOffersRow = (row: Record<string, unknown> = {}) => {
 /**
  * Policy B for offers-0: blank pre-CTA acts are omitted; remaining acts 1–3
  * share [act1_in, green_in) evenly so the last photo headline is gone when
- * greenwave starts sweeping. Act 4 keeps its authored CTA-window clips.
+ * greenwave starts fading in. Act 4 keeps its authored CTA-window clips.
  */
 export const equalHeadlineWindowsForZeroOffers = (
   headings: string[],
@@ -99,7 +99,7 @@ export const equalHeadlineWindowsForZeroOffers = (
   const windowStart = Number(beats.act1_in ?? 0);
   const windowEnd = Number(
     beats.green_in
-    ?? ((beats.act4_in ?? beats.bn_cta_in ?? beats.cta_in ?? 100) - 7),
+    ?? ((beats.act4_in ?? beats.bn_cta_in ?? beats.cta_in ?? 100) - 3.3),
   );
   const span = Math.max(0.01, windowEnd - windowStart);
   const slice = activeActs.length ? span / activeActs.length : span;
@@ -600,7 +600,7 @@ export const headlineTransitionRuntimeBlock = (
             next.act4_in != null ? next.act4_in
               : (next.bn_cta_in != null ? next.bn_cta_in : (next.cta_in != null ? next.cta_in : 100))
           );
-          var greenIn = Math.round((act4 - 7) * 1000) / 1000;
+          var greenIn = Math.round((act4 - 3.3) * 1000) / 1000;
           next.green_in = Math.max(0, Math.min(100, greenIn));
           return next;
         }
@@ -651,7 +651,7 @@ export const headlineTransitionRuntimeBlock = (
             var windowEnd = Number(
               beats.green_in != null ? beats.green_in
                 : ((beats.act4_in != null ? beats.act4_in
-                  : (beats.bn_cta_in != null ? beats.bn_cta_in : (beats.cta_in || 100))) - 7)
+                  : (beats.bn_cta_in != null ? beats.bn_cta_in : (beats.cta_in || 100))) - 3.3)
             );
             var span = Math.max(0.01, windowEnd - windowStart);
             var slice = activeActs.length ? span / activeActs.length : span;

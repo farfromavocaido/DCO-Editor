@@ -86,7 +86,7 @@ DOM stage mirroring the ad structure with compiled CSS, timeline scrubbing, canv
 
 Preview asset URLs are `/assets/...` — served by the Next route, mapped to `campaign/assets/...`.
 
-Offers-0 layers: `bg-blur` (`kind: "blur"`, `src/lib/blur-layer.ts`; stays hidden). Corner bluewave holds for the whole ad; greenwave settles by Act 4 via offer-scoped clips. Photo headlines keep offers-0 box geometry (white/navy ink); Act 4 + CTA are navy over green. `headline-scrim` (`kind: "gradient"`, `src/lib/gradient-layer.ts`) — visible under `white-headlines` only.
+Offers-0 layers: `bg-blur` (`kind: "blur"`, `src/lib/blur-layer.ts`; stays hidden). Corner bluewave holds for the whole ad; greenwave fades in at rest ~0.5s before Act 4 via offer-scoped clips. Photo headlines keep offers-0 box geometry (white/navy ink); Act 4 + CTA are navy over green. `headline-scrim` (`kind: "gradient"`, `src/lib/gradient-layer.ts`) — visible under `white-headlines` only.
 
 ### Motion
 

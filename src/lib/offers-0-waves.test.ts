@@ -19,7 +19,7 @@ const creative = JSON.parse(
 const MULTI = ['offers-1', 'offers-2', 'offers-3'];
 const NAVY = 'rgb(0, 41, 117)';
 
-test('offers-0 greenwave settles by Act 4; blue holds rest from start', () => {
+test('offers-0 greenwave fades at settled rest; blue holds from start', () => {
   for (const size of Object.keys(creative.sizes)) {
     const sizeCreative = creative.sizes[size];
     const green = sizeCreative.layers.find((layer) => layer.id === 'greenwave');
@@ -33,37 +33,37 @@ test('offers-0 greenwave settles by Act 4; blue holds rest from start', () => {
     assert.equal(multiGreen.length, 1, `${size} multi green`);
     assert.equal(zeroGreen.length, 1, `${size} zero green`);
     assert.equal(zeroBlue.length, 1, `${size} zero blue`);
+    assert.equal(zeroGreen[0].preset, 'custom', `${size} green fade clip`);
     assert.equal(zeroGreen[0].start, 'green_in', `${size} green starts at green_in`);
-    assert.notEqual(multiGreen[0].start, zeroGreen[0].start, `${size} green timing differs`);
 
     const beats = beatsForScopes(creative, ['offers-0', 'frames-3']);
     assert.ok(Number.isFinite(beats.green_in), `${size} green_in beat`);
+    const restX = Number(multiGreen[0].params?.end_x ?? 0);
+    const restY = Number(multiGreen[0].params?.end_y ?? multiGreen[0].params?.hold_y ?? 0);
+
     const greenFrames = compileAnimationClips(zeroGreen, beats);
     const blueFrames = compileAnimationClips(zeroBlue, beats);
     const midPhoto = frameAtPercent(blueFrames, 20);
-    const restX = Number(zeroBlue[0].params.end_x ?? 0);
-    const restY = Number(
-      zeroBlue[0].params.end_y
-      ?? zeroBlue[0].params.hold_y
-      ?? 0,
-    );
-    assert.equal(midPhoto.translate[0], restX, `${size} blue peek x at mid-photo`);
-    assert.equal(midPhoto.translate[1], restY, `${size} blue peek y at mid-photo`);
+    assert.equal(midPhoto.translate[0], Number(zeroBlue[0].params.end_x ?? 0), `${size} blue peek x`);
     assert.ok(midPhoto.opacity > 0.9, `${size} blue visible mid-photo`);
 
-    const sweep = Number(zeroGreen[0].params?.sweep_duration_pct ?? 7);
-    const greenStart = resolveTimeRef(zeroGreen[0].start, beats);
-    assert.equal(greenStart, beats.green_in, `${size} green_in resolves`);
-    const settleAt = greenStart + sweep;
+    const greenStart = resolveTimeRef('green_in', beats);
     const act4At = Number(beats.act4_in);
-    assert.ok(
-      settleAt <= act4At + 0.05,
-      `${size} green should settle by Act 4 (${settleAt} > ${act4At})`,
-    );
+    assert.ok(Math.abs(act4At - greenStart - 3.3) < 0.05, `${size} ~0.5s fade window`);
 
-    const before = frameAtPercent(greenFrames, Math.max(0, greenStart - 5));
-    const afterSweep = frameAtPercent(greenFrames, Math.min(99, settleAt + 1));
-    assert.notEqual(before.translate[0], afterSweep.translate[0], `${size} green sweeps in`);
+    const before = frameAtPercent(greenFrames, Math.max(0, greenStart - 2));
+    const midFade = frameAtPercent(greenFrames, (greenStart + act4At) / 2);
+    const atAct4 = frameAtPercent(greenFrames, act4At);
+    const nearEnd = frameAtPercent(greenFrames, 99.5);
+
+    assert.ok(before.opacity < 0.05, `${size} green hidden before fade`);
+    assert.ok(midFade.opacity > 0.2 && midFade.opacity < 0.9, `${size} green mid-fade`);
+    assert.ok(atAct4.opacity > 0.95, `${size} green opaque at Act 4`);
+    assert.ok(nearEnd.opacity < 0.3, `${size} green fades out at end`);
+    assert.equal(before.translate[0], restX, `${size} rest x before`);
+    assert.equal(atAct4.translate[0], restX, `${size} rest x at Act 4`);
+    assert.equal(atAct4.translate[1], restY, `${size} rest y at Act 4`);
+    assert.equal(before.translate[0], atAct4.translate[0], `${size} no green movement`);
   }
 });
 

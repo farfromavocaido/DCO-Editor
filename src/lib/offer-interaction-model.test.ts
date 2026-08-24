@@ -55,8 +55,8 @@ test('visibilityForLayer honours base visibility when no active rule overrides i
         ],
         variantRules: [
           {
-            id: 'white-headlines|headline-scrim|visibility',
-            scope: 'white-headlines',
+            id: 'offers-0|headline-scrim|visibility',
+            scope: 'offers-0',
             layerId: 'headline-scrim',
             cssClass: 'headline-scrim',
             props: { visibility: 'visible' },
@@ -67,7 +67,7 @@ test('visibilityForLayer honours base visibility when no active rule overrides i
   };
   assert.equal(visibilityForLayer(doc, '300x250', 'headline-scrim', ['offers-1']), 'hidden');
   assert.equal(visibilityForLayer(doc, '300x250', 'headline-scrim', ['offers-0', 'white-headlines']), 'visible');
-  assert.equal(visibilityForLayer(doc, '300x250', 'headline-scrim', ['offers-0', 'navy-headlines']), 'hidden');
+  assert.equal(visibilityForLayer(doc, '300x250', 'headline-scrim', ['offers-0', 'navy-headlines']), 'visible');
 });
 
 test('activeOfferMemberIds excludes hidden plus signs for MPU triple', () => {

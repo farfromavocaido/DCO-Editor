@@ -219,6 +219,14 @@ test('offers-0 headline scrim is bottom-up and under the bluewave', () => {
     assert.ok(scrim && blue, size);
     assert.equal(scrim.gradient?.direction, 'to-top', `${size} scrim to-top`);
     assert.ok(scrim.zIndex < blue.zIndex, `${size} scrim behind bluewave`);
+    assert.ok(
+      sizeCreative.variantRules.some((rule) => rule.id === 'offers-0|headline-scrim|visibility'),
+      `${size} scrim always on offers-0`,
+    );
+    assert.ok(
+      !sizeCreative.variantRules.some((rule) => String(rule.id).includes('headlines|headline-scrim')),
+      `${size} scrim not ink-gated`,
+    );
   }
 });
 

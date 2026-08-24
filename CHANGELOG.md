@@ -4,7 +4,7 @@
 
 ### Added
 
-- **`navy_headlines_bool`** — offers-0 photo-act ink toggle (default white). Scopes `white-headlines` / `navy-headlines`; scrim only with white. T&Cs stay white. Not yet on live Studio profiles.
+- **`navy_headlines_bool`** — offers-0 photo-act ink toggle (default white). Scopes `white-headlines` / `navy-headlines`. T&Cs stay white; headline scrim stays on for all offers-0 ink. Not yet on live Studio profiles.
 - **offers-0 endframe H4** — Act 4 stays on the CTA beat as a smaller tagline; `include_heading4_enum` now gates visibility.
 - **ROI + NIR agency packages** — one DCO creative, two Studio profiles. Agency export bakes Brian’s official enable rows. Sync Zips writes `SSE_DCO_ROI_canonical_agency_*.zip` and `SSE_DCO_NIR_canonical_agency_*.zip`; Pages preview offers **Download ROI** and **Download NI**. ROI is `10964545` / `SSE_DCO_ROI_Delivery`. NIR is `10962603` / `SSE_DCO_NIR_Delivery` (same schema; sample copy + naming differ). Runtime uses `Enabler.exitOverride` from `_00_Exit_URL`. See `src/lib/dco-markets.ts`.
 - **Studio profile 10964545 / SSE_DCO_ROI_Delivery** — campaigns + export defaults + `clientfiles/CodeSnippet-html5.txt` point at Brian’s new dynamic profile. Size-override columns match 1:1 (no remap). Schema parity fields: `include_heading4_enum`, `background_image_label` (stored; Act 4 timing unchanged). Studio `<br>` line breaks normalize to `\n` on feed save, preview, and export runtime.
@@ -17,7 +17,7 @@
 
 ### Changed
 
-- **offers-0 last frame** — blue wave starts already at **stage1** (no entry sweep); moves to the exact last-committed **stage2** settle during the green fade (`green_in` → `act4_in`); returns to stage1 at the end (`end-3.3` → `end`, no opacity fade). **160×600** / **320×50** stay on stage1 throughout. Green wave **fades in** at rest over ~0.5s before Act 4, then out at the end. White logo fades in from mid-open (`start+5`, `enter_duration_pct: 5`); blue logo hidden. T&C lines stay **white** (detached from Ink) through the photo acts and fade out at `green_in`. Headline scrim is bottom-up (`to-top`) under the blue wave. Photo headlines end at `green_in`. Ink (White/Navy) drives photo-act headlines only; Act 4 stays navy; CTA is navy fill with white text except **320×50** offers-0 (SSE green fill, navy text). Sample row uses the SEAI grants legal line.
+- **offers-0 last frame** — blue wave starts already at **stage1** (no entry sweep); moves to the exact last-committed **stage2** settle during the green fade (`green_in` → `act4_in`); returns to stage1 at the end (`end-3.3` → `end`, no opacity fade). **160×600** / **320×50** stay on stage1 throughout. Green wave **fades in** at rest over ~0.5s before Act 4, then out at the end. White logo fades in from mid-open (`start+5`, `enter_duration_pct: 5`); blue logo hidden. T&C lines stay **white** (detached from Ink) through the photo acts and fade out at `green_in`. Headline scrim is bottom-up (`to-top`) under the blue wave and **always on** for offers-0. Photo headlines end at `green_in`. Ink (White/Navy) drives photo-act headlines only; Act 4 stays navy; CTA is navy fill with white text except **320×50** offers-0 (SSE green fill, navy text). Sample row uses the SEAI grants legal line.
 - **Client preview Ink** — GitHub Pages DCO preview exposes White/Navy when Offers = 0 (`navy_headlines_bool`).
 
 - **offers-0 T&Cs unlocked** — TopBar / QA / scopes honour `tc_type_enum`. Solo apply line uses the unit-rate box via `offers-0.tc-solo|terms-prices`.

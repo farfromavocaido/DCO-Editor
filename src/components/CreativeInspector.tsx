@@ -348,7 +348,7 @@ export function CreativeInspector() {
             onToggle={() => toggleSection('gradient')}
           >
             <p className="inspector-note">
-              Static dark scrim for offers-0 white headlines. Mid opacity is always half of start opacity.
+              Static dark scrim for offers-0 (supports white T&Cs). Mid opacity is always half of start opacity.
               Visible only when Offers is 0.
             </p>
             <div className="inspector-grid">

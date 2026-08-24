@@ -55,7 +55,7 @@ test('seeds an offers-0 headline scrim gradient on every size', async () => {
     assert.ok(scrim, `missing scrim on ${size}`);
     assert.equal(scrim.kind, 'gradient');
     assert.equal(scrim.base.visibility, 'hidden');
-    assert.ok(sizeCreative.variantRules.some((rule) => rule.id === 'white-headlines|headline-scrim|visibility'));
+    assert.ok(sizeCreative.variantRules.some((rule) => rule.id === 'offers-0|headline-scrim|visibility'));
     assert.equal(scrim.gradient.direction, 'to-top');
     assert.ok(Number(scrim.gradient.endPct) > 0);
     assert.ok(Number(scrim.gradient.startOpacity) > 0);

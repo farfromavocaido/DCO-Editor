@@ -2254,8 +2254,8 @@
           "editable": true
         },
         {
-          "id": "white-headlines|headline-scrim|visibility",
-          "scope": "white-headlines",
+          "id": "offers-0|headline-scrim|visibility",
+          "scope": "offers-0",
           "layerId": "headline-scrim",
           "cssClass": "headline-scrim",
           "when": {
@@ -2433,19 +2433,6 @@
             "borderRadius": "50%",
             "backgroundColor": "rgb(0, 229, 165)",
             "color": "rgb(0, 41, 117)"
-          },
-          "editable": true
-        },
-        {
-          "id": "navy-headlines|headline-scrim|visibility",
-          "scope": "navy-headlines",
-          "layerId": "headline-scrim",
-          "cssClass": "headline-scrim",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
           },
           "editable": true
         },
@@ -4263,8 +4250,8 @@
           "editable": true
         },
         {
-          "id": "white-headlines|headline-scrim|visibility",
-          "scope": "white-headlines",
+          "id": "offers-0|headline-scrim|visibility",
+          "scope": "offers-0",
           "layerId": "headline-scrim",
           "cssClass": "headline-scrim",
           "when": {
@@ -4439,19 +4426,6 @@
             "borderRadius": "50%",
             "backgroundColor": "rgb(0, 41, 117)",
             "color": "rgb(255, 255, 255)"
-          },
-          "editable": true
-        },
-        {
-          "id": "navy-headlines|headline-scrim|visibility",
-          "scope": "navy-headlines",
-          "layerId": "headline-scrim",
-          "cssClass": "headline-scrim",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
           },
           "editable": true
         },
@@ -6294,8 +6268,8 @@
           "editable": true
         },
         {
-          "id": "white-headlines|headline-scrim|visibility",
-          "scope": "white-headlines",
+          "id": "offers-0|headline-scrim|visibility",
+          "scope": "offers-0",
           "layerId": "headline-scrim",
           "cssClass": "headline-scrim",
           "when": {
@@ -6472,19 +6446,6 @@
             "borderRadius": "50%",
             "backgroundColor": "rgb(0, 41, 117)",
             "color": "rgb(255, 255, 255)"
-          },
-          "editable": true
-        },
-        {
-          "id": "navy-headlines|headline-scrim|visibility",
-          "scope": "navy-headlines",
-          "layerId": "headline-scrim",
-          "cssClass": "headline-scrim",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
           },
           "editable": true
         },
@@ -8255,8 +8216,8 @@
           "editable": true
         },
         {
-          "id": "white-headlines|headline-scrim|visibility",
-          "scope": "white-headlines",
+          "id": "offers-0|headline-scrim|visibility",
+          "scope": "offers-0",
           "layerId": "headline-scrim",
           "cssClass": "headline-scrim",
           "when": {
@@ -8431,19 +8392,6 @@
             "borderRadius": "50%",
             "backgroundColor": "rgb(0, 41, 117)",
             "color": "rgb(255, 255, 255)"
-          },
-          "editable": true
-        },
-        {
-          "id": "navy-headlines|headline-scrim|visibility",
-          "scope": "navy-headlines",
-          "layerId": "headline-scrim",
-          "cssClass": "headline-scrim",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
           },
           "editable": true
         },
@@ -10272,8 +10220,8 @@
           "editable": true
         },
         {
-          "id": "white-headlines|headline-scrim|visibility",
-          "scope": "white-headlines",
+          "id": "offers-0|headline-scrim|visibility",
+          "scope": "offers-0",
           "layerId": "headline-scrim",
           "cssClass": "headline-scrim",
           "when": {
@@ -10448,19 +10396,6 @@
             "borderRadius": "50%",
             "backgroundColor": "rgb(0, 41, 117)",
             "color": "rgb(255, 255, 255)"
-          },
-          "editable": true
-        },
-        {
-          "id": "navy-headlines|headline-scrim|visibility",
-          "scope": "navy-headlines",
-          "layerId": "headline-scrim",
-          "cssClass": "headline-scrim",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
           },
           "editable": true
         },
@@ -12287,8 +12222,8 @@
           "editable": true
         },
         {
-          "id": "white-headlines|headline-scrim|visibility",
-          "scope": "white-headlines",
+          "id": "offers-0|headline-scrim|visibility",
+          "scope": "offers-0",
           "layerId": "headline-scrim",
           "cssClass": "headline-scrim",
           "when": {
@@ -12463,19 +12398,6 @@
             "borderRadius": "50%",
             "backgroundColor": "rgb(0, 41, 117)",
             "color": "rgb(255, 255, 255)"
-          },
-          "editable": true
-        },
-        {
-          "id": "navy-headlines|headline-scrim|visibility",
-          "scope": "navy-headlines",
-          "layerId": "headline-scrim",
-          "cssClass": "headline-scrim",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
           },
           "editable": true
         },

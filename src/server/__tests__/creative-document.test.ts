@@ -50,13 +50,21 @@ test('loads the checked-in SSE DCO creative document', async () => {
 
 test('seeds an offers-0 headline scrim gradient on every size', async () => {
   const document = await readCreativeDocument();
+  const expectedDirection = {
+    '320x50': 'to-right',
+    '728x90': 'to-right',
+    '970x250': 'to-right',
+    '300x250': 'to-bottom',
+    '160x600': 'to-bottom',
+    '300x600': 'to-bottom',
+  };
   for (const [size, sizeCreative] of Object.entries(document.sizes)) {
     const scrim = sizeCreative.layers.find((layer) => layer.id === 'headline-scrim');
     assert.ok(scrim, `missing scrim on ${size}`);
     assert.equal(scrim.kind, 'gradient');
     assert.equal(scrim.base.visibility, 'hidden');
     assert.ok(sizeCreative.variantRules.some((rule) => rule.id === 'offers-0|headline-scrim|visibility'));
-    assert.equal(scrim.gradient.direction, 'to-top');
+    assert.equal(scrim.gradient.direction, expectedDirection[size], size);
     assert.ok(Number(scrim.gradient.endPct) > 0);
     assert.ok(Number(scrim.gradient.startOpacity) > 0);
     const blue = sizeCreative.layers.find((layer) => layer.id === 'bluewave');

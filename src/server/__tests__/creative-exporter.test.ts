@@ -192,11 +192,11 @@ test('exports offers-0 headline scrim gradient above bg and below waves', async 
   const htmlLandscape = await renderStudioReadyHtml(document, '320x50');
 
   assert.match(htmlPortrait, /id="headline-scrim"/);
-  assert.match(htmlPortrait, /linear-gradient\(to top, rgba\(0, 0, 0,/);
+  assert.match(htmlPortrait, /linear-gradient\(to bottom, rgba\(0, 0, 0,/);
   assert.match(htmlPortrait, /\.offers-0 \.headline-scrim\s*\{[^}]*visibility:\s*visible/);
   assert.match(htmlPortrait, /\.headline-scrim\s*\{[^}]*visibility:\s*hidden/);
 
-  assert.match(htmlLandscape, /linear-gradient\(to top, rgba\(0, 0, 0,/);
+  assert.match(htmlLandscape, /linear-gradient\(to right, rgba\(0, 0, 0,/);
 
   const size = document.sizes['300x250'];
   const byId = Object.fromEntries(size.layers.map((layer) => [layer.id, layer]));
@@ -205,7 +205,7 @@ test('exports offers-0 headline scrim gradient above bg and below waves', async 
   assert.ok(byId.bluewave.zIndex > byId['headline-scrim'].zIndex);
 });
 
-test('exports offers-0 background blur layer but keeps it hidden', async () => {
+test('exports offers-0 background blur layer and shows it under offers-0', async () => {
   const document = await readCreativeDocument();
   const html = await renderStudioReadyHtml(document, '300x250');
   const htmlBanner = await renderStudioReadyHtml(document, '320x50');
@@ -213,7 +213,7 @@ test('exports offers-0 background blur layer but keeps it hidden', async () => {
   assert.match(html, /id="bg-blur"/);
   assert.match(html, /backdrop-filter:\s*blur\(3px\)/);
   assert.match(html, /-webkit-backdrop-filter:\s*blur\(3px\)/);
-  assert.match(html, /\.offers-0 \.bg-blur\s*\{[^}]*visibility:\s*hidden/);
+  assert.match(html, /\.offers-0 \.bg-blur\s*\{[^}]*visibility:\s*visible/);
 
   assert.match(htmlBanner, /id="bg-blur"/);
 

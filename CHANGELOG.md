@@ -24,6 +24,7 @@
 
 ### Fixed
 
+- **Full-bleed clickbox** — Studio/static HTML now includes a topmost `#clickbox` over the stage and wires Enabler exit / IAB `clickTag` to it (instead of only listening on `#page-content`), so agency previews have a triggerable click surface.
 - **320×50 / 728×90 offer geometry guards** — canvas-alignment tests accept the intentional dual-price narrower value boxes on 320×50 and the offers-3 value/subline overhang on 728×90 (still on-canvas).
 - **offers-0 CTA independence** — brand CTAs use compound scopes `offers-0.cta-rect` / `offers-0.cta-roundel` (full geometry + colour each), so Rect/Round no longer share position or size with each other or with offers 1–3. Legacy `offers-0|cta` migrates on load/save.
 - **Offer decimals crushing gap/plus layout** — `layoutOffers` glyph-ink digit filter lived in a template-literal source string where `\d` / `\s` cooked away, so the inlined runtime ran `/[^d.]/g` and measured a lone `.` for values like `1.5` / `10.5`. That collapsed cluster height, packed vertical offers together, and parked the plus on the decimal. Escapes are doubled; value runs now sample digits only.

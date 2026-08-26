@@ -952,9 +952,12 @@ const outlineRuntimeScript = (
         }
         function wireClickTag() {
           var root = document.getElementById('page-content');
-          if (!root) return;
-          root.addEventListener('click', function() {
-            window.open(clickTag, '_blank');
+          var clickbox = document.getElementById('clickbox') || root;
+          if (!clickbox || clickbox.dataset.exitWired === '1') return;
+          clickbox.dataset.exitWired = '1';
+          clickbox.addEventListener('click', function(event) {
+            event.preventDefault();
+            if (clickTag) window.open(clickTag, '_blank');
           });
         }
         function boot() {
@@ -992,12 +995,17 @@ const outlineRuntimeScript = (
 
         function wireExit() {
           var root = document.getElementById('page-content');
-          if (!root) return;
-          root.addEventListener('click', function() {
+          var clickbox = document.getElementById('clickbox') || root;
+          if (!clickbox || clickbox.dataset.exitWired === '1') return;
+          clickbox.dataset.exitWired = '1';
+          clickbox.addEventListener('click', function(event) {
+            event.preventDefault();
             if (typeof Enabler !== 'undefined' && Enabler.exit) {
               Enabler.exit('Main Exit');
+            } else if (typeof Enabler !== 'undefined' && Enabler.exitOverride) {
+              Enabler.exitOverride('Main Exit', true);
             }
-          }, { once: true });
+          });
         }
 
         function boot() {
@@ -1258,14 +1266,18 @@ const runtimeScript = (
 
         function wireExit(data) {
           var exitUrl = exitUrlFromRow(data);
-          root.addEventListener('click', function() {
+          var clickbox = document.getElementById('clickbox') || root;
+          if (!clickbox || clickbox.dataset.exitWired === '1') return;
+          clickbox.dataset.exitWired = '1';
+          clickbox.addEventListener('click', function(event) {
+            event.preventDefault();
             if (typeof Enabler === 'undefined') return;
             if (exitUrl && Enabler.exitOverride) {
               Enabler.exitOverride('Main Exit', exitUrl);
             } else if (Enabler.exit) {
               Enabler.exit('Main Exit');
             }
-          }, { once: true });
+          });
         }
 
         function applyBackgroundImage(data) {
@@ -1484,6 +1496,21 @@ ${options.renderMode === 'outline' ? outlinedTextCss : ''}
       transform-style: preserve-3d;
       background: transparent;
     }
+    /* Full-bleed hit target for Studio / static exits. Must sit above creative
+       layers so preview tools and serve-time clicks always have a triggerable surface. */
+    #clickbox {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2147483647;
+      cursor: pointer;
+      background: transparent;
+      display: block;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
     /* Hold the motion clock at t=0 until fonts + offer layout settle so cold
        first paint matches warm Replay (see startMotionWhenReady). */
     .stage:not(.motion-ready),
@@ -1548,6 +1575,7 @@ const renderBody = async (document: Record<string, unknown>, size: string, optio
           <img alt="" draggable="false" class="stage-element bg-image" id="bg-image" src="${escapeAttr(background)}"${packagedSrcAttr}>
 ${layers}
 ${terms}
+          <a id="clickbox" href="javascript:void(0)" aria-label="Click through"></a>
       </main>`;
   }
   const layers = sizeCreative.layers
@@ -1559,6 +1587,7 @@ ${terms}
           <img alt="" draggable="false" class="stage-element bg-image" id="bg-image" src="${escapeAttr(background)}" data-packaged-src="${escapeAttr(background)}" data-dco-field="${escapeAttr(backgroundImageFieldName(size))}">
 ${layers}
 ${renderTermsWrappers(sizeCreative)}
+          <a id="clickbox" href="javascript:void(0)" aria-label="Click through"></a>
       </main>`;
 };
 

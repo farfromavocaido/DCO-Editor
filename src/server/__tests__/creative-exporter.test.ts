@@ -93,6 +93,29 @@ test('studio outline delivery keeps Enabler exit and has no static clickTag', as
   assert.doesNotMatch(html, /window\.open\(clickTag, '_blank'\)/);
 });
 
+test('exports a full-bleed clickbox wired for Studio and static exits', async () => {
+  const document = await readCreativeDocument();
+  const fontHtml = await renderStudioReadyHtml(document, '300x250');
+  const studioOutline = await renderStudioReadyHtml(document, '300x250', {
+    renderMode: 'outline',
+    delivery: 'studio',
+  });
+  const staticOutline = await renderStudioReadyHtml(document, '300x250', {
+    renderMode: 'outline',
+    delivery: 'static',
+  });
+
+  for (const [label, html] of [
+    ['font', fontHtml],
+    ['studio outline', studioOutline],
+    ['static outline', staticOutline],
+  ] as const) {
+    assert.match(html, /id="clickbox"/, `${label} markup`);
+    assert.match(html, /#clickbox \{/, `${label} css`);
+    assert.match(html, /getElementById\('clickbox'\)/, `${label} wire`);
+  }
+});
+
 test('exports custom Studio-ready HTML without GWD custom elements', async () => {
   const document = await readCreativeDocument();
   const html = await renderStudioReadyHtml(document, '970x250');

@@ -60,7 +60,7 @@ Reads/writes feed profile data embedded in the creative document. Validates and 
 
 ### `creative-exporter.ts`
 
-Renders Studio-ready HTML, WIP preview variants, client preview ZIPs, agency base ZIPs, and Sync Zips (`outputs/`) from the creative document. Supports `renderMode: 'font' | 'outline'` and outline `delivery: 'studio' | 'static'` (outline inlines logo/wave/plus SVGs as data URIs and omits Museo; static strips Enabler and flattens backgrounds).
+Renders Studio-ready HTML, WIP preview variants, client preview ZIPs, agency base ZIPs, and Sync Zips (`outputs/`) from the creative document. Supports `renderMode: 'font' | 'outline'` and outline `delivery: 'studio' | 'static'` (outline inlines logo/wave/plus SVGs as data URIs and omits Museo; static strips Enabler and flattens backgrounds). Every size includes a full-bleed `#clickbox` above creative layers; Studio wires `Enabler.exit` / `exitOverride`, static wires IAB `clickTag`.
 
 ### `text-outline.ts`
 

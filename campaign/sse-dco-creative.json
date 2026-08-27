@@ -324,6 +324,16 @@
         "type": "image",
         "group": "Assets",
         "description": "Optional background image URL for 970x250. Leave blank to use the packaged default."
+      },
+      {
+        "name": "include_heading4_enum",
+        "type": "boolean",
+        "label": "Include heading 4"
+      },
+      {
+        "name": "navy_headlines_bool",
+        "type": "boolean",
+        "label": "Navy headlines"
       }
     ],
     "sampleRows": [
@@ -342,7 +352,7 @@
         "offer1_sub_text": "OFF ELECTRICITY*",
         "offer2_value_text": "30%",
         "offer2_sub_text": "OFF GAS*",
-        "offer3_value_text": "€125",
+        "offer3_value_text": "\u20ac125",
         "offer3_sub_text": "OFF YOUR FIRST BILL*",
         "tc_type_enum": "tcs_units",
         "tc_terms_text": "*T&Cs apply",
@@ -468,7 +478,7 @@
         "heading1_text": "Your 'how hard can it be' energy",
         "heading2_text": "deserves a different kind of energy",
         "heading3_text": "",
-        "heading4_text": "",
+        "heading4_text": "A different kind of energy",
         "offer_count_num": 0,
         "offer1_value_text": "",
         "offer1_sub_text": "",
@@ -477,11 +487,11 @@
         "offer3_value_text": "",
         "offer3_sub_text": "",
         "tc_type_enum": "tcs_only",
-        "tc_terms_text": "",
+        "tc_terms_text": "Grants are provided by the Government of Ireland through the Sustainable Energy Authority of Ireland (SEAI).",
         "tc_units_text": "",
         "cta_type_enum": "rectangle",
         "cta_text": "Find out more",
-        "include_roundel_frame_bool": true,
+        "include_roundel_frame_bool": false,
         "roundel_text_text": "Saving you up to",
         "roundel_value_text": "999",
         "background_image_url_160x600": {
@@ -501,7 +511,9 @@
         },
         "background_image_url_970x250": {
           "Url": ""
-        }
+        },
+        "include_heading4_enum": true,
+        "navy_headlines_bool": false
       }
     ],
     "studioProfileId": 10964545,
@@ -658,7 +670,7 @@
             "visibility": "hidden"
           },
           "gradient": {
-            "direction": "to-right",
+            "direction": "to-top",
             "endPct": 70,
             "startOpacity": 0.5,
             "midpoint": 0.65
@@ -691,7 +703,57 @@
                 "end_x": -50,
                 "hold_y": 0,
                 "sweep_duration_pct": 6
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "greenwave-fade-offers-0",
+              "label": "Greenwave fade (offers-0 Act 4)",
+              "preset": "custom",
+              "start": "green_in",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "green_in",
+                  "translate": [
+                    -50,
+                    0
+                  ],
+                  "opacity": 0,
+                  "easing": "ease-out"
+                },
+                {
+                  "at": "act4_in",
+                  "translate": [
+                    -50,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end-2",
+                  "translate": [
+                    -50,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end",
+                  "translate": [
+                    -50,
+                    0
+                  ],
+                  "opacity": 0
+                }
+              ]
             }
           ]
         },
@@ -722,7 +784,48 @@
                 "hold_y": 0,
                 "fade_pct": 2,
                 "sweep_duration_pct": 7
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "bluewave-entry-offers-0",
+              "label": "Bluewave stage1 hold (offers-0)",
+              "preset": "custom",
+              "scopes": [
+                "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "start",
+                  "left": -80,
+                  "top": -20,
+                  "width": 584,
+                  "height": 90,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "end",
+                  "left": -80,
+                  "top": -20,
+                  "width": 584,
+                  "height": 90,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                }
+              ]
             }
           ]
         },
@@ -1029,7 +1132,12 @@
               "params": {
                 "enter_duration_pct": 5,
                 "fade_pct": 2
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
             }
           ]
         },
@@ -1057,6 +1165,25 @@
               "params": {
                 "fade_pct": 4,
                 "enter_duration_pct": 2
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "logo-act3-hold-offers-0",
+              "label": "Logo Act3 fade-in (offers-0, mid bluewave)",
+              "preset": "fade",
+              "start": "start+5",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 5,
+                "fade_pct": 4
               }
             }
           ]
@@ -1239,9 +1366,33 @@
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out"
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-prices-fade-offers-0",
+              "label": "terms-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
-          ]
+          ],
+          "fit": {
+            "maxLines": 1,
+            "minFontSize": 4
+          }
         },
         {
           "id": "unit-rate-prices",
@@ -1271,6 +1422,26 @@
               "preset": "fade",
               "start": "act1_out",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "unit-rate-prices-fade-offers-0",
+              "label": "unit-rate-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "act1_out",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -1312,6 +1483,26 @@
               "preset": "fade",
               "start": "terms_in",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-solo-fade-offers-0",
+              "label": "terms-solo fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -1786,7 +1977,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -1799,7 +1990,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -1812,7 +2003,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "backgroundColor": "rgb(0, 229, 165)",
+            "backgroundColor": "rgb(0, 41, 117)",
             "left": 137,
             "top": -16
           },
@@ -1943,6 +2134,24 @@
           "editable": true
         },
         {
+          "id": "offers-0|sse-headline",
+          "scope": "offers-0",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "left": 8,
+            "top": 12,
+            "width": 125,
+            "height": 34,
+            "fontSize": 14,
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true
+        },
+        {
           "id": "offers-2|sse-headline",
           "scope": "offers-2",
           "cssClass": "sse-headline",
@@ -2045,19 +2254,6 @@
           "editable": true
         },
         {
-          "id": "offers-0|greenwave|visibility",
-          "scope": "offers-0",
-          "layerId": "greenwave",
-          "cssClass": "greenwave",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
           "id": "offers-0|headline-scrim|visibility",
           "scope": "offers-0",
           "layerId": "headline-scrim",
@@ -2079,7 +2275,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "visibility": "visible"
+            "visibility": "hidden"
           },
           "editable": true
         },
@@ -2097,86 +2293,80 @@
           "editable": true
         },
         {
-          "id": "offers-0|terms-solo|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-solo",
-          "cssClass": "terms-solo",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|terms-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-prices",
-          "cssClass": "terms-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|unit-rate-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "unit-rate-prices",
-          "cssClass": "unit-rate-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-solo-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-solo-group",
-          "cssClass": "tc-solo-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-prices-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-prices-group",
-          "cssClass": "tc-prices-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|sse-headline",
-          "scope": "offers-0",
+          "id": "white-headlines|sse-headline",
+          "scope": "white-headlines",
           "cssClass": "sse-headline",
           "when": {
             "offer_count_num": 0
           },
           "props": {
             "color": "rgb(255, 255, 255)",
-            "left": 8,
-            "top": 12,
-            "width": 125,
-            "height": 34,
-            "fontSize": 14,
-            "display": "flex",
-            "alignItems": "center"
+            "top": 9,
+            "width": 217,
+            "height": 34
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|sse-headline",
+          "scope": "navy-headlines",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|terms-prices|color",
+          "scope": "offers-0",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|terms-solo|color",
+          "scope": "offers-0",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|unit-rate-prices",
+          "scope": "white-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|unit-rate-prices",
+          "scope": "navy-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|headline-act4",
+          "scope": "offers-0",
+          "layerId": "headline-act4",
+          "props": {
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -2189,10 +2379,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 106,
-            "top": -1,
-            "width": 574,
-            "height": 60
+            "left": -80,
+            "top": -20,
+            "width": 584,
+            "height": 90
           },
           "editable": true
         },
@@ -2205,10 +2395,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 260,
-            "top": 14,
-            "width": 55,
-            "height": 21
+            "left": 275,
+            "top": 15,
+            "width": 40,
+            "height": 20
           },
           "editable": true
         },
@@ -2218,12 +2408,12 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 65,
-            "top": 23,
+            "left": 121,
+            "top": 25,
             "width": 73,
             "height": 18,
-            "borderRadius": 4,
             "fontSize": 9,
+            "borderRadius": 4,
             "backgroundColor": "rgb(0, 229, 165)",
             "color": "rgb(0, 41, 117)"
           },
@@ -2235,16 +2425,73 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 65,
+            "left": 172,
             "top": 7,
             "width": 56,
             "height": 56,
-            "borderRadius": "50%",
             "fontSize": 12,
+            "borderRadius": "50%",
             "backgroundColor": "rgb(0, 229, 165)",
             "color": "rgb(0, 41, 117)"
           },
           "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-solo|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-solo",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|tc-solo-group|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "tc-solo-group",
+          "cssClass": "tc-solo-group",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-prices",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-prices",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "left": 6,
+            "top": 41,
+            "width": 305,
+            "height": 9,
+            "fontSize": 6,
+            "visibility": "visible",
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 1,
+            "minFontSize": 5,
+            "align": "bottom"
+          }
         }
       ],
       "classRules": [
@@ -2334,7 +2581,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .terms-prices,\n    .terms-solo,\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C wrappers (far-left tiny zone) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n\n    /* Act 4 only: white over blue wave on 320×50 */\n    #headline-act4 {\n      color: rgb(255, 255, 255);\n      top: 9px;\n    }\n"
+      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .terms-prices,\n    .terms-solo,\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* \u2500\u2500 T&C wrappers (far-left tiny zone) \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n\n    /* Act 4 only: white over blue wave on 320\u00d750 */\n    #headline-act4 {\n      color: rgb(255, 255, 255);\n      top: 9px;\n    }\n"
     },
     "728x90": {
       "canvas": {
@@ -2426,7 +2673,7 @@
             "visibility": "hidden"
           },
           "gradient": {
-            "direction": "to-right",
+            "direction": "to-top",
             "endPct": 60,
             "startOpacity": 0.4,
             "midpoint": 0.5
@@ -2459,7 +2706,57 @@
                 "end_x": -110,
                 "hold_y": 0,
                 "sweep_duration_pct": 7
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "greenwave-fade-offers-0",
+              "label": "Greenwave fade (offers-0 Act 4)",
+              "preset": "custom",
+              "start": "green_in",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "green_in",
+                  "translate": [
+                    -110,
+                    0
+                  ],
+                  "opacity": 0,
+                  "easing": "ease-out"
+                },
+                {
+                  "at": "act4_in",
+                  "translate": [
+                    -110,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end-2",
+                  "translate": [
+                    -110,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end",
+                  "translate": [
+                    -110,
+                    0
+                  ],
+                  "opacity": 0
+                }
+              ]
             }
           ]
         },
@@ -2489,7 +2786,89 @@
                 "end_x": 0,
                 "hold_y": 0,
                 "fade_pct": 2
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "bluewave-entry-offers-0",
+              "label": "Bluewave stage1\u2194stage2 (offers-0)",
+              "preset": "custom",
+              "scopes": [
+                "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "start",
+                  "left": 490,
+                  "top": -55,
+                  "width": 1000,
+                  "height": 200,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "green_in",
+                  "left": 490,
+                  "top": -55,
+                  "width": 1000,
+                  "height": 200,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1,
+                  "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+                },
+                {
+                  "at": "act4_in",
+                  "left": 455,
+                  "top": -99,
+                  "width": 1000,
+                  "height": 296,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "end-3.3",
+                  "left": 455,
+                  "top": -99,
+                  "width": 1000,
+                  "height": 296,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1,
+                  "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+                },
+                {
+                  "at": "end",
+                  "left": 490,
+                  "top": -55,
+                  "width": 1000,
+                  "height": 200,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                }
+              ]
             }
           ]
         },
@@ -2790,7 +3169,12 @@
               "params": {
                 "enter_duration_pct": 5,
                 "fade_pct": 2
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
             }
           ]
         },
@@ -2818,6 +3202,25 @@
               "params": {
                 "fade_pct": 4,
                 "enter_duration_pct": 2
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "logo-act3-hold-offers-0",
+              "label": "Logo Act3 fade-in (offers-0, mid bluewave)",
+              "preset": "fade",
+              "start": "start+5",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 5,
+                "fade_pct": 4
               }
             }
           ]
@@ -3000,6 +3403,26 @@
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out"
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-prices-fade-offers-0",
+              "label": "terms-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
           ]
@@ -3032,6 +3455,26 @@
               "preset": "fade",
               "start": "act1_out",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "unit-rate-prices-fade-offers-0",
+              "label": "unit-rate-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "act1_out",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -3070,6 +3513,26 @@
               "preset": "fade",
               "start": "terms_in",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-solo-fade-offers-0",
+              "label": "terms-solo fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -3516,7 +3979,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -3529,7 +3992,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -3542,7 +4005,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "backgroundColor": "rgb(0, 229, 165)"
+            "backgroundColor": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -3673,6 +4136,20 @@
           "editable": true
         },
         {
+          "id": "offers-0|sse-headline",
+          "scope": "offers-0",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "left": 19,
+            "top": 16,
+            "fontSize": 22
+          },
+          "editable": true
+        },
+        {
           "id": "offers-2|sse-headline",
           "scope": "offers-2",
           "cssClass": "sse-headline",
@@ -3773,19 +4250,6 @@
           "editable": true
         },
         {
-          "id": "offers-0|greenwave|visibility",
-          "scope": "offers-0",
-          "layerId": "greenwave",
-          "cssClass": "greenwave",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
           "id": "offers-0|headline-scrim|visibility",
           "scope": "offers-0",
           "layerId": "headline-scrim",
@@ -3807,7 +4271,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "visibility": "visible"
+            "visibility": "hidden"
           },
           "editable": true
         },
@@ -3825,82 +4289,77 @@
           "editable": true
         },
         {
-          "id": "offers-0|terms-solo|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-solo",
-          "cssClass": "terms-solo",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|terms-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-prices",
-          "cssClass": "terms-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|unit-rate-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "unit-rate-prices",
-          "cssClass": "unit-rate-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-solo-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-solo-group",
-          "cssClass": "tc-solo-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-prices-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-prices-group",
-          "cssClass": "tc-prices-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|sse-headline",
-          "scope": "offers-0",
+          "id": "white-headlines|sse-headline",
+          "scope": "white-headlines",
           "cssClass": "sse-headline",
           "when": {
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)",
-            "left": 19,
-            "top": 16,
-            "fontSize": 22
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|sse-headline",
+          "scope": "navy-headlines",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|terms-prices|color",
+          "scope": "offers-0",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|terms-solo|color",
+          "scope": "offers-0",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|unit-rate-prices",
+          "scope": "white-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|unit-rate-prices",
+          "scope": "navy-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|headline-act4",
+          "scope": "offers-0",
+          "layerId": "headline-act4",
+          "props": {
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -3913,10 +4372,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 416,
-            "top": -99,
+            "left": 490,
+            "top": -55,
             "width": 1000,
-            "height": 296
+            "height": 200
           },
           "editable": true
         },
@@ -3929,10 +4388,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 574,
-            "top": 26,
-            "width": 124,
-            "height": 45
+            "left": 621,
+            "top": 28,
+            "width": 97,
+            "height": 38
           },
           "editable": true
         },
@@ -3942,14 +4401,14 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 131,
-            "top": 25,
+            "left": 279,
+            "top": 27,
             "width": 157,
             "height": 37,
-            "borderRadius": 6,
             "fontSize": 18,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "borderRadius": 6,
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -3959,16 +4418,73 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 131,
-            "top": -11,
+            "left": 293,
+            "top": -12,
             "width": 115,
             "height": 115,
+            "fontSize": 24,
             "borderRadius": "50%",
-            "fontSize": 18,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-solo|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-solo",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|tc-solo-group|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "tc-solo-group",
+          "cssClass": "tc-solo-group",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-prices",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-prices",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "left": 20,
+            "top": 77,
+            "width": 413,
+            "height": 11,
+            "fontSize": 8,
+            "visibility": "visible",
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 8,
+            "align": "bottom"
+          }
         }
       ],
       "classRules": [
@@ -4072,7 +4588,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .cta {\n      padding: 0px 16px;\n      box-sizing: border-box;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n\n    /* Act 4 only: lower headline placement on 728×90 */\n    #headline-act4 {\n      top: 17px;\n    }\n"
+      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .cta {\n      padding: 0px 16px;\n      box-sizing: border-box;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n\n    /* Act 4 only: lower headline placement on 728\u00d790 */\n    #headline-act4 {\n      top: 17px;\n    }\n"
     },
     "300x250": {
       "canvas": {
@@ -4164,7 +4680,7 @@
             "visibility": "hidden"
           },
           "gradient": {
-            "direction": "to-bottom",
+            "direction": "to-top",
             "endPct": 50,
             "startOpacity": 0.5,
             "midpoint": 0.7
@@ -4196,7 +4712,57 @@
                 "start_x": 0,
                 "end_x": -700,
                 "hold_y": 0
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "greenwave-fade-offers-0",
+              "label": "Greenwave fade (offers-0 Act 4)",
+              "preset": "custom",
+              "start": "green_in",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "green_in",
+                  "translate": [
+                    -700,
+                    0
+                  ],
+                  "opacity": 0,
+                  "easing": "ease-out"
+                },
+                {
+                  "at": "act4_in",
+                  "translate": [
+                    -700,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end-2",
+                  "translate": [
+                    -700,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end",
+                  "translate": [
+                    -700,
+                    0
+                  ],
+                  "opacity": 0
+                }
+              ]
             }
           ]
         },
@@ -4226,7 +4792,89 @@
                 "end_x": 88,
                 "hold_y": 0,
                 "fade_pct": 2
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "bluewave-entry-offers-0",
+              "label": "Bluewave stage1\u2194stage2 (offers-0)",
+              "preset": "custom",
+              "scopes": [
+                "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "start",
+                  "left": 26,
+                  "top": 38,
+                  "width": 185,
+                  "height": 221,
+                  "translate": [
+                    88,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "green_in",
+                  "left": 26,
+                  "top": 38,
+                  "width": 185,
+                  "height": 221,
+                  "translate": [
+                    88,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1,
+                  "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+                },
+                {
+                  "at": "act4_in",
+                  "left": -1,
+                  "top": 0,
+                  "width": 214,
+                  "height": 253,
+                  "translate": [
+                    88,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "end-3.3",
+                  "left": -1,
+                  "top": 0,
+                  "width": 214,
+                  "height": 253,
+                  "translate": [
+                    88,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1,
+                  "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+                },
+                {
+                  "at": "end",
+                  "left": 26,
+                  "top": 38,
+                  "width": 185,
+                  "height": 221,
+                  "translate": [
+                    88,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                }
+              ]
             }
           ]
         },
@@ -4537,7 +5185,12 @@
               "params": {
                 "enter_duration_pct": 8,
                 "fade_pct": 7
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
             }
           ]
         },
@@ -4565,6 +5218,25 @@
               "params": {
                 "fade_pct": 4,
                 "enter_duration_pct": 7
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "logo-act3-hold-offers-0",
+              "label": "Logo Act3 fade-in (offers-0, mid bluewave)",
+              "preset": "fade",
+              "start": "start+5",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 5,
+                "fade_pct": 4
               }
             }
           ]
@@ -4747,9 +5419,34 @@
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out"
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-prices-fade-offers-0",
+              "label": "terms-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
-          ]
+          ],
+          "fit": {
+            "maxLines": 4,
+            "mode": "shrink",
+            "minFontSize": 6
+          }
         },
         {
           "id": "unit-rate-prices",
@@ -4779,6 +5476,26 @@
               "preset": "fade",
               "start": "act1_out",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "unit-rate-prices-fade-offers-0",
+              "label": "unit-rate-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "act1_out",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -4817,6 +5534,26 @@
               "preset": "fade",
               "start": "terms_in",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-solo-fade-offers-0",
+              "label": "terms-solo fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -5244,7 +5981,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -5257,7 +5994,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -5270,7 +6007,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "backgroundColor": "rgb(0, 229, 165)",
+            "backgroundColor": "rgb(0, 41, 117)",
             "left": 29,
             "top": 80,
             "width": 120,
@@ -5403,6 +6140,24 @@
           "editable": true
         },
         {
+          "id": "offers-0|sse-headline",
+          "scope": "offers-0",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "top": 14,
+            "left": 15,
+            "width": 232,
+            "height": 66,
+            "fontSize": 24,
+            "textAlign": "left",
+            "justifyContent": "flex-start"
+          },
+          "editable": true
+        },
+        {
           "id": "offers-2|sse-headline",
           "scope": "offers-2",
           "cssClass": "sse-headline",
@@ -5513,19 +6268,6 @@
           "editable": true
         },
         {
-          "id": "offers-0|greenwave|visibility",
-          "scope": "offers-0",
-          "layerId": "greenwave",
-          "cssClass": "greenwave",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
           "id": "offers-0|headline-scrim|visibility",
           "scope": "offers-0",
           "layerId": "headline-scrim",
@@ -5547,7 +6289,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "visibility": "visible"
+            "visibility": "hidden"
           },
           "editable": true
         },
@@ -5565,86 +6307,79 @@
           "editable": true
         },
         {
-          "id": "offers-0|terms-solo|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-solo",
-          "cssClass": "terms-solo",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|terms-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-prices",
-          "cssClass": "terms-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|unit-rate-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "unit-rate-prices",
-          "cssClass": "unit-rate-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-solo-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-solo-group",
-          "cssClass": "tc-solo-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-prices-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-prices-group",
-          "cssClass": "tc-prices-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|sse-headline",
-          "scope": "offers-0",
+          "id": "white-headlines|sse-headline",
+          "scope": "white-headlines",
           "cssClass": "sse-headline",
           "when": {
             "offer_count_num": 0
           },
           "props": {
             "color": "rgb(255, 255, 255)",
-            "top": 14,
-            "left": 15,
-            "width": 232,
-            "height": 66,
-            "fontSize": 24,
-            "textAlign": "left",
-            "justifyContent": "flex-start"
+            "width": 229,
+            "height": 56
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|sse-headline",
+          "scope": "navy-headlines",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|terms-prices|color",
+          "scope": "offers-0",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|terms-solo|color",
+          "scope": "offers-0",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|unit-rate-prices",
+          "scope": "white-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|unit-rate-prices",
+          "scope": "navy-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|headline-act4",
+          "scope": "offers-0",
+          "layerId": "headline-act4",
+          "props": {
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -5657,10 +6392,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 50,
-            "top": 54,
-            "width": 173,
-            "height": 205
+            "left": 26,
+            "top": 38,
+            "width": 185,
+            "height": 221
           },
           "editable": true
         },
@@ -5673,10 +6408,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 211,
-            "top": 214,
-            "width": 78,
-            "height": 28
+            "left": 206,
+            "top": 208,
+            "width": 83,
+            "height": 36
           },
           "editable": true
         },
@@ -5686,14 +6421,14 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 44,
-            "top": 70,
+            "left": 90,
+            "top": 112,
             "width": 120,
             "height": 36,
-            "borderRadius": 4,
             "fontSize": 12,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "borderRadius": 4,
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -5703,16 +6438,73 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 44,
-            "top": 70,
+            "left": 49,
+            "top": 100,
             "width": 80,
             "height": 80,
-            "borderRadius": "50%",
             "fontSize": 13,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "borderRadius": "50%",
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-solo|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-solo",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|tc-solo-group|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "tc-solo-group",
+          "cssClass": "tc-solo-group",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-prices",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-prices",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "left": 6,
+            "top": 210,
+            "width": 102,
+            "height": 43,
+            "fontSize": 6,
+            "visibility": "visible",
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 10,
+            "align": "bottom"
+          }
         }
       ],
       "classRules": [
@@ -5791,7 +6583,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C wrappers ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* \u2500\u2500 T&C wrappers \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     },
     "160x600": {
       "canvas": {
@@ -5883,7 +6675,7 @@
             "visibility": "hidden"
           },
           "gradient": {
-            "direction": "to-bottom",
+            "direction": "to-top",
             "endPct": 50,
             "startOpacity": 0.5,
             "midpoint": 0.6
@@ -5916,7 +6708,57 @@
                 "end_x": -350,
                 "hold_y": 0,
                 "sweep_duration_pct": 6
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "greenwave-fade-offers-0",
+              "label": "Greenwave fade (offers-0 Act 4)",
+              "preset": "custom",
+              "start": "green_in",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "green_in",
+                  "translate": [
+                    -350,
+                    0
+                  ],
+                  "opacity": 0,
+                  "easing": "ease-out"
+                },
+                {
+                  "at": "act4_in",
+                  "translate": [
+                    -350,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end-2",
+                  "translate": [
+                    -350,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end",
+                  "translate": [
+                    -350,
+                    0
+                  ],
+                  "opacity": 0
+                }
+              ]
             }
           ]
         },
@@ -5949,7 +6791,48 @@
                 "start_y": 280,
                 "end_y": 0,
                 "sweep_duration_pct": 9
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "bluewave-entry-offers-0",
+              "label": "Bluewave stage1 hold (offers-0)",
+              "preset": "custom",
+              "scopes": [
+                "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "start",
+                  "left": -49,
+                  "top": 316,
+                  "width": 240,
+                  "height": 284,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "end",
+                  "left": -49,
+                  "top": 316,
+                  "width": 240,
+                  "height": 284,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                }
+              ]
             }
           ]
         },
@@ -6255,7 +7138,12 @@
               "params": {
                 "enter_duration_pct": 5,
                 "fade_pct": 2
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
             }
           ]
         },
@@ -6283,6 +7171,25 @@
               "params": {
                 "fade_pct": 4,
                 "enter_duration_pct": 2
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "logo-act3-hold-offers-0",
+              "label": "Logo Act3 fade-in (offers-0, mid bluewave)",
+              "preset": "fade",
+              "start": "start+5",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 5,
+                "fade_pct": 4
               }
             }
           ]
@@ -6465,9 +7372,34 @@
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out"
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-prices-fade-offers-0",
+              "label": "terms-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
-          ]
+          ],
+          "fit": {
+            "minFontSize": 5,
+            "mode": "shrink",
+            "maxLines": 3
+          }
         },
         {
           "id": "unit-rate-prices",
@@ -6497,6 +7429,26 @@
               "preset": "fade",
               "start": "act1_out",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "unit-rate-prices-fade-offers-0",
+              "label": "unit-rate-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "act1_out",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -6535,6 +7487,26 @@
               "preset": "fade",
               "start": "terms_in",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-solo-fade-offers-0",
+              "label": "terms-solo fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -6969,7 +7941,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -6982,7 +7954,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -6995,7 +7967,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "backgroundColor": "rgb(0, 229, 165)"
+            "backgroundColor": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -7124,6 +8096,19 @@
           "editable": true
         },
         {
+          "id": "offers-0|sse-headline",
+          "scope": "offers-0",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "left": 11,
+            "top": 17
+          },
+          "editable": true
+        },
+        {
           "id": "offers-2|sse-headline",
           "scope": "offers-2",
           "cssClass": "sse-headline",
@@ -7231,19 +8216,6 @@
           "editable": true
         },
         {
-          "id": "offers-0|greenwave|visibility",
-          "scope": "offers-0",
-          "layerId": "greenwave",
-          "cssClass": "greenwave",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
           "id": "offers-0|headline-scrim|visibility",
           "scope": "offers-0",
           "layerId": "headline-scrim",
@@ -7265,7 +8237,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "visibility": "visible"
+            "visibility": "hidden"
           },
           "editable": true
         },
@@ -7283,81 +8255,77 @@
           "editable": true
         },
         {
-          "id": "offers-0|terms-solo|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-solo",
-          "cssClass": "terms-solo",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|terms-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-prices",
-          "cssClass": "terms-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|unit-rate-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "unit-rate-prices",
-          "cssClass": "unit-rate-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-solo-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-solo-group",
-          "cssClass": "tc-solo-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-prices-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-prices-group",
-          "cssClass": "tc-prices-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|sse-headline",
-          "scope": "offers-0",
+          "id": "white-headlines|sse-headline",
+          "scope": "white-headlines",
           "cssClass": "sse-headline",
           "when": {
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)",
-            "left": 11,
-            "top": 17
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|sse-headline",
+          "scope": "navy-headlines",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|terms-prices|color",
+          "scope": "offers-0",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|terms-solo|color",
+          "scope": "offers-0",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|unit-rate-prices",
+          "scope": "white-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|unit-rate-prices",
+          "scope": "navy-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|headline-act4",
+          "scope": "offers-0",
+          "layerId": "headline-act4",
+          "props": {
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -7370,9 +8338,9 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": -32,
-            "top": 342,
-            "width": 200,
+            "left": -49,
+            "top": 316,
+            "width": 240,
             "height": 284
           },
           "editable": true
@@ -7387,7 +8355,7 @@
           },
           "props": {
             "left": 30,
-            "top": 556,
+            "top": 537,
             "width": 100,
             "height": 36
           },
@@ -7400,13 +8368,13 @@
           "cssClass": "cta",
           "props": {
             "left": 10,
-            "top": 172,
+            "top": 268,
             "width": 140,
             "height": 44,
-            "borderRadius": 5,
             "fontSize": 15,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "borderRadius": 5,
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -7417,15 +8385,72 @@
           "cssClass": "cta",
           "props": {
             "left": 30,
-            "top": 172,
+            "top": 240,
             "width": 100,
             "height": 100,
+            "fontSize": 15,
             "borderRadius": "50%",
-            "fontSize": 18,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-solo|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-solo",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|tc-solo-group|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "tc-solo-group",
+          "cssClass": "tc-solo-group",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-prices",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-prices",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "left": 8,
+            "top": 574,
+            "width": 146,
+            "height": 26,
+            "fontSize": 5,
+            "visibility": "visible",
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 8,
+            "align": "bottom"
+          }
         }
       ],
       "classRules": [
@@ -7518,7 +8543,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 18px;\n      box-sizing: border-box;\n    }\n\n    /* ── T&C wrappers (bottom-left, flush like the reference) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 18px;\n      box-sizing: border-box;\n    }\n\n    /* \u2500\u2500 T&C wrappers (bottom-left, flush like the reference) \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     },
     "300x600": {
       "canvas": {
@@ -7610,7 +8635,7 @@
             "visibility": "hidden"
           },
           "gradient": {
-            "direction": "to-bottom",
+            "direction": "to-top",
             "endPct": 50,
             "startOpacity": 0.5,
             "midpoint": 0.6
@@ -7643,7 +8668,57 @@
                 "end_x": -400,
                 "hold_y": 0,
                 "sweep_duration_pct": 6
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "greenwave-fade-offers-0",
+              "label": "Greenwave fade (offers-0 Act 4)",
+              "preset": "custom",
+              "start": "green_in",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "green_in",
+                  "translate": [
+                    -400,
+                    0
+                  ],
+                  "opacity": 0,
+                  "easing": "ease-out"
+                },
+                {
+                  "at": "act4_in",
+                  "translate": [
+                    -400,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end-2",
+                  "translate": [
+                    -400,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end",
+                  "translate": [
+                    -400,
+                    0
+                  ],
+                  "opacity": 0
+                }
+              ]
             }
           ]
         },
@@ -7676,7 +8751,89 @@
                 "start_y": 420,
                 "end_y": 0,
                 "sweep_duration_pct": 6
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "bluewave-entry-offers-0",
+              "label": "Bluewave stage1\u2194stage2 (offers-0)",
+              "preset": "custom",
+              "scopes": [
+                "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "start",
+                  "left": 77,
+                  "top": 312,
+                  "width": 259,
+                  "height": 317,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "green_in",
+                  "left": 77,
+                  "top": 312,
+                  "width": 259,
+                  "height": 317,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1,
+                  "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+                },
+                {
+                  "at": "act4_in",
+                  "left": -38,
+                  "top": 232,
+                  "width": 340,
+                  "height": 400,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "end-3.3",
+                  "left": -38,
+                  "top": 232,
+                  "width": 340,
+                  "height": 400,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1,
+                  "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+                },
+                {
+                  "at": "end",
+                  "left": 77,
+                  "top": 312,
+                  "width": 259,
+                  "height": 317,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                }
+              ]
             }
           ]
         },
@@ -7979,7 +9136,12 @@
               "params": {
                 "enter_duration_pct": 5,
                 "fade_pct": 9
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
             }
           ]
         },
@@ -8007,6 +9169,25 @@
               "params": {
                 "fade_pct": 4,
                 "enter_duration_pct": 9
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "logo-act3-hold-offers-0",
+              "label": "Logo Act3 fade-in (offers-0, mid bluewave)",
+              "preset": "fade",
+              "start": "start+5",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 5,
+                "fade_pct": 4
               }
             }
           ]
@@ -8189,9 +9370,34 @@
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out"
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-prices-fade-offers-0",
+              "label": "terms-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
-          ]
+          ],
+          "fit": {
+            "maxLines": 6,
+            "minFontSize": 6,
+            "mode": "shrink"
+          }
         },
         {
           "id": "unit-rate-prices",
@@ -8221,6 +9427,26 @@
               "preset": "fade",
               "start": "act1_out",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "unit-rate-prices-fade-offers-0",
+              "label": "unit-rate-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "act1_out",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -8259,6 +9485,26 @@
               "preset": "fade",
               "start": "terms_in",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-solo-fade-offers-0",
+              "label": "terms-solo fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -8702,7 +9948,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -8715,7 +9961,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -8728,7 +9974,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "backgroundColor": "rgb(0, 229, 165)",
+            "backgroundColor": "rgb(0, 41, 117)",
             "top": 173,
             "width": 188,
             "height": 188,
@@ -8861,6 +10107,22 @@
           "editable": true
         },
         {
+          "id": "offers-0|sse-headline",
+          "scope": "offers-0",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "top": 30,
+            "left": 15,
+            "width": 270,
+            "height": 100,
+            "fontSize": 28
+          },
+          "editable": true
+        },
+        {
           "id": "offers-2|sse-headline",
           "scope": "offers-2",
           "cssClass": "sse-headline",
@@ -8958,19 +10220,6 @@
           "editable": true
         },
         {
-          "id": "offers-0|greenwave|visibility",
-          "scope": "offers-0",
-          "layerId": "greenwave",
-          "cssClass": "greenwave",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
           "id": "offers-0|headline-scrim|visibility",
           "scope": "offers-0",
           "layerId": "headline-scrim",
@@ -8992,7 +10241,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "visibility": "visible"
+            "visibility": "hidden"
           },
           "editable": true
         },
@@ -9010,84 +10259,77 @@
           "editable": true
         },
         {
-          "id": "offers-0|terms-solo|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-solo",
-          "cssClass": "terms-solo",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|terms-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-prices",
-          "cssClass": "terms-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|unit-rate-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "unit-rate-prices",
-          "cssClass": "unit-rate-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-solo-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-solo-group",
-          "cssClass": "tc-solo-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-prices-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-prices-group",
-          "cssClass": "tc-prices-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|sse-headline",
-          "scope": "offers-0",
+          "id": "white-headlines|sse-headline",
+          "scope": "white-headlines",
           "cssClass": "sse-headline",
           "when": {
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)",
-            "top": 30,
-            "left": 15,
-            "width": 270,
-            "height": 100,
-            "fontSize": 28
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|sse-headline",
+          "scope": "navy-headlines",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|terms-prices|color",
+          "scope": "offers-0",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|terms-solo|color",
+          "scope": "offers-0",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|unit-rate-prices",
+          "scope": "white-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|unit-rate-prices",
+          "scope": "navy-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|headline-act4",
+          "scope": "offers-0",
+          "layerId": "headline-act4",
+          "props": {
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -9100,10 +10342,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": -48,
-            "top": 245,
-            "width": 356,
-            "height": 409
+            "left": 77,
+            "top": 312,
+            "width": 259,
+            "height": 317
           },
           "editable": true
         },
@@ -9116,10 +10358,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 183,
-            "top": 554,
-            "width": 105,
-            "height": 38
+            "left": 172,
+            "top": 555,
+            "width": 124,
+            "height": 39
           },
           "editable": true
         },
@@ -9129,14 +10371,14 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 65,
-            "top": 157,
+            "left": 60,
+            "top": 230,
             "width": 180,
             "height": 48,
-            "borderRadius": 5,
             "fontSize": 17,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "borderRadius": 5,
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -9146,16 +10388,73 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 65,
-            "top": 157,
+            "left": 85,
+            "top": 202,
             "width": 130,
             "height": 130,
-            "borderRadius": "50%",
             "fontSize": 19,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "borderRadius": "50%",
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-solo|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-solo",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|tc-solo-group|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "tc-solo-group",
+          "cssClass": "tc-solo-group",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-prices",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-prices",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "left": 5,
+            "top": 542,
+            "width": 64,
+            "height": 50,
+            "fontSize": 6,
+            "visibility": "visible",
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 8,
+            "align": "bottom"
+          }
         }
       ],
       "classRules": [
@@ -9249,7 +10548,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 26px;\n      box-sizing: border-box;\n    }\n\n    /* ── T&C wrappers (bottom-left) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 26px;\n      box-sizing: border-box;\n    }\n\n    /* \u2500\u2500 T&C wrappers (bottom-left) \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     },
     "970x250": {
       "canvas": {
@@ -9341,7 +10640,7 @@
             "visibility": "hidden"
           },
           "gradient": {
-            "direction": "to-right",
+            "direction": "to-top",
             "endPct": 60,
             "startOpacity": 0.5,
             "midpoint": 0.7
@@ -9374,7 +10673,57 @@
                 "end_x": -500,
                 "hold_y": 0,
                 "sweep_duration_pct": 7
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "greenwave-fade-offers-0",
+              "label": "Greenwave fade (offers-0 Act 4)",
+              "preset": "custom",
+              "start": "green_in",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "green_in",
+                  "translate": [
+                    -500,
+                    0
+                  ],
+                  "opacity": 0,
+                  "easing": "ease-out"
+                },
+                {
+                  "at": "act4_in",
+                  "translate": [
+                    -500,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end-2",
+                  "translate": [
+                    -500,
+                    0
+                  ],
+                  "opacity": 1
+                },
+                {
+                  "at": "end",
+                  "translate": [
+                    -500,
+                    0
+                  ],
+                  "opacity": 0
+                }
+              ]
             }
           ]
         },
@@ -9404,7 +10753,89 @@
                 "end_x": 0,
                 "hold_y": 0,
                 "fade_pct": 2
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "bluewave-entry-offers-0",
+              "label": "Bluewave stage1\u2194stage2 (offers-0)",
+              "preset": "custom",
+              "scopes": [
+                "offers-0"
+              ],
+              "keyframes": [
+                {
+                  "at": "start",
+                  "left": 691,
+                  "top": -43,
+                  "width": 330,
+                  "height": 300,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "green_in",
+                  "left": 691,
+                  "top": -43,
+                  "width": 330,
+                  "height": 300,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1,
+                  "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+                },
+                {
+                  "at": "act4_in",
+                  "left": 662,
+                  "top": -119,
+                  "width": 330,
+                  "height": 391,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                },
+                {
+                  "at": "end-3.3",
+                  "left": 662,
+                  "top": -119,
+                  "width": 330,
+                  "height": 391,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1,
+                  "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+                },
+                {
+                  "at": "end",
+                  "left": 691,
+                  "top": -43,
+                  "width": 330,
+                  "height": 300,
+                  "translate": [
+                    0,
+                    0
+                  ],
+                  "scale": 1,
+                  "opacity": 1
+                }
+              ]
             }
           ]
         },
@@ -9706,7 +11137,12 @@
               "params": {
                 "enter_duration_pct": 5,
                 "fade_pct": 7
-              }
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
             }
           ]
         },
@@ -9734,6 +11170,25 @@
               "params": {
                 "fade_pct": 4,
                 "enter_duration_pct": 7
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "logo-act3-hold-offers-0",
+              "label": "Logo Act3 fade-in (offers-0, mid bluewave)",
+              "preset": "fade",
+              "start": "start+5",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 5,
+                "fade_pct": 4
               }
             }
           ]
@@ -9916,6 +11371,26 @@
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out"
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-prices-fade-offers-0",
+              "label": "terms-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
               }
             }
           ]
@@ -9948,6 +11423,26 @@
               "preset": "fade",
               "start": "act1_out",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "unit-rate-prices-fade-offers-0",
+              "label": "unit-rate-prices fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "act1_out",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -9986,6 +11481,26 @@
               "preset": "fade",
               "start": "terms_in",
               "end": "offers_exit-2",
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "scopes": [
+                "offers-1",
+                "offers-2",
+                "offers-3"
+              ]
+            },
+            {
+              "id": "terms-solo-fade-offers-0",
+              "label": "terms-solo fade (offers-0 until green)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "green_in",
+              "scopes": [
+                "offers-0"
+              ],
               "params": {
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
@@ -10435,7 +11950,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -10448,7 +11963,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -10461,7 +11976,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "backgroundColor": "rgb(0, 229, 165)"
+            "backgroundColor": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -10592,6 +12107,22 @@
           "editable": true
         },
         {
+          "id": "offers-0|sse-headline",
+          "scope": "offers-0",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "top": 82,
+            "width": 307,
+            "height": 88,
+            "left": 20,
+            "fontSize": 32
+          },
+          "editable": true
+        },
+        {
           "id": "offers-2|sse-headline",
           "scope": "offers-2",
           "cssClass": "sse-headline",
@@ -10691,19 +12222,6 @@
           "editable": true
         },
         {
-          "id": "offers-0|greenwave|visibility",
-          "scope": "offers-0",
-          "layerId": "greenwave",
-          "cssClass": "greenwave",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
           "id": "offers-0|headline-scrim|visibility",
           "scope": "offers-0",
           "layerId": "headline-scrim",
@@ -10725,7 +12243,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "visibility": "visible"
+            "visibility": "hidden"
           },
           "editable": true
         },
@@ -10743,84 +12261,77 @@
           "editable": true
         },
         {
-          "id": "offers-0|terms-solo|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-solo",
-          "cssClass": "terms-solo",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|terms-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "terms-prices",
-          "cssClass": "terms-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|unit-rate-prices|visibility",
-          "scope": "offers-0",
-          "layerId": "unit-rate-prices",
-          "cssClass": "unit-rate-prices",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-solo-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-solo-group",
-          "cssClass": "tc-solo-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|tc-prices-group|visibility",
-          "scope": "offers-0",
-          "layerId": "tc-prices-group",
-          "cssClass": "tc-prices-group",
-          "when": {
-            "offer_count_num": 0
-          },
-          "props": {
-            "visibility": "hidden"
-          },
-          "editable": true
-        },
-        {
-          "id": "offers-0|sse-headline",
-          "scope": "offers-0",
+          "id": "white-headlines|sse-headline",
+          "scope": "white-headlines",
           "cssClass": "sse-headline",
           "when": {
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)",
-            "top": 82,
-            "width": 307,
-            "height": 88,
-            "left": 20,
-            "fontSize": 32
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|sse-headline",
+          "scope": "navy-headlines",
+          "cssClass": "sse-headline",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|terms-prices|color",
+          "scope": "offers-0",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|terms-solo|color",
+          "scope": "offers-0",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "white-headlines|unit-rate-prices",
+          "scope": "white-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "navy-headlines|unit-rate-prices",
+          "scope": "navy-headlines",
+          "cssClass": "unit-rate-prices",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0|headline-act4",
+          "scope": "offers-0",
+          "layerId": "headline-act4",
+          "props": {
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -10833,10 +12344,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 646,
-            "top": -104,
+            "left": 691,
+            "top": -43,
             "width": 330,
-            "height": 391
+            "height": 300
           },
           "editable": true
         },
@@ -10849,10 +12360,10 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 796,
-            "top": 172,
-            "width": 160,
-            "height": 58
+            "left": 823,
+            "top": 194,
+            "width": 136,
+            "height": 47
           },
           "editable": true
         },
@@ -10862,14 +12373,14 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 201,
-            "top": 96,
+            "left": 375,
+            "top": 97,
             "width": 220,
             "height": 56,
+            "fontSize": 20,
             "borderRadius": 6,
-            "fontSize": 22,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -10879,16 +12390,73 @@
           "layerId": "cta",
           "cssClass": "cta",
           "props": {
-            "left": 207,
-            "top": 47,
+            "left": 400,
+            "top": 40,
             "width": 170,
             "height": 170,
-            "borderRadius": "50%",
             "fontSize": 24,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "borderRadius": "50%",
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-solo|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-solo",
+          "cssClass": "terms-solo",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|tc-solo-group|visibility",
+          "scope": "offers-0.tc-solo",
+          "layerId": "tc-solo-group",
+          "cssClass": "tc-solo-group",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.tc-solo|terms-prices",
+          "scope": "offers-0.tc-solo",
+          "layerId": "terms-prices",
+          "cssClass": "terms-prices",
+          "when": {
+            "offer_count_num": 0,
+            "tc_type_enum": "tcs_only"
+          },
+          "props": {
+            "left": 17,
+            "top": 223,
+            "width": 653,
+            "height": 22,
+            "fontSize": 11,
+            "visibility": "visible",
+            "display": "flex",
+            "alignItems": "flex-end",
+            "justifyContent": "flex-start",
+            "textAlign": "left"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 12,
+            "align": "bottom"
+          }
         }
       ],
       "classRules": [
@@ -10981,7 +12549,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* ── Shared typography ── */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* ── OfferSlot group plumbing ── */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* ── T&C group plumbing ── */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* ── T&C wrappers (bottom-left) ── */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 30px;\n      box-sizing: border-box;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* \u2500\u2500 T&C wrappers (bottom-left) \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 30px;\n      box-sizing: border-box;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
     }
   }
 }

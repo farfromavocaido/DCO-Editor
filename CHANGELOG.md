@@ -24,7 +24,7 @@
 
 ### Fixed
 
-- **Offers-0 tests vs restored creative** — wave/scrim/blur/exporter assertions match the pre-evergreen SSE DCO JSON again (greenwave hidden, shared `waveSweep`, banner/portrait scrim directions, blur visible on offers-0), so CI Pages deploy can pass after the creative restore.
+- **Restored evergreen offers-0 creative** — `campaign/sse-dco-creative.json` checked out from `checkpoint/offers-0-evergreen-2026-08-24` (stage1↔stage2 bluewave, green fade, `to-top` scrim, ink scopes, etc.); offers-0 tests realigned to that document.
 - **Full-bleed clickbox** — Studio/static HTML now includes a topmost `#clickbox` over the stage and wires Enabler exit / IAB `clickTag` to it (instead of only listening on `#page-content`), so agency previews have a triggerable click surface.
 - **320×50 / 728×90 offer geometry guards** — canvas-alignment tests accept the intentional dual-price narrower value boxes on 320×50 and the offers-3 value/subline overhang on 728×90 (still on-canvas).
 - **offers-0 CTA independence** — brand CTAs use compound scopes `offers-0.cta-rect` / `offers-0.cta-roundel` (full geometry + colour each), so Rect/Round no longer share position or size with each other or with offers 1–3. Legacy `offers-0|cta` migrates on load/save.

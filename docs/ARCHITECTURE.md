@@ -86,7 +86,7 @@ DOM stage mirroring the ad structure with compiled CSS, timeline scrubbing, canv
 
 Preview asset URLs are `/assets/...` — served by the Next route, mapped to `campaign/assets/...`.
 
-Offers-0 layers (checked-in SSE DCO baseline): hide greenwave, blue logo, offer slots, and T&Cs via visibility rules. Shared `waveSweep` / logo fade clips still apply; `offers-0|bluewave` / `|logo-act3` / `|sse-headline` set geometry + white headlines. CTA and roundel use SSE green fill with navy text. `bg-blur` (`kind: "blur"`) and `headline-scrim` (`kind: "gradient"`) are visible under offers-0 (scrim directions: banners `to-right`, portraits `to-bottom`), stacked under the blue wave. (Evergreen stage2 / `to-top` / ink-toggle creative is on `checkpoint/offers-0-evergreen-2026-08-24` — see `docs/RESTORE_EVERGREEN_VARIANTS.md`.)
+Offers-0 layers: `bg-blur` (`kind: "blur"`, `src/lib/blur-layer.ts`; stays hidden). Bluewave begins at stage1, moves to the exact prior committed settle (stage2) while green fades in, then returns to stage1 at the end (no opacity fade). Greenwave fades in at rest ~0.5s before Act 4 via offer-scoped clips. White logo (`logo-act3`) fades in from mid-open over 5%; blue logo (`logo-act1`) stays hidden. T&C lines are always white and fade out at `green_in`. Photo headlines keep offers-0 box geometry (white/navy ink); Act 4 + CTA are navy over green. `headline-scrim` (`kind: "gradient"`, `src/lib/gradient-layer.ts`) — bottom-up (`to-top`), under the blue wave; always visible under `offers-0` (supports white T&Cs).
 
 ### Motion
 

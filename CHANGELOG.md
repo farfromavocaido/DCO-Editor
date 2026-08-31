@@ -17,7 +17,7 @@
 
 ### Changed
 
-- **Offers-0 preview defaults** — zero-offer sample / preview Offers=0 copy is H1/H2 brand lines, H3 `Discover the best savings`, H4 `A different kind of energy`, SEAI T&Cs, empty unit prices, roundel `Switch and save today` / `999`.
+- **Offers-0 preview defaults** — zero-offer sample / preview Offers=0 copy is H1/H2 brand lines, H3 `Discover the best savings`, H4 `A different kind of energy`, SEAI T&Cs, empty unit prices, roundel `Switch and save` / `999`.
 - **offers-0 last frame** — blue wave starts already at **stage1** (no entry sweep); moves to the exact last-committed **stage2** settle during the green fade (`green_in` → `act4_in`); returns to stage1 at the end (`end-3.3` → `end`, no opacity fade). **160×600** / **320×50** stay on stage1 throughout. Green wave **fades in** at rest over ~0.5s before Act 4, then out at the end. White logo fades in from mid-open (`start+5`, `enter_duration_pct: 5`); blue logo hidden. T&C lines stay **white** (detached from Ink) through the photo acts and fade out at `green_in`. Headline scrim is bottom-up (`to-top`) under the blue wave and **always on** for offers-0. Photo headlines end at `green_in`. Ink (White/Navy) drives photo-act headlines only; Act 4 stays navy; CTA is navy fill with white text except **320×50** offers-0 (SSE green fill, navy text). Sample row uses the SEAI grants legal line.
 - **Client preview Ink** — GitHub Pages DCO preview exposes White/Navy when Offers = 0 (`navy_headlines_bool`).
 
@@ -25,6 +25,7 @@
 
 ### Fixed
 
+- **Offers-0 banner frames-4 T&Cs** — on **320×50** / **728×90**, offers-0 terms fade out at `roundel_in` (gone as the roundel starts) instead of holding until `green_in`.
 - **Offers-0 320×50 no-roundel H4 gap** — Act 4 now enters on `act4_in` (after the green fade) instead of the banner `bn_cta_in` alias, so photo headlines hand off without a dead beat.
 - **Offers-0 roundel colours** — green fill + navy text to match the brand CTA treatment.
 - **Offers-0 unit-rate line** — force-hidden on all sizes; only the T&C terms line remains.

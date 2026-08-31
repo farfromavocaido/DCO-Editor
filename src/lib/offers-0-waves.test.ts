@@ -137,6 +137,25 @@ test('offers-0 T&C fades out just before greenwave', () => {
   }
 });
 
+test('offers-0 banner frames-4 T&Cs fade out just before the roundel', () => {
+  for (const size of ['320x50', '728x90']) {
+    const sizeCreative = creative.sizes[size];
+    const terms = sizeCreative.layers.find((layer) => layer.id === 'terms-prices');
+    assert.ok(terms, size);
+    const zero = clipsForProfile(terms.clips, 'frames-4', ['offers-0']);
+    assert.equal(zero.length, 1, `${size} frames-4 offers-0 terms`);
+    assert.equal(zero[0].end, 'roundel_in', `${size} terms end at roundel_in`);
+
+    const beats = beatsForScopes(creative, ['offers-0', 'frames-4']);
+    const frames = compileAnimationClips(zero, beats);
+    const roundelIn = Number(beats.roundel_in);
+    const mid = frameAtPercent(frames, Math.max(25, roundelIn / 2));
+    const atRoundel = frameAtPercent(frames, roundelIn);
+    assert.ok(mid.opacity > 0.9, `${size} terms visible before roundel`);
+    assert.ok(atRoundel.opacity < 0.05, `${size} terms gone when roundel starts`);
+  }
+});
+
 test('offers-0 white logo from start; blue logo hidden with no multi fade', () => {
   for (const size of Object.keys(creative.sizes)) {
     const sizeCreative = creative.sizes[size];

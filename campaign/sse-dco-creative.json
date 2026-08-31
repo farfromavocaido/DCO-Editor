@@ -360,7 +360,7 @@
         "cta_type_enum": "rectangle",
         "cta_text": "Switch today",
         "include_roundel_frame_bool": true,
-        "roundel_text_text": "switch and save today",
+        "roundel_text_text": "Switch and save",
         "roundel_value_text": "999",
         "background_image_url_160x600": {
           "Url": ""
@@ -492,7 +492,7 @@
         "cta_type_enum": "rectangle",
         "cta_text": "Find out more",
         "include_roundel_frame_bool": true,
-        "roundel_text_text": "Switch and save today",
+        "roundel_text_text": "Switch and save",
         "roundel_value_text": "999",
         "background_image_url_160x600": {
           "Url": ""
@@ -937,7 +937,7 @@
           ],
           "fit": {
             "mode": "shrink",
-            "minFontSize": 8,
+            "minFontSize": 6,
             "maxLines": 1
           }
         },
@@ -1374,8 +1374,8 @@
               ]
             },
             {
-              "id": "terms-prices-fade-offers-0",
-              "label": "terms-prices fade (offers-0 until green)",
+              "id": "terms-prices-fade-offers-0-frames-3",
+              "label": "terms-prices fade (offers-0 until green) (frames-3)",
               "preset": "fade",
               "start": "terms_in",
               "end": "green_in",
@@ -1386,7 +1386,28 @@
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
                 "fade_pct": 1
-              }
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "terms-prices-fade-offers-0-frames-4",
+              "label": "terms-prices fade (offers-0 until roundel) (frames-4)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "roundel_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
           ],
           "fit": {
@@ -1434,8 +1455,8 @@
               ]
             },
             {
-              "id": "unit-rate-prices-fade-offers-0",
-              "label": "unit-rate-prices fade (offers-0 until green)",
+              "id": "unit-rate-prices-fade-offers-0-frames-3",
+              "label": "unit-rate-prices fade (offers-0 until green) (frames-3)",
               "preset": "fade",
               "start": "act1_out",
               "end": "green_in",
@@ -1446,7 +1467,28 @@
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
                 "fade_pct": 1
-              }
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "unit-rate-prices-fade-offers-0-frames-4",
+              "label": "unit-rate-prices fade (offers-0 until roundel) (frames-4)",
+              "preset": "fade",
+              "start": "act1_out",
+              "end": "roundel_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
           ],
           "fit": {
@@ -1495,8 +1537,8 @@
               ]
             },
             {
-              "id": "terms-solo-fade-offers-0",
-              "label": "terms-solo fade (offers-0 until green)",
+              "id": "terms-solo-fade-offers-0-frames-3",
+              "label": "terms-solo fade (offers-0 until green) (frames-3)",
               "preset": "fade",
               "start": "terms_in",
               "end": "green_in",
@@ -1507,7 +1549,28 @@
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
                 "fade_pct": 1
-              }
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "terms-solo-fade-offers-0-frames-4",
+              "label": "terms-solo fade (offers-0 until roundel) (frames-4)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "roundel_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
           ]
         },
@@ -2005,7 +2068,9 @@
           "props": {
             "backgroundColor": "rgb(0, 229, 165)",
             "left": 147,
-            "top": -17
+            "top": -17,
+            "width": 90,
+            "height": 90
           },
           "editable": true
         },
@@ -2098,10 +2163,10 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 145,
-            "top": 6,
-            "width": 76,
-            "height": 12,
+            "left": 153,
+            "top": 8,
+            "width": 80,
+            "height": 10,
             "fontSize": 12,
             "lineHeight": 1.05,
             "whiteSpace": "nowrap",
@@ -2119,8 +2184,8 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 145,
-            "top": 19,
+            "left": 155,
+            "top": 17,
             "width": 76,
             "height": 30,
             "fontSize": 28,
@@ -2991,7 +3056,7 @@
           ],
           "fit": {
             "mode": "shrink",
-            "minFontSize": 12,
+            "minFontSize": 10,
             "maxLines": 1
           }
         },
@@ -3424,8 +3489,8 @@
               ]
             },
             {
-              "id": "terms-prices-fade-offers-0",
-              "label": "terms-prices fade (offers-0 until green)",
+              "id": "terms-prices-fade-offers-0-frames-3",
+              "label": "terms-prices fade (offers-0 until green) (frames-3)",
               "preset": "fade",
               "start": "terms_in",
               "end": "green_in",
@@ -3436,7 +3501,28 @@
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
                 "fade_pct": 1
-              }
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "terms-prices-fade-offers-0-frames-4",
+              "label": "terms-prices fade (offers-0 until roundel) (frames-4)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "roundel_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
           ]
         },
@@ -3480,8 +3566,8 @@
               ]
             },
             {
-              "id": "unit-rate-prices-fade-offers-0",
-              "label": "unit-rate-prices fade (offers-0 until green)",
+              "id": "unit-rate-prices-fade-offers-0-frames-3",
+              "label": "unit-rate-prices fade (offers-0 until green) (frames-3)",
               "preset": "fade",
               "start": "act1_out",
               "end": "green_in",
@@ -3492,7 +3578,28 @@
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
                 "fade_pct": 1
-              }
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "unit-rate-prices-fade-offers-0-frames-4",
+              "label": "unit-rate-prices fade (offers-0 until roundel) (frames-4)",
+              "preset": "fade",
+              "start": "act1_out",
+              "end": "roundel_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
           ],
           "fit": {
@@ -3538,8 +3645,8 @@
               ]
             },
             {
-              "id": "terms-solo-fade-offers-0",
-              "label": "terms-solo fade (offers-0 until green)",
+              "id": "terms-solo-fade-offers-0-frames-3",
+              "label": "terms-solo fade (offers-0 until green) (frames-3)",
               "preset": "fade",
               "start": "terms_in",
               "end": "green_in",
@@ -3550,7 +3657,28 @@
                 "enter_duration_pct": 2,
                 "ease_in": "ease-out",
                 "fade_pct": 1
-              }
+              },
+              "profiles": [
+                "frames-3"
+              ]
+            },
+            {
+              "id": "terms-solo-fade-offers-0-frames-4",
+              "label": "terms-solo fade (offers-0 until roundel) (frames-4)",
+              "preset": "fade",
+              "start": "terms_in",
+              "end": "roundel_in",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 2,
+                "ease_in": "ease-out",
+                "fade_pct": 1
+              },
+              "profiles": [
+                "frames-4"
+              ]
             }
           ]
         },
@@ -4018,7 +4146,11 @@
             "offer_count_num": 0
           },
           "props": {
-            "backgroundColor": "rgb(0, 229, 165)"
+            "backgroundColor": "rgb(0, 229, 165)",
+            "width": 150,
+            "height": 150,
+            "left": 289,
+            "top": -15
           },
           "editable": true
         },
@@ -4111,10 +4243,10 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 310,
-            "top": 9,
-            "width": 109,
-            "height": 23,
+            "left": 289,
+            "top": 18,
+            "width": 150,
+            "height": 16,
             "fontSize": 15,
             "lineHeight": 1.05,
             "whiteSpace": "nowrap",
@@ -4134,8 +4266,8 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 311,
-            "top": 33,
+            "left": 312,
+            "top": 37,
             "width": 105,
             "height": 48,
             "fontSize": 46,

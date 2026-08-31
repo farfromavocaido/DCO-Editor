@@ -263,6 +263,16 @@ test('client preview page uses textareas for multiline headline fields', async (
   assert.match(html, /<textarea name="tc_units_text">/);
 });
 
+test('client preview page loads offers-0 sample copy when Offers changes', async () => {
+  const document = await readCreativeDocument();
+  const html = renderClientPreviewPage(document, { includeValidator: false });
+  assert.match(html, /var defaultsByOfferCount = /);
+  assert.match(html, /function applyOfferCountDefaults\(offerCount\)/);
+  assert.match(html, /Discover the best savings/);
+  assert.match(html, /"roundel_value_text":"999"/);
+  assert.match(html, /Sustainable Energy Authority of Ireland \(SEAI\)/);
+});
+
 test('studio export still waits for Enabler init before bootstrap', async () => {
   const document = await readCreativeDocument();
   const html = await renderStudioReadyHtml(document, '160x600', {

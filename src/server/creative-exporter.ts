@@ -356,6 +356,19 @@ const clientInitialRow = (document: Record<string, unknown>) => {
   };
 };
 
+/** First sample row per offer count — used when the preview Offers control changes. */
+const clientDefaultsByOfferCount = (document: Record<string, unknown> = {}) => {
+  const map: Record<string, Record<string, unknown>> = {};
+  for (const sample of document.feed?.sampleRows || []) {
+    const parsed = Number.parseInt(String(sample.offer_count_num ?? ''), 10);
+    if (!Number.isFinite(parsed)) continue;
+    const key = String(Math.min(3, Math.max(0, parsed)));
+    if (map[key]) continue;
+    map[key] = sample;
+  }
+  return map;
+};
+
 const assetSrc = (src: unknown, options: RenderOptions = {}) => {
   const value = String(src ?? '');
   const mappedUrl = options.assetUrlMap?.[value.replace(/^\/+/, '')];
@@ -3174,6 +3187,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
       (function() {
         var STORAGE_KEY = ${jsString('sse-dco-client-preview:' + slug)};
         var defaults = ${jsString(initialRow)};
+        var defaultsByOfferCount = ${jsString(clientDefaultsByOfferCount(document))};
         var defaultSize = ${jsString(initialSize.size)};
         var sizes = ${jsString(sizes)};
         var cacheBust = ${jsString(cacheBust)};
@@ -3302,6 +3316,30 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           }
           if (heading3Input) {
             heading3Input.disabled = !enabled;
+          }
+        }
+
+        function applyOfferCountDefaults(offerCount) {
+          var preset = defaultsByOfferCount[String(offerCount)];
+          if (!preset) return;
+          setControl('heading1_text', preset.heading1_text);
+          setControl('heading2_text', preset.heading2_text);
+          setControl('heading3_text', preset.heading3_text);
+          setControl('heading4_text', preset.heading4_text);
+          setControl('offer1_value_text', preset.offer1_value_text);
+          setControl('offer1_sub_text', preset.offer1_sub_text);
+          setControl('offer2_value_text', preset.offer2_value_text);
+          setControl('offer2_sub_text', preset.offer2_sub_text);
+          setControl('offer3_value_text', preset.offer3_value_text);
+          setControl('offer3_sub_text', preset.offer3_sub_text);
+          setControl('roundel_text_text', preset.roundel_text_text);
+          setControl('roundel_value_text', preset.roundel_value_text);
+          setControl('tc_terms_text', preset.tc_terms_text);
+          setControl('tc_units_text', preset.tc_units_text);
+          if (preset.tc_type_enum != null) setControl('tc_type_enum', preset.tc_type_enum);
+          if (preset.cta_text != null) setControl('cta_text', preset.cta_text);
+          if (preset.include_roundel_frame_bool != null) {
+            setControl('include_roundel_frame_bool', preset.include_roundel_frame_bool);
           }
         }
 
@@ -3507,6 +3545,9 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
             backgroundBySize[trackedBackgroundSize] = field('background_image_url');
             trackedBackgroundSize = field('Ad_Size');
             syncBackgroundControl();
+          }
+          if (event.target && event.target.name === 'offer_count_num') {
+            applyOfferCountDefaults(field('offer_count_num'));
           }
           updateAds();
         });

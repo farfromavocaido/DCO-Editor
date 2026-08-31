@@ -473,3 +473,50 @@ test('offers-0 include_heading4_enum false hides Act 4 even with copy', () => {
   );
   assert.equal(plan.find((item) => item.layerId === 'headline-act4')?.hidden, true);
 });
+
+test('offers-0 Act 4 uses act4_in even when authored clip starts at bn_cta_in', () => {
+  const layers = [
+    {
+      id: 'headline-act1',
+      clips: [{ id: 'h1', preset: 'slideInRight', start: 'act1_in', end: 'act1_out', params: { enter_duration_pct: 4 } }],
+    },
+    {
+      id: 'headline-act2',
+      clips: [{ id: 'h2', preset: 'slideInRight', start: 'act2_in', end: 'offers_exit', profiles: ['frames-3'], params: { enter_duration_pct: 4 } }],
+    },
+    { id: 'headline-act3', clips: [] },
+    {
+      id: 'headline-act4',
+      // 320x50 frames-3 banner authoring — must not leave a gap after green_in.
+      clips: [{ id: 'h4', preset: 'slideInRight', start: 'bn_cta_in', end: 'act3_exit-1', profiles: ['frames-3'], params: { enter_duration_pct: 4 } }],
+    },
+  ];
+  const zeroBeats = {
+    act1_in: 7,
+    act1_out: 44,
+    act2_in: 43,
+    offers_exit: 66,
+    act4_in: 65.1,
+    bn_cta_in: 72.1,
+    green_in: 61.8,
+    cta_in: 69,
+    act3_exit: 96,
+  };
+  const plan = buildHeadlineMotionPlan(
+    layers,
+    {
+      offer_count_num: 0,
+      heading1_text: 'One',
+      heading2_text: 'Two',
+      heading4_text: 'Tagline',
+    },
+    'frames-3',
+    zeroBeats,
+  );
+  const act2 = plan.find((item) => item.layerId === 'headline-act2');
+  const act4 = plan.find((item) => item.layerId === 'headline-act4');
+  assert.equal(act2?.end, zeroBeats.green_in);
+  assert.equal(act4?.hidden, false);
+  assert.equal(act4?.start, zeroBeats.act4_in);
+  assert.ok((act4?.start ?? 0) - (act2?.end ?? 0) < 5, 'no notable dead gap before Act 4');
+});

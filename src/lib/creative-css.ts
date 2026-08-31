@@ -49,9 +49,9 @@ export const selectorForVariantRule = (rule: Record<string, unknown>) => {
   const layerId = String(rule.layerId || '');
   const cssClass = String(rule.cssClass || rule.layerId || '');
   const scope = String(rule.scope || '');
-  // Photo-act ink scopes must not paint Act 4 (always navy over green on offers-0).
+  // Photo-act shared headline overrides must not move/recolour Act 4 (endframe).
   if (
-    (scope === 'white-headlines' || scope === 'navy-headlines')
+    (scope === 'offers-0' || scope === 'white-headlines' || scope === 'navy-headlines')
     && cssClass === 'sse-headline'
     && !layerId
   ) {

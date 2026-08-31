@@ -1,0 +1,80 @@
+{
+  "generatedAt": "2026-08-26T08:51:13.631Z",
+  "zip": "downloads/SSE_Statics_20260826-095113.zip",
+  "dcoZip": "downloads/SSE_DCO_ROI_canonical_agency_20260826-095113.zip",
+  "dcoZips": {
+    "roi": "downloads/SSE_DCO_ROI_canonical_agency_20260826-095113.zip",
+    "ni": "downloads/SSE_DCO_NIR_canonical_agency_20260826-095113.zip"
+  },
+  "campaigns": [
+    {
+      "id": "sse-hiker-welcome",
+      "name": "Hiker Keypad",
+      "exportSlug": "SSE_Hiker_Welcome",
+      "sizes": [
+        "320x50",
+        "728x90",
+        "300x250",
+        "160x600",
+        "300x600",
+        "970x250"
+      ]
+    },
+    {
+      "id": "sse-keepyuppy-welcome",
+      "name": "Keepy Uppy Welcome Credit",
+      "exportSlug": "SSE_KeepyUppy_Welcome",
+      "sizes": [
+        "320x50",
+        "728x90",
+        "300x250",
+        "160x600",
+        "300x600",
+        "970x250"
+      ]
+    },
+    {
+      "id": "sse-keepyuppy-discount",
+      "name": "Keepy Uppy Top Discount",
+      "exportSlug": "SSE_KeepyUppy_Discount",
+      "sizes": [
+        "320x50",
+        "728x90",
+        "300x250",
+        "160x600",
+        "300x600",
+        "970x250"
+      ]
+    }
+  ],
+  "dco": {
+    "id": "sse-dco",
+    "name": "SSE DCO",
+    "exportSlug": "SSE_DCO",
+    "sizes": [
+      "320x50",
+      "728x90",
+      "300x250",
+      "160x600",
+      "300x600",
+      "970x250"
+    ],
+    "packageKind": "canonical-agency"
+  },
+  "dcoMarkets": [
+    {
+      "id": "roi",
+      "label": "ROI",
+      "profileId": 10964545,
+      "profileElement": "SSE_DCO_ROI_Delivery",
+      "zip": "downloads/SSE_DCO_ROI_canonical_agency_20260826-095113.zip"
+    },
+    {
+      "id": "ni",
+      "label": "NI",
+      "profileId": 10962603,
+      "profileElement": "SSE_DCO_NIR_Delivery",
+      "zip": "downloads/SSE_DCO_NIR_canonical_agency_20260826-095113.zip"
+    }
+  ]
+}

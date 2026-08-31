@@ -182,7 +182,11 @@ test('offers-0 headlines restore shared geometry; Act 4 colour only; T&Cs always
     assert.ok(sse, `${size} offers-0|sse-headline restored`);
     assert.equal(sse.props.color, undefined, `${size} geometry rule has no colour`);
     const act4 = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|headline-act4');
-    assert.deepEqual(act4?.props, { color: NAVY }, `${size} act4 colour-only`);
+    if (size === '320x50') {
+      assert.deepEqual(act4?.props, { color: 'rgb(255, 255, 255)' }, `${size} act4 white`);
+    } else {
+      assert.deepEqual(act4?.props, { color: NAVY }, `${size} act4 colour-only navy`);
+    }
     const ctaRect = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0.cta-rect|cta');
     const ctaRoundel = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0.cta-roundel|cta');
     if (size === '320x50') {
@@ -205,9 +209,14 @@ test('offers-0 headlines restore shared geometry; Act 4 colour only; T&Cs always
     const roundelFrame = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|roundel-frame');
     const roundelCopy = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|roundel-copy');
     const roundelValue = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|roundel-value');
-    assert.equal(roundelFrame?.props?.backgroundColor, NAVY, `${size} roundel navy fill`);
-    assert.equal(roundelCopy?.props?.color, 'rgb(255, 255, 255)', `${size} roundel copy white`);
-    assert.equal(roundelValue?.props?.color, 'rgb(255, 255, 255)', `${size} roundel value white`);
+    assert.equal(roundelFrame?.props?.backgroundColor, 'rgb(0, 229, 165)', `${size} roundel green fill`);
+    assert.equal(roundelCopy?.props?.color, NAVY, `${size} roundel copy navy`);
+    assert.equal(roundelValue?.props?.color, NAVY, `${size} roundel value navy`);
+    assert.equal(
+      sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|unit-rate-prices|visibility')?.props?.visibility,
+      'hidden',
+      `${size} unit-rate hidden on offers-0`,
+    );
   }
 });
 
@@ -230,7 +239,7 @@ test('offers-0 headline scrim is bottom-up and under the bluewave', () => {
   }
 });
 
-test('white/navy headline scopes exclude Act 4', () => {
+test('white/navy/offers-0 headline scopes exclude Act 4', () => {
   assert.equal(
     selectorForVariantRule({ scope: 'white-headlines', cssClass: 'sse-headline' }),
     '.white-headlines .sse-headline:not(#headline-act4)',
@@ -238,5 +247,13 @@ test('white/navy headline scopes exclude Act 4', () => {
   assert.equal(
     selectorForVariantRule({ scope: 'navy-headlines', cssClass: 'sse-headline' }),
     '.navy-headlines .sse-headline:not(#headline-act4)',
+  );
+  assert.equal(
+    selectorForVariantRule({ scope: 'offers-0', cssClass: 'sse-headline' }),
+    '.offers-0 .sse-headline:not(#headline-act4)',
+  );
+  assert.equal(
+    selectorForVariantRule({ scope: 'offers-0', layerId: 'headline-act4', props: { color: NAVY } }),
+    '.offers-0 #headline-act4',
   );
 });

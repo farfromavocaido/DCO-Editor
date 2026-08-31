@@ -303,12 +303,19 @@ export const buildHeadlineMotionPlan = (
     );
     const eligible = new Set(eligibleHeadlineActs(includeRoundelFrame));
     for (const window of windows) {
-      // Act 4 stays on its authored CTA clips when copy is present and enabled.
+      // Act 4 stays on the offers-0 CTA beat (act4_in / green fade end), not
+      // size-specific banner aliases like bn_cta_in that leave a dead gap after
+      // the equal-split photo window.
       if (window.act === 4) {
         const showAct4 = heading4Enabled && Boolean(headings[3]);
         if (!showAct4) {
           window.hidden = true;
           window.keyframes = hiddenKeyframes();
+        } else {
+          const act4Start = Number(
+            beats.act4_in ?? beats.bn_cta_in ?? beats.cta_in ?? window.start,
+          );
+          rebuildSlideWindow(window, act4Start, window.end, window._clips, beats);
         }
         continue;
       }

@@ -24,6 +24,10 @@
 
 ### Fixed
 
+- **Offers-0 320×50 no-roundel H4 gap** — Act 4 now enters on `act4_in` (after the green fade) instead of the banner `bn_cta_in` alias, so photo headlines hand off without a dead beat.
+- **Offers-0 roundel colours** — green fill + navy text to match the brand CTA treatment.
+- **Offers-0 unit-rate line** — force-hidden on all sizes; only the T&C terms line remains.
+- **Offers-0 H4 endframe placement** — shared `offers-0|sse-headline` geometry no longer applies to `#headline-act4` (same natural `.sse-headline` box as multi-offer). Act 4 colour stays navy except **320×50** (white).
 - **Restored evergreen offers-0 creative** — `campaign/sse-dco-creative.json` checked out from `checkpoint/offers-0-evergreen-2026-08-24` (stage1↔stage2 bluewave, green fade, `to-top` scrim, ink scopes, etc.); offers-0 tests realigned to that document.
 - **Full-bleed clickbox** — Studio/static HTML now includes a topmost `#clickbox` over the stage and wires Enabler exit / IAB `clickTag` to it (instead of only listening on `#page-content`), so agency previews have a triggerable click surface.
 - **320×50 / 728×90 offer geometry guards** — canvas-alignment tests accept the intentional dual-price narrower value boxes on 320×50 and the offers-3 value/subline overhang on 728×90 (still on-canvas).

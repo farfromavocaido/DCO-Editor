@@ -180,12 +180,23 @@ export const termsWrapperBounds = (
 const ruleMatchesIdentity = (
   rule: Record<string, unknown>,
   identity: { layerId?: string; cssClass?: string },
-) => (
-  (
+) => {
+  // Keep Act 4 on shared .sse-headline endframe geometry under offers-0 / ink
+  // scopes (mirrors selectorForVariantRule :not(#headline-act4)).
+  const scope = String(rule.scope || '');
+  if (
+    identity.layerId === 'headline-act4'
+    && rule.cssClass === 'sse-headline'
+    && !rule.layerId
+    && (scope === 'offers-0' || scope === 'white-headlines' || scope === 'navy-headlines')
+  ) {
+    return false;
+  }
+  return (
     (identity.layerId && rule.layerId === identity.layerId)
     || (identity.cssClass && rule.cssClass === identity.cssClass)
-  )
-);
+  );
+};
 
 /** Plain scope token, or compound `offers-0.cta-rect` requiring every part active. */
 export const variantScopeIsActive = (scope: unknown, activeScopes: string[] = []) => {

@@ -550,6 +550,36 @@ test('resolves and writes 300x250 headline offer-count variants', () => {
   assert.equal(shared.properties.left, 17);
 });
 
+test('banner offers-0 Act 3 geometry writes separately from shared H1/H2', () => {
+  const doc = loadPersistedCreative();
+  const scopes = ['offers-0', 'white-headlines', 'frames-4', 'tc-solo', 'cta-rect'];
+
+  const act1 = findCreativeTarget(doc, '320x50', 'headline-act1', scopes);
+  const act3 = findCreativeTarget(doc, '320x50', 'headline-act3', scopes);
+  assert.equal(act1.writeSource.ruleId, 'white-headlines|sse-headline');
+  assert.equal(act3.writeSource.ruleId, 'white-headlines|headline-act3');
+
+  const afterH1 = updateCreativeTargetValue(doc, '320x50', 'headline-act1', scopes, 'width', 111);
+  assert.equal(
+    afterH1.sizes['320x50'].variantRules.find((rule) => rule.id === 'white-headlines|sse-headline').props.width,
+    111,
+  );
+  assert.notEqual(
+    afterH1.sizes['320x50'].variantRules.find((rule) => rule.id === 'white-headlines|headline-act3').props.width,
+    111,
+  );
+
+  const afterH3 = updateCreativeTargetValue(doc, '320x50', 'headline-act3', scopes, 'width', 77);
+  assert.equal(
+    afterH3.sizes['320x50'].variantRules.find((rule) => rule.id === 'white-headlines|headline-act3').props.width,
+    77,
+  );
+  assert.notEqual(
+    afterH3.sizes['320x50'].variantRules.find((rule) => rule.id === 'white-headlines|sse-headline').props.width,
+    77,
+  );
+});
+
 test('every size exposes offers-2 and offers-3 headline variant rules', () => {
   const doc = loadPersistedCreative();
 

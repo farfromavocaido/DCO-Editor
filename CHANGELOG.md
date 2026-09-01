@@ -17,7 +17,8 @@
 
 ### Changed
 
-- **Offers-0 preview defaults** — zero-offer sample / preview Offers=0 copy is H1/H2 brand lines, H3 `Discover the best savings`, H4 `A different kind of energy`, SEAI T&Cs, empty unit prices, roundel `Switch and save` / `999`.
+- **Offers-0 banner Act 3 sizing** — on **320×50** / **728×90** only, offers-0 H3 uses its own layer rules (`offers-0|headline-act3` + ink siblings); shared H1/H2 `sse-headline` rules exclude `#headline-act3`. Other sizes unchanged. Timing/transitions untouched.
+- **Offers-0 preview defaults** — zero-offer sample / preview Offers=0 copy is H1 `SEAI Grant Applications?`, H2 `Sorted. With Ireland's leading one  stop shop.`, H3 `Switch and save today`, H4 `Book your free consultation today`, SEAI T&Cs, empty unit prices, roundel `Book your consultation today` (no value).
 - **offers-0 last frame** — blue wave starts already at **stage1** (no entry sweep); moves to the exact last-committed **stage2** settle during the green fade (`green_in` → `act4_in`); returns to stage1 at the end (`end-3.3` → `end`, no opacity fade). **160×600** / **320×50** stay on stage1 throughout. Green wave **fades in** at rest over ~0.5s before Act 4, then out at the end. White logo fades in from mid-open (`start+5`, `enter_duration_pct: 5`); blue logo hidden. T&C lines stay **white** (detached from Ink) through the photo acts and fade out at `green_in`. Headline scrim is bottom-up (`to-top`) under the blue wave and **always on** for offers-0. Photo headlines end at `green_in`. Ink (White/Navy) drives photo-act headlines only; Act 4 stays navy; CTA is navy fill with white text except **320×50** offers-0 (SSE green fill, navy text). Sample row uses the SEAI grants legal line.
 - **Client preview Ink** — GitHub Pages DCO preview exposes White/Navy when Offers = 0 (`navy_headlines_bool`).
 

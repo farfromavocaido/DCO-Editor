@@ -1,5 +1,7 @@
 // @ts-nocheck
 
+import { excludedHeadlineLayerIdsForVariantRule } from '@/lib/creative-css';
+
 export const deepClone = (value: unknown) => JSON.parse(JSON.stringify(value ?? null));
 
 export const currentSizeCreative = (document: Record<string, unknown> | null, size: string) => (
@@ -181,14 +183,13 @@ const ruleMatchesIdentity = (
   rule: Record<string, unknown>,
   identity: { layerId?: string; cssClass?: string },
 ) => {
-  // Keep Act 4 on shared .sse-headline endframe geometry under offers-0 / ink
-  // scopes (mirrors selectorForVariantRule :not(#headline-act4)).
-  const scope = String(rule.scope || '');
+  // Shared photo-act `.sse-headline` rules skip excluded acts (mirrors
+  // selectorForVariantRule :not(#…) — default Act 4; banners may exclude Act 3).
   if (
-    identity.layerId === 'headline-act4'
+    identity.layerId
     && rule.cssClass === 'sse-headline'
     && !rule.layerId
-    && (scope === 'offers-0' || scope === 'white-headlines' || scope === 'navy-headlines')
+    && excludedHeadlineLayerIdsForVariantRule(rule).includes(String(identity.layerId))
   ) {
     return false;
   }
@@ -1131,7 +1132,7 @@ export const updateCreativeTargetValue = (
   }
 
   const headlineIdentity = isHeadlineLayer(layer)
-    ? { cssClass: HEADLINE_CSS_CLASS }
+    ? { cssClass: HEADLINE_CSS_CLASS, layerId: layer.id }
     : null;
   const backgroundIdentity = isBackgroundLayer(layer)
     ? { cssClass: BG_IMAGE_CSS_CLASS }

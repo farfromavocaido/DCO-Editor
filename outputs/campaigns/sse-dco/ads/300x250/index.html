@@ -249,7 +249,7 @@
       width: 300px;
       height: 250px;
       visibility: hidden;
-      background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.25) 35%, rgba(0, 0, 0, 0) 50%);
+      background-image: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.25) 35%, rgba(0, 0, 0, 0) 50%);
       position: absolute;
     }
 
@@ -694,10 +694,10 @@
 
     .offers-0 .roundel-frame {
       background-color: rgb(0, 229, 165);
-      left: 29px;
-      top: 80px;
-      width: 120px;
-      height: 120px;
+      left: 48px;
+      top: 91px;
+      width: 100px;
+      height: 100px;
     }
 
     .roundel-frame-off .roundel-frame {
@@ -709,11 +709,11 @@
     }
 
     .roundel-copy-only .roundel-copy {
-      left: 48px;
-      top: 107px;
-      width: 83px;
-      height: 68px;
-      font-size: 22px;
+      left: 51px;
+      top: 117px;
+      width: 94px;
+      height: 51px;
+      font-size: 14px;
       line-height: 1.05;
       white-space: normal;
       text-align: center;
@@ -754,6 +754,16 @@
 
     .roundel-frame-off .roundel-value {
       visibility: hidden;
+    }
+
+    .offers-0 .sse-headline:not(#headline-act4) {
+      top: 14px;
+      left: 15px;
+      width: 232px;
+      height: 66px;
+      font-size: 24px;
+      text-align: left;
+      justify-content: flex-start;
     }
 
     .offers-2 .sse-headline {
@@ -801,89 +811,113 @@
       visibility: hidden;
     }
 
-    .offers-0 .greenwave {
-      visibility: hidden;
-    }
-
     .offers-0 .headline-scrim {
       visibility: visible;
     }
 
     .offers-0 .bg-blur {
-      visibility: visible;
+      visibility: hidden;
     }
 
     .offers-0 .logo-act1 {
       visibility: hidden;
     }
 
-    .offers-0 .terms-solo {
-      visibility: hidden;
+    .white-headlines .sse-headline:not(#headline-act4) {
+      color: rgb(255, 255, 255);
+      width: 267px;
+      height: 77px;
+      top: 13px;
+      font-size: 24px;
     }
 
-    .offers-0 .terms-prices {
-      visibility: hidden;
+    .navy-headlines .sse-headline:not(#headline-act4) {
+      color: rgb(0, 41, 117);
+      height: 31px;
     }
 
     .offers-0 .unit-rate-prices {
       visibility: hidden;
     }
 
-    .offers-0 .tc-solo-group {
-      visibility: hidden;
-      height: 30px;
-    }
-
-    .offers-0 .tc-prices-group {
-      visibility: hidden;
-      height: 30px;
-    }
-
-    .offers-0 .sse-headline {
+    .offers-0 .terms-prices {
       color: rgb(255, 255, 255);
-      top: 14px;
-      left: 15px;
-      width: 232px;
-      height: 66px;
-      font-size: 24px;
-      text-align: left;
-      justify-content: flex-start;
+    }
+
+    .offers-0 .terms-solo {
+      color: rgb(255, 255, 255);
+    }
+
+    .white-headlines .unit-rate-prices {
+      color: rgb(255, 255, 255);
+    }
+
+    .navy-headlines .unit-rate-prices {
+      color: rgb(0, 41, 117);
+    }
+
+    .offers-0 #headline-act4 {
+      color: rgb(0, 41, 117);
+      width: 254px;
+      height: 49px;
     }
 
     .offers-0 .bluewave {
-      left: 50px;
-      top: 54px;
-      width: 173px;
-      height: 205px;
+      left: 26px;
+      top: 38px;
+      width: 185px;
+      height: 221px;
     }
 
     .offers-0 .logo-act3 {
-      left: 211px;
-      top: 214px;
-      width: 78px;
-      height: 28px;
+      left: 206px;
+      top: 208px;
+      width: 83px;
+      height: 36px;
     }
 
     .offers-0.cta-rect .cta {
-      left: 44px;
-      top: 70px;
+      left: 90px;
+      top: 112px;
       width: 120px;
       height: 36px;
-      border-radius: 4px;
       font-size: 12px;
-      background-color: rgb(0, 229, 165);
-      color: rgb(0, 41, 117);
+      border-radius: 4px;
+      background-color: rgb(0, 41, 117);
+      color: rgb(255, 255, 255);
     }
 
     .offers-0.cta-roundel .cta {
-      left: 44px;
-      top: 70px;
+      left: 49px;
+      top: 100px;
       width: 80px;
       height: 80px;
-      border-radius: 50%;
       font-size: 13px;
-      background-color: rgb(0, 229, 165);
-      color: rgb(0, 41, 117);
+      border-radius: 50%;
+      background-color: rgb(0, 41, 117);
+      color: rgb(255, 255, 255);
+    }
+
+    .offers-0.tc-solo .terms-solo {
+      visibility: hidden;
+    }
+
+    .offers-0.tc-solo .tc-solo-group {
+      visibility: hidden;
+      height: 30px;
+    }
+
+    .offers-0.tc-solo .terms-prices {
+      left: 6px;
+      top: 210px;
+      width: 102px;
+      height: 43px;
+      font-size: 6px;
+      visibility: visible;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-start;
+      text-align: left;
     }
 
     @keyframes bg-blur-bg-blur-fade-frames-3 {
@@ -2539,8 +2573,8 @@
       top: -6px;
       width: 1907.36px;
       height: 300px;
-      transform: translate3d(0px, 0px, 0px);
-      opacity: 1;
+      transform: translate3d(-700px, 0px, 0px);
+      opacity: 0;
       position: absolute;
       visibility: inherit;
     }
@@ -2550,7 +2584,7 @@
       top: 0px;
       width: 214px;
       height: 253px;
-      transform: translate3d(318px, 0px, 0px);
+      transform: translate3d(88px, 0px, 0px);
       opacity: 1;
       position: absolute;
       visibility: inherit;
@@ -2646,8 +2680,6 @@
       top: 200px;
       width: 110px;
       height: 40px;
-      transform: translate3d(0px, 0px, 0px);
-      opacity: 0;
       position: absolute;
       visibility: inherit;
     }
@@ -2788,8 +2820,8 @@
       top: -6px;
       width: 1907.36px;
       height: 300px;
-      transform: translate3d(0px, 0px, 0px);
-      opacity: 1;
+      transform: translate3d(-700px, 0px, 0px);
+      opacity: 0;
       position: absolute;
       visibility: inherit;
     }
@@ -2799,7 +2831,7 @@
       top: 0px;
       width: 214px;
       height: 253px;
-      transform: translate3d(318px, 0px, 0px);
+      transform: translate3d(88px, 0px, 0px);
       opacity: 1;
       position: absolute;
       visibility: inherit;
@@ -2900,8 +2932,6 @@
       top: 200px;
       width: 110px;
       height: 40px;
-      transform: translate3d(0px, 0px, 0px);
-      opacity: 0;
       position: absolute;
       visibility: inherit;
     }
@@ -3049,28 +3079,24 @@
       animation: 15s linear 0s infinite normal forwards running bg-blur-bg-blur-fade-frames-3-offers-0;
     }
 
-    @keyframes greenwave-greenwave-waveSweep-offers-0 {
+    @keyframes greenwave-greenwave-fade-offers-0-offers-0 {
       0% {
-        transform: translate3d(0px, 0px, 0px);
-        opacity: 1;
-        animation-timing-function: ease-out;
-      }
-      4% {
-        transform: translate3d(0px, 0px, 0px);
-        opacity: 1;
-        animation-timing-function: ease-out;
-      }
-      11% {
         transform: translate3d(-700px, 0px, 0px);
-        opacity: 1;
+        opacity: 0;
+        animation-timing-function: ease-out;
       }
-      95% {
+      61.8% {
+        transform: translate3d(-700px, 0px, 0px);
+        opacity: 0;
+        animation-timing-function: ease-out;
+      }
+      65.1% {
         transform: translate3d(-700px, 0px, 0px);
         opacity: 1;
       }
       98% {
         transform: translate3d(-700px, 0px, 0px);
-        opacity: 0;
+        opacity: 1;
       }
       100% {
         transform: translate3d(-700px, 0px, 0px);
@@ -3078,35 +3104,55 @@
       }
     }
     .offers-0 .greenwave {
-      animation: 15s linear 0s infinite normal forwards running greenwave-greenwave-waveSweep-offers-0;
+      animation: 15s linear 0s infinite normal forwards running greenwave-greenwave-fade-offers-0-offers-0;
     }
 
-    @keyframes bluewave-bluewave-waveSweep-offers-0 {
+    @keyframes bluewave-bluewave-entry-offers-0-offers-0 {
       0% {
-        transform: translate3d(318px, 0px, 0px);
-        opacity: 1;
-        animation-timing-function: ease-out;
-      }
-      61% {
-        transform: translate3d(318px, 0px, 0px);
-        opacity: 1;
-        animation-timing-function: ease-out;
-      }
-      68% {
         transform: translate3d(88px, 0px, 0px);
+        left: 26px;
+        top: 38px;
+        width: 185px;
+        height: 221px;
         opacity: 1;
       }
-      98% {
+      61.8% {
         transform: translate3d(88px, 0px, 0px);
+        left: 26px;
+        top: 38px;
+        width: 185px;
+        height: 221px;
         opacity: 1;
+        animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      65.1% {
+        transform: translate3d(88px, 0px, 0px);
+        left: -1px;
+        top: 0px;
+        width: 214px;
+        height: 253px;
+        opacity: 1;
+      }
+      96.7% {
+        transform: translate3d(88px, 0px, 0px);
+        left: -1px;
+        top: 0px;
+        width: 214px;
+        height: 253px;
+        opacity: 1;
+        animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
       }
       100% {
         transform: translate3d(88px, 0px, 0px);
-        opacity: 0;
+        left: 26px;
+        top: 38px;
+        width: 185px;
+        height: 221px;
+        opacity: 1;
       }
     }
     .offers-0 .bluewave {
-      animation: 15s linear 0s infinite normal forwards running bluewave-bluewave-waveSweep-offers-0;
+      animation: 15s linear 0s infinite normal forwards running bluewave-bluewave-entry-offers-0-offers-0;
     }
 
     @keyframes roundel-frame-roundel-frame-popPulse-offers-0 {
@@ -3353,46 +3399,16 @@
       animation: 15s linear 0s infinite normal forwards running cta-cta-popPulse-offers-0;
     }
 
-    @keyframes logo-act1-logo-act1-fade-offers-0 {
+    @keyframes logo-act3-logo-act3-hold-offers-0-offers-0 {
       0% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 0;
       }
-      4% {
+      5% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 0;
       }
-      12% {
-        transform: translate3d(0px, 0px, 0px);
-        opacity: 1;
-      }
-      61% {
-        transform: translate3d(0px, 0px, 0px);
-        opacity: 1;
-      }
-      68% {
-        transform: translate3d(0px, 0px, 0px);
-        opacity: 0;
-      }
-      100% {
-        transform: translate3d(0px, 0px, 0px);
-        opacity: 0;
-      }
-    }
-    .offers-0 .logo-act1 {
-      animation: 15s linear 0s infinite normal forwards running logo-act1-logo-act1-fade-offers-0;
-    }
-
-    @keyframes logo-act3-logo-act3-fade-offers-0 {
-      0% {
-        transform: translate3d(0px, 0px, 0px);
-        opacity: 0;
-      }
-      61% {
-        transform: translate3d(0px, 0px, 0px);
-        opacity: 0;
-      }
-      68% {
+      10% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 1;
       }
@@ -3406,7 +3422,7 @@
       }
     }
     .offers-0 .logo-act3 {
-      animation: 15s linear 0s infinite normal forwards running logo-act3-logo-act3-fade-offers-0;
+      animation: 15s linear 0s infinite normal forwards running logo-act3-logo-act3-hold-offers-0-offers-0;
     }
 
     @keyframes offer-slot-1-offer-slot-1-slideInRight-offers-0 {
@@ -3569,7 +3585,7 @@
       animation: 15s linear 0s infinite normal forwards running offer-slot-3-offer-slot-3-slideInRight-offers-0;
     }
 
-    @keyframes terms-prices-terms-prices-fade-offers-0 {
+    @keyframes terms-prices-terms-prices-fade-offers-0-offers-0 {
       0% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 0;
@@ -3584,11 +3600,11 @@
         transform: translate3d(0px, 0px, 0px);
         opacity: 1;
       }
-      42% {
+      60.8% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 1;
       }
-      44% {
+      61.8% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 0;
       }
@@ -3598,10 +3614,10 @@
       }
     }
     .offers-0 .terms-prices {
-      animation: 15s linear 0s infinite normal forwards running terms-prices-terms-prices-fade-offers-0;
+      animation: 15s linear 0s infinite normal forwards running terms-prices-terms-prices-fade-offers-0-offers-0;
     }
 
-    @keyframes unit-rate-prices-unit-rate-prices-fade-offers-0 {
+    @keyframes unit-rate-prices-unit-rate-prices-fade-offers-0-offers-0 {
       0% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 0;
@@ -3616,11 +3632,11 @@
         transform: translate3d(0px, 0px, 0px);
         opacity: 1;
       }
-      63% {
+      60.8% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 1;
       }
-      64% {
+      61.8% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 0;
       }
@@ -3630,10 +3646,10 @@
       }
     }
     .offers-0 .unit-rate-prices {
-      animation: 15s linear 0s infinite normal forwards running unit-rate-prices-unit-rate-prices-fade-offers-0;
+      animation: 15s linear 0s infinite normal forwards running unit-rate-prices-unit-rate-prices-fade-offers-0-offers-0;
     }
 
-    @keyframes terms-solo-terms-solo-fade-offers-0 {
+    @keyframes terms-solo-terms-solo-fade-offers-0-offers-0 {
       0% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 0;
@@ -3648,11 +3664,11 @@
         transform: translate3d(0px, 0px, 0px);
         opacity: 1;
       }
-      63% {
+      60.8% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 1;
       }
-      64% {
+      61.8% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 0;
       }
@@ -3662,7 +3678,7 @@
       }
     }
     .offers-0 .terms-solo {
-      animation: 15s linear 0s infinite normal forwards running terms-solo-terms-solo-fade-offers-0;
+      animation: 15s linear 0s infinite normal forwards running terms-solo-terms-solo-fade-offers-0-offers-0;
     }
 
     @keyframes headline-act4-headline-act4-slideInRight-frames-3-offers-0 {
@@ -3723,28 +3739,24 @@
       animation: 15s linear 0s infinite normal forwards running bg-blur-bg-blur-fade-frames-4-offers-0-frames-4;
     }
 
-    @keyframes greenwave-greenwave-waveSweep-offers-0-frames-4 {
+    @keyframes greenwave-greenwave-fade-offers-0-offers-0-frames-4 {
       0% {
-        transform: translate3d(0px, 0px, 0px);
-        opacity: 1;
-        animation-timing-function: ease-out;
-      }
-      4% {
-        transform: translate3d(0px, 0px, 0px);
-        opacity: 1;
-        animation-timing-function: ease-out;
-      }
-      11% {
         transform: translate3d(-700px, 0px, 0px);
-        opacity: 1;
+        opacity: 0;
+        animation-timing-function: ease-out;
       }
-      95% {
+      72.7% {
+        transform: translate3d(-700px, 0px, 0px);
+        opacity: 0;
+        animation-timing-function: ease-out;
+      }
+      76% {
         transform: translate3d(-700px, 0px, 0px);
         opacity: 1;
       }
       98% {
         transform: translate3d(-700px, 0px, 0px);
-        opacity: 0;
+        opacity: 1;
       }
       100% {
         transform: translate3d(-700px, 0px, 0px);
@@ -3752,35 +3764,55 @@
       }
     }
     .offers-0.frames-4 .greenwave {
-      animation: 15s linear 0s infinite normal forwards running greenwave-greenwave-waveSweep-offers-0-frames-4;
+      animation: 15s linear 0s infinite normal forwards running greenwave-greenwave-fade-offers-0-offers-0-frames-4;
     }
 
-    @keyframes bluewave-bluewave-waveSweep-offers-0-frames-4 {
+    @keyframes bluewave-bluewave-entry-offers-0-offers-0-frames-4 {
       0% {
-        transform: translate3d(318px, 0px, 0px);
-        opacity: 1;
-        animation-timing-function: ease-out;
-      }
-      54.7% {
-        transform: translate3d(318px, 0px, 0px);
-        opacity: 1;
-        animation-timing-function: ease-out;
-      }
-      61.7% {
         transform: translate3d(88px, 0px, 0px);
+        left: 26px;
+        top: 38px;
+        width: 185px;
+        height: 221px;
         opacity: 1;
       }
-      98% {
+      72.7% {
         transform: translate3d(88px, 0px, 0px);
+        left: 26px;
+        top: 38px;
+        width: 185px;
+        height: 221px;
         opacity: 1;
+        animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      76% {
+        transform: translate3d(88px, 0px, 0px);
+        left: -1px;
+        top: 0px;
+        width: 214px;
+        height: 253px;
+        opacity: 1;
+      }
+      96.7% {
+        transform: translate3d(88px, 0px, 0px);
+        left: -1px;
+        top: 0px;
+        width: 214px;
+        height: 253px;
+        opacity: 1;
+        animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
       }
       100% {
         transform: translate3d(88px, 0px, 0px);
-        opacity: 0;
+        left: 26px;
+        top: 38px;
+        width: 185px;
+        height: 221px;
+        opacity: 1;
       }
     }
     .offers-0.frames-4 .bluewave {
-      animation: 15s linear 0s infinite normal forwards running bluewave-bluewave-waveSweep-offers-0-frames-4;
+      animation: 15s linear 0s infinite normal forwards running bluewave-bluewave-entry-offers-0-offers-0-frames-4;
     }
 
     @keyframes headline-act3-headline-act3-slideInRight-frames-4-offers-0-frames-4 {
@@ -4059,46 +4091,16 @@
       animation: 15s linear 0s infinite normal forwards running cta-cta-popPulse-offers-0-frames-4;
     }
 
-    @keyframes logo-act1-logo-act1-fade-offers-0-frames-4 {
+    @keyframes logo-act3-logo-act3-hold-offers-0-offers-0-frames-4 {
       0% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 0;
       }
-      4% {
+      5% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 0;
       }
-      12% {
-        transform: translate3d(0px, 0px, 0px);
-        opacity: 1;
-      }
-      54.7% {
-        transform: translate3d(0px, 0px, 0px);
-        opacity: 1;
-      }
-      61.7% {
-        transform: translate3d(0px, 0px, 0px);
-        opacity: 0;
-      }
-      100% {
-        transform: translate3d(0px, 0px, 0px);
-        opacity: 0;
-      }
-    }
-    .offers-0.frames-4 .logo-act1 {
-      animation: 15s linear 0s infinite normal forwards running logo-act1-logo-act1-fade-offers-0-frames-4;
-    }
-
-    @keyframes logo-act3-logo-act3-fade-offers-0-frames-4 {
-      0% {
-        transform: translate3d(0px, 0px, 0px);
-        opacity: 0;
-      }
-      54.7% {
-        transform: translate3d(0px, 0px, 0px);
-        opacity: 0;
-      }
-      61.7% {
+      10% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 1;
       }
@@ -4112,7 +4114,7 @@
       }
     }
     .offers-0.frames-4 .logo-act3 {
-      animation: 15s linear 0s infinite normal forwards running logo-act3-logo-act3-fade-offers-0-frames-4;
+      animation: 15s linear 0s infinite normal forwards running logo-act3-logo-act3-hold-offers-0-offers-0-frames-4;
     }
 
     @keyframes offer-slot-1-offer-slot-1-slideInRight-offers-0-frames-4 {
@@ -4275,7 +4277,7 @@
       animation: 15s linear 0s infinite normal forwards running offer-slot-3-offer-slot-3-slideInRight-offers-0-frames-4;
     }
 
-    @keyframes terms-prices-terms-prices-fade-offers-0-frames-4 {
+    @keyframes terms-prices-terms-prices-fade-offers-0-offers-0-frames-4 {
       0% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 0;
@@ -4290,11 +4292,11 @@
         transform: translate3d(0px, 0px, 0px);
         opacity: 1;
       }
-      30.5% {
+      71.7% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 1;
       }
-      32.5% {
+      72.7% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 0;
       }
@@ -4304,10 +4306,10 @@
       }
     }
     .offers-0.frames-4 .terms-prices {
-      animation: 15s linear 0s infinite normal forwards running terms-prices-terms-prices-fade-offers-0-frames-4;
+      animation: 15s linear 0s infinite normal forwards running terms-prices-terms-prices-fade-offers-0-offers-0-frames-4;
     }
 
-    @keyframes unit-rate-prices-unit-rate-prices-fade-offers-0-frames-4 {
+    @keyframes unit-rate-prices-unit-rate-prices-fade-offers-0-offers-0-frames-4 {
       0% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 0;
@@ -4322,11 +4324,11 @@
         transform: translate3d(0px, 0px, 0px);
         opacity: 1;
       }
-      54.7% {
+      71.7% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 1;
       }
-      55.7% {
+      72.7% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 0;
       }
@@ -4336,10 +4338,10 @@
       }
     }
     .offers-0.frames-4 .unit-rate-prices {
-      animation: 15s linear 0s infinite normal forwards running unit-rate-prices-unit-rate-prices-fade-offers-0-frames-4;
+      animation: 15s linear 0s infinite normal forwards running unit-rate-prices-unit-rate-prices-fade-offers-0-offers-0-frames-4;
     }
 
-    @keyframes terms-solo-terms-solo-fade-offers-0-frames-4 {
+    @keyframes terms-solo-terms-solo-fade-offers-0-offers-0-frames-4 {
       0% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 0;
@@ -4354,11 +4356,11 @@
         transform: translate3d(0px, 0px, 0px);
         opacity: 1;
       }
-      54.7% {
+      71.7% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 1;
       }
-      55.7% {
+      72.7% {
         transform: translate3d(0px, 0px, 0px);
         opacity: 0;
       }
@@ -4368,7 +4370,7 @@
       }
     }
     .offers-0.frames-4 .terms-solo {
-      animation: 15s linear 0s infinite normal forwards running terms-solo-terms-solo-fade-offers-0-frames-4;
+      animation: 15s linear 0s infinite normal forwards running terms-solo-terms-solo-fade-offers-0-offers-0-frames-4;
     }
 
     @keyframes headline-act4-headline-act4-slideInRight-offers-0-frames-4 {
@@ -4408,7 +4410,7 @@
     <script>
       (function() {
         var root = null;
-        var textFitRules = [{"cssClass":"sse-headline","shared":true,"wrap":true,"maxLines":2,"minFontSize":20,"allowShrink":true},{"cssClass":"roundel-copy","shared":false,"wrap":false,"minFontSize":1,"maxLines":1,"allowShrink":true,"scopes":{"roundel-copy-only":{"maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18}}},{"cssClass":"roundel-value","shared":false,"wrap":false,"minFontSize":32,"maxLines":1},{"cssClass":"terms-prices","shared":false,"wrap":false,"maxLines":2,"minFontSize":8},{"cssClass":"unit-rate-prices","shared":false,"wrap":true,"minFontSize":10,"maxLines":2,"allowShrink":true,"align":"bottom"},{"cssClass":"terms-solo","shared":false,"wrap":false,"maxLines":2,"minFontSize":8},{"cssClass":"offer-value","shared":true,"wrap":false,"minFontSize":8,"minFontSizeRatio":0.5,"tracking":{"minEm":-0.05},"align":"bottom"},{"cssClass":"offer-subline","shared":true,"wrap":true,"minFontSize":6,"minFontSizeRatio":0.6,"maxLines":2,"allowShrink":false,"scopes":{"offers-3":{"maxLines":1,"allowShrink":true,"wrap":false,"minFontSize":10}}}];
+        var textFitRules = [{"cssClass":"sse-headline","shared":true,"wrap":true,"maxLines":0,"minFontSize":20,"allowShrink":false},{"cssClass":"roundel-copy","shared":false,"wrap":true,"minFontSize":1,"maxLines":3,"allowShrink":false,"scopes":{"roundel-copy-only":{"maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18}}},{"cssClass":"roundel-value","shared":false,"wrap":false,"minFontSize":32,"maxLines":1},{"cssClass":"terms-prices","shared":false,"wrap":true,"minFontSize":6,"maxLines":4,"allowShrink":true,"scopes":{"offers-0.tc-solo":{"maxLines":2,"allowShrink":true,"wrap":true,"minFontSize":10,"align":"bottom"}}},{"cssClass":"unit-rate-prices","shared":false,"wrap":true,"minFontSize":10,"maxLines":2,"allowShrink":true,"align":"bottom"},{"cssClass":"terms-solo","shared":false,"wrap":false,"maxLines":2,"minFontSize":8},{"cssClass":"offer-value","shared":true,"wrap":false,"minFontSize":8,"minFontSizeRatio":0.5,"tracking":{"minEm":-0.05},"align":"bottom"},{"cssClass":"offer-subline","shared":true,"wrap":true,"minFontSize":6,"minFontSizeRatio":0.6,"maxLines":2,"allowShrink":false,"scopes":{"offers-3":{"maxLines":1,"allowShrink":true,"wrap":false,"minFontSize":10}}}];
 
         function fieldValue(value) {
           if (value === undefined || value === null) return '';

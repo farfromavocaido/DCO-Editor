@@ -475,10 +475,10 @@
         "Reporting_label": "0offer|brand|tc_off|cta_rect",
         "Active": true,
         "Default": false,
-        "heading1_text": "Your 'how hard can it be' energy",
-        "heading2_text": "deserves a different kind of energy",
-        "heading3_text": "Discover the best savings",
-        "heading4_text": "A different kind of energy",
+        "heading1_text": "SEAI Grant Applications?",
+        "heading2_text": "Sorted. With Ireland's leading one  stop shop.",
+        "heading3_text": "Switch and save today",
+        "heading4_text": "Book your free consultation today",
         "offer_count_num": 0,
         "offer1_value_text": "",
         "offer1_sub_text": "",
@@ -492,8 +492,8 @@
         "cta_type_enum": "rectangle",
         "cta_text": "Find out more",
         "include_roundel_frame_bool": true,
-        "roundel_text_text": "Switch and save",
-        "roundel_value_text": "999",
+        "roundel_text_text": "Book your consultation today",
+        "roundel_value_text": "",
         "background_image_url_160x600": {
           "Url": ""
         },
@@ -2067,10 +2067,10 @@
           },
           "props": {
             "backgroundColor": "rgb(0, 229, 165)",
-            "left": 147,
-            "top": -17,
-            "width": 90,
-            "height": 90
+            "left": 175,
+            "top": -12,
+            "width": 75,
+            "height": 75
           },
           "editable": true
         },
@@ -2135,11 +2135,11 @@
             "roundel_value_text": ""
           },
           "props": {
-            "left": 158,
+            "left": 176,
             "top": 9,
-            "width": 68,
-            "height": 31,
-            "fontSize": 12,
+            "width": 73,
+            "height": 48,
+            "fontSize": 10,
             "lineHeight": 1.05,
             "whiteSpace": "normal",
             "textAlign": "center",
@@ -2214,7 +2214,29 @@
             "display": "flex",
             "alignItems": "center"
           },
-          "editable": true
+          "editable": true,
+          "excludeLayerIds": [
+            "headline-act3",
+            "headline-act4"
+          ]
+        },
+        {
+          "id": "offers-0|headline-act3",
+          "scope": "offers-0",
+          "layerId": "headline-act3",
+          "props": {
+            "left": 8,
+            "top": 12,
+            "width": 125,
+            "height": 34,
+            "fontSize": 14,
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true,
+          "when": {
+            "offer_count_num": 0
+          }
         },
         {
           "id": "offers-2|sse-headline",
@@ -2367,10 +2389,29 @@
           "props": {
             "color": "rgb(255, 255, 255)",
             "top": 10,
-            "width": 138,
+            "width": 217,
             "height": 33
           },
-          "editable": true
+          "editable": true,
+          "excludeLayerIds": [
+            "headline-act3",
+            "headline-act4"
+          ]
+        },
+        {
+          "id": "white-headlines|headline-act3",
+          "scope": "white-headlines",
+          "layerId": "headline-act3",
+          "props": {
+            "color": "rgb(255, 255, 255)",
+            "top": 10,
+            "width": 158,
+            "height": 33
+          },
+          "editable": true,
+          "when": {
+            "offer_count_num": 0
+          }
         },
         {
           "id": "navy-headlines|sse-headline",
@@ -2382,7 +2423,23 @@
           "props": {
             "color": "rgb(0, 41, 117)"
           },
-          "editable": true
+          "editable": true,
+          "excludeLayerIds": [
+            "headline-act3",
+            "headline-act4"
+          ]
+        },
+        {
+          "id": "navy-headlines|headline-act3",
+          "scope": "navy-headlines",
+          "layerId": "headline-act3",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true,
+          "when": {
+            "offer_count_num": 0
+          }
         },
         {
           "id": "offers-0|unit-rate-prices|visibility",
@@ -2444,7 +2501,11 @@
           "scope": "offers-0",
           "layerId": "headline-act4",
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(255, 255, 255)",
+            "left": 8,
+            "top": 11,
+            "display": "flex",
+            "alignItems": "center"
           },
           "editable": true
         },
@@ -3524,7 +3585,11 @@
                 "frames-4"
               ]
             }
-          ]
+          ],
+          "fit": {
+            "minFontSize": 9,
+            "maxLines": 1
+          }
         },
         {
           "id": "unit-rate-prices",
@@ -4149,8 +4214,8 @@
             "backgroundColor": "rgb(0, 229, 165)",
             "width": 150,
             "height": 150,
-            "left": 289,
-            "top": -15
+            "left": 331,
+            "top": -25
           },
           "editable": true
         },
@@ -4215,10 +4280,10 @@
             "roundel_value_text": ""
           },
           "props": {
-            "left": 310,
-            "top": 24,
-            "width": 109,
-            "height": 44,
+            "left": 346,
+            "top": 17,
+            "width": 120,
+            "height": 64,
             "fontSize": 24,
             "lineHeight": 1.05,
             "whiteSpace": "normal",
@@ -4292,7 +4357,25 @@
             "top": 16,
             "fontSize": 22
           },
-          "editable": true
+          "editable": true,
+          "excludeLayerIds": [
+            "headline-act3",
+            "headline-act4"
+          ]
+        },
+        {
+          "id": "offers-0|headline-act3",
+          "scope": "offers-0",
+          "layerId": "headline-act3",
+          "props": {
+            "left": 19,
+            "top": 16,
+            "fontSize": 22
+          },
+          "editable": true,
+          "when": {
+            "offer_count_num": 0
+          }
         },
         {
           "id": "offers-2|sse-headline",
@@ -4441,9 +4524,37 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(255, 255, 255)",
+            "left": 19,
+            "top": 12,
+            "width": 351,
+            "height": 57,
+            "display": "flex",
+            "alignItems": "center"
           },
-          "editable": true
+          "editable": true,
+          "excludeLayerIds": [
+            "headline-act3",
+            "headline-act4"
+          ]
+        },
+        {
+          "id": "white-headlines|headline-act3",
+          "scope": "white-headlines",
+          "layerId": "headline-act3",
+          "props": {
+            "color": "rgb(255, 255, 255)",
+            "left": 19,
+            "top": 13,
+            "width": 266,
+            "height": 56,
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true,
+          "when": {
+            "offer_count_num": 0
+          }
         },
         {
           "id": "navy-headlines|sse-headline",
@@ -4455,7 +4566,23 @@
           "props": {
             "color": "rgb(0, 41, 117)"
           },
-          "editable": true
+          "editable": true,
+          "excludeLayerIds": [
+            "headline-act3",
+            "headline-act4"
+          ]
+        },
+        {
+          "id": "navy-headlines|headline-act3",
+          "scope": "navy-headlines",
+          "layerId": "headline-act3",
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true,
+          "when": {
+            "offer_count_num": 0
+          }
         },
         {
           "id": "offers-0|unit-rate-prices|visibility",
@@ -4626,10 +4753,10 @@
           },
           "props": {
             "left": 20,
-            "top": 77,
-            "width": 413,
-            "height": 11,
-            "fontSize": 8,
+            "top": 74,
+            "width": 478,
+            "height": 14,
+            "fontSize": 10,
             "visibility": "visible",
             "display": "flex",
             "alignItems": "flex-end",
@@ -5068,8 +5195,8 @@
           ],
           "fit": {
             "minFontSize": 20,
-            "maxLines": 2,
-            "mode": "shrink"
+            "maxLines": "",
+            "mode": "wrap"
           }
         },
         {
@@ -5144,9 +5271,9 @@
             }
           ],
           "fit": {
-            "mode": "shrink",
+            "mode": "wrap",
             "minFontSize": 1,
-            "maxLines": 1
+            "maxLines": 3
           }
         },
         {
@@ -5239,8 +5366,8 @@
           ],
           "fit": {
             "minFontSize": 20,
-            "maxLines": 2,
-            "mode": "shrink"
+            "maxLines": "",
+            "mode": "wrap"
           }
         },
         {
@@ -5271,8 +5398,8 @@
           ],
           "fit": {
             "minFontSize": 20,
-            "maxLines": 2,
-            "mode": "shrink"
+            "maxLines": "",
+            "mode": "wrap"
           }
         },
         {
@@ -5768,8 +5895,8 @@
           ],
           "fit": {
             "minFontSize": 20,
-            "maxLines": 2,
-            "mode": "shrink"
+            "maxLines": "",
+            "mode": "wrap"
           }
         }
       ],
@@ -6166,10 +6293,10 @@
           },
           "props": {
             "backgroundColor": "rgb(0, 229, 165)",
-            "left": 35,
-            "top": 88,
-            "width": 110,
-            "height": 110
+            "left": 48,
+            "top": 91,
+            "width": 100,
+            "height": 100
           },
           "editable": true
         },
@@ -6208,11 +6335,11 @@
             "roundel_value_text": ""
           },
           "props": {
-            "left": 43,
-            "top": 112,
+            "left": 51,
+            "top": 117,
             "width": 94,
-            "height": 67,
-            "fontSize": 22,
+            "height": 51,
+            "fontSize": 14,
             "lineHeight": 1.05,
             "whiteSpace": "normal",
             "textAlign": "center",
@@ -6473,8 +6600,10 @@
           },
           "props": {
             "color": "rgb(255, 255, 255)",
-            "width": 229,
-            "height": 56
+            "width": 267,
+            "height": 77,
+            "top": 13,
+            "fontSize": 24
           },
           "editable": true
         },
@@ -6550,7 +6679,9 @@
           "scope": "offers-0",
           "layerId": "headline-act4",
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(0, 41, 117)",
+            "width": 254,
+            "height": 49
           },
           "editable": true
         },
@@ -7038,7 +7169,8 @@
           ],
           "fit": {
             "maxLines": 4,
-            "mode": "wrap"
+            "mode": "shrink",
+            "minFontSize": 2
           }
         },
         {
@@ -7115,7 +7247,7 @@
           "fit": {
             "mode": "shrink",
             "minFontSize": 12,
-            "maxLines": 1
+            "maxLines": 3
           }
         },
         {
@@ -7206,7 +7338,8 @@
           ],
           "fit": {
             "maxLines": 4,
-            "mode": "wrap"
+            "mode": "shrink",
+            "minFontSize": 2
           }
         },
         {
@@ -7238,7 +7371,8 @@
           ],
           "fit": {
             "maxLines": 4,
-            "mode": "wrap"
+            "mode": "shrink",
+            "minFontSize": 2
           }
         },
         {
@@ -7732,7 +7866,8 @@
           ],
           "fit": {
             "maxLines": 4,
-            "mode": "wrap"
+            "mode": "shrink",
+            "minFontSize": 2
           }
         }
       ],
@@ -8138,7 +8273,11 @@
             "offer_count_num": 0
           },
           "props": {
-            "backgroundColor": "rgb(0, 229, 165)"
+            "backgroundColor": "rgb(0, 229, 165)",
+            "width": 115,
+            "height": 115,
+            "left": 23,
+            "top": 233
           },
           "editable": true
         },
@@ -8203,11 +8342,11 @@
             "roundel_value_text": ""
           },
           "props": {
-            "left": 37,
-            "top": 259,
-            "width": 86,
-            "height": 65,
-            "fontSize": 24,
+            "left": 26,
+            "top": 262,
+            "width": 108,
+            "height": 57,
+            "fontSize": 16,
             "lineHeight": 1.05,
             "whiteSpace": "normal",
             "textAlign": "center",
@@ -8433,7 +8572,11 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(255, 255, 255)",
+            "left": 7,
+            "top": 16,
+            "width": 146,
+            "height": 131
           },
           "editable": true
         },
@@ -9051,8 +9194,8 @@
             }
           ],
           "fit": {
-            "maxLines": 2,
-            "mode": "wrap"
+            "maxLines": 3,
+            "mode": "shrink"
           }
         },
         {
@@ -9218,8 +9361,8 @@
             }
           ],
           "fit": {
-            "maxLines": 2,
-            "mode": "wrap"
+            "maxLines": 3,
+            "mode": "shrink"
           }
         },
         {
@@ -9248,8 +9391,8 @@
             }
           ],
           "fit": {
-            "maxLines": 2,
-            "mode": "wrap"
+            "maxLines": 3,
+            "mode": "shrink"
           }
         },
         {
@@ -9578,7 +9721,7 @@
             }
           ],
           "fit": {
-            "maxLines": 6,
+            "maxLines": 8,
             "minFontSize": 6,
             "mode": "shrink"
           }
@@ -9742,8 +9885,8 @@
             }
           ],
           "fit": {
-            "maxLines": 2,
-            "mode": "wrap"
+            "maxLines": 3,
+            "mode": "shrink"
           }
         }
       ],
@@ -10159,10 +10302,10 @@
           },
           "props": {
             "backgroundColor": "rgb(0, 229, 165)",
-            "top": 173,
-            "width": 188,
-            "height": 188,
-            "left": 55
+            "top": 186,
+            "width": 165,
+            "height": 165,
+            "left": 68
           },
           "editable": true
         },
@@ -10228,7 +10371,7 @@
           },
           "props": {
             "left": 77,
-            "top": 213,
+            "top": 228,
             "width": 147,
             "height": 94,
             "fontSize": 28,
@@ -10450,7 +10593,13 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(255, 255, 255)",
+            "width": 269,
+            "height": 147,
+            "left": 15,
+            "top": 30,
+            "display": "flex",
+            "alignItems": "flex-start"
           },
           "editable": true
         },
@@ -10539,7 +10688,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 77,
+            "left": 95,
             "top": 312,
             "width": 259,
             "height": 317
@@ -10635,10 +10784,10 @@
           },
           "props": {
             "left": 5,
-            "top": 542,
-            "width": 64,
-            "height": 50,
-            "fontSize": 6,
+            "top": 518,
+            "width": 72,
+            "height": 74,
+            "fontSize": 8,
             "visibility": "visible",
             "display": "flex",
             "alignItems": "flex-end",
@@ -12174,8 +12323,10 @@
           },
           "props": {
             "backgroundColor": "rgb(0, 229, 165)",
-            "left": 367,
-            "top": 31
+            "left": 510,
+            "top": 32,
+            "width": 175,
+            "height": 175
           },
           "editable": true
         },
@@ -12240,8 +12391,8 @@
             "roundel_value_text": ""
           },
           "props": {
-            "left": 391,
-            "top": 86,
+            "left": 525,
+            "top": 80,
             "width": 138,
             "height": 79,
             "fontSize": 28,
@@ -12467,7 +12618,12 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(255, 255, 255)",
+            "top": 80,
+            "width": 461,
+            "height": 90,
+            "display": "flex",
+            "alignItems": "center"
           },
           "editable": true
         },
@@ -12543,7 +12699,11 @@
           "scope": "offers-0",
           "layerId": "headline-act4",
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(0, 41, 117)",
+            "left": 36,
+            "top": 80,
+            "width": 308,
+            "height": 90
           },
           "editable": true
         },
@@ -12655,7 +12815,7 @@
             "top": 223,
             "width": 653,
             "height": 22,
-            "fontSize": 11,
+            "fontSize": 12,
             "visibility": "visible",
             "display": "flex",
             "alignItems": "flex-end",

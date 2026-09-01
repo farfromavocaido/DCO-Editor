@@ -258,7 +258,7 @@ test('offers-0 headline scrim is bottom-up and under the bluewave', () => {
   }
 });
 
-test('white/navy/offers-0 headline scopes exclude Act 4', () => {
+test('white/navy/offers-0 headline scopes exclude Act 4 by default', () => {
   assert.equal(
     selectorForVariantRule({ scope: 'white-headlines', cssClass: 'sse-headline' }),
     '.white-headlines .sse-headline:not(#headline-act4)',
@@ -274,5 +274,49 @@ test('white/navy/offers-0 headline scopes exclude Act 4', () => {
   assert.equal(
     selectorForVariantRule({ scope: 'offers-0', layerId: 'headline-act4', props: { color: NAVY } }),
     '.offers-0 #headline-act4',
+  );
+});
+
+test('banner offers-0 separates Act 3 geometry from shared H1/H2', () => {
+  for (const size of ['320x50', '728x90'] as const) {
+    const sizeCreative = creative.sizes[size];
+    for (const id of [
+      'offers-0|sse-headline',
+      'white-headlines|sse-headline',
+      'navy-headlines|sse-headline',
+    ]) {
+      const shared = sizeCreative.variantRules.find((rule) => rule.id === id);
+      assert.deepEqual(
+        shared?.excludeLayerIds,
+        ['headline-act3', 'headline-act4'],
+        `${size} ${id} excludes Act 3 + Act 4`,
+      );
+      assert.equal(
+        selectorForVariantRule(shared),
+        `.${shared.scope} .sse-headline:not(#headline-act3):not(#headline-act4)`,
+        `${size} ${id} selector`,
+      );
+    }
+    for (const id of [
+      'offers-0|headline-act3',
+      'white-headlines|headline-act3',
+      'navy-headlines|headline-act3',
+    ]) {
+      const act3 = sizeCreative.variantRules.find((rule) => rule.id === id);
+      assert.ok(act3, `${size} missing ${id}`);
+      assert.equal(act3.layerId, 'headline-act3');
+      assert.equal(
+        selectorForVariantRule(act3),
+        `.${act3.scope} #headline-act3`,
+        `${size} ${id} selector`,
+      );
+    }
+  }
+  // Other sizes keep Act 3 on the shared photo-act box.
+  const mpu = creative.sizes['300x250'].variantRules.find((rule) => rule.id === 'offers-0|sse-headline');
+  assert.equal(mpu?.excludeLayerIds, undefined);
+  assert.equal(
+    selectorForVariantRule(mpu),
+    '.offers-0 .sse-headline:not(#headline-act4)',
   );
 });

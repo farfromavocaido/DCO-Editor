@@ -45,18 +45,36 @@ export const selectorForVariantScope = (scope: unknown) => {
   return parts.map((part) => `.${part}`).join('');
 };
 
+/** Photo-act ink/geometry scopes that share `.sse-headline` across acts. */
+const PHOTO_ACT_HEADLINE_SCOPES = new Set(['offers-0', 'white-headlines', 'navy-headlines']);
+
+/**
+ * Layer ids omitted from a shared `.sse-headline` variant rule.
+ * Default: Act 4 stays on endframe geometry. Banner offers-0 may also list Act 3
+ * (`excludeLayerIds` on the rule) so H3 can be sized independently of H1/H2.
+ */
+export const excludedHeadlineLayerIdsForVariantRule = (rule: Record<string, unknown> = {}) => {
+  const layerId = String(rule.layerId || '');
+  const cssClass = String(rule.cssClass || '');
+  const scope = String(rule.scope || '');
+  if (layerId || cssClass !== 'sse-headline' || !PHOTO_ACT_HEADLINE_SCOPES.has(scope)) {
+    return [];
+  }
+  if (Array.isArray(rule.excludeLayerIds)) {
+    return rule.excludeLayerIds.map(String).filter(Boolean);
+  }
+  return ['headline-act4'];
+};
+
 export const selectorForVariantRule = (rule: Record<string, unknown>) => {
   const layerId = String(rule.layerId || '');
   const cssClass = String(rule.cssClass || rule.layerId || '');
-  const scope = String(rule.scope || '');
-  // Photo-act shared headline overrides must not move/recolour Act 4 (endframe).
-  if (
-    (scope === 'offers-0' || scope === 'white-headlines' || scope === 'navy-headlines')
-    && cssClass === 'sse-headline'
-    && !layerId
-  ) {
-    const scopeSelector = selectorForVariantScope(scope);
-    return `${scopeSelector} .sse-headline:not(#headline-act4)`.trim();
+  const excluded = excludedHeadlineLayerIdsForVariantRule(rule);
+  // Photo-act shared headline overrides skip excluded acts (default: Act 4 endframe).
+  if (excluded.length && cssClass === 'sse-headline' && !layerId) {
+    const scopeSelector = selectorForVariantScope(String(rule.scope || ''));
+    const notActs = excluded.map((id) => `:not(#${id})`).join('');
+    return `${scopeSelector} .sse-headline${notActs}`.trim();
   }
   // Headline acts share .sse-headline; act-specific overrides target the element id.
   const base = layerId.startsWith('headline-act')

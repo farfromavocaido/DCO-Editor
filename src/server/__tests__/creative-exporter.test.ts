@@ -268,8 +268,9 @@ test('client preview page loads offers-0 sample copy when Offers changes', async
   const html = renderClientPreviewPage(document, { includeValidator: false });
   assert.match(html, /var defaultsByOfferCount = /);
   assert.match(html, /function applyOfferCountDefaults\(offerCount\)/);
-  assert.match(html, /Discover the best savings/);
-  assert.match(html, /"roundel_value_text":"999"/);
+  assert.match(html, /SEAI Grant Applications\?/);
+  assert.match(html, /Book your consultation today/);
+  assert.match(html, /"roundel_value_text":""/);
   assert.match(html, /Sustainable Energy Authority of Ireland \(SEAI\)/);
 });
 

@@ -108,6 +108,29 @@ const fitForClass = (
   return classRule?.fit || {};
 };
 
+const BOX_LAYOUT_KEYS = new Set([
+  'left',
+  'top',
+  'right',
+  'bottom',
+  'width',
+  'height',
+  'fontSize',
+  'lineHeight',
+  'display',
+  'alignItems',
+  'justifyContent',
+  'textAlign',
+]);
+
+const variantOwnsBoxLayout = (props: Record<string, unknown> = {}) => (
+  Object.keys(props).some((key) => BOX_LAYOUT_KEYS.has(key))
+);
+
+const hasAuthoredLength = (value: unknown) => (
+  value !== undefined && value !== null && value !== ''
+);
+
 export const structuredRuleCss = (sizeCreative: Record<string, unknown>) => {
   const classRules = (sizeCreative.classRules || [])
     .map((rule: Record<string, unknown>) => renderCssRule(
@@ -124,16 +147,28 @@ export const structuredRuleCss = (sizeCreative: Record<string, unknown>) => {
       const classProps = (sizeCreative.classRules || []).find(
         (item: Record<string, unknown>) => item.cssClass === cssClass,
       )?.properties || {};
-      const merged = { ...classProps, ...(rule.props || {}) };
+      const authored = { ...(rule.props || {}) };
+      const merged = { ...classProps, ...authored };
       const budgeted = propsWithFitBudget(merged, fit);
-      // Only emit fields the variant actually owns, plus derived height/top.
-      const props = {
-        ...(rule.props || {}),
-        height: budgeted.height,
-        ...(rule.props?.top !== undefined || budgeted.top !== classProps.top
-          ? { top: budgeted.top }
-          : {}),
-      };
+      // Only emit fields the variant actually owns. Never leak class height/top
+      // into colour-only ink scopes (that overrode offers-0 geometry to 31px).
+      const props: Record<string, unknown> = { ...authored };
+      if (variantOwnsBoxLayout(authored)) {
+        if (hasAuthoredLength(authored.height)) {
+          props.height = budgeted.height;
+        } else if (budgeted.height !== classProps.height) {
+          props.height = budgeted.height;
+        }
+        if (hasAuthoredLength(authored.top)) {
+          props.top = budgeted.top !== undefined ? budgeted.top : authored.top;
+        } else if (
+          props.height !== undefined
+          && budgeted.top !== classProps.top
+          && budgeted.top !== undefined
+        ) {
+          props.top = budgeted.top;
+        }
+      }
       return renderCssRule(selectorForVariantRule(rule), props);
     })
     .filter(Boolean);

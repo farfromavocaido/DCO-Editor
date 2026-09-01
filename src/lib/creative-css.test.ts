@@ -48,3 +48,42 @@ test('renders compound offers-0 CTA scopes as chained classes', () => {
   assert.match(css, /\.offers-0\.cta-rect \.cta/);
   assert.match(css, /left: 18px;/);
 });
+
+test('colour-only ink scopes do not leak class height over offers-0 geometry', () => {
+  const css = structuredRuleCss({
+    classRules: [
+      {
+        cssClass: 'sse-headline',
+        properties: { left: 17, top: 25, width: 255, fontSize: 18, height: 31 },
+      },
+    ],
+    variantRules: [
+      {
+        id: 'offers-0|sse-headline',
+        scope: 'offers-0',
+        cssClass: 'sse-headline',
+        props: {
+          top: 13, left: 15, width: 267, height: 77, fontSize: 24,
+        },
+      },
+      {
+        id: 'white-headlines|sse-headline',
+        scope: 'white-headlines',
+        cssClass: 'sse-headline',
+        props: { color: 'rgb(255, 255, 255)' },
+      },
+      {
+        id: 'navy-headlines|sse-headline',
+        scope: 'navy-headlines',
+        cssClass: 'sse-headline',
+        props: { color: 'rgb(0, 41, 117)' },
+      },
+    ],
+  });
+
+  assert.match(css, /\.offers-0 \.sse-headline(?::not\(#headline-act4\))? \{\n(?:.*\n)*?      height: 77px;/);
+  assert.match(css, /\.white-headlines \.sse-headline(?::not\(#headline-act4\))? \{\n      color: rgb\(255, 255, 255\);\n    \}/);
+  assert.match(css, /\.navy-headlines \.sse-headline(?::not\(#headline-act4\))? \{\n      color: rgb\(0, 41, 117\);\n    \}/);
+  assert.doesNotMatch(css, /\.white-headlines[\s\S]*height: 31px/);
+  assert.doesNotMatch(css, /\.navy-headlines[\s\S]*height: 31px/);
+});

@@ -29,6 +29,7 @@
 
 ### Fixed
 
+- **Offers-0 ink height leak** — colour-only white/navy headline rules no longer emit class `height`/`top` from fit-budget. That override was clipping Act 2 (and other photo headlines) to the 31px multi-offer box after geometry moved onto `offers-0|sse-headline`.
 - **Offers-0 banner frames-4 T&Cs** — on **320×50** / **728×90**, offers-0 terms fade out at `roundel_in` (gone as the roundel starts) instead of holding until `green_in`.
 - **Offers-0 320×50 no-roundel H4 gap** — Act 4 now enters on `act4_in` (after the green fade) instead of the banner `bn_cta_in` alias, so photo headlines hand off without a dead beat.
 - **Offers-0 roundel colours** — green fill + navy text to match the brand CTA treatment.

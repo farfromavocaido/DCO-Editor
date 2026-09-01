@@ -3273,6 +3273,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
               return Math.min(3, Math.max(0, parsed));
             })(field('offer_count_num')),
             navy_headlines_bool: field('navy_headlines_bool') === 'true',
+            include_heading4_enum: true,
             offer1_value_text: field('offer1_value_text'),
             offer1_sub_text: field('offer1_sub_text'),
             offer2_value_text: field('offer2_value_text'),

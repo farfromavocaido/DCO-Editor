@@ -113,12 +113,14 @@ export const equalHeadlineWindowsForZeroOffers = (
   return { activeActs, windows, windowStart, windowEnd };
 };
 
-/** Studio include_heading4_enum: missing/undefined → true (show when copy present). */
+/** Studio include_heading4_enum: missing/undefined/blank → true (show when copy present). */
 export const isHeading4Enabled = (row: Record<string, unknown> = {}) => {
   if (row.include_heading4_enum === undefined || row.include_heading4_enum === null) return true;
   if (typeof row.include_heading4_enum === 'boolean') return row.include_heading4_enum;
   const normalized = String(row.include_heading4_enum).trim().toLowerCase();
-  if (['false', '0', 'no', 'off', ''].includes(normalized)) return false;
+  // Empty string is the exporter's fieldValue(undefined) — treat as missing, not off.
+  if (!normalized) return true;
+  if (['false', '0', 'no', 'off'].includes(normalized)) return false;
   if (['true', '1', 'yes', 'on'].includes(normalized)) return true;
   return true;
 };
@@ -626,7 +628,9 @@ export const headlineTransitionRuntimeBlock = (
           if (!data || data.include_heading4_enum === undefined || data.include_heading4_enum === null) return true;
           if (typeof data.include_heading4_enum === 'boolean') return data.include_heading4_enum;
           var normalized = String(data.include_heading4_enum).trim().toLowerCase();
-          if (normalized === 'false' || normalized === '0' || normalized === 'no' || normalized === 'off' || normalized === '') return false;
+          // Empty string is normalizeProfileRow/fieldValue(undefined) — treat as missing.
+          if (!normalized) return true;
+          if (normalized === 'false' || normalized === '0' || normalized === 'no' || normalized === 'off') return false;
           return true;
         }
 
@@ -680,6 +684,23 @@ export const headlineTransitionRuntimeBlock = (
                 if (!(heading4Enabled && headings[3])) {
                   window.hidden = true;
                   window.keyframes = [{ at: 0, translate: [0, 0], opacity: 0 }, { at: 100, translate: [0, 0], opacity: 0 }];
+                } else {
+                  // Match buildHeadlineMotionPlan: pin Act 4 to act4_in (not banner bn_cta_in).
+                  var act4Start = Number(
+                    beats.act4_in != null ? beats.act4_in
+                      : (beats.bn_cta_in != null ? beats.bn_cta_in
+                        : (beats.cta_in != null ? beats.cta_in : window.start))
+                  );
+                  var source = (window.clips && window.clips[0]) || {};
+                  var rebuilt = [{
+                    preset: source.preset || 'slideInRight',
+                    start: act4Start,
+                    end: window.end,
+                    params: source.params || {}
+                  }];
+                  window.start = act4Start;
+                  window.hidden = false;
+                  window.keyframes = __compileHeadlineClips(rebuilt, beats);
                 }
                 return;
               }

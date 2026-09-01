@@ -474,6 +474,47 @@ test('offers-0 include_heading4_enum false hides Act 4 even with copy', () => {
   assert.equal(plan.find((item) => item.layerId === 'headline-act4')?.hidden, true);
 });
 
+test('offers-0 blank include_heading4_enum (exporter fieldValue) still shows Act 4', () => {
+  const layers = [
+    {
+      id: 'headline-act1',
+      clips: [{ id: 'h1', preset: 'slideInRight', start: 'act1_in', end: 'act1_out', params: { enter_duration_pct: 4 } }],
+    },
+    {
+      id: 'headline-act2',
+      clips: [{ id: 'h2', preset: 'slideInRight', start: 'act2_in', end: 'offers_exit', profiles: ['frames-3'], params: { enter_duration_pct: 4 } }],
+    },
+    { id: 'headline-act3', clips: [] },
+    {
+      id: 'headline-act4',
+      clips: [{ id: 'h4', preset: 'slideInRight', start: 'act4_in', end: 'act3_exit-1', profiles: ['frames-3'], params: { enter_duration_pct: 4 } }],
+    },
+  ];
+  const beats = {
+    act1_in: 7,
+    act1_out: 32.5,
+    act2_in: 32.5,
+    offers_exit: 66,
+    act4_in: 65.1,
+    cta_in: 69,
+    act3_exit: 96,
+  };
+  for (const include of [undefined, null, ''] as const) {
+    const row: Record<string, unknown> = {
+      offer_count_num: 0,
+      heading1_text: 'One',
+      heading4_text: 'Tagline',
+    };
+    if (include !== undefined) row.include_heading4_enum = include;
+    const plan = buildHeadlineMotionPlan(layers, row, 'frames-3', beats);
+    assert.equal(
+      plan.find((item) => item.layerId === 'headline-act4')?.hidden,
+      false,
+      `include_heading4_enum=${JSON.stringify(include)} should show Act 4`,
+    );
+  }
+});
+
 test('offers-0 Act 4 uses act4_in even when authored clip starts at bn_cta_in', () => {
   const layers = [
     {

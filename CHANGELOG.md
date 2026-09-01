@@ -17,6 +17,7 @@
 
 ### Changed
 
+- **Offers-0 Act 4 hidden on preview** — exporter `normalizeProfileRow` turns missing `include_heading4_enum` into `''`, which the offers-0 motion path treated as off and force-hid `#headline-act4`. Blank/missing now defaults to show (explicit `false` still hides). Runtime Act 4 also rebuilds onto `act4_in` like the editor plan.
 - **Offers-0 banner Act 3 sizing** — on **320×50** / **728×90** only, offers-0 H3 uses its own layer rules (`offers-0|headline-act3` + ink siblings); shared H1/H2 `sse-headline` rules exclude `#headline-act3`. Other sizes unchanged. Timing/transitions untouched.
 - **CI test realign** — offers-0 / canvas / text-fit expectations updated for Act 3 split, Act 4 geometry, 300×600 bluewave stage1 left `77`, and empty `maxLines` hardening.
 - **Offers-0 preview defaults** — zero-offer sample / preview Offers=0 copy is H1 `SEAI Grant Applications?`, H2 `Sorted. With Ireland's leading one  stop shop.`, H3 `Switch and save today`, H4 `Book your free consultation today`, SEAI T&Cs, empty unit prices, roundel `Book your consultation today` (no value).

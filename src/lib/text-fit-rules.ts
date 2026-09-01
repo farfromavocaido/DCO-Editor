@@ -58,7 +58,10 @@ const minFromBase = (baseFontSize, ratio, fallback) => (
 export const normalizeFitConfig = (fit = {}) => {
   const normalized = {};
   const mode = String(fit.mode || '');
-  const maxLines = fit.maxLines !== undefined ? Number(fit.maxLines) : undefined;
+  const rawMaxLines = fit.maxLines;
+  const maxLines = rawMaxLines === undefined || rawMaxLines === null || rawMaxLines === ''
+    ? undefined
+    : Number(rawMaxLines);
   if (Number.isFinite(maxLines)) normalized.maxLines = maxLines;
 
   if (mode === 'wrap') {

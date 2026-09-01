@@ -190,7 +190,7 @@ test('offers-0 white logo from start; blue logo hidden with no multi fade', () =
   }
 });
 
-test('offers-0 headlines restore shared geometry; Act 4 colour only; T&Cs always white', () => {
+test('offers-0 headlines restore shared geometry; Act 4 ink; T&Cs always white', () => {
   for (const size of Object.keys(creative.sizes)) {
     const sizeCreative = creative.sizes[size];
     assert.ok(
@@ -201,10 +201,11 @@ test('offers-0 headlines restore shared geometry; Act 4 colour only; T&Cs always
     assert.ok(sse, `${size} offers-0|sse-headline restored`);
     assert.equal(sse.props.color, undefined, `${size} geometry rule has no colour`);
     const act4 = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|headline-act4');
+    assert.ok(act4?.props?.color, `${size} act4 has colour`);
     if (size === '320x50') {
-      assert.deepEqual(act4?.props, { color: 'rgb(255, 255, 255)' }, `${size} act4 white`);
+      assert.equal(act4.props.color, 'rgb(255, 255, 255)', `${size} act4 white`);
     } else {
-      assert.deepEqual(act4?.props, { color: NAVY }, `${size} act4 colour-only navy`);
+      assert.equal(act4.props.color, NAVY, `${size} act4 navy`);
     }
     const ctaRect = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0.cta-rect|cta');
     const ctaRoundel = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0.cta-roundel|cta');

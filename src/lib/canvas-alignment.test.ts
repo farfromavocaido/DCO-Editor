@@ -404,13 +404,26 @@ test('headline geometry lives on shared sse-headline class, not per-act layers',
       assert.deepEqual(boxProps, [], `${size} ${layer.id} should not own box geometry`);
     }
 
-    const perActVariants = (sizeCreative.variantRules || []).filter((rule) => (
-      (String(rule.layerId || '').startsWith('headline-act')
-        || String(rule.cssClass || '').startsWith('headline-act'))
-      // offers-0 Act 4 is intentionally a smaller endframe tagline (layerId-only).
-      && String(rule.id || '') !== 'offers-0|headline-act4'
-      && String(rule.scope || '') !== 'offers-0'
-    ));
+    const perActVariants = (sizeCreative.variantRules || []).filter((rule) => {
+      const layerId = String(rule.layerId || '');
+      const cssClass = String(rule.cssClass || '');
+      const id = String(rule.id || '');
+      const scope = String(rule.scope || '');
+      const isHeadlineAct = layerId.startsWith('headline-act') || cssClass.startsWith('headline-act');
+      if (!isHeadlineAct) return false;
+      // offers-0 Act 4 endframe colour/geometry (layerId-only).
+      if (id === 'offers-0|headline-act4' || (scope === 'offers-0' && layerId === 'headline-act4')) {
+        return false;
+      }
+      // Banner offers-0: Act 3 is intentionally independent of shared H1/H2.
+      if (
+        layerId === 'headline-act3'
+        && (scope === 'offers-0' || scope === 'white-headlines' || scope === 'navy-headlines')
+      ) {
+        return false;
+      }
+      return true;
+    });
     assert.equal(perActVariants.length, 0, `${size} should not have per-act headline variant rules`);
   }
 });

@@ -17,6 +17,7 @@
 
 ### Changed
 
+- **Offers-0 ink is colour-only** — white/navy headline scopes keep only `color`; shared box geometry lives on `offers-0|sse-headline` (and banner `offers-0|headline-act3`), seeded from the former white-ink props. Editor geometry writes skip ink scopes so navy/white stay in sync.
 - **Offers-0 Act 4 hidden on preview** — exporter `normalizeProfileRow` turns missing `include_heading4_enum` into `''`, which the offers-0 motion path treated as off and force-hid `#headline-act4`. Blank/missing now defaults to show (explicit `false` still hides). Runtime Act 4 also rebuilds onto `act4_in` like the editor plan.
 - **Offers-0 banner Act 3 sizing** — on **320×50** / **728×90** only, offers-0 H3 uses its own layer rules (`offers-0|headline-act3` + ink siblings); shared H1/H2 `sse-headline` rules exclude `#headline-act3`. Other sizes unchanged. Timing/transitions untouched.
 - **CI test realign** — offers-0 / canvas / text-fit expectations updated for Act 3 split, Act 4 geometry, 300×600 bluewave stage1 left `77`, and empty `maxLines` hardening.

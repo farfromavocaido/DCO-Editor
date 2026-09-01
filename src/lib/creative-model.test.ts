@@ -556,28 +556,62 @@ test('banner offers-0 Act 3 geometry writes separately from shared H1/H2', () =>
 
   const act1 = findCreativeTarget(doc, '320x50', 'headline-act1', scopes);
   const act3 = findCreativeTarget(doc, '320x50', 'headline-act3', scopes);
-  assert.equal(act1.writeSource.ruleId, 'white-headlines|sse-headline');
-  assert.equal(act3.writeSource.ruleId, 'white-headlines|headline-act3');
+  // Ink scopes are colour-only — geometry writes go to offers-0 hosts.
+  assert.equal(act1.writeSource.ruleId, 'offers-0|sse-headline');
+  assert.equal(act3.writeSource.ruleId, 'offers-0|headline-act3');
 
   const afterH1 = updateCreativeTargetValue(doc, '320x50', 'headline-act1', scopes, 'width', 111);
   assert.equal(
-    afterH1.sizes['320x50'].variantRules.find((rule) => rule.id === 'white-headlines|sse-headline').props.width,
+    afterH1.sizes['320x50'].variantRules.find((rule) => rule.id === 'offers-0|sse-headline').props.width,
     111,
   );
   assert.notEqual(
-    afterH1.sizes['320x50'].variantRules.find((rule) => rule.id === 'white-headlines|headline-act3').props.width,
+    afterH1.sizes['320x50'].variantRules.find((rule) => rule.id === 'offers-0|headline-act3').props.width,
     111,
+  );
+  assert.deepEqual(
+    afterH1.sizes['320x50'].variantRules.find((rule) => rule.id === 'white-headlines|sse-headline').props,
+    { color: 'rgb(255, 255, 255)' },
   );
 
   const afterH3 = updateCreativeTargetValue(doc, '320x50', 'headline-act3', scopes, 'width', 77);
   assert.equal(
-    afterH3.sizes['320x50'].variantRules.find((rule) => rule.id === 'white-headlines|headline-act3').props.width,
+    afterH3.sizes['320x50'].variantRules.find((rule) => rule.id === 'offers-0|headline-act3').props.width,
     77,
   );
   assert.notEqual(
-    afterH3.sizes['320x50'].variantRules.find((rule) => rule.id === 'white-headlines|sse-headline').props.width,
+    afterH3.sizes['320x50'].variantRules.find((rule) => rule.id === 'offers-0|sse-headline').props.width,
     77,
   );
+});
+
+test('offers-0 ink scopes are colour-only; white/navy share offers-0 geometry', () => {
+  const doc = loadPersistedCreative();
+  for (const [size, sizeCreative] of Object.entries(doc.sizes)) {
+    for (const id of [
+      'white-headlines|sse-headline',
+      'navy-headlines|sse-headline',
+      'white-headlines|headline-act3',
+      'navy-headlines|headline-act3',
+    ]) {
+      const rule = sizeCreative.variantRules?.find((item) => item.id === id);
+      if (!rule) continue;
+      assert.deepEqual(
+        Object.keys(rule.props || {}).sort(),
+        ['color'],
+        `${size} ${id} must be colour-only`,
+      );
+    }
+    const white = findCreativeTarget(doc, size, 'headline-act1', ['offers-0', 'white-headlines']);
+    const navy = findCreativeTarget(doc, size, 'headline-act1', ['offers-0', 'navy-headlines']);
+    assert.ok(white && navy, size);
+    for (const key of ['left', 'top', 'width', 'height', 'fontSize']) {
+      if (white.values[key] === undefined && navy.values[key] === undefined) continue;
+      assert.equal(white.values[key], navy.values[key], `${size} ${key} must match across ink`);
+    }
+    assert.equal(white.values.color, 'rgb(255, 255, 255)', `${size} white ink`);
+    assert.equal(navy.values.color, 'rgb(0, 41, 117)', `${size} navy ink`);
+  }
 });
 
 test('every size exposes offers-2 and offers-3 headline variant rules', () => {

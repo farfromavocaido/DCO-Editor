@@ -249,6 +249,24 @@ const findActiveVariantRule = (
   activeVariantRulesForIdentity(sizeCreative, identity, activeScopes).at(-1) || null
 );
 
+/** Ink scopes must stay colour-only — never the write target for geometry. */
+const INK_COLOR_SCOPES = new Set(['white-headlines', 'navy-headlines']);
+
+const isInkColorScopeRule = (rule: Record<string, unknown>) => (
+  INK_COLOR_SCOPES.has(String(rule.scope || ''))
+);
+
+/** Last active variant rule that may own layout (skips white/navy ink colour rules). */
+const findActiveVariantWriteRule = (
+  sizeCreative: Record<string, unknown>,
+  identity: { layerId?: string; cssClass?: string },
+  activeScopes: string[] = [],
+) => {
+  const matched = activeVariantRulesForIdentity(sizeCreative, identity, activeScopes);
+  const writable = matched.filter((rule) => !isInkColorScopeRule(rule));
+  return writable.at(-1) || matched.at(-1) || null;
+};
+
 const mergedActiveVariantProps = (
   sizeCreative: Record<string, unknown>,
   identity: { layerId?: string; cssClass?: string },
@@ -314,7 +332,7 @@ export const findCreativeTarget = (
   if (isHeadlineLayer(layer)) {
     const classRule = findClassRule(sizeCreative, HEADLINE_CSS_CLASS);
     const identity = { cssClass: HEADLINE_CSS_CLASS, layerId: layer.id };
-    const variantRule = findActiveVariantRule(sizeCreative, identity, activeScopes);
+    const writeRule = findActiveVariantWriteRule(sizeCreative, identity, activeScopes);
     const variantProps = mergedActiveVariantProps(sizeCreative, identity, activeScopes);
     const values = {
       ...(classRule?.properties || {}),
@@ -328,20 +346,20 @@ export const findCreativeTarget = (
       parentLayerId: '',
       cssClass: HEADLINE_CSS_CLASS,
       coordinateScope: 'canvas',
-      description: variantRule?.layerId === layer.id
-        ? `Editing ${variantRule.scope} ${layer.id} overrides.`
-        : variantRule
-          ? `Editing ${variantRule.scope} headline overrides (shared by acts).`
+      description: writeRule?.layerId === layer.id
+        ? `Editing ${writeRule.scope} ${layer.id} overrides.`
+        : writeRule
+          ? `Editing ${writeRule.scope} headline overrides (shared by acts).`
           : 'Shared headline placement for acts 1–3.',
       values,
       base: values,
       fit: {
         ...(layer.fit || {}),
-        ...(variantRule?.fit || {}),
+        ...(writeRule?.fit || {}),
       },
       clips: layer.clips || [],
-      writeSource: variantRule
-        ? { kind: 'variantRule', ruleId: variantRule.id, scope: variantRule.scope }
+      writeSource: writeRule
+        ? { kind: 'variantRule', ruleId: writeRule.id, scope: writeRule.scope }
         : { kind: 'classRule', cssClass: HEADLINE_CSS_CLASS },
     };
   }
@@ -1148,11 +1166,13 @@ export const updateCreativeTargetValue = (
     return next;
   }
 
-  const variantRule = findActiveVariantRule(
-    sizeCreative,
-    headlineIdentity || backgroundIdentity || { layerId: layer.id, cssClass },
-    activeScopes,
-  );
+  const variantRule = headlineIdentity
+    ? findActiveVariantWriteRule(sizeCreative, headlineIdentity, activeScopes)
+    : findActiveVariantRule(
+      sizeCreative,
+      backgroundIdentity || { layerId: layer.id, cssClass },
+      activeScopes,
+    );
   if (variantRule) {
     variantRule.props = { ...(variantRule.props || {}), [field]: value };
     return next;

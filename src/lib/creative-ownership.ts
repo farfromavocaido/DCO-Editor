@@ -2,7 +2,7 @@
 import { excludedHeadlineLayerIdsForVariantRule, selectorForVariantRule } from './creative-css';
 
 /** Empty scopes apply globally; compound scopes require every token. */
-export const ownershipScopeIsActive = (scope, scopes = []) => String(scope || '').split('.').filter(Boolean).every((part) => scopes.includes(part));
+export const ownershipScopeIsActive = (scope: unknown, scopes: string[] = []) => String(scope || '').split('.').filter(Boolean).every((part) => scopes.includes(part));
 
 /** Mirror the selectors emitted for legacy documents until migration is explicit. */
 export const ownershipRuleSpecificity = (rule) => {
@@ -10,7 +10,7 @@ export const ownershipRuleSpecificity = (rule) => {
   return (selector.match(/#[\w-]+/g) || []).length * 1000
     + (selector.match(/\.[\w-]+|\[[^\]]+\]/g) || []).length;
 };
-export const activeOwnershipRules = (rules = [], identity, scopes = []) => rules.filter((rule) => {
+export const activeOwnershipRules = (rules: any[] = [], identity: any, scopes: string[] = []) => rules.filter((rule) => {
   if (!ownershipScopeIsActive(rule.scope, scopes)) return false;
   if (rule.targetId) return rule.targetId === identity.targetId;
   if (identity.layerId && excludedHeadlineLayerIdsForVariantRule(rule).includes(identity.layerId)) return false;
@@ -44,6 +44,8 @@ const targetIdentity = (document, size, targetId) => {
 const scopeParts = (scope) => String(scope || '').split('.').filter(Boolean);
 const scopeFamily = (token) => {
   if (/^(white|navy)-headlines$/.test(token)) return 'headline-ink';
+  if (/^roundel-frame-/.test(token)) return 'roundel-frame';
+  if (/^roundel-(split|copy-only)$/.test(token)) return 'roundel-copy';
   return /^(offers|frames|tc|cta|roundel)-/.exec(token)?.[1];
 };
 const scopesOverlap = (a, b) => !scopeParts(a).some((x) => scopeParts(b).some((y) => x !== y && scopeFamily(x) && scopeFamily(x) === scopeFamily(y)));
@@ -51,7 +53,7 @@ const memberKey = (member) => `${member.size}/${member.targetId}/${member.scope 
 const definitionFields = (definition, size, domain, member) => Object.fromEntries(Object.entries({ ...(definition[domain] || {}), ...(definition.perSize?.[size]?.[domain] || {}) }).filter(([field]) => !(member?.exclude?.[domain] || []).includes(field)));
 
 /** Pure, idempotent compatibility compiler. Authored definitions are never rewritten. */
-export const materializeCreativeOwnership = (document) => {
+export const materializeCreativeOwnership = (document: any): any => {
   if (!document?.sharedDefinitions?.length && !Object.values(document?.sizes || {}).some((size) => size.localOverrides?.length || size.variantRules?.some((rule) => rule.ownershipGenerated))) return document;
   const next = clone(document);
   const ids = new Set();
@@ -66,10 +68,10 @@ export const materializeCreativeOwnership = (document) => {
         for (const previous of assignments) {
           if (previous.member.size === member.size && previous.member.targetId === member.targetId && previous.domain === domain && scopesOverlap(previous.member.scope, member.scope)) {
             const duplicate = Object.keys(fields).find((field) => Object.hasOwn(previous.fields, field));
-            if (duplicate) throw new Error(`Shared ownership conflict for ${member.size}/${member.targetId} ${domain}.${duplicate}: ${previous.definitionId} and ${definition.id}`);
+            if (duplicate) throw new Error(`Shared ownership conflict for ${member.size}/${member.targetId} ${domain}.${duplicate}: ${previous.definitionName} and ${definition.name}`);
           }
         }
-        assignments.push({ definitionId: definition.id, member, domain, fields });
+        assignments.push({ definitionId: definition.id, definitionName: definition.name, member, domain, fields });
       }
     }
   }
@@ -97,7 +99,7 @@ export const materializeCreativeOwnership = (document) => {
   return next;
 };
 
-export const activeNamedOwnership = (document, size, targetId, scopes = []) => {
+export const activeNamedOwnership = (document: any, size: string, targetId: string, scopes: string[] = []) => {
   const compiled = materializeCreativeOwnership(document);
   return activeOwnershipRules(compiled.sizes?.[size]?.variantRules || [], targetIdentity(compiled, size, targetId), scopes).filter((rule) => rule.ownershipGenerated);
 };
@@ -110,7 +112,7 @@ const localFor = (next, size, targetId, scopes) => {
   return local;
 };
 /** Explicit intent: local exceptions never mutate named members; shared edits name their source. */
-export const setCreativeOwnershipField = (document, size, targetId, scopes, domain, field, value, intent = 'local', definitionId) => {
+export const setCreativeOwnershipField = (document: any, size: string, targetId: string, scopes: string[], domain: 'values' | 'fit', field: string, value: any, intent: 'local' | 'shared' = 'local', definitionId?: string) => {
   const next = clone(document);
   targetIdentity(next, size, targetId);
   let destination;
@@ -133,7 +135,7 @@ export const resetCreativeOwnershipField = (document, size, targetId, scopes, do
   return next;
 };
 /** Detach one explicit membership, copying its authored bundle into a local exception. */
-export const detachCreativeOwnership = (document, definitionId, member, fields) => {
+export const detachCreativeOwnership = (document: any, definitionId: string, member: any, fields?: {values?: string[];fit?: string[]}) => {
   const next = clone(document);
   const definition = next.sharedDefinitions?.find((item) => item.id === definitionId);
   if (!definition || !definition.members.some((item) => memberKey(item) === memberKey(member))) throw new Error('Unknown shared membership');

@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { findCanvasGroup, canvasGroupForMember } from "./canvas-groups";
 
 import {
   findCreativeTarget,
@@ -103,7 +104,12 @@ export const selectionHierarchy = (
   activeScopes: string[] = [],
 ) => {
   if (document && size) {
-    return selectionPathForTarget(document, size, deepestTargetId, activeScopes, offerCount);
+    const selectedGroup = findCanvasGroup(document, size, deepestTargetId);
+    if (selectedGroup) return [selectedGroup.id];
+    const group = canvasGroupForMember(document, size, deepestTargetId);
+    const path = selectionPathForTarget(document, size, deepestTargetId, activeScopes, offerCount);
+    if (group) return [group.id, ...path.filter((id) => id !== OFFERS_BLOCK_ID)];
+    return path;
   }
 
   const parsedCount = Number(offerCount);
@@ -127,7 +133,9 @@ export const selectionHierarchy = (
   return [deepestTargetId];
 };
 
-export const resolveLayerIdForSelection = (targetId: string) => {
+export const resolveLayerIdForSelection = (targetId: string, document: any = null, size = '') => {
+  const group = findCanvasGroup(document, size, targetId);
+  if (group) return parseCreativeTargetId(group.members[0]).layerId;
   if (targetId === OFFERS_BLOCK_ID) return offerBlockLayerIds(2)[0] || 'offer-slot-1';
   return parseCreativeTargetId(targetId).layerId || targetId;
 };
@@ -144,6 +152,12 @@ export const dragTargetIdsForSelection = (
   size = '',
   activeScopes: string[] = [],
 ) => {
+  const groupMembers = (id) => findCanvasGroup(document, size, id)?.members || [id];
+  if (selectedTargetIds.some((id) => findCanvasGroup(document, size, id))) {
+    return [...new Set(selectedTargetIds.flatMap(groupMembers))];
+  }
+  const group = findCanvasGroup(document, size, selectedTargetId);
+  if (group) return group.members;
   if (selectedTargetIds.length > 1) {
     return [...new Set(selectedTargetIds)];
   }
@@ -174,6 +188,12 @@ export const resolveSelectionMeta = (
   offerCount: number,
   activeScopes: string[] = [],
 ) => {
+  const canvasGroup = findCanvasGroup(document, size, selectedTargetId);
+  if (canvasGroup && selectedTargetIds.length <= 1) return {
+    id: canvasGroup.id, label: canvasGroup.name, kind: 'group', coordinateScope: 'canvas',
+    description: 'Canvas group. Move the members together; double-click to edit a child. Each child keeps its own motion and shared style.',
+    bounds: getGroupCanvasBounds(document, size, canvasGroup.members, activeScopes), members: canvasGroup.members,
+  };
   if (selectedTargetIds.length > 1) {
     const bounds = getGroupCanvasBounds(document, size, selectedTargetIds, activeScopes);
     return {

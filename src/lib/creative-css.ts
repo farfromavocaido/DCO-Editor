@@ -144,15 +144,9 @@ const hasAuthoredLength = (value: unknown) => (
   value !== undefined && value !== null && value !== ''
 );
 
-export const structuredRuleCss = (sizeCreative: Record<string, unknown>) => {
-  const classRules = (sizeCreative.classRules || [])
-    .map((rule: Record<string, unknown>) => renderCssRule(
-      selectorForClassRule(rule.cssClass),
-      propsWithFitBudget(rule.properties || {}, rule.fit || {}),
-    ))
-    .filter(Boolean);
-  const variantRules = (sizeCreative.variantRules || [])
-    .map((rule: Record<string, unknown>) => {
+/** Effective declarations, shared with inspector ownership resolution. */
+export const variantRuleProps = (sizeCreative, rule) => {
+  if (rule.ownershipGenerated) return { ...(rule.props || {}) };
       const cssClass = String(rule.cssClass || rule.layerId || '');
       const fit = fitForClass(sizeCreative, cssClass, rule.fit);
       // Variant props overlay class properties so fontSize/lineHeight/align
@@ -182,6 +176,19 @@ export const structuredRuleCss = (sizeCreative: Record<string, unknown>) => {
           props.top = budgeted.top;
         }
       }
+  return props;
+};
+
+export const structuredRuleCss = (sizeCreative: Record<string, unknown>) => {
+  const classRules = (sizeCreative.classRules || [])
+    .map((rule: Record<string, unknown>) => renderCssRule(
+      selectorForClassRule(rule.cssClass),
+      propsWithFitBudget(rule.properties || {}, rule.fit || {}),
+    ))
+    .filter(Boolean);
+  const variantRules = (sizeCreative.variantRules || [])
+    .map((rule: Record<string, unknown>) => {
+      const props = variantRuleProps(sizeCreative, rule);
       return renderCssRule(selectorForVariantRule(rule), props);
     })
     .filter(Boolean);

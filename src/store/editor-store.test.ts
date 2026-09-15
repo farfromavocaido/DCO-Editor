@@ -209,3 +209,21 @@ test('named ownership membership edits undo and redo atomically', () => {
  useEditorStore.getState().redo();
  assert.deepEqual(useEditorStore.getState().creativeDocument,next);
 });
+
+test('virtual group move edits local geometry, keeps clips, and undoes atomically', () => {
+ const doc = {version:1,sizes:{'300x250':{canvas:{width:300,height:250},layers:[{id:'a',kind:'text',base:{left:5,top:10,width:20,height:20},clips:[{id:'a-in',preset:'fade'}]},{id:'b',kind:'text',base:{left:35,top:10,width:20,height:20},clips:[{id:'b-in',preset:'fadeUp',params:{enter_dy:20}}]}]}}};
+ useEditorStore.setState({creativeDocument:doc,size:'300x250',offerCount:0,selectedTargetId:'a',selectedLayerId:'a',selectedTargetIds:['a','b'],history:[],historyIndex:-1});
+ useEditorStore.getState().groupSelectedCanvasTargets('Copy group');
+ const grouped = useEditorStore.getState().creativeDocument;
+ const groupId = useEditorStore.getState().selectedTargetId;
+ assert.ok(groupId.startsWith('canvas-group:'));
+ assert.equal(useEditorStore.getState().selectedLayerId,'a');
+ useEditorStore.getState().nudgeSelectedTarget(3,4);
+ assert.deepEqual(useEditorStore.getState().creativeDocument.sizes['300x250'].layers,doc.sizes['300x250'].layers);
+ useEditorStore.getState().undo();
+ assert.deepEqual(useEditorStore.getState().creativeDocument,grouped);
+ useEditorStore.getState().ungroupSelectedCanvasTargets();
+ assert.deepEqual(useEditorStore.getState().creativeDocument.sizes['300x250'].canvasGroups,[]);
+ useEditorStore.getState().undo();
+ assert.deepEqual(useEditorStore.getState().creativeDocument,grouped);
+});

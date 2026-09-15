@@ -31,6 +31,12 @@ function LayerBadge({ icon, label, tone = '' }) {
 
 export function LayerTree() {
   const [menu, setMenu] = useState(null);
+  const [canvasGroupName, setCanvasGroupName] = useState('Canvas group');
+  const [groupError, setGroupError] = useState('');
+  const groupTargets = useEditorStore((s) => s.groupSelectedCanvasTargets);
+  const ungroupTargets = useEditorStore((s) => s.ungroupSelectedCanvasTargets);
+  const setCanvasSelection = useEditorStore((s) => s.setCanvasSelection);
+  const selectedTargetIds = useEditorStore((s) => s.selectedTargetIds);
   const [draggingLayerId, setDraggingLayerId] = useState('');
   const [dropTargetLayerId, setDropTargetLayerId] = useState('');
   const [openSections, setOpenSections] = useState(() => new Set(['sample']));
@@ -572,6 +578,17 @@ export function LayerTree() {
         {layersOpen ? (
           <div className="sidebar-section-body layer-section-body">
             <div className="layer-group-list">
+              <section className="layer-group">
+                <h3>Canvas groups</h3>
+                <label>Group name<input value={canvasGroupName} onChange={(event) => setCanvasGroupName(event.target.value)} /></label>
+                <button type="button" disabled={selectedTargetIds.length < 2} onClick={() => { try { groupTargets(canvasGroupName); setGroupError(''); } catch (error) { setGroupError(error.message); } }}>Group selected items</button>
+                <button type="button" disabled={!String(selectedTargetId).startsWith('canvas-group:')} onClick={ungroupTargets}>Ungroup selected group</button>
+                {groupError ? <p role="alert">{groupError}</p> : null}
+                {(sizeCreative?.canvasGroups || []).map((group) => <div key={group.id}>
+                  <button type="button" className={`layer-row-main ${selectedTargetId === group.id ? 'is-selected' : ''}`} onClick={() => setCanvasSelection(group.id,[group.id])}><EditorIcon name="group" /> {group.name} · {group.members.length} items</button>
+                  <div className="layer-child-list">{group.members.map((member) => <button key={member} type="button" className="layer-row-main" onClick={() => setCanvasSelection(member,[member],[group.id])}>{findCreativeTarget(document,size,member,activeScopes)?.label || member}</button>)}</div>
+                </div>)}
+              </section>
               {groups.map((group) => (
                 <section className="layer-group" key={group.label}>
                   <h3>{group.label}</h3>

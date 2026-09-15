@@ -134,3 +134,17 @@ it('save and reload preserve named members, overrides, and their effective field
   expect(findCreativeTarget(loaded,'300x250','terms',['offers-1']).fit.maxLines).toBe(4);
  } finally { fs.rmSync(directory,{recursive:true,force:true}); }
 });
+
+import { variantRuleProps } from './creative-css';
+it('named rules emit only their owned properties without deriving unrelated frame dimensions', () => {
+ const doc = fixture();
+ doc.sharedDefinitions = [{id:'type',name:'Type',values:{fontSize:10},fit:{maxLines:2},members:[{size:'300x250',targetId:'terms'}]}];
+ const compiled = materializeCreativeOwnership(doc);
+ const rule = compiled.sizes['300x250'].variantRules.at(-1);
+ expect(variantRuleProps(compiled.sizes['300x250'],rule)).toEqual({fontSize:10});
+});
+it('roundel visibility and roundel copy mode are independent scope dimensions', () => {
+ const doc = fixture();
+ doc.sharedDefinitions = [{id:'a',name:'Visible',fit:{maxLines:2},members:[{size:'300x250',targetId:'terms',scope:'roundel-frame-on'}]},{id:'b',name:'Split',fit:{maxLines:3},members:[{size:'300x250',targetId:'terms',scope:'roundel-split'}]}];
+ expect(()=>materializeCreativeOwnership(doc)).toThrow(/Visible and Split/);
+});

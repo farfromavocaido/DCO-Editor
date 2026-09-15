@@ -2,6 +2,8 @@
 'use client';
 
 import { create } from 'zustand';
+import { setCreativeOwnershipField } from '@/lib/creative-ownership';
+import { createCanvasGroup, removeCanvasGroup, findCanvasGroup } from '@/lib/canvas-groups';
 import { waitForProductionStage, withProductionRestPose } from '@/lib/production-stage';
 
 import {
@@ -325,7 +327,7 @@ export const useEditorStore = create<any>((set, get) => ({
 
   setCanvasSelection: (targetId, targetIds = [targetId], isolationPath = []) => {
     const state = get();
-    const layerId = targetId ? resolveLayerIdForSelection(targetId) : '';
+    const layerId = targetId ? resolveLayerIdForSelection(targetId, state.creativeDocument, state.size) : '';
     const layer = layerId ? findCreativeLayer(state.creativeDocument, state.size, layerId) : null;
     const next = normalizeSelectionState({
       selectedTargetId: targetId,
@@ -406,6 +408,24 @@ export const useEditorStore = create<any>((set, get) => ({
     const history = state.history.slice(0, state.historyIndex + 1);
     history.push(realChanges);
     set({ history, historyIndex: history.length - 1 });
+  },
+
+  groupSelectedCanvasTargets: (name) => {
+    const state = get();
+    const members = state.selectionDragTargetIds();
+    const id = `canvas-group:${crypto.randomUUID()}`;
+    const next = createCanvasGroup(state.creativeDocument, state.size, { id, name: String(name || 'Canvas group'), members });
+    get().applyCreativeOwnershipDocument(next, 'Created canvas group');
+    get().setCanvasSelection(id, [id]);
+  },
+
+  ungroupSelectedCanvasTargets: () => {
+    const state = get();
+    const group = findCanvasGroup(state.creativeDocument, state.size, state.selectedTargetId);
+    if (!group) return;
+    const next = removeCanvasGroup(state.creativeDocument, state.size, group.id);
+    get().applyCreativeOwnershipDocument(next, 'Ungrouped canvas members');
+    get().setCanvasSelection(group.members[0], group.members);
   },
 
   applyCreativeOwnershipDocument: (next, message = 'Updated explicit sharing') => {
@@ -967,7 +987,10 @@ export const useEditorStore = create<any>((set, get) => ({
   applyCreativeTargetValue: (size, targetId, activeScopes, field, value) => {
     const state = get();
     if (!state.creativeDocument) return;
-    const next = updateCreativeTargetDocumentValue(state.creativeDocument, size, targetId, activeScopes, field, value);
+    const selectedGroup = findCanvasGroup(state.creativeDocument, size, state.selectedTargetId);
+    const next = selectedGroup?.members.includes(targetId)
+      ? setCreativeOwnershipField(state.creativeDocument, size, targetId, activeScopes, 'values', field, value, 'local')
+      : updateCreativeTargetDocumentValue(state.creativeDocument, size, targetId, activeScopes, field, value);
     set({ creativeDocument: next, creativeDirty: true });
     get().setStatus('Unsaved creative changes', 'warn');
   },
@@ -1083,7 +1106,7 @@ export const useEditorStore = create<any>((set, get) => ({
         changes.push({ kind: 'creativeTarget', size: state.size, targetId, activeScopes, field: 'top', before, after });
       }
     }
-    if (changes.length) get().pushHistory(changes);
+    if (changes.length) get().pushHistory([{kind:'creativeDocument',before:state.creativeDocument,after:get().creativeDocument}]);
   },
 
   alignSelectedTarget: (mode) => {

@@ -2,6 +2,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+import { validateCanvasGroups } from '@/lib/canvas-groups';
 import { materializeCreativeOwnership } from '@/lib/creative-ownership';
 import { isBlurLayer, validateBlurConfig } from '@/lib/blur-layer';
 import { isGradientLayer, validateGradientConfig } from '@/lib/gradient-layer';
@@ -44,6 +45,7 @@ export const validateCreativeDocument = (document: CreativeDocument) => {
     }
   }
   materializeCreativeOwnership(document);
+  validateCanvasGroups(document);
   return document;
 };
 

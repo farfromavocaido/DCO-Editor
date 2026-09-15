@@ -3,7 +3,7 @@ import { resolveTimeRef } from './creative-compiler';
 import { beatsForScopes } from './timing-profiles';
 import { activeOwnershipRules, resolveOwnedFields, materializeCreativeOwnership, setCreativeOwnershipField, resetCreativeOwnershipField } from "./creative-ownership";
 
-import { excludedHeadlineLayerIdsForVariantRule } from '@/lib/creative-css';
+import { excludedHeadlineLayerIdsForVariantRule, variantRuleProps } from '@/lib/creative-css';
 
 export const deepClone = (value: unknown) => JSON.parse(JSON.stringify(value ?? null));
 
@@ -452,7 +452,7 @@ const findCreativeTargetLegacy = (
 };
 
 /** Resolve each field independently; a later unrelated rule is not its owner. */
-export const findCreativeTarget = (document, size, targetId, activeScopes = []) => {
+export const findCreativeTarget = (document: any, size: string, targetId: string, activeScopes: string[] = []): any => {
   document = materializeCreativeOwnership(document);
   const target = findCreativeTargetLegacy(document, size, targetId, activeScopes);
   if (!target) return null;
@@ -463,7 +463,7 @@ export const findCreativeTarget = (document, size, targetId, activeScopes = []) 
   const rules = activeOwnershipRules(sizeCreative.variantRules || [], identity, activeScopes)
     .filter((rule) => !propsOnlyHideVisibility(rule.props));
   const baseline = findCreativeTargetLegacy({ ...document, sizes: { ...document.sizes, [size]: { ...sizeCreative, variantRules: [] } } }, size, targetId, []);
-  const props = resolveOwnedFields(baseline.values, baseline.writeSource, rules);
+  const props = resolveOwnedFields(baseline.values, baseline.writeSource, rules.map((rule) => ({ ...rule, props: variantRuleProps(sizeCreative, rule) })));
   const fit = resolveOwnedFields(baseline.fit, { kind: parsed.isNested ? 'classRule' : 'layerFit', layerId: layer.id, cssClass: target.cssClass }, rules, 'fit');
   return { ...target, values: props.values, base: props.values, fit: fit.values, valueProvenance: props.provenance, fitProvenance: fit.provenance };
 };
@@ -743,6 +743,10 @@ export const deleteCreativeLayer = (
   sizeCreative.variantRules = (sizeCreative.variantRules || []).filter((rule: Record<string, unknown>) => (
     rule.layerId !== layerId && rule.cssClass !== cssClass
   ));
+  const belongs = (targetId) => targetId === layerId || String(targetId).startsWith(`${layerId}::`);
+  if (sizeCreative.localOverrides) sizeCreative.localOverrides = sizeCreative.localOverrides.filter((item) => !belongs(item.targetId));
+  if (sizeCreative.canvasGroups) sizeCreative.canvasGroups = sizeCreative.canvasGroups.map((group) => ({...group, members: group.members.filter((id) => !belongs(id))})).filter((group) => group.members.length >= 2);
+  for (const definition of next.sharedDefinitions || []) definition.members = definition.members.filter((member) => member.size !== size || !belongs(member.targetId));
   return next;
 };
 

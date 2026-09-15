@@ -1,6 +1,7 @@
 // @ts-nocheck
 'use client';
 
+import { effectiveTextFitForTarget } from '@/lib/text-fit-rules';
 import { TextFitPolicyControls } from './TextFitPolicyControls';
 import { MotionTimingControls } from './MotionTimingControls';
 import { MotionDistanceControls, isMotionDistanceField } from './MotionDistanceControls';
@@ -248,6 +249,7 @@ export function CreativeInspector() {
     && (selectedLayer.kind !== 'group' || isNestedTextTarget)
     && selectedLayer.id !== 'cta';
   const activeFit = selectedTarget.fit || {};
+  const effectiveFitRule = effectiveTextFitForTarget(document, size, selectedTarget.id, activeScopes);
   const applyFitUpdate = (field, value) => updateTargetFit(selectedTarget.id, field, value);
   const fittedFontSize = fitResults.get(selectedTarget.id) ?? (activeCssClass ? fitResults.get(activeCssClass) : undefined);
   const fittedTracking = fitTrackings?.has?.(selectedTarget.id) ? fitTrackings.get(selectedTarget.id) : activeCssClass && fitTrackings?.has?.(activeCssClass)
@@ -279,7 +281,7 @@ export function CreativeInspector() {
     updateTargetValue(selectedTarget.id, 'alignItems', align);
   };
   const fitMode = activeFit?.mode || 'shrink';
-  const minFontEnabled = canTextFit && fitMode === 'shrink';
+  const minFontEnabled = canTextFit && (effectiveFitRule.frame ? effectiveFitRule.allowShrink !== false && !effectiveFitRule.static : fitMode === 'shrink');
 
   return (
     <aside className="creative-inspector" aria-label="Inspector">
@@ -461,7 +463,7 @@ export function CreativeInspector() {
                 />
               ) : null}
             </div>
-            {canTextFit ? <TextFitPolicyControls fit={activeFit} onChange={applyFitUpdate} /> : null}
+            {canTextFit ? <TextFitPolicyControls fit={activeFit} effectiveRule={effectiveFitRule} onChange={applyFitUpdate} /> : null}
             {canTextFit ? (
               <div className="inspector-grid">
                 <SelectControl

@@ -133,8 +133,20 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
     return scopeActive;
   }
 
+  function explicitPolicyRule(rule) {
+    if (!rule.frame || !rule.static) return rule;
+    var resolved = {};
+    for (var key in rule) resolved[key] = rule[key];
+    // A scoped legacy mode may arrive after the frame policy. Resolve the
+    // final merged policy so explicit sizing remains independent of overflow.
+    if (resolved.allowShrink === undefined) resolved.allowShrink = false;
+    if (!resolved.overflow) resolved.overflow = resolved.static === 'truncate' ? 'ellipsis' : 'clip';
+    delete resolved.static;
+    return resolved;
+  }
+
   function resolveRule(rule, root) {
-    if (!rule.scopes && !rule.targetOverrides) return rule;
+    if (!rule.scopes && !rule.targetOverrides) return explicitPolicyRule(rule);
     var resolved = {};
     var key;
     for (key in rule) {
@@ -160,7 +172,7 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
       });
       if (!targetActive) return null;
     } else if (rule.scopeOnly && !matchedScope) return null;
-    return resolved;
+    return explicitPolicyRule(resolved);
   }
 
   function excludedFromRule(element, rule, root) {
@@ -345,8 +357,14 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
 
   function applyPolicy(root, rule) {
     var elements = Array.prototype.slice.call(root.querySelectorAll(rule.selector || '.' + rule.cssClass)).filter(function (element) {
-      // Membership does not depend on opacity or animation visibility.
-      return element.textContent && String(element.textContent).trim() && !excludedFromRule(element, rule, root);
+      // Supported motion changes opacity, never visibility/display. Those
+      // authored CSS properties identify state-inactive text and wrappers.
+      var node = element;
+      while (node) {
+        if (computedOf(node).display === 'none') return false;
+        node = node.parentElement;
+      }
+      return element.textContent && String(element.textContent).trim() && isVisible(element) && !excludedFromRule(element, rule, root);
     });
     if (!elements.length) return undefined;
     var fits = elements.map(function (element) { return fitPolicyMember(element, rule); });
@@ -520,7 +538,7 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
     return results;
   }
 
-  return { applyRules: applyRules };
+  return { applyRules: applyRules, resolveRule: resolveRule };
 })`;
 
 /** Engine source, inlined verbatim into exported Studio HTML. */
@@ -543,3 +561,6 @@ export const applyTextFitting = (root, rules = [], options = {}) => {
   });
   return { sizes, trackings, clipped };
 };
+
+/** Resolve the same final rule for authoring controls without measuring DOM. */
+export const resolveTextFitRule = (rule, scopes = []) => createTextFitEngine({}).resolveRule(rule, { className: scopes.join(' ') });

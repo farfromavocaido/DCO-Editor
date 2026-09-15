@@ -1,8 +1,9 @@
 import { afterAll, beforeAll, expect, test } from 'vitest';
 import { chromium, type Browser } from 'playwright';
 import { textFitEngineSource } from './text-fit';
+import { updateCreativeTargetFit } from './creative-model';
 import { propsWithFitBudget } from './fit-box';
-import { normalizeFitConfig, textFitRulesForSize } from './text-fit-rules';
+import { effectiveTextFitForTarget, normalizeFitConfig, textFitRulesForSize } from './text-fit-rules';
 
 let browser: Browser;
 beforeAll(async () => { browser = await chromium.launch({ headless: true }); });
@@ -51,8 +52,8 @@ test('a contradictory minimum remains visible instead of silently clamping confi
   expect(result.results[0].diagnostics[0].reasons).toContain('minimum-size');
 });
 
-test('shared explicit fitting includes animation-hidden members', async () => {
-  const result = await fit('<p class="target">short</p><p class="target" style="opacity:0;visibility:hidden">supercalifragilistic</p>', {frame:'fixed',wrap:false,shared:true,minFontSize:8,overflow:'clip'});
+test('shared explicit fitting includes opacity-hidden active animation members', async () => {
+  const result = await fit('<p class="target">short</p><p class="target" style="opacity:0">supercalifragilistic</p>', {frame:'fixed',wrap:false,shared:true,minFontSize:8,overflow:'clip'});
   expect(result.after[0].size).toEqual(result.after[1].size);
   expect(result.after[0].size).toBeLessThan(20);
 });
@@ -112,4 +113,19 @@ test('shared size membership survives target-specific policy overrides', async (
     },{source:textFitEngineSource(),rules});
     expect(sizes[0]).toEqual(sizes[1]);
   } finally { await page.close(); }
+});
+
+
+test('state-inactive members do not constrain the active shared fit', async () => {
+  const result = await fit('<p class="target">short</p><div style="visibility:hidden"><p class="target">supercalifragilistic</p></div><div style="display:none"><p class="target">supercalifragilistic</p></div>', {frame:'fixed',wrap:false,shared:true,minFontSize:8,overflow:'clip'});
+  expect(result.after[0].size).toBe(20);
+  expect(result.results[0].diagnostics).toHaveLength(1);
+});
+
+test.each(['clip','truncate'])('explicit font sizing can override a scoped %s mode in the production runtime', async (mode) => {
+  const document = {sizes:{'300x250':{canvas:{width:300,height:250},layers:[{id:'target',kind:'text',base:{fontSize:20},fit:{frame:'fixed',wrap:false,minFontSize:8},clips:[]}],variantRules:[{id:'scoped-mode',layerId:'target',scope:'offers-1',fit:{mode}}]}}};
+  const updated = updateCreativeTargetFit(document,'300x250','target',['offers-1'],'allowShrink',true);
+  const effective = effectiveTextFitForTarget(updated,'300x250','target',['offers-1']);
+  const result = await fit('<p class="target">a very long headline</p>', effective);
+  expect(result.after[0].size).toBeLessThan(20);
 });

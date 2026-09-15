@@ -26,7 +26,8 @@
 
 import { HEADLINE_CSS_CLASS, isHeadlineLayer } from './creative-model';
 import { targetIdToSelector } from './creative-css';
-import { ownershipRuleSpecificity } from './creative-ownership';
+import { resolveTextFitRule } from './text-fit';
+import { materializeCreativeOwnership, ownershipRuleSpecificity } from './creative-ownership';
 
 const OFFER_VALUE_CLASS = 'offer-value';
 const OFFER_SUBLINE_CLASS = 'offer-subline';
@@ -78,6 +79,7 @@ export const normalizeFitConfig = (fit = {}): Record<string, any> => {
     normalized.shared = true;
   } else if (mode === 'clip' || mode === 'truncate') {
     normalized.static = mode;
+    normalized.allowShrink = false;
   }
 
   // Explicit fields win over mode defaults (scope overrides use this).
@@ -243,4 +245,20 @@ export const textFitRulesForSize = (sizeCreative) => {
   push(baseRule(OFFER_SUBLINE_CLASS, OFFER_SUBLINE_DEFAULTS));
 
   return attachScopeOverrides(rules, sizeCreative.variantRules || [], sizeCreative.layers || []);
+};
+
+/** Engine-effective policy; authored fields/provenance remain on the target. */
+export const effectiveTextFitForTarget = (document, size, targetId, activeScopes = []) => {
+  const creative = materializeCreativeOwnership(document)?.sizes?.[size];
+  if (!creative) return {};
+  const [layerId, childClass] = String(targetId).split('::');
+  const layer = (creative.layers || []).find(item => item.id === layerId);
+  if (!layer) return {};
+  const cssClass = childClass || (isHeadlineLayer(layer) ? HEADLINE_CSS_CLASS : layer.base?.cssClass || layer.id);
+  const rules = textFitRulesForSize(creative);
+  const specific = rules.find(rule => rule.targetId === targetId);
+  const resolved = specific && resolveTextFitRule(specific, activeScopes);
+  if (resolved) return resolved;
+  const base = rules.find(rule => !rule.targetId && rule.cssClass === cssClass);
+  return base ? resolveTextFitRule(base, activeScopes) || {} : {};
 };

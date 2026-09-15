@@ -37,3 +37,11 @@ The separate creative comparison failure was diagnosed as offers-2 728x90 offer-
 `creative-exporter.ts` has concurrent root-owned outline and ownership integration; omitted from this task commit so root can commit combined changes. Task 2 owns inspector/store integrations. Public helpers for headline skip rendering now accept optional motion context; consumers of newly authored relative values must supply it.
 
 This task does not claim a general replacement of the legacy headline skip choreography or a migration of every existing fit into explicit policy. Existing campaigns remain on their authored compatibility path. Final production-stage browser review and standalone outlined-export parity are root-owned.
+
+## Task 3 follow-up — effective controls and active membership
+
+Corrected the earlier visibility-membership statement: supported production motion animates opacity/transform/layout, not CSS visibility/display. Explicit fitting now excludes nodes whose authored CSS state (or ancestor state) is visibility:hidden/display:none, and never filters opacity. Inactive offer slots therefore do not constrain one-offer copy; opacity-zero active headline acts retain shared membership. This uses the actual CSS cascade rather than inferring an offer count or naming specific slots. Legacy fitting paint is unchanged.
+
+TextFitPolicyControls now receives `effectiveTextFitForTarget`, including family defaults, scopes and named target rules. It delegates final resolution to the exact engine `resolveRule` function; raw fit/provenance remain separate in the inspector. A scoped legacy clip/truncate mode is converted into independent overflow/sizing decisions after all rule overrides merge, so explicitly enabling shrinking works and remains selected. Inspector minimum-size editing follows effective sizing policy.
+
+Behavioral tests observed failing first for effective shared-default display, inactive member exclusion, and scoped clip/truncate shrink. Final scoped run: 70 tests passed in five files (`text-fit-policy-controls`, `text-fit-policy`, `text-fit`, `text-fit-rules`, `creative-ownership`), including mounted React change-handler → authored document → effective runtime rule checks and actual Chromium fitting after the same document write. `git diff --check` passed.

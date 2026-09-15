@@ -45,6 +45,7 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
   }
 
   function resetStyles(element) {
+    if (element.__dcoExplicitFitStyles) element.style.height = element.__dcoExplicitFitStyles.height;
     element.style.fontSize = '';
     element.style.letterSpacing = '';
     element.style.whiteSpace = '';
@@ -133,7 +134,7 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
   }
 
   function resolveRule(rule, root) {
-    if (!rule.scopes) return rule;
+    if (!rule.scopes && !rule.targetOverrides) return rule;
     var resolved = {};
     var key;
     for (key in rule) {
@@ -150,8 +151,25 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
       }
     }
     // Host rules created only to carry variant fit must not run when idle.
-    if (rule.scopeOnly && !matchedScope) return null;
+    if (rule.targetOverrides) {
+      var targetActive = false;
+      rule.targetOverrides.forEach(function (override) {
+        if (override.scope && !scopeTokensOnRoot(override.scope, className)) return;
+        targetActive = true;
+        for (var property in override) if (property !== 'scope') resolved[property] = override[property];
+      });
+      if (!targetActive) return null;
+    } else if (rule.scopeOnly && !matchedScope) return null;
     return resolved;
+  }
+
+  function excludedFromRule(element, rule, root) {
+    var className = ' ' + String((root && root.className) || '') + ' ';
+    return (rule.excludeTargets || []).some(function (target) {
+      return element.matches(target.selector) && target.scopes.some(function (scope) {
+        return !scope || scopeTokensOnRoot(scope, className);
+      });
+    });
   }
 
   function applyStatic(element, rule) {
@@ -249,12 +267,136 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
     return clipped;
   }
 
+  // Explicit policy measures the entire browser-shaped text. It does not
+  // rewrite frame geometry or transform, and never treats clipping as a fit.
+  function measurePolicy(element, rule, size, minimum) {
+    var cs = computedOf(element);
+    var reasons = [];
+    var lines = 0;
+    var range = element.ownerDocument.createRange();
+    range.selectNodeContents(element);
+    var rects = Array.prototype.slice.call(range.getClientRects());
+    var frame = element.getBoundingClientRect();
+    var scaleX = element.offsetWidth ? frame.width / element.offsetWidth : 1;
+    var scaleY = element.offsetHeight ? frame.height / element.offsetHeight : 1;
+    if (!scaleX || !scaleY || !rects.length || !element.clientWidth) {
+      reasons.push('unmeasurable');
+    } else {
+      var tops = [];
+      var widthOverflow = overflowsWidth(element);
+      var heightOverflow = false;
+      var left = frame.left + (element.clientLeft + cssNumber(cs.paddingLeft)) * scaleX;
+      var right = frame.left + (element.clientLeft + element.clientWidth - cssNumber(cs.paddingRight)) * scaleX;
+      var top = frame.top + (element.clientTop + cssNumber(cs.paddingTop)) * scaleY;
+      var bottom = frame.top + (element.clientTop + element.clientHeight - cssNumber(cs.paddingBottom)) * scaleY;
+      rects.forEach(function (rect) {
+        if (!rect.width && !rect.height) return;
+        var center = (rect.top + rect.bottom) / 2;
+        if (!tops.some(function (value) { return Math.abs(value - center) < lineHeightPx(cs, size) * scaleY * 0.45; })) tops.push(center);
+        if (rect.left < left - 0.5 * scaleX || rect.right > right + 0.5 * scaleX) widthOverflow = true;
+        if (rect.top < top - 0.5 * scaleY || rect.bottom > bottom + 0.5 * scaleY) heightOverflow = true;
+      });
+      lines = tops.length;
+      if (widthOverflow) reasons.push('width');
+      if (rule.frame === 'fixed' && heightOverflow) reasons.push('height');
+      if (Number(rule.maxLines) > 0 && lines > Number(rule.maxLines)) reasons.push('max-lines');
+    }
+    if (size < minimum) reasons.push('minimum-size');
+    if (range.detach) range.detach();
+    return { reasons: reasons, lines: lines };
+  }
+
+  function fitPolicyMember(element, rule) {
+    var keys = ['fontSize', 'letterSpacing', 'whiteSpace', 'overflow', 'textOverflow', 'height'];
+    // Preserve authored inline values, including font size. Repeated font-load
+    // fitting starts from authored styles rather than the previous fitted size.
+    if (!element.__dcoExplicitFitStyles) {
+      element.__dcoExplicitFitStyles = {};
+      keys.forEach(function (key) { element.__dcoExplicitFitStyles[key] = element.style[key]; });
+    }
+    keys.forEach(function (key) { element.style[key] = element.__dcoExplicitFitStyles[key]; });
+    var cs = computedOf(element);
+    var base = cssNumber(cs.fontSize, 1);
+    var minimum = Math.max(Number(rule.minFontSize) || 1, base * (Number(rule.minFontSizeRatio) || 0));
+    var floor = Math.min(base, minimum);
+    var size = base;
+    var trackingEm = 0;
+    element.style.whiteSpace = rule.wrap ? 'pre-line' : 'nowrap';
+    if (rule.frame === 'auto') element.style.height = 'auto';
+    element.style.overflow = 'visible';
+    element.style.textOverflow = 'clip';
+    if (rule.tracking) {
+      var minEm = Number(rule.tracking.minEm) || 0;
+      while (trackingEm > minEm && overflowsWidth(element)) {
+        trackingEm = Math.max(minEm, Number((trackingEm - 0.005).toFixed(3)));
+        element.style.letterSpacing = trackingEm + 'em';
+      }
+    }
+    var measurement = measurePolicy(element, rule, size, minimum);
+    if (rule.allowShrink !== false && !rule.static) {
+      while (size > floor && measurement.reasons.some(function (reason) { return reason !== 'minimum-size'; })) {
+        size = Math.max(floor, Number((size - 0.5).toFixed(3)));
+        element.style.fontSize = size + 'px';
+        measurement = measurePolicy(element, rule, size, minimum);
+      }
+    }
+    return { element: element, base: base, minimum: minimum, size: size, trackingEm: trackingEm };
+  }
+
+  function applyPolicy(root, rule) {
+    var elements = Array.prototype.slice.call(root.querySelectorAll(rule.selector || '.' + rule.cssClass)).filter(function (element) {
+      // Membership does not depend on opacity or animation visibility.
+      return element.textContent && String(element.textContent).trim() && !excludedFromRule(element, rule, root);
+    });
+    if (!elements.length) return undefined;
+    var fits = elements.map(function (element) { return fitPolicyMember(element, rule); });
+    var sharedSize = Math.min.apply(null, fits.map(function (fit) { return fit.size; }));
+    if (rule.shared) {
+      // Respect every member's floor. Conflicts are diagnosed below, not hidden
+      // by forcing one member below its minimum for another member's copy.
+      sharedSize = Math.min(Math.min.apply(null, fits.map(function (fit) { return fit.base; })),
+        Math.max(sharedSize, Math.max.apply(null, fits.map(function (fit) { return fit.minimum; }))));
+    }
+    var diagnostics = fits.map(function (fit) {
+      var size = rule.shared ? sharedSize : fit.size;
+      var element = fit.element;
+      element.style.fontSize = size + 'px';
+      var measurement = measurePolicy(element, rule, size, fit.minimum);
+      var overflow = rule.overflow || (rule.static === 'truncate' ? 'ellipsis' : 'clip');
+      element.style.overflow = overflow === 'visible' ? 'visible' : 'hidden';
+      element.style.textOverflow = overflow === 'ellipsis' ? 'ellipsis' : 'clip';
+      var failed = measurement.reasons.length > 0;
+      element.setAttribute('data-fit-status', failed ? 'failed' : 'fitted');
+      element.setAttribute('data-fit-requested-size', String(fit.base));
+      element.setAttribute('data-fit-rendered-size', String(size));
+      if (failed) {
+        element.setAttribute('data-fit-clipped', 'true');
+        element.setAttribute('data-fit-clip-reason', measurement.reasons.join(','));
+      } else {
+        element.removeAttribute('data-fit-clipped');
+        element.removeAttribute('data-fit-clip-reason');
+      }
+      fit.rule = rule;
+      fit.diagnostic = { targetId: element.id || null, requestedSize: fit.base, renderedSize: size, reasons: measurement.reasons, lines: measurement.lines };
+      return fit.diagnostic;
+    });
+    return {
+      size: Math.min.apply(null, diagnostics.map(function (item) { return item.renderedSize; })),
+      trackingEm: Math.min.apply(null, fits.map(function (fit) { return fit.trackingEm; })),
+      clipped: diagnostics.some(function (item) { return item.reasons.length > 0; }),
+      diagnostics: diagnostics,
+      members: fits,
+    };
+  }
+
   function applyRule(root, rule) {
     var resolved = resolveRule(rule, root);
     if (!resolved) return undefined;
+    if (resolved.frame) return applyPolicy(root, resolved);
     var elements = [];
-    root.querySelectorAll('.' + resolved.cssClass).forEach(function (element) {
+    root.querySelectorAll(resolved.selector || '.' + resolved.cssClass).forEach(function (element) {
       if (!element.textContent || !String(element.textContent).trim()) return;
+      if (excludedFromRule(element, resolved, root)) return;
       if (!isVisible(element)) return;
       elements.push(element);
     });
@@ -323,16 +465,57 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
 
   function applyRules(root, rules) {
     var results = [];
+    var policyGroups = {};
     (rules || []).forEach(function (rule) {
       var result = applyRule(root, rule);
       if (result !== undefined) {
-        results.push({
+        (result.members || []).forEach(function (member) {
+          if (!member.rule.shared) return;
+          var key = member.rule.sharedGroup || member.rule.cssClass;
+          if (!policyGroups[key]) policyGroups[key] = [];
+          policyGroups[key].push(member);
+        });
+        var entry = {
           cssClass: rule.cssClass,
           size: result.size,
           trackingEm: Number(result.trackingEm) || 0,
           clipped: Boolean(result.clipped),
-        });
+        };
+        if (result.diagnostics) entry.diagnostics = result.diagnostics;
+        results.push(entry);
       }
+    });
+    // A local text policy does not detach a member from its fit relationship.
+    // Equalise across resolved target rules as well as within each selector.
+    Object.keys(policyGroups).forEach(function (key) {
+      var members = policyGroups[key];
+      if (members.length < 2) return;
+      var size = Math.min.apply(null, members.map(function (member) { return member.diagnostic.renderedSize; }));
+      var floor = Math.max.apply(null, members.map(function (member) { return member.minimum; }));
+      var ceiling = Math.min.apply(null, members.map(function (member) { return member.base; }));
+      size = Math.min(ceiling, Math.max(size, floor));
+      members.forEach(function (member) {
+        var element = member.element;
+        element.style.fontSize = size + 'px';
+        var measurement = measurePolicy(element, member.rule, size, member.minimum);
+        member.diagnostic.renderedSize = size;
+        member.diagnostic.reasons = measurement.reasons;
+        member.diagnostic.lines = measurement.lines;
+        element.setAttribute('data-fit-rendered-size', String(size));
+        element.setAttribute('data-fit-status', measurement.reasons.length ? 'failed' : 'fitted');
+        if (measurement.reasons.length) {
+          element.setAttribute('data-fit-clipped', 'true');
+          element.setAttribute('data-fit-clip-reason', measurement.reasons.join(','));
+        } else {
+          element.removeAttribute('data-fit-clipped');
+          element.removeAttribute('data-fit-clip-reason');
+        }
+      });
+    });
+    results.forEach(function (entry) {
+      if (!entry.diagnostics) return;
+      entry.size = Math.min.apply(null, entry.diagnostics.map(function (item) { return item.renderedSize; }));
+      entry.clipped = entry.diagnostics.some(function (item) { return item.reasons.length > 0; });
     });
     return results;
   }

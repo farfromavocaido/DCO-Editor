@@ -58,11 +58,15 @@ function TimelineClipBar({
   onUpdateClipValue,
   dimmed = false,
 }) {
-  const span = timelineSpanForClip(clip, beats);
+  const document = useEditorStore(s => s.document);
+  const size = useEditorStore(s => s.size);
+  const canvas = document?.sizes?.[size]?.canvas;
+  const context = { canvas, parent: canvas, durationS: document?.clock?.durationS };
+  const span = timelineSpanForClip(clip, beats, context.durationS);
   const start = span.start;
   const end = span.end;
   const duration = Math.max(1, end - start);
-  const keyframes = compileAnimationClips([clip], beats).filter((keyframe) => (
+  const keyframes = compileAnimationClips([clip], beats, context).filter((keyframe) => (
     keyframe.at >= start - 0.05 && keyframe.at <= end + 0.05
   ));
   const family = animationFamilyForLayer(layer);

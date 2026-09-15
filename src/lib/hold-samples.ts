@@ -1,3 +1,4 @@
+import type { MotionContext } from './motion-units';
 import {
   compileAnimationClips,
   frameAtPercent,
@@ -158,14 +159,15 @@ const keyframesForLayer = (
   profile: string,
   beats: Record<string, number>,
   activeScopes: string[] = [],
+  context: MotionContext = {},
 ): CreativeKeyframe[] => {
   const clips = (layer.clips || []) as AnimationClip[];
   if (HEADLINE_IDS.has(String(layer.id))) {
-    return compileHeadlineKeyframes(layer, layers, row, profile, beats);
+    return compileHeadlineKeyframes(layer, layers, row, profile, beats, context);
   }
   const profileClips = clipsForProfile(clips, profile, activeScopes);
   if (!profileClips.length) return [];
-  return compileAnimationClips(profileClips, beats);
+  return compileAnimationClips(profileClips, beats, context);
 };
 
 /**
@@ -187,7 +189,7 @@ export const holdSamplesForSize = (
   const row = options.row || {};
   const beats = beatsForScopes(document, activeScopes);
   const profile = activeFrameScope(activeScopes);
-  const sizeCreative = (document.sizes as Record<string, { layers?: Array<Record<string, unknown>> }> | undefined)?.[size];
+  const sizeCreative = (document.sizes as Record<string, { layers?: Array<Record<string, unknown>>; canvas?: { width: number; height: number } }> | undefined)?.[size];
   const layers = sizeCreative?.layers || [];
   const layerById = new Map(layers.map((layer) => [String(layer.id), layer]));
   const wantedIds = qaHoldLayerIdsForScopes(activeScopes);
@@ -225,7 +227,7 @@ export const holdSamplesForSize = (
   for (const layerId of wantedIds) {
     const layer = layerById.get(layerId);
     if (!layer) continue;
-    const keyframes = keyframesForLayer(layer, layers, row, profile, beats, activeScopes);
+    const keyframes = keyframesForLayer(layer, layers, row, profile, beats, activeScopes, { canvas: sizeCreative?.canvas, parent: sizeCreative?.canvas, durationS });
     if (!keyframes.length) continue;
     // Always-on (no motion after normalize) still yields opacity 1 everywhere — skip flat full-timeline.
     const plateaus = findSettledPlateaus(keyframes);

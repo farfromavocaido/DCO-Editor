@@ -1,6 +1,7 @@
 // @ts-nocheck
 
 import { resolveTimeRef } from './creative-compiler';
+import { resolveMotionTime } from './motion-units';
 
 const roundPct = (value: number) => Number(value.toFixed(3));
 const deepClone = (value: unknown) => JSON.parse(JSON.stringify(value ?? null));
@@ -41,7 +42,7 @@ export const animationIntentDefinitions = {
 const pctForSeconds = (seconds: number, durationS = 15) => roundPct((seconds / durationS) * 100);
 
 const startEndForIntent = (intent: Record<string, unknown>, anchorPct: number, durationS: number) => {
-  const span = pctForSeconds(Number(intent.durationS || 0.5), durationS);
+  const span = intent.motionDuration ? resolveMotionTime(intent.motionDuration, durationS) : pctForSeconds(Number(intent.durationS || 0.5), durationS);
   if (intent.anchor === 'end') {
     return {
       start: roundPct(Math.max(0, anchorPct - span)),
@@ -63,13 +64,13 @@ const keyframesForIntent = (intent: Record<string, unknown>, start: number, end:
   }
   if (intent.id === 'slideInRight') {
     return [
-      { at: start, translate: [Number(intent.distancePx || 60), 0], opacity: 0, easing: intent.easing },
+      { at: start, translate: [(intent.distance ?? Number(intent.distancePx ?? 60)), 0], opacity: 0, easing: intent.easing },
       { at: end, translate: [0, 0], opacity: 1 },
     ];
   }
   if (intent.id === 'fadeUp') {
     return [
-      { at: start, translate: [0, Number(intent.distancePx || 12)], opacity: 0, easing: intent.easing },
+      { at: start, translate: [0, (intent.distance ?? Number(intent.distancePx ?? 12))], opacity: 0, easing: intent.easing },
       { at: end, translate: [0, 0], opacity: 1 },
     ];
   }
@@ -85,8 +86,11 @@ export const createAnimationIntentClip = ({
   intentId,
   anchorPct,
   durationS = 15,
+  distance,
+  motionDuration,
 }) => {
-  const intent = animationIntentDefinitions[intentId];
+  const definition = animationIntentDefinitions[intentId];
+  const intent = definition ? { ...definition, distance, motionDuration } : null;
   if (!intent) throw new Error(`Unknown animation intent: ${intentId}`);
   const { start, end } = startEndForIntent(intent, Number(anchorPct), durationS);
   return {
@@ -105,18 +109,18 @@ export const createAnimationIntentClip = ({
   };
 };
 
-export const timelineSpanForClip = (clip: Record<string, unknown>, beats: Record<string, number> = {}) => {
+export const timelineSpanForClip = (clip: Record<string, unknown>, beats: Record<string, number> = {}, durationS?: number) => {
   const intent = animationIntentDefinitions[clip.intentId] || null;
   const keyframes = clip.keyframes || [];
   let start = clip.start;
   let end = clip.end;
   if (keyframes.length) {
-    const times = keyframes.map((keyframe) => resolveTimeRef(keyframe.at, beats));
+    const times = keyframes.map((keyframe) => resolveTimeRef(keyframe.at, beats, durationS));
     start = Math.min(...times);
     end = Math.max(...times);
   } else {
-    start = resolveTimeRef(start ?? 0, beats);
-    end = resolveTimeRef(end ?? 100, beats);
+    start = resolveTimeRef(start ?? 0, beats, durationS);
+    end = resolveTimeRef(end ?? 100, beats, durationS);
   }
   return {
     start: roundPct(Number(start)),

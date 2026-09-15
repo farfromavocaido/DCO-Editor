@@ -25,6 +25,8 @@
 //   clip / truncate — static overflow only (no wrap/shrink).
 
 import { HEADLINE_CSS_CLASS, isHeadlineLayer } from './creative-model';
+import { targetIdToSelector } from './creative-css';
+import { ownershipRuleSpecificity } from './creative-ownership';
 
 const OFFER_VALUE_CLASS = 'offer-value';
 const OFFER_SUBLINE_CLASS = 'offer-subline';
@@ -55,7 +57,7 @@ const minFromBase = (baseFontSize, ratio, fallback) => (
 );
 
 /** Map an authored fit config ({ mode, ... }) onto engine-shape overrides. */
-export const normalizeFitConfig = (fit = {}) => {
+export const normalizeFitConfig = (fit = {}): Record<string, any> => {
   const normalized = {};
   const mode = String(fit.mode || '');
   const rawMaxLines = fit.maxLines;
@@ -82,10 +84,21 @@ export const normalizeFitConfig = (fit = {}) => {
   if (fit.wrap !== undefined) normalized.wrap = Boolean(fit.wrap);
   if (fit.allowShrink !== undefined) normalized.allowShrink = Boolean(fit.allowShrink);
   if (fit.shared !== undefined) normalized.shared = Boolean(fit.shared);
+  if (fit.sharedGroup !== undefined) normalized.sharedGroup = String(fit.sharedGroup);
   if (fit.minFontSize !== undefined) normalized.minFontSize = Number(fit.minFontSize);
   if (fit.minFontSizeRatio !== undefined) normalized.minFontSizeRatio = Number(fit.minFontSizeRatio);
   if (fit.tracking !== undefined) normalized.tracking = fit.tracking;
   if (fit.align !== undefined) normalized.align = fit.align;
+  if (fit.frame === '') normalized.frame = '';
+  if (fit.frame === 'fixed' || fit.frame === 'auto') {
+    normalized.frame = fit.frame;
+    if (normalized.static) {
+      if (fit.allowShrink === undefined) normalized.allowShrink = false;
+      normalized.overflow = normalized.static === 'truncate' ? 'ellipsis' : 'clip';
+      normalized.static = undefined;
+    }
+  }
+  if (fit.overflow !== undefined) normalized.overflow = fit.overflow;
   return normalized;
 };
 
@@ -144,9 +157,13 @@ const classRuleFit = (rule) => {
   }, rule.fit);
 };
 
-const attachScopeOverrides = (rules, variantRules = []) => {
-  for (const variant of variantRules) {
-    if (!variant?.fit || !variant.scope) continue;
+const attachScopeOverrides = (rules, variantRules = [], layers = []) => {
+  const targeted = variantRules.filter(rule => rule.fit && (rule.targetId || String(rule.layerId || '').startsWith('headline-act')));
+  variantRules = variantRules.filter(rule => !targeted.includes(rule));
+  const ordered = variantRules.map((rule, index) => ({ rule, index }))
+    .sort((a, b) => ownershipRuleSpecificity(a.rule) - ownershipRuleSpecificity(b.rule) || a.index - b.index);
+  for (const { rule: variant } of ordered) {
+    if (!variant?.fit) continue;
     const cssClass = String(variant.cssClass || variant.layerId || '');
     let rule = rules.find((item) => item.cssClass === cssClass);
     if (!rule) {
@@ -161,13 +178,40 @@ const attachScopeOverrides = (rules, variantRules = []) => {
       };
       rules.push(rule);
     }
+    if (!variant.scope) {
+      Object.assign(rule, normalizeFitConfig(variant.fit));
+      delete rule.scopeOnly;
+      continue;
+    }
     rule.scopes = rule.scopes || {};
     rule.scopes[variant.scope] = {
       ...(rule.scopes[variant.scope] || {}),
       ...normalizeFitConfig(variant.fit),
     };
   }
-  return rules;
+  const targetIds = [...new Set(targeted.map(rule => rule.targetId || rule.layerId))];
+  const targetRules = [];
+  for (const targetId of targetIds) {
+    const variants = targeted.filter(rule => (rule.targetId || rule.layerId) === targetId)
+      .sort((a,b) => ownershipRuleSpecificity(a) - ownershipRuleSpecificity(b));
+    const [layerId, childClass] = targetId.split('::');
+    const layer = layers.find(item => item.id === layerId);
+    const cssClass = childClass || (isHeadlineLayer(layer) ? HEADLINE_CSS_CLASS : layer?.base?.cssClass || layerId);
+    const base = rules.find(rule => rule.cssClass === cssClass);
+    const selector = targetIdToSelector(targetId);
+    if (base) {
+      base.excludeTargets ||= [];
+      base.excludeTargets.push({ selector, scopes: variants.map(rule => rule.scope || '') });
+    }
+    targetRules.push({
+      ...(base || { cssClass, wrap: false, shared: false }),
+      excludeTargets: undefined,
+      selector,
+      targetId,
+      targetOverrides: variants.map(rule => ({scope: rule.scope || '', ...normalizeFitConfig(rule.fit)})),
+    });
+  }
+  return [...rules, ...targetRules];
 };
 
 export const textFitRulesForSize = (sizeCreative) => {
@@ -198,5 +242,5 @@ export const textFitRulesForSize = (sizeCreative) => {
   push(baseRule(OFFER_VALUE_CLASS, OFFER_VALUE_DEFAULTS));
   push(baseRule(OFFER_SUBLINE_CLASS, OFFER_SUBLINE_DEFAULTS));
 
-  return attachScopeOverrides(rules, sizeCreative.variantRules || []);
+  return attachScopeOverrides(rules, sizeCreative.variantRules || [], sizeCreative.layers || []);
 };

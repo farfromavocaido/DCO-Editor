@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { resolveClipMotionUnits, type MotionContext } from './motion-units';
 
 import { layerAnimationShorthand } from '@/lib/animation-css';
 import {
@@ -94,6 +95,7 @@ export const equalHeadlineWindowsForZeroOffers = (
   headings: string[],
   includeRoundelFrame = false,
   beats: Record<string, number> = {},
+  context: MotionContext = {},
 ) => {
   const eligible = eligibleHeadlineActs(includeRoundelFrame).filter((act) => act !== 4);
   const activeActs = eligible.filter((act) => Boolean(headings[act - 1]));
@@ -240,6 +242,7 @@ const rebuildSlideWindow = (
   end: number,
   sourceClips: AnimationClip[] = [],
   beats: Record<string, number> = {},
+  context: MotionContext = {},
 ) => {
   const source = sourceClips[0] || {};
   const params = { ...(source.params || {}) };
@@ -253,7 +256,7 @@ const rebuildSlideWindow = (
   window.start = start;
   window.end = end;
   window.hidden = false;
-  window.keyframes = compileAnimationClips([clip], beats);
+  window.keyframes = compileAnimationClips([clip], beats, context);
 };
 
 export const buildHeadlineMotionPlan = (
@@ -261,6 +264,7 @@ export const buildHeadlineMotionPlan = (
   row: Record<string, unknown> = {},
   profile = 'frames-3',
   beats: Record<string, number> = {},
+  context: MotionContext = {},
 ) => {
   const includeRoundelFrame = profile === 'frames-4';
   const headings = headlineTextsFromRow(row);
@@ -274,8 +278,8 @@ export const buildHeadlineMotionPlan = (
 
   const windows: HeadlineWindow[] = headlineLayers.map((layer, index) => {
     const act = index + 1;
-    const clips = clipsForProfile(layer.clips, profile);
-    const keyframes = clips.length ? compileAnimationClips(clips, beats) : hiddenKeyframes();
+    const clips = clipsForProfile(layer.clips, profile).map(clip => resolveClipMotionUnits(clip, context));
+    const keyframes = clips.length ? compileAnimationClips(clips, beats, context) : hiddenKeyframes();
     const end = authoredClipExit(clips, beats);
     const start = clips.length
       ? Math.min(...clips.map((clip) => resolveTimeRef(clip.start ?? 0, beats)))
@@ -317,7 +321,7 @@ export const buildHeadlineMotionPlan = (
           const act4Start = Number(
             beats.act4_in ?? beats.bn_cta_in ?? beats.cta_in ?? window.start,
           );
-          rebuildSlideWindow(window, act4Start, window.end, window._clips, beats);
+          rebuildSlideWindow(window, act4Start, window.end, window._clips, beats, context);
         }
         continue;
       }
@@ -332,7 +336,7 @@ export const buildHeadlineMotionPlan = (
         window.keyframes = hiddenKeyframes();
         continue;
       }
-      rebuildSlideWindow(window, slot.start, slot.end, window._clips, beats);
+      rebuildSlideWindow(window, slot.start, slot.end, window._clips, beats, context);
     }
     for (const window of windows) delete window._clips;
     return windows;
@@ -375,10 +379,11 @@ export const compileHeadlineKeyframes = (
   row: Record<string, unknown> = {},
   profile = 'frames-3',
   beats: Record<string, number> = {},
+  context: MotionContext = {},
 ) => {
-  const plan = buildHeadlineMotionPlan(layers, row, profile, beats);
+  const plan = buildHeadlineMotionPlan(layers, row, profile, beats, context);
   return plan.find((item) => item.layerId === layer.id)?.keyframes
-    || compileAnimationClips(clipsForProfile(layer.clips, profile), beats);
+    || compileAnimationClips(clipsForProfile(layer.clips, profile), beats, context);
 };
 
 const formatTransform = (frame: CreativeKeyframe) => {
@@ -403,8 +408,9 @@ export const headlineSkipOverrideCss = (
   beats: Record<string, number> = {},
   durationS = 15,
   loop = false,
+  context: MotionContext = {},
 ) => {
-  const plan = buildHeadlineMotionPlan(layers, row, profile, beats);
+  const plan = buildHeadlineMotionPlan(layers, row, profile, beats, context);
   const blocks: string[] = [];
 
   for (const item of plan) {
@@ -420,7 +426,7 @@ export const headlineSkipOverrideCss = (
   return blocks.join('\n\n');
 };
 
-export const serializeHeadlineMotionLayers = (layers: Array<Record<string, unknown>> = []) => (
+export const serializeHeadlineMotionLayers = (layers: Array<Record<string, unknown>> = [], context: MotionContext = {}) => (
   HEADLINE_LAYER_IDS.map((id) => {
     const layer = layers.find((item) => item.id === id);
     if (!layer) return null;
@@ -428,8 +434,8 @@ export const serializeHeadlineMotionLayers = (layers: Array<Record<string, unkno
       id,
       color: layerInkColor(layer),
       clips: {
-        'frames-3': clipsForProfile(layer.clips, 'frames-3'),
-        'frames-4': clipsForProfile(layer.clips, 'frames-4'),
+        'frames-3': clipsForProfile(layer.clips, 'frames-3').map(clip => resolveClipMotionUnits(clip, context)),
+        'frames-4': clipsForProfile(layer.clips, 'frames-4').map(clip => resolveClipMotionUnits(clip, context)),
       },
     };
   }).filter(Boolean)
@@ -440,8 +446,9 @@ export const headlineTransitionRuntimeBlock = (
   beatsProfiles: Record<string, Record<string, number>> = {},
   durationS = 15,
   loop = false,
+  context: MotionContext = {},
 ) => {
-  const headlineLayers = serializeHeadlineMotionLayers(layers);
+  const headlineLayers = serializeHeadlineMotionLayers(layers, { ...context, durationS });
   const iteration = loop ? 'infinite' : 1;
   return `
         var __headlineMotionLayers = ${JSON.stringify(headlineLayers)};
@@ -466,8 +473,8 @@ export const headlineTransitionRuntimeBlock = (
           var enterDuration = Number(params.enter_duration_pct || 7);
           var fadePct = Number(params.fade_pct || 2);
           var settled = Math.min(end, start + enterDuration);
-          var enterDistance = Number(params.enter_distance_px || 320);
-          var exitDy = Number(params.exit_dy || 5);
+          var enterDistance = Number(params.enter_distance_px === undefined ? 320 : params.enter_distance_px);
+          var exitDy = Number(params.exit_dy === undefined ? 5 : params.exit_dy);
           return [
             { at: start, translate: [enterDistance, 0], opacity: 0 },
             { at: settled, translate: [0, 0], opacity: 1 },
@@ -501,6 +508,30 @@ export const headlineTransitionRuntimeBlock = (
         function __compileHeadlineClips(clips, beats) {
           if (!clips || !clips.length) {
             return [{ at: 0, translate: [0, 0], opacity: 0 }, { at: 100, translate: [0, 0], opacity: 0 }];
+          }
+          if (clips[0].preset === 'custom') {
+            var frames = [];
+            var translate = [0, 0];
+            var scale = 1;
+            var opacity = 1;
+            clips.forEach(function(clip) {
+              (clip.keyframes || []).forEach(function(frame) {
+                var next = {};
+                Object.keys(frame).forEach(function(key) { next[key] = frame[key]; });
+                next.at = __resolveBeat(frame.at, beats);
+                frames.push(next);
+              });
+            });
+            frames.sort(function(a,b) { return a.at - b.at; });
+            return frames.map(function(frame) {
+              if (frame.translate) translate = frame.translate;
+              if (frame.scale !== undefined) scale = frame.scale;
+              if (frame.opacity !== undefined) opacity = frame.opacity;
+              frame.translate = translate;
+              frame.scale = scale;
+              frame.opacity = opacity;
+              return frame;
+            });
           }
           if (clips[0].preset === 'fade') return __compileFade(clips[0], beats);
           return __compileSlideInRight(clips[0], beats);

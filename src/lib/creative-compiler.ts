@@ -1,6 +1,8 @@
 // @ts-nocheck
 
-export type TimeRef = number | string;
+import { resolveMotionDistance, resolveMotionTime, type MotionContext, type MotionTime, type MotionDistance } from './motion-units';
+
+export type TimeRef = number | string | MotionTime;
 
 /** Uniform scale number, or `[scaleX, scaleY]` if ever needed. Prefer uniform for image assets. */
 export type KeyframeScale = number | [number, number];
@@ -60,7 +62,7 @@ export type AnimationClip = {
   end?: TimeRef;
   durationPct?: number;
   params?: Record<string, unknown>;
-  keyframes?: CreativeKeyframe[];
+  keyframes?: Array<Omit<CreativeKeyframe, 'at' | 'translate'> & { at: TimeRef; translate?: [MotionDistance, MotionDistance] }>;
   /** When set, clip applies only for these frame profiles (frames-3 / frames-4). */
   profiles?: string[];
   /** When set, clip applies only when any listed offer/CSS scope is active. */
@@ -104,7 +106,8 @@ const defaultEnterDurationForPreset = (preset: AnimationClip['preset'], fallback
   return 1;
 };
 
-export const resolveTimeRef = (ref: TimeRef, beats: Record<string, number>) => {
+export const resolveTimeRef = (ref: TimeRef, beats: Record<string, number>, durationS?: number) => {
+  if (typeof ref === 'object' && ref !== null) return resolveMotionTime(ref, durationS);
   if (typeof ref === 'number') return ref;
   const numeric = Number(ref);
   if (Number.isFinite(numeric)) return numeric;
@@ -123,9 +126,10 @@ const resolveParamTime = (
   name: string,
   beats: Record<string, number>,
   fallback: number,
+  durationS?: number,
 ) => {
   if (params[name] === undefined || params[name] === '') return fallback;
-  return resolveTimeRef(params[name] as TimeRef, beats);
+  return resolveTimeRef(params[name] as TimeRef, beats, durationS);
 };
 
 const normalizeKeyframes = (keyframes: CreativeKeyframe[]) => {
@@ -168,22 +172,25 @@ const fillMotionChannels = (keyframes: CreativeKeyframe[]) => {
 };
 
 /** Compile one clip to authored frames only — no 0%/100% padding. */
-const compileClipFrames = (clip: AnimationClip, beats: Record<string, number>) => {
+const compileClipFrames = (clip: AnimationClip, beats: Record<string, number>, context: MotionContext) => {
   const params = clip.params || {};
+  const distance = (value, axis, fallback = 0) => resolveMotionDistance(value ?? fallback, axis, context);
+  const time = (value) => resolveTimeRef(value, beats, context.durationS);
   if (clip.preset === 'custom') {
     return (clip.keyframes || []).map((keyframe) => ({
       ...keyframe,
-      at: resolveTimeRef(keyframe.at, beats),
+      at: time(keyframe.at),
+      ...(keyframe.translate ? { translate: [distance(keyframe.translate[0], 'x'), distance(keyframe.translate[1], 'y')] } : {}),
     }));
   }
 
-  const start = resolveTimeRef(clip.start, beats);
-  const end = resolveTimeRef(clip.end ?? 100, beats);
-  const enterDuration = numberOr(
+  const start = time(clip.start);
+  const end = time(clip.end ?? 100);
+  const enterDuration = params.enter_duration ? resolveMotionTime(params.enter_duration, context.durationS) : numberOr(
     params.enter_duration_pct,
     defaultEnterDurationForPreset(clip.preset, clip.durationPct),
   );
-  const fadePct = numberOr(params.fade_pct, legacyMotionDefaults.exit.durationPct);
+  const fadePct = params.fade_duration ? resolveMotionTime(params.fade_duration, context.durationS) : numberOr(params.fade_pct, legacyMotionDefaults.exit.durationPct);
 
   if (clip.preset === 'fade') {
     const settled = Math.min(end, start + enterDuration);
@@ -205,13 +212,13 @@ const compileClipFrames = (clip: AnimationClip, beats: Record<string, number>) =
     return [
       {
         at: start,
-        translate: [numberOr(params.enter_distance_px, legacyMotionDefaults.enter.distancePx), 0] as [number, number],
+        translate: [distance(params.enter_distance ?? params.enter_distance_px, 'x', legacyMotionDefaults.enter.distancePx), 0] as [number, number],
         opacity: 0,
         easing: String(params.ease_in || legacyMotionDefaults.enter.easing),
       },
       { at: settled, translate: [0, 0] as [number, number], opacity: 1 },
       { at: Math.max(settled, end - fadePct), translate: [0, 0] as [number, number], opacity: 1 },
-      { at: end, translate: [0, numberOr(params.exit_dy, legacyMotionDefaults.exit.dropPx)] as [number, number], opacity: 0 },
+      { at: end, translate: [0, distance(params.exit_dy, 'y', legacyMotionDefaults.exit.dropPx)] as [number, number], opacity: 0 },
     ];
   }
 
@@ -220,22 +227,22 @@ const compileClipFrames = (clip: AnimationClip, beats: Record<string, number>) =
     return [
       {
         at: start,
-        translate: [0, numberOr(params.enter_dy, -7)] as [number, number],
+        translate: [0, distance(params.enter_dy, 'y', -7)] as [number, number],
         opacity: 0,
         easing: String(params.ease_in || legacyMotionDefaults.enter.easing),
       },
-      { at: settled, translate: [0, numberOr(params.settled_dy, 0)] as [number, number], opacity: 1 },
-      { at: Math.max(settled, end - fadePct), translate: [0, numberOr(params.settled_dy, 0)] as [number, number], opacity: 1 },
-      { at: end, translate: [0, numberOr(params.exit_dy, legacyMotionDefaults.exit.dropPx)] as [number, number], opacity: 0 },
+      { at: settled, translate: [0, distance(params.settled_dy, 'y', 0)] as [number, number], opacity: 1 },
+      { at: Math.max(settled, end - fadePct), translate: [0, distance(params.settled_dy, 'y', 0)] as [number, number], opacity: 1 },
+      { at: end, translate: [0, distance(params.exit_dy, 'y', legacyMotionDefaults.exit.dropPx)] as [number, number], opacity: 0 },
     ];
   }
 
   if (clip.preset === 'popPulse') {
-    const anchorY = numberOr(params.anchor_y, 0);
+    const anchorY = distance(params.anchor_y, 'y', 0);
     const settled = Math.min(end, start + enterDuration);
-    const pulseStart = resolveParamTime(params, 'pulse_start', beats, Math.min(end, settled + 8));
-    const pulsePeak = resolveParamTime(params, 'pulse_peak', beats, Math.min(end, pulseStart + 2));
-    const pulseEnd = resolveParamTime(params, 'pulse_end', beats, Math.min(end, pulsePeak + 1));
+    const pulseStart = resolveParamTime(params, 'pulse_start', beats, Math.min(end, settled + 8), context.durationS);
+    const pulsePeak = resolveParamTime(params, 'pulse_peak', beats, Math.min(end, pulseStart + 2), context.durationS);
+    const pulseEnd = resolveParamTime(params, 'pulse_end', beats, Math.min(end, pulsePeak + 1), context.durationS);
     return [
       {
         at: start,
@@ -262,18 +269,18 @@ const compileClipFrames = (clip: AnimationClip, beats: Record<string, number>) =
   if (clip.preset === 'waveSweep') {
     const waveFadePct = numberOr(params.fade_pct, legacyMotionDefaults.waveSweep.fadePct);
     const sweepEnd = Math.min(end, start + numberOr(params.sweep_duration_pct, legacyMotionDefaults.waveSweep.durationPct));
-    const startY = params.start_y !== undefined ? numberOr(params.start_y, 0) : numberOr(params.hold_y, 0);
-    const endY = params.end_y !== undefined ? numberOr(params.end_y, 0) : numberOr(params.hold_y, 0);
+    const startY = params.start_y !== undefined ? distance(params.start_y, 'y', 0) : distance(params.hold_y, 'y', 0);
+    const endY = params.end_y !== undefined ? distance(params.end_y, 'y', 0) : distance(params.hold_y, 'y', 0);
     return [
       {
         at: start,
-        translate: [numberOr(params.start_x, 0), startY] as [number, number],
+        translate: [distance(params.start_x, 'x', 0), startY] as [number, number],
         opacity: 1,
         easing: String(params.ease_in || legacyMotionDefaults.waveSweep.easing),
       },
-      { at: sweepEnd, translate: [numberOr(params.end_x, 0), endY] as [number, number], opacity: 1 },
-      { at: Math.max(sweepEnd, end - waveFadePct), translate: [numberOr(params.end_x, 0), endY] as [number, number], opacity: 1 },
-      { at: end, translate: [numberOr(params.end_x, 0), endY] as [number, number], opacity: 0 },
+      { at: sweepEnd, translate: [distance(params.end_x, 'x', 0), endY] as [number, number], opacity: 1 },
+      { at: Math.max(sweepEnd, end - waveFadePct), translate: [distance(params.end_x, 'x', 0), endY] as [number, number], opacity: 1 },
+      { at: end, translate: [distance(params.end_x, 'x', 0), endY] as [number, number], opacity: 0 },
     ];
   }
 
@@ -283,13 +290,14 @@ const compileClipFrames = (clip: AnimationClip, beats: Record<string, number>) =
 export const compileAnimationClips = (
   clips: AnimationClip[] = [],
   beats: Record<string, number> = {},
-) => {
+  context: MotionContext = {},
+): CreativeKeyframe[] => {
   if (!clips.length) return normalizeKeyframes([]);
   // Merge clips raw, fill missing channels, THEN pad to 0/100. Per-clip padding
   // used to inject opacity-only frames at 0% that stole translate from [0,0]
   // and made waveSweep layers creep on-stage before their real start.
   const merged = clips
-    .flatMap((clip) => compileClipFrames(clip, beats))
+    .flatMap((clip) => compileClipFrames(clip, beats, context))
     .sort((a, b) => a.at - b.at);
   return normalizeKeyframes(fillMotionChannels(merged));
 };

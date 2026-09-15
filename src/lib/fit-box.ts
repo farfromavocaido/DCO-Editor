@@ -69,6 +69,9 @@ export const applyFitBudgetToBox = ({
   values?: Record<string, unknown>;
   fit?: Record<string, unknown> | null;
 }) => {
+  if (fit?.frame === 'fixed' || fit?.frame === 'auto') {
+    return { top, height, localTop, budgetApplied: false };
+  }
   const budget = fitBudgetHeight(values, fit);
   if (budget == null) {
     return {

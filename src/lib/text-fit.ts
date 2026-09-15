@@ -44,7 +44,37 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
     return true;
   }
 
+  var fitStyleKeys = ['fontSize', 'letterSpacing', 'whiteSpace', 'overflow', 'textOverflow', 'maxHeight', 'transform', 'alignItems', 'height'];
+  var fitAttributeKeys = ['data-fit-clipped', 'data-fit-clip-reason', 'data-fit-status', 'data-fit-requested-size', 'data-fit-rendered-size'];
+
+  function cssStyleName(key) {
+    return key.replace(/[A-Z]/g, function (letter) { return '-' + letter.toLowerCase(); });
+  }
+
+  function rememberAuthoredFitStyles(element) {
+    if (element.__dcoFitAuthored) return;
+    var authored = { values: {}, priorities: {}, title: element.getAttribute('title') };
+    fitStyleKeys.forEach(function (key) {
+      authored.values[key] = element.style[key];
+      authored.priorities[key] = element.style.getPropertyPriority ? element.style.getPropertyPriority(cssStyleName(key)) : '';
+    });
+    element.__dcoFitAuthored = authored;
+  }
+
+  function restoreAuthoredFitStyles(element) {
+    var authored = element.__dcoFitAuthored;
+    if (!authored) return;
+    fitStyleKeys.forEach(function (key) {
+      if (element.style.setProperty) element.style.setProperty(cssStyleName(key), authored.values[key] || '', authored.priorities[key]);
+      else element.style[key] = authored.values[key];
+    });
+    fitAttributeKeys.forEach(function (key) { element.removeAttribute(key); });
+    if (authored.title === null) element.removeAttribute('title');
+    else element.setAttribute('title', authored.title);
+  }
+
   function resetStyles(element) {
+    rememberAuthoredFitStyles(element);
     if (element.__dcoExplicitFitStyles) element.style.height = element.__dcoExplicitFitStyles.height;
     element.style.fontSize = '';
     element.style.letterSpacing = '';
@@ -319,6 +349,7 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
   }
 
   function fitPolicyMember(element, rule) {
+    rememberAuthoredFitStyles(element);
     var keys = ['fontSize', 'letterSpacing', 'whiteSpace', 'overflow', 'textOverflow', 'height'];
     // Preserve authored inline values, including font size. Repeated font-load
     // fitting starts from authored styles rather than the previous fitted size.
@@ -482,6 +513,12 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
   }
 
   function applyRules(root, rules) {
+    // A feed update can empty or hide a previously fitted node. Restore every
+    // candidate before membership checks, including now-inactive scoped rules,
+    // so prior rows cannot leave font sizes, clipping or transforms behind.
+    (rules || []).forEach(function (rule) {
+      root.querySelectorAll(rule.selector || '.' + rule.cssClass).forEach(restoreAuthoredFitStyles);
+    });
     var results = [];
     var policyGroups = {};
     (rules || []).forEach(function (rule) {

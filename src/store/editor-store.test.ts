@@ -236,3 +236,58 @@ test('virtual group alignment undo removes newly authored local coordinates', ()
  useEditorStore.getState().undo();
  assert.deepEqual(useEditorStore.getState().creativeDocument,doc);
 });
+
+test('fixed-copy export uses active effective row while font export preserves every row', async () => {
+  const { selectPreviewFeedRow, creativeDocumentForExport } = await import('./editor-store');
+  const rows = [
+    {Unique_ID:'default',Default:true,offer_count_num:1,heading1_text:'Default headline'},
+    {Unique_ID:'active',Default:false,offer_count_num:3,heading1_text:'Active headline',heading1_text_300x250:'MPU active'},
+  ];
+  const state = {creativeDocument:{feed:{sampleRows:rows},sizes:{}}, feedDraft:{rows,selectedIndex:1}, offerCount:3,tcMode:'tcs_units',ctaShape:'rectangle',includeRoundelFrame:true,frameCount:4,roundelMode:'split',navyHeadlines:false};
+  const row = selectPreviewFeedRow(state);
+  assert.equal(row.Unique_ID,'active');
+  assert.equal(row.tc_type_enum,'tcs_units');
+  assert.equal(row.include_roundel_frame_bool,true);
+  assert.equal(selectPreviewFeedRow({...state,size:'970x250',percent:80}),row,'unrelated editor changes keep selector reference stable');
+  const outlined = creativeDocumentForExport(state,'outline');
+  assert.deepEqual(outlined.feed.sampleRows,[{...row,Default:true}]);
+  assert.equal(outlined.feed.sampleRows[0].heading1_text_300x250,'MPU active');
+  assert.deepEqual(creativeDocumentForExport(state,'font').feed.sampleRows,rows);
+  assert.equal(rows[0].Default,true);assert.equal(rows[1].Default,false);
+});
+
+test('snapshot source identity rejects source changes but allows internal size walking', async () => {
+  const { outlineSnapshotSource, assertOutlineSnapshotSource } = await import('./editor-store');
+  const rows = [{Unique_ID:'a',offer_count_num:1}];
+  const state = {activeCampaignId:'a',creativeDocument:{sizes:{}},feedDraft:{rows,selectedIndex:0},offerCount:1};
+  const source = outlineSnapshotSource(state);
+  assert.doesNotThrow(()=>assertOutlineSnapshotSource(source,{...state,size:'300x250',percent:55}));
+  assert.throws(()=>assertOutlineSnapshotSource(source,{...state,creativeDocument:{sizes:{}}}),/changed during/);
+  assert.throws(()=>assertOutlineSnapshotSource(source,{...state,offerCount:3}),/changed during/);
+  assert.throws(()=>assertOutlineSnapshotSource(source,{...state,activeCampaignId:'b'}),/changed during/);
+});
+
+test('every fixed-copy download posts only the selected row', async () => {
+  const original = useEditorStore.getState();
+  const originalFetch = globalThis.fetch;
+  const rows = [{Default:true,offer_count_num:1,heading1_text:'first'}, {Default:false,offer_count_num:3,heading1_text:'chosen'}];
+  const payloads: Array<{document:{feed:{sampleRows:Array<Record<string, unknown>>}}}> = [];
+  try {
+    useEditorStore.setState({creativeDocument:{feed:{sampleRows:rows},sizes:{}},feedDraft:{rows,selectedIndex:1},offerCount:3,tcMode:'tcs_units',ctaShape:'rectangle',includeRoundelFrame:false,frameCount:3,
+      captureOutlineSnapshotsForAllSizes:async()=>({})});
+    globalThis.fetch = async (_url, options) => {
+      payloads.push(JSON.parse(String(options?.body || '{}')));
+      return new Response(JSON.stringify({error:'test stops before file download'}),{status:400,headers:{'content-type':'application/json'}});
+    };
+    for (const method of ['buildHtml','exportClientPackage','exportBasePackage']) {
+      await assert.rejects(useEditorStore.getState()[method]({renderMode:'outline'}),/test stops/);
+    }
+    assert.equal(payloads.length,3);
+    for (const payload of payloads) {
+      assert.equal(payload.document.feed.sampleRows.length,1);
+      assert.equal(payload.document.feed.sampleRows[0].heading1_text,'chosen');
+      assert.equal(payload.document.feed.sampleRows[0].offer_count_num,3);
+      assert.equal(payload.document.feed.sampleRows[0].Default,true);
+    }
+  } finally { globalThis.fetch=originalFetch;useEditorStore.setState(original,true); }
+});

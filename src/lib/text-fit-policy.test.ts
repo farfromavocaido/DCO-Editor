@@ -129,3 +129,36 @@ test.each(['clip','truncate'])('explicit font sizing can override a scoped %s mo
   const result = await fit('<p class="target">a very long headline</p>', effective);
   expect(result.after[0].size).toBeLessThan(20);
 });
+
+test.each([
+  {name:'legacy shrink',policy:{minFontSize:8,wrap:true,maxLines:1}},
+  {name:'legacy truncate',policy:{static:'truncate'}},
+  {name:'explicit fixed',policy:{frame:'fixed',minFontSize:8,wrap:true,maxLines:1}},
+])('$name resets prior fitting before text becomes empty and state-hidden', async ({policy}) => {
+  const page=await browser.newPage();
+  try {
+    await page.setContent('<style>.target{font:20px/1.2 sans-serif;width:30px;height:24px;margin:0}.final .target{font-size:16.5px;visibility:hidden}</style><p class="target" title="Authored title" style="letter-spacing:0.2px;transform:translateX(2px)">supercalifragilisticexpialidocious</p>');
+    const result=await page.evaluate(({source,policy})=>{
+      const engine=new Function(`return ${source}`)()(window);
+      const target=document.querySelector<HTMLElement>('.target')!;
+      const original=target.outerHTML;
+      const rules=[{cssClass:'target',...policy}];
+      engine.applyRules(document.body,rules);
+      const wasClipped=target.getAttribute('data-fit-clipped');
+      target.textContent='';document.body.className='final';
+      engine.applyRules(document.body,rules);
+      const read=(element:HTMLElement)=>{
+        const css=getComputedStyle(element);
+        return {size:css.fontSize,tracking:css.letterSpacing,transform:css.transform,overflow:css.overflow,maxHeight:css.maxHeight,whiteSpace:css.whiteSpace,title:element.getAttribute('title'),fitAttributes:[...element.attributes].filter(attr=>attr.name.startsWith('data-fit-')).map(attr=>[attr.name,attr.value])};
+      };
+      const reused=read(target);
+      const template=document.createElement('template');template.innerHTML=original;
+      const fresh=template.content.firstElementChild as HTMLElement;fresh.textContent='';document.body.append(fresh);
+      engine.applyRules(document.body,rules);
+      return {wasClipped,reused,fresh:read(fresh)};
+    },{source:textFitEngineSource(),policy});
+    expect(result.wasClipped).toBe('true');
+    expect(result.reused).toEqual(result.fresh);
+    expect(result.reused).toMatchObject({size:'16.5px',title:'Authored title',fitAttributes:[]});
+  } finally {await page.close();}
+});

@@ -146,6 +146,67 @@ export const selectSelectedFeedRow = (state) => {
     || EMPTY_FEED_ROW;
 };
 
+/** Effective feed input shared by production preview and fixed-copy export. */
+const previewRowCache = new WeakMap();
+export const selectPreviewFeedRow = (state) => {
+  const row = selectSelectedFeedRow(state);
+  const defaults = controlsFromFeedRow(row);
+  const controls = {
+    offerCount: state.offerCount ?? defaults.offerCount,
+    tcMode: state.tcMode ?? defaults.tcMode,
+    ctaShape: state.ctaShape ?? defaults.ctaShape,
+    includeRoundelFrame: state.includeRoundelFrame ?? defaults.includeRoundelFrame,
+    frameCount: state.frameCount ?? defaults.frameCount,
+    navyHeadlines: state.navyHeadlines ?? defaults.navyHeadlines,
+  };
+  const key = JSON.stringify(controls);
+  let entries = previewRowCache.get(row);
+  if (!entries) { entries = new Map(); previewRowCache.set(row, entries); }
+  if (!entries.has(key)) entries.set(key, {
+    ...row,
+    offer_count_num: Number(controls.offerCount),
+    tc_type_enum: controls.tcMode === 'prices' || controls.tcMode === 'tcs_units' ? 'tcs_units' : 'tcs_only',
+    cta_type_enum: controls.ctaShape === 'rect' || controls.ctaShape === 'rectangle' ? 'rectangle' : 'roundel',
+    include_roundel_frame_bool: Boolean(controls.includeRoundelFrame || Number(controls.frameCount) === 4),
+    navy_headlines_bool: Boolean(controls.navyHeadlines),
+  });
+  return entries.get(key);
+};
+
+export const creativeDocumentForExport = (state, renderMode = 'font') => state.creativeDocument ? {
+  ...state.creativeDocument,
+  feed: {
+    ...state.creativeDocument.feed,
+    sampleRows: renderMode === 'outline'
+      ? [{ ...selectPreviewFeedRow(state), Default: true }]
+      : (state.feedDraft.rows?.length ? state.feedDraft.rows : state.creativeDocument.feed.sampleRows),
+  },
+} : null;
+
+export const outlineSnapshotSource = (state) => ({
+  campaignId: state.activeCampaignId,
+  document: state.creativeDocument,
+  rows: state.feedDraft.rows,
+  selectedIndex: state.feedDraft.selectedIndex,
+  row: JSON.stringify(selectPreviewFeedRow(state)),
+});
+export const assertOutlineSnapshotSource = (source, state) => {
+  const current = outlineSnapshotSource(state);
+  if (source.campaignId !== current.campaignId || source.document !== current.document
+    || source.rows !== current.rows || source.selectedIndex !== current.selectedIndex || source.row !== current.row) {
+    throw new Error('Creative document or active feed changed during outline snapshot capture. Please export again.');
+  }
+};
+
+const lockSnapshotInteractions = () => {
+  const body = window.document.body;
+  const previous = body.inert;
+  body.inert = true;
+  const stopKeyboard = event => { event.preventDefault(); event.stopImmediatePropagation(); };
+  window.addEventListener('keydown', stopKeyboard, true);
+  return () => { body.inert = previous; window.removeEventListener('keydown', stopKeyboard, true); };
+};
+
 // Fit rules come from the same module the exporter embeds into Studio HTML
 // (src/lib/text-fit-rules.ts) so the preview always matches the served ad.
 const creativeFitRules = (state) => (
@@ -1516,32 +1577,40 @@ export const useEditorStore = create<any>((set, get) => ({
    */
   captureOutlineSnapshotsForAllSizes: async () => {
     const state = get();
-    const sizes = state.sizes?.length
-      ? state.sizes
-      : Object.keys(state.creativeDocument?.sizes || {});
+    const source = outlineSnapshotSource(state);
+    const sizes = state.sizes?.length ? state.sizes : Object.keys(state.creativeDocument?.sizes || {});
     const originalSize = state.size;
     const snapshots: PresentationSnapshots = {};
-    const waitForPaint = () => new Promise((resolve) => {
-      window.requestAnimationFrame(() => {
-        window.requestAnimationFrame(() => resolve(undefined));
-      });
-    });
-
-    get().setStatus('Snapshotting editor presentation for outline export…');
-    for (const size of sizes) {
-      if (size !== get().size) {
-        await get().loadSize(size);
+    const waitForPaint = () => new Promise(resolve => window.requestAnimationFrame(() => window.requestAnimationFrame(resolve)));
+    get().setStatus('Snapshotting active feed presentation for outline export…');
+    const unlockInteractions = lockSnapshotInteractions();
+    try {
+      for (const size of sizes) {
+        assertOutlineSnapshotSource(source, get());
+        set({ size });
+        await waitForPaint();
+        const stage = await waitForProductionStage(size);
+        assertOutlineSnapshotSource(source, get());
+        if (get().size !== size) throw new Error('Ad size changed during outline snapshot capture. Please export again.');
+        snapshots[size] = withProductionRestPose(stage, () => capturePresentationSnapshot(stage, size));
       }
-      await waitForPaint();
-      const stage = await waitForProductionStage(size);
-      snapshots[size] = await withProductionRestPose(stage, () => capturePresentationSnapshot(stage, size));
+      assertOutlineSnapshotSource(source, get());
+      return snapshots;
+    } finally {
+      // Never overwrite a user's newer source when detecting a concurrent edit.
+      let unchanged = true;
+      try { assertOutlineSnapshotSource(source, get()); } catch { unchanged = false; }
+      try {
+        if (unchanged && originalSize) {
+          set({ size: originalSize, selectedLayerId: state.selectedLayerId, selectedTargetId: state.selectedTargetId,
+            selectedTargetIds: state.selectedTargetIds, selectedClipId: state.selectedClipId,
+            isolationPath: state.isolationPath, isolatedGroupId: state.isolatedGroupId });
+          await waitForPaint();
+          await waitForProductionStage(originalSize);
+          assertOutlineSnapshotSource(source, get());
+        }
+      } finally { unlockInteractions(); }
     }
-    if (originalSize && get().size !== originalSize) {
-      await get().loadSize(originalSize);
-      await waitForPaint();
-      await waitForProductionStage(originalSize);
-    }
-    return snapshots;
   },
 
   /**
@@ -1581,19 +1650,7 @@ export const useEditorStore = create<any>((set, get) => ({
       });
     });
 
-    const mergedDocumentForState = () => {
-      const state = get();
-      if (!state.creativeDocument) return null;
-      return {
-        ...state.creativeDocument,
-        feed: {
-          ...state.creativeDocument.feed,
-          sampleRows: state.feedDraft.rows?.length
-            ? state.feedDraft.rows
-            : state.creativeDocument.feed.sampleRows,
-        },
-      };
-    };
+    const mergedDocumentForState = (renderMode = 'font') => creativeDocumentForExport(get(), renderMode);
 
     const loadCampaignQuiet = async (campaignId) => {
       set({
@@ -1628,6 +1685,7 @@ export const useEditorStore = create<any>((set, get) => ({
       throw new Error('No non-DCO campaigns registered for Sync Zips');
     }
 
+    const unlockSyncInteractions = lockSnapshotInteractions();
     get().setStatus('Syncing zips (statics + DCO agency)…');
     const payloads = [];
     const dcoDocument = original.activeCampaignId === 'sse-dco'
@@ -1636,7 +1694,7 @@ export const useEditorStore = create<any>((set, get) => ({
     try {
       const alreadySnapshotted = new Set();
       if (previewCampaigns.some((entry) => entry.id === original.activeCampaignId)) {
-        const document = mergedDocumentForState();
+        const document = mergedDocumentForState('outline');
         if (!document) throw new Error('No creative document loaded');
         const presentationSnapshots = await get().captureOutlineSnapshotsForAllSizes();
         payloads.push({
@@ -1651,7 +1709,7 @@ export const useEditorStore = create<any>((set, get) => ({
         if (alreadySnapshotted.has(entry.id)) continue;
         get().setStatus(`Snapshotting ${entry.name} for Sync Zips…`);
         await loadCampaignQuiet(entry.id);
-        const document = mergedDocumentForState();
+        const document = mergedDocumentForState('outline');
         if (!document) throw new Error(`Failed to load ${entry.id}`);
         const presentationSnapshots = await get().captureOutlineSnapshotsForAllSizes();
         payloads.push({
@@ -1708,6 +1766,7 @@ export const useEditorStore = create<any>((set, get) => ({
         historyIndex: -1,
       });
       writeEditorSession({ campaignId: original.activeCampaignId, size: original.size });
+      unlockSyncInteractions();
       await waitForPaint();
       const stage = window.document.querySelector('[data-preview-stage]');
       if (stage) get().applyPreviewTextFitting(stage);
@@ -1724,17 +1783,7 @@ export const useEditorStore = create<any>((set, get) => ({
           ? 'Exporting outlined SVG HTML for all sizes'
           : 'Exporting Studio-ready HTML for all sizes',
     );
-    const creativeDocument = state.creativeDocument
-      ? {
-          ...state.creativeDocument,
-          feed: {
-            ...state.creativeDocument.feed,
-            sampleRows: state.feedDraft.rows?.length
-              ? state.feedDraft.rows
-              : state.creativeDocument.feed.sampleRows,
-          },
-        }
-      : null;
+    const creativeDocument = creativeDocumentForExport(state, renderMode);
     const presentationSnapshots = renderMode === 'outline'
       ? await get().captureOutlineSnapshotsForAllSizes()
       : undefined;
@@ -1787,17 +1836,7 @@ export const useEditorStore = create<any>((set, get) => ({
         : (includeValidator ? 'Building validated client preview ZIP' : 'Building client preview ZIP'),
     );
     const state = get();
-    const creativeDocument = state.creativeDocument
-      ? {
-          ...state.creativeDocument,
-          feed: {
-            ...state.creativeDocument.feed,
-            sampleRows: state.feedDraft.rows?.length
-              ? state.feedDraft.rows
-              : state.creativeDocument.feed.sampleRows,
-          },
-        }
-      : null;
+    const creativeDocument = creativeDocumentForExport(state, renderMode);
     const presentationSnapshots = renderMode === 'outline'
       ? await get().captureOutlineSnapshotsForAllSizes()
       : undefined;
@@ -1855,17 +1894,7 @@ export const useEditorStore = create<any>((set, get) => ({
             : 'Building agency base ZIP';
     get().setStatus(statusLabel);
     const state = get();
-    const creativeDocument = state.creativeDocument
-      ? {
-          ...state.creativeDocument,
-          feed: {
-            ...state.creativeDocument.feed,
-            sampleRows: state.feedDraft.rows?.length
-              ? state.feedDraft.rows
-              : state.creativeDocument.feed.sampleRows,
-          },
-        }
-      : null;
+    const creativeDocument = creativeDocumentForExport(state, renderMode);
     const presentationSnapshots = renderMode === 'outline'
       ? await get().captureOutlineSnapshotsForAllSizes()
       : undefined;
@@ -1950,7 +1979,7 @@ export const useEditorStore = create<any>((set, get) => ({
     input.name = 'payload';
     input.value = JSON.stringify({
       document: creativeDocument,
-      row: selectSelectedFeedRow(state),
+      row: selectPreviewFeedRow(state),
     });
     form.appendChild(input);
     window.document.body.appendChild(form);

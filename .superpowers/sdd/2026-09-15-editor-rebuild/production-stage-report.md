@@ -44,3 +44,18 @@ Reproducible local scripts and screenshots are under gitignored `output/playwrig
 - Selection/hit rectangles use browser geometry; existing snapping, alignment and group-scale write calculations still use authored geometry. This does not change creative paint but may warrant dedicated transformed-parent interaction refinement.
 - Default parity requires the same asset inputs and editor-only hidden layers disabled. The preview includes packaged background fallback; canonical feed-only agency delivery differs when no feed background is supplied. Parent integration is checking packaged-output parity separately.
 - Full-suite/build, all-format package comparison, persisted save/reload, and end-to-end outline package verification belong to parent Task 4. This report does not claim those have passed.
+
+## Cross-review follow-up
+
+The earlier reload-visibility constraint is superseded: the stage now keeps a ready production iframe mounted while a second iframe loads its replacement. It swaps only after the latest request's assets/runtime are ready. A small updating badge replaces the full-stage mask. A separate selection outline follows ongoing drag/resize while compilation is pending. New pointer/double/context interactions are blocked against an obsolete frame; already captured window gestures continue. Snapshot readiness is invalidated immediately, even though old paint remains visible. Consumers should wait for `[data-production-frame][data-ready="true"]`, not visibility alone.
+
+Additional corrections:
+
+- Gesture undo now captures the entire document before/after so inherited ownership is restored, rather than leaving local overrides after numeric undo. Virtual canvas groups resize their actual members instead of the offers group.
+- Selection clipping diagnostics prefer target ID over the potentially overwritten family class entry.
+- GET preview campaign IDs resolve with `readCreativeDocumentForCampaign`; a Hiker query regression was observed returning 500 before this fix.
+- Solo T&Cs map to `terms-solo` even without an element ID. `hiddenTargets` records text hidden by computed CSS visibility or ancestor display, and hidden nested offers are no longer reinserted by the collector's second pass. Animation opacity does not suppress snapshots. Explicit visible descendants inside visibility-hidden ancestors remain measurable.
+
+Cross-review findings sent to parent: missing solo terms silently entered the approximate outline fitter (fixed collector, parent adds strict snapshot completeness); original parity measurement omitted text line geometry and decoded image identity (parent upgrading its script). The local and CDN Museo hashes were verified identical by parent.
+
+Additional real-browser checks passed: twelve continuous pointer moves retain visible production paint and a moving external selection outline; delaying a feed render preserves paint while blocking stale clicks, double-clicks and context menus; existing drag/resize/undo/seek/campaign and multiselect/zoom/feed checks passed after buffering. Local scripts `verify-production-buffering.mjs` and `verify-production-stale-input.mjs` record these checks. Scoped tests now include target-specific clipping, GET campaign mapping, solo T&Cs, nested visibility and visibility overrides. Standalone regression additions are in the parent's `production-snapshot.test.ts` integration file.

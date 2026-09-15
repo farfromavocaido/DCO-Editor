@@ -37,11 +37,12 @@ export function readProductionTargets(stage: HTMLElement, layerIds: string[]): P
   const record = (id: string, element: HTMLElement | null) => {
     if (!element) return;
     // Parent visibility and opacity matter: invisible wrappers must not steal hits.
+    if (win.getComputedStyle(element).visibility === 'hidden') return;
     let node: HTMLElement | null = element;
     let opacity = 1;
     while (node) {
       const style = win.getComputedStyle(node);
-      if (style.display === 'none' || style.visibility === 'hidden') return;
+      if (style.display === 'none') return;
       opacity *= Number(style.opacity);
       if (node === stage) break;
       node = node.parentElement;
@@ -53,7 +54,7 @@ export function readProductionTargets(stage: HTMLElement, layerIds: string[]): P
   };
   for (const id of layerIds) {
     const domId = id.replace(/^offer-slot-(\d+)$/, 'offer$1');
-    const element = (id === 'terms-solo' ? stage.querySelector('.terms-solo') : stage.ownerDocument.getElementById(domId)) as HTMLElement | null;
+    const element = (id === 'terms-solo' ? stage.querySelector('#TC_Solo [data-dco-field="tc_terms_text"], .terms-solo') : stage.ownerDocument.getElementById(domId)) as HTMLElement | null;
     record(id, element);
     if (id.startsWith('offer-slot-') && element) {
       for (const child of ['offer-value', 'offer-subline']) record(`${id}::${child}`, element.querySelector(`.${child}`));
@@ -140,4 +141,8 @@ export function resolveProductionHit(targets: ProductionTarget[], elements: Elem
     }
   }
   return null;
+}
+
+export function productionTargetClipped(flags: Map<string, boolean> | undefined, targetId: string, cssClass: string): boolean {
+  return Boolean(flags?.get(targetId) ?? flags?.get(cssClass));
 }

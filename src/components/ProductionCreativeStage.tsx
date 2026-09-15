@@ -20,19 +20,21 @@ type Props = {
   onContextMenu: (event: React.MouseEvent, targetId: string) => void;
 };
 
+type RenderedCreative = { html: string; generation: number; document: Props['document']; row: Props['row']; size: string };
+
 export function ProductionCreativeStage(props: Props) {
   const { document, row, size, percent, layerIds, hiddenLayerIds, onTargets } = props;
-  const frameRef = useRef<HTMLIFrameElement>(null);
+  const frameRefs = useRef(new Map<number, HTMLIFrameElement>());
   const requests = useRef(createRenderGeneration());
   const latest = useRef(props);
   latest.current = props;
-  const [render, setRender] = useState<{ html: string; generation: number; document: Props["document"]; row: Props["row"]; size: string } | null>(null);
+  const [displayed, setDisplayed] = useState<RenderedCreative | null>(null);
+  const [pending, setPending] = useState<RenderedCreative | null>(null);
   const [error, setError] = useState('');
-  const [ready, setReady] = useState(false);
   const [targets, setTargets] = useState<ProductionTarget[]>([]);
 
-  const measure = () => {
-    const doc = frameRef.current?.contentDocument;
+  const measure = (frame?: HTMLIFrameElement) => {
+    const doc = (frame || (displayed && frameRefs.current.get(displayed.generation)))?.contentDocument;
     const stage = doc?.querySelector<HTMLElement>('.stage.motion-ready');
     if (!doc || !stage) return;
     const current = latest.current;
@@ -45,7 +47,7 @@ export function ProductionCreativeStage(props: Props) {
       doc.head.append(hiddenStyle);
     }
     hiddenStyle.textContent = Array.from(current.hiddenLayerIds).map(id => {
-      const selector = id === 'terms-solo' ? '.terms-solo' : `#${CSS.escape(id.replace(/^offer-slot-(\d+)$/, 'offer$1'))}`;
+      const selector = id === 'terms-solo' ? '#TC_Solo' : `#${CSS.escape(id.replace(/^offer-slot-(\d+)$/, 'offer$1'))}`;
       return `${selector}, ${selector} * { visibility: hidden !important; }`;
     }).join('\n');
     // Force layout after the browser evaluates animation currentTime.
@@ -58,10 +60,9 @@ export function ProductionCreativeStage(props: Props) {
     const generation = requests.current.next();
     const controller = new AbortController();
     beginProductionStage(size);
-    setReady(false);
     setError('');
-    setTargets([]);
-    onTargets([]);
+    setPending(null);
+    if (displayed?.size !== size) { setTargets([]); onTargets([]); }
     // Coalesce pointer-move writes, while generation invalidation is immediate.
     const timer = setTimeout(async () => {
       try {
@@ -71,7 +72,7 @@ export function ProductionCreativeStage(props: Props) {
         });
         if (!response.ok) throw new Error((await response.json()).error || 'Creative render failed');
         const html = await response.text();
-        if (requests.current.isCurrent(generation)) setRender({ html, generation, document, row, size });
+        if (requests.current.isCurrent(generation)) setPending({ html, generation, document, row, size });
       } catch (cause) {
         if (!requests.current.isCurrent(generation) || controller.signal.aborted) return;
         const failure = cause instanceof Error ? cause : new Error(String(cause));
@@ -82,18 +83,20 @@ export function ProductionCreativeStage(props: Props) {
     return () => { clearTimeout(timer); controller.abort(); requests.current.next(); };
   }, [document, row, size, onTargets]);
 
-  useEffect(() => { if (ready) measure(); }, [percent, ready, layerIds, hiddenLayerIds]);
+  useEffect(() => { if (displayed?.size === size) measure(); }, [percent, displayed, layerIds, hiddenLayerIds, size]);
 
-  const loaded = async (generation: number) => {
-    const doc = frameRef.current?.contentDocument;
+  const loaded = async (render: RenderedCreative, frame: HTMLIFrameElement) => {
+    const generation = render.generation;
+    const doc = frame.contentDocument;
     if (!doc || !requests.current.isCurrent(generation)) return;
     try {
       const stage = await waitForProductionDocument(doc);
-      if (!requests.current.isCurrent(generation) || doc !== frameRef.current?.contentDocument) return;
+      if (!requests.current.isCurrent(generation) || render.document !== latest.current.document || render.row !== latest.current.row || render.size !== latest.current.size) return;
       stage.dataset.productionStage = 'true';
-      measure();
+      measure(frame);
       publishProductionStage(stage);
-      setReady(true);
+      setDisplayed(render);
+      setPending(null);
     } catch (cause) {
       if (!requests.current.isCurrent(generation)) return;
       const failure = cause instanceof Error ? cause : new Error(String(cause));
@@ -102,7 +105,8 @@ export function ProductionCreativeStage(props: Props) {
     }
   };
 
-  const displayReady = ready && render?.document === document && render?.row === row && render?.size === size;
+  const displayReady = displayed?.document === document && displayed?.row === row && displayed?.size === size;
+  const hasDisplay = displayed?.size === size;
   const hit = (event: React.MouseEvent) => {
     if (!displayReady) return null;
     const bounds = event.currentTarget.getBoundingClientRect();
@@ -110,20 +114,28 @@ export function ProductionCreativeStage(props: Props) {
     const x = (event.clientX - bounds.left) * canvas.width / bounds.width;
     const y = (event.clientY - bounds.top) * canvas.height / bounds.height;
     // Browser paint order resolves overlapping animation frames and nested copy.
-    const elements = frameRef.current?.contentDocument?.elementsFromPoint(x, y) || [];
+    const elements = (displayed && frameRefs.current.get(displayed.generation))?.contentDocument?.elementsFromPoint(x, y) || [];
     return resolveProductionHit(targets, elements, x, y);
   };
 
   return <>
-    {render && <iframe key={render.generation} ref={frameRef} title="Production creative" data-production-frame="true" data-ready={displayReady ? "true" : "false"}
-      srcDoc={render.html} onLoad={() => loaded(render.generation)}
-      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0, pointerEvents: 'none', visibility: displayReady ? 'visible' : 'hidden' }} />}
+    {[displayed, pending].filter((item): item is RenderedCreative => Boolean(item)).map(render => {
+      const isDisplayed = render === displayed;
+      return <iframe key={render.generation}
+        ref={frame => { if (frame) frameRefs.current.set(render.generation, frame); else frameRefs.current.delete(render.generation); }}
+        title={isDisplayed ? 'Production creative' : 'Preparing production creative'}
+        data-production-frame={isDisplayed || !displayed ? 'true' : undefined}
+        data-pending-production-frame={!isDisplayed ? 'true' : undefined}
+        data-ready={isDisplayed && displayReady ? 'true' : 'false'}
+        srcDoc={render.html} onLoad={event => loaded(render, event.currentTarget)}
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0, pointerEvents: 'none', visibility: isDisplayed && hasDisplay ? 'visible' : 'hidden' }} />;
+    })}
     <div data-production-controls="true" style={{position:'absolute', inset:0}}
       onPointerDown={event => { const id = hit(event); if (id) props.onPointerDown(event, id); }}
       onDoubleClick={event => { const id = hit(event); if (id) { event.stopPropagation(); props.onDoubleClick(id); } }}
       onContextMenu={event => { const id = hit(event); if (id) props.onContextMenu(event, id); }} />
-    {!displayReady && <div role={error ? 'alert' : 'status'} style={{position:'absolute', inset:0, display:'grid', placeItems:'center', background:'#fff', color:'#333', padding:16, fontSize:12, pointerEvents:'none'}}>
-      {error || 'Rendering production creative…'}
+    {!displayReady && <div role={error ? 'alert' : 'status'} style={{position:'absolute', ...(hasDisplay ? {left:4, bottom:4, maxWidth:'calc(100% - 8px)'} : {inset:0}), background:hasDisplay ? '#ffffffe6' : '#fff', color:'#333', padding:hasDisplay ? 4 : 16, fontSize:12, pointerEvents:'none'}}>
+      {error || (hasDisplay ? 'Updating preview…' : 'Rendering production creative…')}
     </div>}
   </>;
 }

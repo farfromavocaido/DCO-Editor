@@ -70,3 +70,11 @@ it('rest snapshot restores the paused browser pose even if the collector fails',
   expect(restored.currentTime).toBe(5625);
   expect(restored.pause).toHaveBeenCalledOnce();
 });
+
+it('selected clipping diagnostics prefer the selected object over later family members', async () => {
+  const { productionTargetClipped } = await import('./production-stage');
+  const flags = new Map([['offer-slot-1::offer-subline', true], ['offer-slot-2::offer-subline', false], ['offer-subline', false]]);
+  expect(productionTargetClipped(flags, 'offer-slot-1::offer-subline', 'offer-subline')).toBe(true);
+  flags.set('offer-subline', true);
+  expect(productionTargetClipped(flags, 'offer-slot-2::offer-subline', 'offer-subline')).toBe(false);
+});

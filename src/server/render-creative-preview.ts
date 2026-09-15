@@ -1,5 +1,5 @@
 import { CDN_FONT_URLS } from '@/lib/brand-font';
-import { readCreativeDocument } from '@/server/creative-document';
+import { readCreativeDocumentForCampaign } from '@/server/creative-document';
 import { renderStudioReadyHtml, renderWipHtml } from '@/server/creative-exporter';
 
 type PreviewOptions = {
@@ -10,7 +10,7 @@ type PreviewOptions = {
 };
 
 export async function renderCreativeSourceHtml(size: string, options: PreviewOptions = {}) {
-  const document = options.document || await readCreativeDocument(options.campaignId);
+  const document = options.document || await readCreativeDocumentForCampaign(options.campaignId);
   return await renderStudioReadyHtml(document, size, {
     assetBasePath: options.assetBasePath ?? '/',
     // Same Studio CDN Museo the editor stage loads — fit + symbol metrics match serve.
@@ -20,7 +20,7 @@ export async function renderCreativeSourceHtml(size: string, options: PreviewOpt
 
 /** Standalone preview with the current feed row baked in for local QA only. */
 export async function renderCreativePreviewHtml(size: string, options: PreviewOptions = {}) {
-  const document = options.document || await readCreativeDocument(options.campaignId);
+  const document = options.document || await readCreativeDocumentForCampaign(options.campaignId);
   const html = await renderCreativeSourceHtml(size, { ...options, document });
   const row = options.row ?? (document as Record<string, any>).feed?.sampleRows?.[0];
   if (!row) return html;

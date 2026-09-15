@@ -18,3 +18,10 @@ test('POST rejects a malformed document before attempting a production render', 
   }), { params: Promise.resolve({size:'300x250'}) });
   expect(response.status).toBe(400);
 });
+
+test('GET view resolves a campaign ID through its registry instead of treating it as a path', async () => {
+  const { GET } = await import('@/app/api/creative/[size]/view/route');
+  const response = await GET(new Request('http://localhost/api/creative/300x250/view?campaign=sse-hiker-welcome'), { params: Promise.resolve({size:'300x250'}) });
+  expect(response.status).toBe(200);
+  expect(await response.text()).toContain('Hiker');
+});

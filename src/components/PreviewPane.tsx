@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ProductionCreativeStage } from '@/components/ProductionCreativeStage';
-import { unionProductionBounds, type ProductionTarget } from '@/lib/production-stage';
+import { getProductionStage, productionTargetClipped, unionProductionBounds, type ProductionTarget } from '@/lib/production-stage';
 import {
   collectSnapBounds,
   computeSnap,
@@ -62,8 +62,11 @@ const dimensionValue = (value: unknown, fallback: number, basis = fallback) => {
 export function PreviewPane() {
   const [contextMenu, setContextMenu] = useState(null);
   const [productionTargets, setProductionTargets] = useState<ProductionTarget[]>([]);
+  const [manipulationBounds, setManipulationBounds] = useState(null);
+  const manipulationActive = useRef(false);
   const receiveProductionTargets = useCallback((targets: ProductionTarget[]) => {
     setProductionTargets(targets);
+    if (!manipulationActive.current) setManipulationBounds(null);
     const fitResults = new Map<string, number>();
     const fitTrackings = new Map<string, number>();
     const fitClipped = new Map<string, boolean>();
@@ -193,6 +196,7 @@ export function PreviewPane() {
   }, [drillIntoCanvasTarget, exitGroupIsolation, isolatedGroupId, selectedTargetId]);
 
   const startSelectionDrag = useCallback((event: React.PointerEvent, deepestTargetId: string) => {
+    if (!getProductionStage()) return;
     if (event.button !== 0) return;
     event.preventDefault();
     event.stopPropagation();
@@ -223,6 +227,8 @@ export function PreviewPane() {
       })
       .filter(Boolean);
     if (!dragTargets.length) return;
+    const beforeDocument = state.creativeDocument;
+    const ghostStart = unionProductionBounds(productionTargets.filter(target => dragTargetIds.includes(target.id)));
 
     const startX = event.clientX;
     const startY = event.clientY;
@@ -270,6 +276,8 @@ export function PreviewPane() {
         setSnapGuides({ vertical: [], horizontal: [] });
       }
 
+      manipulationActive.current = true;
+      if (ghostStart) setManipulationBounds({ ...ghostStart, left: ghostStart.left + deltaLeft, top: ghostStart.top + deltaTop });
       lastPositions = dragTargets.map((item) => {
         const left = Math.round(item.startLeft + deltaLeft);
         const top = Math.round(item.startTop + deltaTop);
@@ -283,20 +291,16 @@ export function PreviewPane() {
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
       setSnapGuides({ vertical: [], horizontal: [] });
-      const history = [];
-      dragTargets.forEach((item, index) => {
-        const last = lastPositions[index];
-        history.push(
-          { kind: 'creativeTarget', size, targetId: item.targetId, activeScopes, field: 'left', before: item.startLeft, after: last.left },
-          { kind: 'creativeTarget', size, targetId: item.targetId, activeScopes, field: 'top', before: item.startTop, after: last.top },
-        );
-      });
-      pushHistory(history);
+      manipulationActive.current = false;
+      const afterDocument = useEditorStore.getState().creativeDocument;
+      if (afterDocument !== beforeDocument) pushHistory([{ kind: 'creativeDocument', before: beforeDocument, after: afterDocument }]);
+      else setManipulationBounds(null);
+      if (getProductionStage()) setManipulationBounds(null);
     };
 
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp, { once: true });
-  }, [activeScopes, document, handleCanvasTargetClick, lockedLayerIds, pushHistory, scale, size, sizeCreative, updateTargetValue, userGuides]);
+  }, [activeScopes, document, handleCanvasTargetClick, lockedLayerIds, pushHistory, scale, size, sizeCreative, updateTargetValue, userGuides, productionTargets]);
 
   const handleAlign = useCallback((mode: string) => {
     const guides = alignSelectedTarget(mode);
@@ -327,12 +331,15 @@ export function PreviewPane() {
   }, [clearCanvasSelection]);
 
   const startGroupResize = useCallback((event: React.PointerEvent, handle: string) => {
+    if (!getProductionStage()) return;
     if (!selectedTarget?.bounds) return;
-    const memberIds = selectedTarget.kind === 'group'
+    const memberIds = selectedTarget.id === OFFERS_BLOCK_ID
       ? scaleTargetIdsForOfferGroup(offerCount, document, size, activeScopes)
       : filterManipulationTargetIds(selectedTarget.members || [], document, size, activeScopes);
     const snapshots = buildGroupScaleSnapshots(document, size, memberIds, activeScopes);
     if (!snapshots.length) return;
+    const beforeDocument = useEditorStore.getState().creativeDocument;
+    const ghostStart = unionProductionBounds(productionTargets.filter(target => memberIds.includes(target.id)));
 
     event.preventDefault();
     event.stopPropagation();
@@ -369,6 +376,8 @@ export function PreviewPane() {
       moved = true;
       const dx = (moveEvent.clientX - startX) / scale;
       const dy = (moveEvent.clientY - startY) / scale;
+      manipulationActive.current = true;
+      if (ghostStart) setManipulationBounds(frameResizeWritesFromHandle(ghostStart, handle, dx, dy, { keepRatio: resizeMode === 'scale' || moveEvent.shiftKey }).next);
       const nextScale = uniformScaleFromHandle(startBounds, handle, dx, dy);
       applyScale(nextScale, false);
     };
@@ -377,28 +386,19 @@ export function PreviewPane() {
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
       if (!moved) return;
-      const history = [];
-      for (const snapshot of snapshots) {
-        for (const write of scaledFieldWritesForSnapshot(snapshot, lastScale, anchor)) {
-          history.push({
-            kind: 'creativeTarget',
-            size,
-            targetId: snapshot.targetId,
-            activeScopes,
-            field: write.field,
-            before: snapshot.raw[write.field],
-            after: write.value,
-          });
-        }
-      }
-      pushHistory(history);
+      manipulationActive.current = false;
+      const afterDocument = useEditorStore.getState().creativeDocument;
+      if (afterDocument !== beforeDocument) pushHistory([{ kind: 'creativeDocument', before: beforeDocument, after: afterDocument }]);
+      else setManipulationBounds(null);
+      if (getProductionStage()) setManipulationBounds(null);
     };
 
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp, { once: true });
-  }, [activeScopes, document, offerCount, pushHistory, scale, selectedTarget, size, updateTargetValue]);
+  }, [activeScopes, document, offerCount, pushHistory, scale, selectedTarget, size, updateTargetValue, productionTargets, resizeMode]);
 
   const startTargetResize = useCallback((event: React.PointerEvent, handle: string) => {
+    if (!getProductionStage()) return;
     if (selectedTarget?.kind === 'group' || selectedTarget?.kind === 'multi') {
       startGroupResize(event, handle);
       return;
@@ -408,6 +408,8 @@ export function PreviewPane() {
       : (selectedTarget?.id && !String(selectedTarget.id).startsWith('group:') ? selectedTarget.id : selectedTargetId);
     const target = targetId ? findCreativeTarget(document, size, targetId, activeScopes) : null;
     if (event.button !== 0 || !target) return;
+    const beforeDocument = useEditorStore.getState().creativeDocument;
+    const ghostStart = unionProductionBounds(productionTargets.filter(item => item.id === targetId));
     event.preventDefault();
     event.stopPropagation();
     setContextMenu(null);
@@ -457,6 +459,8 @@ export function PreviewPane() {
     const onMove = (moveEvent: PointerEvent) => {
       const dx = (moveEvent.clientX - startX) / scale;
       const dy = (moveEvent.clientY - startY) / scale;
+      manipulationActive.current = true;
+      if (ghostStart) setManipulationBounds(frameResizeWritesFromHandle(ghostStart, handle, dx, dy, { keepRatio: resizeMode === 'scale' || moveEvent.shiftKey }).next);
       if (resizeMode === 'scale' && scaleSnapshot) {
         const result = scaledResizeWritesFromHandle(scaleSnapshot, handle, dx, dy);
         const anchor = groupResizeAnchor(scaleSnapshot.bounds, handle);
@@ -481,28 +485,16 @@ export function PreviewPane() {
     const onUp = () => {
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
-      const history = [];
-      for (const [historyTargetId, touchedFields] of touchedFieldsByTarget) {
-        const beforeValues = rawStarts.get(historyTargetId) || {};
-        const afterValues = lastByTarget.get(historyTargetId) || {};
-        for (const field of touchedFields) {
-          history.push({
-            kind: 'creativeTarget',
-            size,
-            targetId: historyTargetId,
-            activeScopes,
-            field,
-            before: beforeValues[field],
-            after: afterValues[field],
-          });
-        }
-      }
-      pushHistory(history);
+      manipulationActive.current = false;
+      const afterDocument = useEditorStore.getState().creativeDocument;
+      if (afterDocument !== beforeDocument) pushHistory([{ kind: 'creativeDocument', before: beforeDocument, after: afterDocument }]);
+      else setManipulationBounds(null);
+      if (getProductionStage()) setManipulationBounds(null);
     };
 
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp, { once: true });
-  }, [activeScopes, document, pushHistory, resizeMode, scale, selectedTarget, selectedTargetId, size, startGroupResize, updateTargetValue]);
+  }, [activeScopes, document, pushHistory, resizeMode, scale, selectedTarget, selectedTargetId, size, startGroupResize, updateTargetValue, productionTargets]);
 
   const layers = [...(sizeCreative?.layers || [])].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
   const layerById = new Map(layers.map((layer) => [layer.id, layer]));
@@ -513,7 +505,7 @@ export function PreviewPane() {
   const selectionBox = (() => {
     if (!selectedTarget) return null;
     const ids = selectedTarget.members?.length ? selectedTarget.members : [selectedTarget.id];
-    const bounds = unionProductionBounds(productionTargets.filter(target => ids.includes(target.id)));
+    const bounds = manipulationBounds || unionProductionBounds(productionTargets.filter(target => ids.includes(target.id)));
     if (!bounds) return null;
     return { ...bounds, transform: 'none', label: selectedTarget.label,
       scope: selectedTarget.kind === 'group' ? 'group' : selectedTarget.coordinateScope || 'canvas',
@@ -533,13 +525,11 @@ export function PreviewPane() {
     || (String(selectedTargetId || '').includes('::offer-subline') ? 'offer-subline' : '')
     || (String(selectedTargetId || '').includes('::offer-value') ? 'offer-value' : '')
     || (isHeadlineLayer(selectedTarget?.layer) ? HEADLINE_CSS_CLASS : '');
-  const selectionFitClipped = Boolean(
-    selectionFitCssClass && fitClipped?.get?.(selectionFitCssClass),
-  );
+  const selectionFitClipped = productionTargetClipped(fitClipped, selectedTarget?.id || '', selectionFitCssClass);
   const showOffersBlock = Number(offerCount) >= 2;
-  const distributeCount = selectedTarget?.kind === 'group'
+  const distributeCount = selectedTarget?.id === OFFERS_BLOCK_ID
     ? offerBlockLayerIds(offerCount).length
-    : selectedTarget?.kind === 'multi'
+    : selectedTarget?.kind === 'multi' || selectedTarget?.kind === 'group'
       ? selectedTarget.members.filter((targetId) => !String(targetId).includes('::')).length
       : 0;
   const canDistribute = distributeCount >= 2;
@@ -706,6 +696,7 @@ export function PreviewPane() {
                 className={`selection-box selection-scope-${selectionBox.scope} selection-kind-${selectionKind}`}
                 data-bounds-mode={selectionBox.boundsMode}
                 data-selection-kind={selectionKind}
+                data-manipulation-preview={manipulationBounds ? "true" : undefined}
                 style={{
                   left: selectionBox.left,
                   top: selectionBox.top,

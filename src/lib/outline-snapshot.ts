@@ -53,6 +53,8 @@ export type SizePresentationSnapshot = {
   size: string;
   texts: Record<string, TextPresentationSnapshot>;
   positions: Record<string, PositionSnapshot>;
+  /** Targets excluded by CSS visibility/display, independent of animation opacity. */
+  hiddenTargets?: string[];
 };
 
 export type PresentationSnapshots = Record<string, SizePresentationSnapshot>;
@@ -265,6 +267,7 @@ export const captureDisplayedLines = (element: HTMLElement | null | undefined): 
 const textKeyForElement = (element: Element) => {
   const id = element.getAttribute('id');
   if (id) return id;
+  if (element.classList.contains('terms-solo') || (element.closest('#TC_Solo') && element.getAttribute('data-dco-field') === 'tc_terms_text')) return 'terms-solo';
   const slot = element.closest('[id^="offer"]');
   const slotId = slot?.getAttribute('id') || '';
   if (element.classList.contains('offer-value') && slotId) {
@@ -290,6 +293,18 @@ export const capturePresentationSnapshot = (
 ): SizePresentationSnapshot => {
   const texts: Record<string, TextPresentationSnapshot> = {};
   const positions: Record<string, PositionSnapshot> = {};
+  const hiddenTargets = new Set<string>();
+  const isHidden = (element: HTMLElement) => {
+    const win = element.ownerDocument.defaultView || window;
+    if (win.getComputedStyle(element).visibility === 'hidden') return true;
+    let node: HTMLElement | null = element;
+    while (node) {
+      const css = win.getComputedStyle(node);
+      if (css.display === 'none') return true;
+      node = node.parentElement;
+    }
+    return false;
+  };
   if (!stage || !('querySelectorAll' in stage)) {
     return { size, texts, positions };
   }
@@ -305,7 +320,7 @@ export const capturePresentationSnapshot = (
     const key = textKeyForElement(element);
     if (!key || texts[key]) return;
     const style = (element.ownerDocument.defaultView || window).getComputedStyle(element);
-    if (style.visibility === 'hidden') return;
+    if (isHidden(element)) { hiddenTargets.add(key); return; }
     const fontSize = cssNumber(style.fontSize, 0);
     if (fontSize <= 0) return;
     const text = normalizeCapturedText(element.textContent);
@@ -334,7 +349,8 @@ export const capturePresentationSnapshot = (
       : slotId.replace(/^offer/, 'offer-slot-');
     const value = slotEl.querySelector('.offer-value') as HTMLElement | null;
     const sub = slotEl.querySelector('.offer-subline') as HTMLElement | null;
-    if (value) {
+    if (value && isHidden(value)) hiddenTargets.add(`${normalizedSlot}::offer-value`);
+    if (value && !isHidden(value)) {
       const key = `${normalizedSlot}::offer-value`;
       const style = (value.ownerDocument.defaultView || window).getComputedStyle(value);
       const fontSize = cssNumber(style.fontSize, 0);
@@ -349,7 +365,8 @@ export const capturePresentationSnapshot = (
         scaleOfferSymbols: true,
       };
     }
-    if (sub) {
+    if (sub && isHidden(sub)) hiddenTargets.add(`${normalizedSlot}::offer-subline`);
+    if (sub && !isHidden(sub)) {
       const key = `${normalizedSlot}::offer-subline`;
       const style = (sub.ownerDocument.defaultView || window).getComputedStyle(sub);
       const fontSize = cssNumber(style.fontSize, 0);
@@ -368,7 +385,7 @@ export const capturePresentationSnapshot = (
   const recordPosition = (element: HTMLElement, key: string) => {
     if (!key || positions[key]) return;
     const style = (element.ownerDocument.defaultView || window).getComputedStyle(element);
-    if (style.visibility === 'hidden') return;
+    if (isHidden(element)) { hiddenTargets.add(key); return; }
     // Prefer inline layout writes (side-by-side / placePlus); else computed CSS box.
     const left = element.style.left
       ? cssNumber(element.style.left, NaN)
@@ -453,5 +470,5 @@ export const capturePresentationSnapshot = (
     if (sub) recordOfferTextGeometry(sub, `${normalizedSlot}::offer-subline`, false);
   });
 
-  return { size, texts, positions };
+  return { size, texts, positions, hiddenTargets: [...hiddenTargets] };
 };

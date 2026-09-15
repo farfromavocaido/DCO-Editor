@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { activeOwnershipRules, resolveOwnedFields } from "./creative-ownership";
 
 import { excludedHeadlineLayerIdsForVariantRule } from '@/lib/creative-css';
 
@@ -257,25 +258,8 @@ const activeVariantRulesForIdentity = (
   identity: { layerId?: string; cssClass?: string },
   activeScopes: string[] = [],
 ) => {
-  const scopes = (activeScopes || []).map(String);
-  const matched = matchedVariantRulesUnfiltered(sizeCreative, identity, scopes);
-  if (!scopes.includes('offers-0')) return matched;
-
-  if (isCtaIdentity(identity)) {
-    const compound = matched.filter((rule: Record<string, unknown>) => (
-      String(rule.scope || '').startsWith('offers-0.')
-    ));
-    return compound.length ? compound : matched;
-  }
-
-  if (isRoundelIdentity(identity)) {
-    const owned = matched.filter((rule: Record<string, unknown>) => (
-      isOffers0OwnedScope(rule.scope)
-    ));
-    return owned.length ? owned : matched;
-  }
-
-  return matched;
+  return activeOwnershipRules(sizeCreative?.variantRules || [], identity, activeScopes)
+    .filter((rule) => !propsOnlyHideVisibility(rule.props));
 };
 
 const findActiveVariantRule = (
@@ -317,7 +301,7 @@ const childDefinitionForTarget = (childId: string) => (
   offerChildDefinitions.find((child) => child.id === childId || child.cssClass === childId) || null
 );
 
-export const findCreativeTarget = (
+const findCreativeTargetLegacy = (
   document: Record<string, unknown> | null,
   size: string,
   targetId: string,
@@ -465,6 +449,22 @@ export const findCreativeTarget = (
   };
 };
 
+/** Resolve each field independently; a later unrelated rule is not its owner. */
+export const findCreativeTarget = (document, size, targetId, activeScopes = []) => {
+  const target = findCreativeTargetLegacy(document, size, targetId, activeScopes);
+  if (!target) return null;
+  const sizeCreative = currentSizeCreative(document, size);
+  const parsed = parseCreativeTargetId(targetId);
+  const layer = findCreativeLayer(document, size, parsed.layerId);
+  const identity = identityForTarget(layer, parsed);
+  const rules = activeOwnershipRules(sizeCreative.variantRules || [], identity, activeScopes)
+    .filter((rule) => !propsOnlyHideVisibility(rule.props));
+  const baseline = findCreativeTargetLegacy({ ...document, sizes: { ...document.sizes, [size]: { ...sizeCreative, variantRules: [] } } }, size, targetId, []);
+  const props = resolveOwnedFields(baseline.values, baseline.writeSource, rules);
+  const fit = resolveOwnedFields(baseline.fit, { kind: parsed.isNested ? 'classRule' : 'layerFit', layerId: layer.id, cssClass: target.cssClass }, rules, 'fit');
+  return { ...target, values: props.values, base: props.values, fit: fit.values, valueProvenance: props.provenance, fitProvenance: fit.provenance };
+};
+
 export const groupedCreativeLayers = (layers: Array<Record<string, unknown>> = []) => {
   const groups: Array<{ label: string; layers: Array<Record<string, unknown>> }> = [];
   const byLabel = new Map<string, { label: string; layers: Array<Record<string, unknown>> }>();
@@ -609,52 +609,23 @@ export const updateCreativeTargetFit = (
   const layer = findCreativeLayer(next, size, parsed.layerId);
   if (!layer) throw new Error(`Unknown layer: ${parsed.layerId}`);
 
+  const target = findCreativeTarget(document, size, targetId, activeScopes);
+  const rules = activeOwnershipRules(sizeCreative.variantRules || [], identityForTarget(layer, parsed), activeScopes);
+  const source = target.fitProvenance?.[field];
+  const rule = source?.kind === 'variantRule'
+    ? rules.find((item) => item.id === source.ruleId)
+    : rules.filter((item) => !isInkColorScopeRule(item)).at(-1);
+  if (rule) {
+    rule.fit = { ...(rule.fit || {}), [field]: value };
+    return next;
+  }
   if (parsed.isNested) {
-    const child = childDefinitionForTarget(parsed.childId);
-    if (!child) throw new Error(`Unknown nested target: ${parsed.childId}`);
-    const variantRule = findActiveVariantRule(sizeCreative, { cssClass: child.cssClass }, activeScopes);
-    if (variantRule) {
-      variantRule.fit = {
-        ...(variantRule.fit || {}),
-        [field]: value,
-      };
-      return next;
-    }
-    const classRule = ensureClassRule(sizeCreative, child.cssClass);
-    classRule.fit = {
-      ...(classRule.fit || {}),
-      [field]: value,
-    };
+    const classRule = ensureClassRule(sizeCreative, target.cssClass);
+    classRule.fit = { ...(classRule.fit || {}), [field]: value };
     return next;
   }
-
-  const cssClass = layer.base?.cssClass || layer.id;
-  const scopes = (activeScopes || []).map(String);
-  if (
-    scopes.includes('offers-0')
-    && isRoundelIdentity({ layerId: String(layer.id || ''), cssClass })
-  ) {
-    const layerId = String(layer.id || cssClass);
-    const rule = ensureOffers0RoundelRule(
-      sizeCreative,
-      offers0RoundelWriteScope(layerId, scopes),
-      layerId,
-    );
-    if (!rule.fit) {
-      rule.fit = lastUnfilteredVariantFit(
-        sizeCreative,
-        { layerId, cssClass: layerId },
-        scopes,
-      ) || {};
-    }
-    rule.fit = {
-      ...(rule.fit || {}),
-      [field]: value,
-    };
-    return next;
-  }
-
-  return updateCreativeLayerFit(document, size, parsed.layerId, field, value);
+  layer.fit = { ...(layer.fit || {}), [field]: value };
+  return next;
 };
 
 export const replaceCreativeLayer = (
@@ -1347,6 +1318,13 @@ export const updateCreativeTargetValue = (
   const parsed = parseCreativeTargetId(targetId);
   const layer = findCreativeLayer(next, size, parsed.layerId);
   if (!layer) throw new Error(`Unknown layer: ${parsed.layerId}`);
+
+  const source = findCreativeTarget(document, size, targetId, activeScopes)?.valueProvenance?.[field];
+  if (source?.kind === 'variantRule') {
+    const rule = (sizeCreative.variantRules || []).find((item) => item.id === source.ruleId);
+    rule.props = { ...(rule.props || {}), [field]: value };
+    return next;
+  }
 
   if (parsed.isNested) {
     const child = childDefinitionForTarget(parsed.childId);

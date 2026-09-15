@@ -408,6 +408,10 @@ export const useEditorStore = create<any>((set, get) => ({
   },
 
   applyHistoryChange: (change, value) => {
+    if (change.kind === 'creativeDocument') {
+      set({ creativeDocument: value, creativeDirty: true });
+      return;
+    }
     if (change.kind === 'creativeBase') {
       get().applyCreativeLayerBaseValue(change.size, change.layerId, change.field, value);
       return;
@@ -917,18 +921,10 @@ export const useEditorStore = create<any>((set, get) => ({
     const activeScopes = state.activeScopes();
     const target = findCreativeTarget(state.creativeDocument, size, targetId, activeScopes);
     const nextValue = value === '' ? '' : typeof value === 'boolean' ? value : Number.isFinite(Number(value)) ? Number(value) : value;
-    const previous = before ?? target?.fit?.[field];
+    const previousDocument = state.creativeDocument;
     get().applyCreativeTargetFitValue(size, targetId, activeScopes, field, nextValue);
     if (record) {
-      get().pushHistory([{
-        kind: 'creativeTargetFit',
-        size,
-        targetId,
-        activeScopes,
-        field,
-        before: previous,
-        after: nextValue,
-      }]);
+      get().pushHistory([{ kind: 'creativeDocument', before: previousDocument, after: get().creativeDocument }]);
     }
   },
 
@@ -978,7 +974,7 @@ export const useEditorStore = create<any>((set, get) => ({
     const previous = before ?? target.values?.[field];
     get().applyCreativeTargetValue(size, targetId, activeScopes, field, nextValue);
     if (record) {
-      get().pushHistory([{ kind: 'creativeTarget', size, targetId, activeScopes, field, before: previous, after: nextValue }]);
+      get().pushHistory([{ kind: 'creativeDocument', before: state.creativeDocument, after: get().creativeDocument }]);
     }
   },
 
@@ -991,7 +987,7 @@ export const useEditorStore = create<any>((set, get) => ({
     const next = updateCreativeTargetSharedValue(state.creativeDocument, size, targetId, field, nextValue);
     set({ creativeDocument: next, creativeDirty: true });
     get().setStatus('Updated shared reusable style', 'warn');
-    get().pushHistory([{ kind: 'creativeTargetShared', size, targetId, field, before: target.values?.[field], after: nextValue }]);
+    get().pushHistory([{ kind: 'creativeDocument', before: state.creativeDocument, after: next }]);
   },
 
   clearCreativeTargetOverrides: (targetId, fields = []) => {
@@ -1002,7 +998,7 @@ export const useEditorStore = create<any>((set, get) => ({
     const next = clearCreativeTargetActiveOverride(state.creativeDocument, state.size, targetId, activeScopes, fields);
     set({ creativeDocument: next, creativeDirty: true });
     get().setStatus('Cleared active override', 'warn');
-    get().pushHistory([{ kind: 'creativeTargetOverrideClear', size: state.size, targetId, activeScopes, fields, before, after: null }]);
+    get().pushHistory([{ kind: 'creativeDocument', before: state.creativeDocument, after: next }]);
   },
 
   promoteCreativeTargetToSharedStyle: (targetId, fields = []) => {
@@ -1013,7 +1009,7 @@ export const useEditorStore = create<any>((set, get) => ({
     const next = promoteCreativeTargetToSharedStyle(state.creativeDocument, state.size, targetId, activeScopes, fields);
     set({ creativeDocument: next, creativeDirty: true });
     get().setStatus('Saved active values as shared style', 'warn');
-    get().pushHistory([{ kind: 'creativeTargetSharedPromote', size: state.size, targetId, activeScopes, fields, before, after: null }]);
+    get().pushHistory([{ kind: 'creativeDocument', before: state.creativeDocument, after: next }]);
   },
 
   copyHeadlineOfferLayout: (sourceOfferCount, targetOfferCount = null) => {

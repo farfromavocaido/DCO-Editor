@@ -242,16 +242,8 @@ export function CreativeInspector() {
     && selectedLayer.kind !== 'image'
     && (selectedLayer.kind !== 'group' || isNestedTextTarget)
     && selectedLayer.id !== 'cta';
-  const activeFit = selectedTarget.kind === 'nested'
-    ? (selectedTarget.fit || {})
-    : (selectedLayer.fit || {});
-  // Nested fit (offer value/subline) writes to classRule under offers-1 and to
-  // variantRules[].fit under offers-2/3 — same independence as layout props.
-  const applyFitUpdate = (field, value) => (
-    selectedTarget.kind === 'nested'
-      ? updateTargetFit(selectedTarget.id, field, value)
-      : updateLayerFit(selectedLayer.id, field, value)
-  );
+  const activeFit = selectedTarget.fit || {};
+  const applyFitUpdate = (field, value) => updateTargetFit(selectedTarget.id, field, value);
   const fittedFontSize = activeCssClass ? fitResults.get(activeCssClass) : undefined;
   const fittedTracking = activeCssClass && fitTrackings?.has?.(activeCssClass)
     ? fitTrackings.get(activeCssClass)
@@ -317,7 +309,7 @@ export function CreativeInspector() {
             {boxFields.map((field) => (
               <FieldControl
                 key={field}
-                label={field}
+                label={`${field} · ${selectedTarget.valueProvenance?.[field]?.scope || selectedTarget.valueProvenance?.[field]?.kind || "base"}`}
                 type="text"
                 value={selectedTarget.values?.[field] ?? ''}
                 onChange={(value) => updateTargetValue(selectedTarget.id, field, value)}
@@ -463,7 +455,7 @@ export function CreativeInspector() {
             {canTextFit ? (
               <div className="inspector-grid">
                 <SelectControl
-                  label="Fit mode"
+                  label={`Fit mode · ${selectedTarget.fitProvenance?.mode?.scope || selectedTarget.fitProvenance?.mode?.kind || "default"}`}
                   value={fitMode}
                   onChange={(value) => applyFitUpdate('mode', value)}
                 >
@@ -473,7 +465,7 @@ export function CreativeInspector() {
                   <option value="truncate">truncate</option>
                 </SelectControl>
                 <FieldControl
-                  label="Max lines"
+                  label={`Max lines · ${selectedTarget.fitProvenance?.maxLines?.scope || selectedTarget.fitProvenance?.maxLines?.kind || "default"}`}
                   type="text"
                   value={activeFit?.maxLines ?? ''}
                   onChange={(value) => applyFitUpdate('maxLines', value)}

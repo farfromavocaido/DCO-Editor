@@ -188,3 +188,13 @@ test('timeline edits to named clip boundaries update the active frame timing pro
   assert.equal(next.clock.profiles['frames-4'].swap, 60);
   assert.equal(next.clock.profiles['frames-3'].swap, 65);
 });
+
+test('active fit undo restores the exact document without leaving an inherited override', () => {
+  const doc = {version:1,sizes:{'300x250':{canvas:{width:300,height:250},layers:[{id:'terms',kind:'text',base:{fontSize:6},fit:{maxLines:4},clips:[]}],variantRules:[{id:'zero',layerId:'terms',scope:'offers-0',props:{top:210},fit:{minFontSize:10}}]}}};
+  useEditorStore.setState({creativeDocument:doc,size:'300x250',offerCount:0,history:[],historyIndex:-1});
+  useEditorStore.getState().updateCreativeTargetFitValue('terms','maxLines',2);
+  useEditorStore.getState().undo();
+  assert.deepEqual(useEditorStore.getState().creativeDocument,doc);
+  useEditorStore.getState().redo();
+  assert.equal(useEditorStore.getState().creativeDocument.sizes['300x250'].variantRules[0].fit.maxLines,2);
+});

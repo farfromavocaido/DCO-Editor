@@ -22,10 +22,10 @@ function htmlResponse(html: string) {
   });
 }
 
-export async function GET(_request: Request, { params }: Params) {
+export async function GET(request: Request, { params }: Params) {
   try {
     const { size } = await params;
-    const html = await renderCreativePreviewHtml(size);
+    const html = await renderCreativePreviewHtml(size, { campaignId: new URL(request.url).searchParams.get('campaign') || undefined });
     return htmlResponse(html);
   } catch (error) {
     return Response.json(
@@ -39,7 +39,13 @@ export async function POST(request: Request, { params }: Params) {
   try {
     const { size } = await params;
     const payload = await readPreviewPayload(request);
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)
+      || (payload.document !== undefined && (!payload.document || typeof payload.document !== 'object' || Array.isArray(payload.document) || !payload.document.sizes))
+      || (payload.row !== undefined && (!payload.row || typeof payload.row !== 'object' || Array.isArray(payload.row)))) {
+      return Response.json({ error: 'Expected a creative document and feed row object' }, { status: 400 });
+    }
     const html = await renderCreativePreviewHtml(size, {
+      campaignId: new URL(request.url).searchParams.get('campaign') || undefined,
       document: payload.document,
       row: payload.row,
     });

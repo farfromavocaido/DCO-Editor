@@ -182,7 +182,7 @@ export const captureDisplayedLines = (element: HTMLElement | null | undefined): 
 
   // nowrap / offer-value / scaled currency symbols → hard breaks only.
   try {
-    const style = typeof window !== 'undefined' ? window.getComputedStyle(element) : null;
+    const style = typeof window !== 'undefined' ? (element.ownerDocument.defaultView || window).getComputedStyle(element) : null;
     const nowrap = Boolean(style && /nowrap/i.test(style.whiteSpace || ''));
     const offerValue = element.classList?.contains('offer-value')
       || Boolean(element.querySelector?.('.sym-pct, .offer-value-run'));
@@ -218,7 +218,7 @@ export const captureDisplayedLines = (element: HTMLElement | null | undefined): 
   // Soft-wrap detection: require a top jump roughly ≥ half a line box so nested
   // inline (different font-size) cannot register as a new line.
   const fontSize = cssNumber(
-    typeof window !== 'undefined' ? window.getComputedStyle(element).fontSize : '',
+    typeof window !== 'undefined' ? (element.ownerDocument.defaultView || window).getComputedStyle(element).fontSize : '',
     12,
   );
   const minLineJump = Math.max(4, fontSize * 0.45);
@@ -304,7 +304,7 @@ export const capturePresentationSnapshot = (
     }
     const key = textKeyForElement(element);
     if (!key || texts[key]) return;
-    const style = window.getComputedStyle(element);
+    const style = (element.ownerDocument.defaultView || window).getComputedStyle(element);
     if (style.visibility === 'hidden') return;
     const fontSize = cssNumber(style.fontSize, 0);
     if (fontSize <= 0) return;
@@ -336,7 +336,7 @@ export const capturePresentationSnapshot = (
     const sub = slotEl.querySelector('.offer-subline') as HTMLElement | null;
     if (value) {
       const key = `${normalizedSlot}::offer-value`;
-      const style = window.getComputedStyle(value);
+      const style = (value.ownerDocument.defaultView || window).getComputedStyle(value);
       const fontSize = cssNumber(style.fontSize, 0);
       const lines = captureDisplayedLines(value);
       texts[key] = {
@@ -351,7 +351,7 @@ export const capturePresentationSnapshot = (
     }
     if (sub) {
       const key = `${normalizedSlot}::offer-subline`;
-      const style = window.getComputedStyle(sub);
+      const style = (sub.ownerDocument.defaultView || window).getComputedStyle(sub);
       const fontSize = cssNumber(style.fontSize, 0);
       const lines = captureDisplayedLines(sub);
       texts[key] = {
@@ -367,7 +367,7 @@ export const capturePresentationSnapshot = (
 
   const recordPosition = (element: HTMLElement, key: string) => {
     if (!key || positions[key]) return;
-    const style = window.getComputedStyle(element);
+    const style = (element.ownerDocument.defaultView || window).getComputedStyle(element);
     if (style.visibility === 'hidden') return;
     // Prefer inline layout writes (side-by-side / placePlus); else computed CSS box.
     const left = element.style.left

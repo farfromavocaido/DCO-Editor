@@ -3,9 +3,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { compileAnimationClips, formatScale3d, frameAtPercent } from '@/lib/creative-compiler';
-import { blurBackdropFilter, blurIsActive, isBlurLayer } from '@/lib/blur-layer';
-import { cssName, cssValue, structuredRuleCss } from '@/lib/creative-css';
+import { ProductionCreativeStage } from '@/components/ProductionCreativeStage';
+import { unionProductionBounds, type ProductionTarget } from '@/lib/production-stage';
 import {
   collectSnapBounds,
   computeSnap,
@@ -21,88 +20,32 @@ import {
   uniformScaleFromHandle,
 } from '@/lib/canvas-group-scale';
 import {
-  BG_IMAGE_LAYER_ID,
   currentSizeCreative,
   findCreativeTarget,
   HEADLINE_CSS_CLASS,
-  isBackgroundLayer,
   isHeadlineLayer,
   targetIdForLayerChild,
 } from '@/lib/creative-model';
-import { gradientBackgroundImage, isGradientLayer } from '@/lib/gradient-layer';
-import { clipsForProfile, compileHeadlineKeyframes, headlineAct4DisplayText } from '@/lib/headline-motion';
 import {
   deriveSelectedTarget,
   filterManipulationTargetIds,
   getGroupCanvasBounds,
   OFFERS_BLOCK_ID,
-  linkedTargetIdsForSelection,
   offerBlockLayerIds,
   selectionHierarchy,
-  targetMatchesSelection,
 } from '@/lib/selection-groups';
 import { zoomLabel, zoomScale } from '@/lib/canvas-zoom';
-import { adPlumbingCss } from '@/lib/ad-plumbing-css';
-import { offerValueSymbolCss } from '@/lib/offer-value-symbols';
 import { resolveOfferPlusLayout } from '@/lib/offer-plus-layout';
 import {
-  assetUrl,
   feedFieldForEditableTarget,
-  fieldValue,
-  previewBackgroundSrc,
-  wrapOfferValueSymbols,
 } from '@/lib/preview-utils';
 import { resizeHandlesForSelection, selectionChromeKind } from '@/lib/selection-chrome';
-import { activeFrameScope, beatsForScopes } from '@/lib/timing-profiles';
 import { activeScopesFromControls } from '@/lib/feed-model';
-import { applySizeTextOverridesToRow } from '@/lib/feed-size-text';
-import {
-  offerTargetAtPoint as resolveOfferTargetAtPoint,
-  shouldBypassOfferCapture,
-} from '@/lib/offer-hit-testing';
 import { useStageResize } from '@/hooks/useStageResize';
 import { EditorIcon } from '@/components/EditorIcon';
 import { PlayheadReadout } from '@/components/PlayheadReadout';
 import { AlignControls, AlignmentGuides, ViewportRulersFrame } from '@/components/CanvasWorkspace';
 import { selectSelectedFeedRow, useEditorStore } from '@/store/editor-store';
-const renderLayerRule = (layer: Record<string, unknown>) => {
-  if (isHeadlineLayer(layer) || isBackgroundLayer(layer)) return '';
-  const base = layer.base || {};
-  const cssClass = base.cssClass || layer.id;
-  const decl = Object.entries(base)
-    .filter(([key]) => key !== 'cssClass')
-    .map(([key, value]) => {
-      const cssKey = key === 'fontSize' ? 'font-size' : cssName(key);
-      return `      ${cssKey}: ${cssValue(key, value)};`;
-    });
-  if (isGradientLayer(layer)) {
-    const backgroundImage = gradientBackgroundImage(layer.gradient || {});
-    if (backgroundImage) decl.push(`      background-image: ${backgroundImage};`);
-  }
-  if (isBlurLayer(layer)) {
-    const filter = blurBackdropFilter(layer.blur || {});
-    decl.push(`      backdrop-filter: ${filter};`);
-    decl.push(`      -webkit-backdrop-filter: ${filter};`);
-    // Tiny fill helps some WebKit builds actually sample the backdrop.
-    decl.push('      background-color: rgba(255, 255, 255, 0.01);');
-  }
-  decl.push('      position: absolute;');
-  // Gradient/blur author visibility on base (hidden) + offers-0 override;
-  // other layers still inherit the stage visibility cascade.
-  if (!isGradientLayer(layer) && !isBlurLayer(layer)) decl.push('      visibility: inherit;');
-  return `    .${cssClass} {\n${decl.join('\n')}\n    }`;
-};
-
-const renderCreativeCss = (sizeCreative: Record<string, unknown>) => [
-  '    p, h1, h2, h3 { margin: 0px; }',
-  adPlumbingCss,
-  sizeCreative.manualCss || '',
-  offerValueSymbolCss,
-  ...(sizeCreative.layers || []).map(renderLayerRule),
-  structuredRuleCss(sizeCreative),
-  '    .stage-element, .stage-static { position: absolute; cursor: move; }',
-].join('\n\n');
-
 const numberValue = (value: unknown, fallback = 0) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -116,17 +59,35 @@ const dimensionValue = (value: unknown, fallback: number, basis = fallback) => {
   return numberValue(value, fallback);
 };
 
-const translateFromTransform = (transform = '') => {
-  const match = String(transform).match(/translate3d\(([-\d.]+)px,\s*([-\d.]+)px/i);
-  if (!match) return { x: 0, y: 0 };
-  return {
-    x: Number(match[1]) || 0,
-    y: Number(match[2]) || 0,
-  };
-};
-
 export function PreviewPane() {
   const [contextMenu, setContextMenu] = useState(null);
+  const [productionTargets, setProductionTargets] = useState<ProductionTarget[]>([]);
+  const receiveProductionTargets = useCallback((targets: ProductionTarget[]) => {
+    setProductionTargets(targets);
+    const fitResults = new Map<string, number>();
+    const fitTrackings = new Map<string, number>();
+    const fitClipped = new Map<string, boolean>();
+    const fitDiagnostics = new Map();
+    for (const target of targets) {
+      const style = target.element.ownerDocument.defaultView?.getComputedStyle(target.element);
+      if (!style) continue;
+      const fontSize = Number.parseFloat(style.fontSize);
+      if (!(fontSize > 0)) continue;
+      const tracking = (Number.parseFloat(style.letterSpacing) || 0) / fontSize;
+      for (const key of [target.id, ...target.element.classList]) {
+        fitResults.set(key, fontSize);
+        fitTrackings.set(key, tracking);
+        fitClipped.set(key, target.element.getAttribute('data-fit-clipped') === 'true');
+        if (target.element.hasAttribute('data-fit-status')) fitDiagnostics.set(key, {
+          status: target.element.getAttribute('data-fit-status'),
+          requestedSize: Number(target.element.getAttribute('data-fit-requested-size')),
+          renderedSize: Number(target.element.getAttribute('data-fit-rendered-size')),
+          reason: target.element.getAttribute('data-fit-clip-reason') || '',
+        });
+      }
+    }
+    useEditorStore.setState({ fitResults, fitTrackings, fitClipped, fitDiagnostics });
+  }, []);
   const [snapGuides, setSnapGuides] = useState({ vertical: [], horizontal: [] });
   const [userGuides, setUserGuides] = useState({ vertical: [], horizontal: [] });
   const document = useEditorStore((s) => s.creativeDocument);
@@ -146,7 +107,6 @@ export function PreviewPane() {
   const frameCount = useEditorStore((s) => s.frameCount);
   const roundelMode = useEditorStore((s) => s.roundelMode);
   const row = useEditorStore(selectSelectedFeedRow);
-  const displayRow = useMemo(() => applySizeTextOverridesToRow(row, size), [row, size]);
   const canvasZoom = useEditorStore((s) => s.canvasZoom);
   const resizeMode = useEditorStore((s) => s.resizeMode);
   const selectTarget = useEditorStore((s) => s.selectTarget);
@@ -162,7 +122,6 @@ export function PreviewPane() {
   const addShapeLayer = useEditorStore((s) => s.addShapeLayer);
   const moveLayerZ = useEditorStore((s) => s.moveLayerZ);
   const requestEditFeedField = useEditorStore((s) => s.requestEditFeedField);
-  const applyPreviewTextFitting = useEditorStore((s) => s.applyPreviewTextFitting);
   const fitClipped = useEditorStore((s) => s.fitClipped);
   const setCanvasZoom = useEditorStore((s) => s.setCanvasZoom);
   const stepCanvasZoom = useEditorStore((s) => s.stepCanvasZoom);
@@ -193,7 +152,6 @@ export function PreviewPane() {
     frameCount,
     roundelMode,
   }), [ctaShape, frameCount, includeRoundelFrame, offerCount, roundelMode, tcMode]);
-  const activeOfferBlockIds = useMemo(() => new Set(offerBlockLayerIds(offerCount)), [offerCount]);
   const selectedTarget = useMemo(
     () => deriveSelectedTarget(
       document,
@@ -207,7 +165,6 @@ export function PreviewPane() {
     [activeScopes, document, offerCount, selectedLayerId, selectedTargetId, selectedTargetIds, size],
   );
 
-  const activeBeats = useMemo(() => beatsForScopes(document, activeScopes), [activeScopes, document]);
   const seconds = document?.clock?.durationS ? (percent / 100) * document.clock.durationS : 0;
 
   useEffect(() => {
@@ -234,26 +191,6 @@ export function PreviewPane() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [drillIntoCanvasTarget, exitGroupIsolation, isolatedGroupId, selectedTargetId]);
-
-  useEffect(() => {
-    const stage = stageRef.current;
-    if (!stage) return undefined;
-    let cancelled = false;
-    const frame = window.requestAnimationFrame(() => {
-      applyPreviewTextFitting(stage);
-    });
-    // One post-font layout commit (export also gates the CSS clock on
-    // fonts.ready via .motion-ready). layoutOffers clears slot motion
-    // transforms for the measure pass so scrub pose cannot bake into plus Y.
-    window.document.fonts?.ready?.then(() => {
-      if (cancelled || !stageRef.current) return;
-      applyPreviewTextFitting(stageRef.current);
-    }).catch(() => {});
-    return () => {
-      cancelled = true;
-      window.cancelAnimationFrame(frame);
-    };
-  }, [activeScopes, applyPreviewTextFitting, document, offerCount, displayRow, size]);
 
   const startSelectionDrag = useCallback((event: React.PointerEvent, deepestTargetId: string) => {
     if (event.button !== 0) return;
@@ -567,289 +504,22 @@ export function PreviewPane() {
     window.addEventListener('pointerup', onUp, { once: true });
   }, [activeScopes, document, pushHistory, resizeMode, scale, selectedTarget, selectedTargetId, size, startGroupResize, updateTargetValue]);
 
-  const selectionClassForTarget = useCallback((targetId: string) => {
-    if (targetMatchesSelection(targetId, selectedTargetId, selectedTargetIds, offerCount, isolatedGroupId)) return 'is-selected';
-    if (isolatedGroupId === OFFERS_BLOCK_ID) return '';
-    if (linkedTargetIdsForSelection(selectedTargetId, selectedTargetIds, offerCount, isolatedGroupId).includes(targetId)) return 'is-linked';
-    return '';
-  }, [isolatedGroupId, offerCount, selectedTargetId, selectedTargetIds]);
-
-  const targetOutsideIsolation = useCallback((targetId: string) => {
-    if (!isolationPath?.length) return false;
-    const path = selectionHierarchy(targetId, offerCount, document, size, activeScopes);
-    return !isolationPath.every((id, index) => path[index] === id);
-  }, [activeScopes, document, isolationPath, offerCount, size]);
-
-  const layerClass = (layer: Record<string, unknown>, targetId = layer.id) => [
-    'stage-element',
-    isHeadlineLayer(layer) ? HEADLINE_CSS_CLASS : (layer.base?.cssClass || layer.id),
-    lockedLayerIds.has(String(layer.id)) ? 'is-locked' : '',
-    selectionClassForTarget(String(targetId)),
-    targetOutsideIsolation(String(targetId)) ? 'is-outside-isolation' : '',
-  ].filter(Boolean).join(' ');
-
   const layers = [...(sizeCreative?.layers || [])].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
   const layerById = new Map(layers.map((layer) => [layer.id, layer]));
-  const renderedLayers = layers.filter((layer) => !hiddenLayerIds.has(String(layer.id)));
-  const offerLayers = renderedLayers.filter((layer) => layer.id.startsWith('offer-slot-') && activeOfferBlockIds.has(layer.id));
-  const activeOfferLayers = renderedLayers.filter((layer) => (
-    activeOfferBlockIds.has(layer.id)
-    && (layer.id.startsWith('offer-slot-') || layer.id.startsWith('plus-'))
-  ));
-  const nonOfferLayers = renderedLayers.filter((layer) => (
-    !layer.id.startsWith('offer-slot-')
-    && !layer.id.startsWith('plus-')
-  ));
-
-  const offerTargetAtPoint = useCallback((clientX: number, clientY: number) => (
-    resolveOfferTargetAtPoint({
-      stage: stageRef.current,
-      activeOfferLayers,
-      clientX,
-      clientY,
-    })
-  ), [activeOfferLayers]);
-
-  const handleStagePointerDownCapture = useCallback((event: React.PointerEvent) => {
-    if (event.button !== 0) return;
-    const target = event.target as HTMLElement | null;
-    if (shouldBypassOfferCapture(target) || target?.closest('.offers-block-group')) return;
-    const offerTargetId = offerTargetAtPoint(event.clientX, event.clientY);
-    if (offerTargetId) startSelectionDrag(event, offerTargetId);
-  }, [offerTargetAtPoint, startSelectionDrag]);
-
-  const handleStageDoubleClickCapture = useCallback((event: React.MouseEvent) => {
-    const target = event.target as HTMLElement | null;
-    if (shouldBypassOfferCapture(target) || target?.closest('.offers-block-group')) return;
-    const offerTargetId = offerTargetAtPoint(event.clientX, event.clientY);
-    if (!offerTargetId) return;
-    event.preventDefault();
-    event.stopPropagation();
-    drillIntoCanvasTarget(offerTargetId);
-  }, [drillIntoCanvasTarget, offerTargetAtPoint]);
+  const productionLayerIds = useMemo(() => (sizeCreative?.layers || []).map(layer => String(layer.id)), [sizeCreative]);
 
   if (!sizeCreative) return null;
 
-  const isolationOpacityForTarget = (targetId: string) => {
-    if (!targetOutsideIsolation(targetId)) return 1;
-    const selectionClass = selectionClassForTarget(targetId);
-    return selectionClass === 'is-selected' || selectionClass === 'is-linked' ? 1 : 0.28;
-  };
-
-  const targetStateClass = (targetId: string) => [
-    selectionClassForTarget(targetId),
-    targetOutsideIsolation(targetId) ? 'is-outside-isolation' : '',
-  ].filter(Boolean).join(' ');
-
-  const frameStyle = (layer: Record<string, unknown>, targetId = layer.id) => {
-    const profile = activeFrameScope(activeScopes);
-    const keyframes = layer.id?.startsWith('headline-act')
-      ? compileHeadlineKeyframes(layer, sizeCreative?.layers || [], displayRow, profile, activeBeats)
-      : compileAnimationClips(clipsForProfile(layer.clips || [], profile, activeScopes), activeBeats);
-    const frame = frameAtPercent(keyframes, percent);
-    const transform = [
-      `translate3d(${frame.translate[0]}px, ${frame.translate[1]}px, 0px)`,
-      formatScale3d(frame.scale),
-    ].filter(Boolean).join(' ');
-    const opacity = isBlurLayer(layer) && !blurIsActive(layer.blur)
-      ? 0
-      : frame.opacity * isolationOpacityForTarget(String(targetId));
-    return {
-      transform,
-      opacity,
-      pointerEvents: opacity <= 0.03 ? 'none' : 'auto',
-      ...(frame.color ? { color: frame.color } : {}),
-      ...(frame.left !== undefined ? { left: frame.left } : {}),
-      ...(frame.top !== undefined ? { top: frame.top } : {}),
-      ...(frame.width !== undefined ? { width: frame.width } : {}),
-      ...(frame.height !== undefined ? { height: frame.height } : {}),
-    };
-  };
-
-  const termsFrameStyle = (id: string) => {
-    const layer = layerById.get(id);
-    return layer ? frameStyle(layer, id) : undefined;
-  };
-  const visibleTermsFrameStyle = (id: string) => (
-    hiddenLayerIds.has(id) ? { display: 'none' } : termsFrameStyle(id)
-  );
-
   const selectionBox = (() => {
-    if (!selectedTarget?.bounds && selectedTarget?.kind !== 'nested' && !selectedTarget?.values) return null;
-    if (selectedTarget.bounds) {
-      const layerForBounds = layerById.get(selectedTarget.parentLayerId || selectedTarget.id);
-      const frame = layerForBounds ? frameStyle(layerForBounds, selectedTarget.parentLayerId || selectedTarget.id) : { transform: 'none' };
-      return {
-        left: selectedTarget.bounds.left,
-        top: selectedTarget.bounds.top,
-        width: selectedTarget.bounds.width,
-        height: selectedTarget.bounds.height,
-        transform: frame.transform,
-        label: selectedTarget.label,
-        scope: selectedTarget.kind === 'group' ? 'group' : selectedTarget.coordinateScope || 'canvas',
-        boundsMode: selectedTarget.boundsMode || '',
-      };
-    }
-    const bounds = getTargetCanvasBounds(document, size, selectedTarget.id, activeScopes);
+    if (!selectedTarget) return null;
+    const ids = selectedTarget.members?.length ? selectedTarget.members : [selectedTarget.id];
+    const bounds = unionProductionBounds(productionTargets.filter(target => ids.includes(target.id)));
     if (!bounds) return null;
-    const parentLayer = selectedTarget.kind === 'nested'
-      ? layerById.get(selectedTarget.parentLayerId)
-      : layerById.get(selectedTarget.id);
-    const frame = parentLayer ? frameStyle(parentLayer) : { transform: 'none' };
-    return {
-      left: bounds.left,
-      top: bounds.top,
-      width: bounds.width,
-      height: bounds.height,
-      transform: frame.transform,
-      label: selectedTarget.label,
-      scope: selectedTarget.coordinateScope,
-      boundsMode: selectedTarget.boundsMode || '',
-    };
+    return { ...bounds, transform: 'none', label: selectedTarget.label,
+      scope: selectedTarget.kind === 'group' ? 'group' : selectedTarget.coordinateScope || 'canvas',
+      boundsMode: selectedTarget.boundsMode || '' };
   })();
   const selectionKind = selectionChromeKind(selectedTarget, selectionBox?.boundsMode || '');
-  const showRestingSelectionBox = Boolean(selectionBox?.transform && selectionBox.transform !== 'none');
-  const motionGuide = (() => {
-    if (!showRestingSelectionBox || !selectionBox) return null;
-    const translate = translateFromTransform(selectionBox.transform);
-    if (Math.abs(translate.x) < 0.5 && Math.abs(translate.y) < 0.5) return null;
-    const rest = {
-      x: selectionBox.left + selectionBox.width / 2,
-      y: selectionBox.top + selectionBox.height / 2,
-    };
-    const current = {
-      x: rest.x + translate.x,
-      y: rest.y + translate.y,
-    };
-    const pad = 14;
-    const left = Math.min(rest.x, current.x) - pad;
-    const top = Math.min(rest.y, current.y) - pad;
-    return {
-      left,
-      top,
-      width: Math.max(2, Math.abs(current.x - rest.x)) + pad * 2,
-      height: Math.max(2, Math.abs(current.y - rest.y)) + pad * 2,
-      restX: rest.x - left,
-      restY: rest.y - top,
-      currentX: current.x - left,
-      currentY: current.y - top,
-    };
-  })();
-
-  const renderOfferSlot = (layer: Record<string, unknown>) => {
-    const index = layer.id.match(/(\d)$/)?.[1] || '1';
-    const valueId = targetIdForLayerChild(layer.id, 'offer-value');
-    const sublineId = targetIdForLayerChild(layer.id, 'offer-subline');
-    const slotOutsideIsolation = targetOutsideIsolation(layer.id);
-    return (
-      <div
-        key={layer.id}
-        className={layerClass(layer)}
-        data-gwd-group="OfferSlot"
-        data-offer-index={index}
-        id={`offer${index}`}
-        style={frameStyle(layer, layer.id)}
-        onPointerDown={(event) => startSelectionDrag(event, layer.id)}
-        onDoubleClick={(event) => {
-          event.stopPropagation();
-          drillIntoCanvasTarget(layer.id);
-        }}
-        onContextMenu={(event) => openLayerMenu(event, layer, layer.id)}
-      >
-        <p
-          className={`gwd-grp-offer offer-value ${selectionClassForTarget(valueId)} ${targetOutsideIsolation(valueId) ? 'is-outside-isolation' : ''}`}
-          style={{ opacity: slotOutsideIsolation ? 1 : isolationOpacityForTarget(valueId) }}
-          dangerouslySetInnerHTML={{ __html: wrapOfferValueSymbols(row[`offer${index}_value_text`]) }}
-          onPointerDown={(event) => startSelectionDrag(event, valueId)}
-          onDoubleClick={(event) => {
-            event.stopPropagation();
-            drillIntoCanvasTarget(valueId);
-          }}
-          onContextMenu={(event) => openLayerMenu(event, layer, valueId)}
-        />
-        <p
-          className={`gwd-grp-offer offer-subline ${selectionClassForTarget(sublineId)} ${targetOutsideIsolation(sublineId) ? 'is-outside-isolation' : ''}`}
-          style={{ opacity: slotOutsideIsolation ? 1 : isolationOpacityForTarget(sublineId) }}
-          onPointerDown={(event) => startSelectionDrag(event, sublineId)}
-          onDoubleClick={(event) => {
-            event.stopPropagation();
-            drillIntoCanvasTarget(sublineId);
-          }}
-          onContextMenu={(event) => openLayerMenu(event, layer, sublineId)}
-        >
-          {fieldValue(row[`offer${index}_sub_text`])}
-        </p>
-      </div>
-    );
-  };
-
-  const renderLayerNode = (layer: Record<string, unknown>) => {
-    // terms-solo stays in its dedicated wrapper; prices lines are canvas layers.
-    if (layer.id === 'terms-solo') return null;
-    if (layer.id.startsWith('offer-slot-')) return renderOfferSlot(layer);
-
-    if (layer.kind === 'shape' || isGradientLayer(layer) || isBlurLayer(layer)) {
-      return (
-        <div
-          key={layer.id}
-          className={layerClass(layer)}
-          id={layer.id}
-          style={frameStyle(layer, layer.id)}
-          onPointerDown={(event) => startSelectionDrag(event, layer.id)}
-          onContextMenu={(event) => openLayerMenu(event, layer)}
-        />
-      );
-    }
-
-    if (layer.kind === 'image') {
-      const isBackground = isBackgroundLayer(layer);
-      return (
-        <img
-          key={layer.id}
-          id={isBackground ? BG_IMAGE_LAYER_ID : layer.id}
-          alt=""
-          draggable={false}
-          className={layerClass(layer)}
-          src={isBackground
-            ? previewBackgroundSrc(row, size, sizeCreative.assets.background)
-            : assetUrl(layer.asset)}
-          style={frameStyle(layer, layer.id)}
-          onPointerDown={(event) => startSelectionDrag(event, layer.id)}
-          onContextMenu={(event) => openLayerMenu(event, layer)}
-        />
-      );
-    }
-
-    const isHeadline = layer.id.startsWith('headline-');
-    const Tag = layer.id === 'cta' ? 'div' : 'p';
-    const className = [
-      layerClass(layer),
-      isHeadline ? 'sse-text sse-text-bold' : '',
-      /terms|unit-rate/.test(layer.id) ? 'sse-text sse-bottom-line' : '',
-    ].filter(Boolean).join(' ');
-    const boundField = layer.binding?.field;
-    const text = boundField ? fieldValue(displayRow[boundField])
-      : layer.id === 'headline-act1' ? fieldValue(displayRow.heading1_text)
-        : layer.id === 'headline-act2' ? fieldValue(displayRow.heading2_text)
-          : layer.id === 'headline-act3' ? fieldValue(displayRow.heading3_text)
-            : layer.id === 'headline-act4' ? headlineAct4DisplayText(displayRow, includeRoundelFrame)
-            : layer.id === 'cta' ? fieldValue(displayRow.cta_text)
-              : '';
-    return (
-      <Tag
-        key={layer.id}
-        className={className}
-        id={layer.id}
-        style={frameStyle(layer, layer.id)}
-        onPointerDown={(event) => startSelectionDrag(event, layer.id)}
-        onContextMenu={(event) => openLayerMenu(event, layer)}
-      >
-        {text}
-      </Tag>
-    );
-  };
-
-  const offersBlockSelected = selectedTargetId === OFFERS_BLOCK_ID && isolatedGroupId !== OFFERS_BLOCK_ID && !selectionBox;
   const offersBlockIsolated = isolatedGroupId === OFFERS_BLOCK_ID;
   const showSelectionChrome = Boolean(selectionBox);
   const selectionDragHandleTargetId = selectedTarget?.members?.length === 1
@@ -974,6 +644,7 @@ export function PreviewPane() {
             </div>
           ) : null}
           <div className="preview-status" data-tone={statusTone} title={statusMessage}>{statusMessage}</div>
+          {hiddenLayerIds.size > 0 && <span className="preview-status" title="Temporary editor visibility; exported creative includes these layers">Hidden in editor: {hiddenLayerIds.size}</span>}
         </div>
         <AlignControls
           disabled={!selectedTarget}
@@ -1013,95 +684,23 @@ export function PreviewPane() {
               <div
                 ref={stageRef}
                 className={stageClassName}
-                data-preview-stage="true"
+                data-editor-stage="true"
                 data-size={size}
                 data-offer-plus-layout={resolveOfferPlusLayout(document)}
                 style={{ width: sizeCreative.canvas.width, height: sizeCreative.canvas.height, transform: `scale(${scale})` }}
-                onPointerDownCapture={handleStagePointerDownCapture}
-                onDoubleClickCapture={handleStageDoubleClickCapture}
                 onPointerDown={() => setContextMenu(null)}
               >
-            <style className="layout-style">{renderCreativeCss(sizeCreative)}</style>
-            {nonOfferLayers.map((layer) => renderLayerNode(layer))}
-            {showOffersBlock ? (
-              <div
-                className={`offers-block-group ${offersBlockSelected ? 'is-selected' : ''} ${offersBlockIsolated ? 'is-isolated' : ''}`}
-                onPointerDown={(event) => {
-                  if (event.target === event.currentTarget) {
-                    selectOffersBlock();
-                  }
-                }}
-              >
-                {activeOfferLayers.map((layer) => (
-                  layer.id.startsWith('offer-slot-')
-                    ? renderOfferSlot(layer)
-                    : renderLayerNode(layer)
-                ))}
-              </div>
-            ) : (
-              offerLayers.map((layer) => renderOfferSlot(layer))
-            )}
-
-            <div
-              className={`stage-static tc-solo-group ${targetStateClass('terms-solo')}`}
-              data-gwd-group="tc_solo"
-              id="TC_Solo"
-            >
-              <p
-                className={`gwd-grp-tc sse-text sse-bottom-line terms-solo ${targetStateClass('terms-solo')}`}
-                style={visibleTermsFrameStyle('terms-solo')}
-                onPointerDown={(event) => {
-                  const layer = layerById.get('terms-solo');
-                  if (layer) startSelectionDrag(event, layer.id);
-                }}
-                onContextMenu={(event) => {
-                  const layer = layerById.get('terms-solo');
-                  if (layer) openLayerMenu(event, layer);
-                }}
-              >
-                {fieldValue(row.tc_terms_text)}
-              </p>
-            </div>
-            {showSelectionChrome && showRestingSelectionBox ? (
-              <div
-                className={`current-selection-box selection-kind-${selectionKind}`}
-                style={{
-                  left: selectionBox.left,
-                  top: selectionBox.top,
-                  width: selectionBox.width,
-                  height: selectionBox.height,
-                  transform: selectionBox.transform,
-                }}
-                aria-hidden="true"
-              >
-                <span className="selection-label selection-label-current">Current</span>
-              </div>
-            ) : null}
-            {motionGuide ? (
-              <svg
-                className="motion-state-guide"
-                style={{
-                  left: motionGuide.left,
-                  top: motionGuide.top,
-                  width: motionGuide.width,
-                  height: motionGuide.height,
-                }}
-                viewBox={`0 0 ${motionGuide.width} ${motionGuide.height}`}
-                aria-hidden="true"
-              >
-                <line
-                  className="motion-state-line"
-                  x1={motionGuide.restX}
-                  y1={motionGuide.restY}
-                  x2={motionGuide.currentX}
-                  y2={motionGuide.currentY}
-                />
-                <circle className="motion-state-point motion-state-point-rest" cx={motionGuide.restX} cy={motionGuide.restY} r="3" />
-                <circle className="motion-state-point motion-state-point-current" cx={motionGuide.currentX} cy={motionGuide.currentY} r="3" />
-                <text className="motion-state-label motion-state-label-rest" x={motionGuide.restX + 5} y={motionGuide.restY - 5}>Rest</text>
-                <text className="motion-state-label motion-state-label-current" x={motionGuide.currentX + 5} y={motionGuide.currentY - 5}>Current</text>
-              </svg>
-            ) : null}
+            <ProductionCreativeStage
+              document={document} row={row} size={size} percent={percent}
+              layerIds={productionLayerIds} hiddenLayerIds={hiddenLayerIds}
+              onTargets={receiveProductionTargets}
+              onPointerDown={startSelectionDrag}
+              onDoubleClick={drillIntoCanvasTarget}
+              onContextMenu={(event, targetId) => {
+                const layer = layerById.get(targetId.split('::')[0]);
+                if (layer) openLayerMenu(event, layer, targetId);
+              }}
+            />
             {showSelectionChrome ? (
               <div
                 className={`selection-box selection-scope-${selectionBox.scope} selection-kind-${selectionKind}`}

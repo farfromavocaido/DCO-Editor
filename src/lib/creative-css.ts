@@ -66,7 +66,20 @@ export const excludedHeadlineLayerIdsForVariantRule = (rule: Record<string, unkn
   return ['headline-act4'];
 };
 
+/** Stable authoring targets use exact DOM IDs, including nested offer children. */
+export const targetIdToSelector = (targetId, priority = 1) => {
+  const [layerId, childId] = String(targetId).split('::');
+  if (!/^[\w-]+$/.test(layerId) || (childId && !/^[\w-]+$/.test(childId))) throw new Error(`Invalid target ID: ${targetId}`);
+  const domId = layerId === 'terms-solo' ? 'TC_Solo' : layerId.replace(/^offer-slot-(\d+)$/, 'offer$1');
+  const parent = Array(Math.max(1, priority)).fill(`#${domId}`).join('');
+  return layerId === 'terms-solo' ? `${parent} .terms-solo` : childId ? `${parent} .${childId}` : parent;
+};
+
 export const selectorForVariantRule = (rule: Record<string, unknown>) => {
+  if (rule.targetId) {
+    const scope = selectorForVariantScope(rule.scope);
+    return `${scope} ${targetIdToSelector(rule.targetId, rule.ownershipPriority || 1)}`.trim();
+  }
   const layerId = String(rule.layerId || '');
   const cssClass = String(rule.cssClass || rule.layerId || '');
   const excluded = excludedHeadlineLayerIdsForVariantRule(rule);

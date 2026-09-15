@@ -2,6 +2,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+import { materializeCreativeOwnership } from '@/lib/creative-ownership';
 import { isBlurLayer, validateBlurConfig } from '@/lib/blur-layer';
 import { isGradientLayer, validateGradientConfig } from '@/lib/gradient-layer';
 import { isRegisteredCampaignId } from './campaign-registry';
@@ -42,6 +43,7 @@ export const validateCreativeDocument = (document: CreativeDocument) => {
       if (isBlurLayer(layer)) validateBlurConfig(layer.blur, String(layer.id));
     }
   }
+  materializeCreativeOwnership(document);
   return document;
 };
 

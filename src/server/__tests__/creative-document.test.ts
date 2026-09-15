@@ -86,7 +86,7 @@ test('preserves 728x90 banner assets and partial bluewave treatment', async () =
   assert.ok(headline.height >= 48);
 });
 
-test('strips offers-2/3 roundel overrides so Offer Roundel stays linked to 1-offer', async () => {
+test('preserves authored offer-count roundel overrides during validation', async () => {
   const document = validateCreativeDocument({
     version: 1,
     campaign: { id: 'sse-dco', name: 'SSE DCO' },
@@ -161,6 +161,8 @@ test('strips offers-2/3 roundel overrides so Offer Roundel stays linked to 1-off
   const ids = document.sizes['728x90'].variantRules.map((rule) => rule.id);
   assert.deepEqual(ids, [
     'roundel-split|roundel-copy',
+    'offers-2|roundel-frame',
+    'offers-3|roundel-copy',
     'offers-2|offer-slot-1',
     'offers-0|roundel-frame',
   ]);

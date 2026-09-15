@@ -12,6 +12,7 @@ export const ownershipRuleSpecificity = (rule) => {
 };
 export const activeOwnershipRules = (rules = [], identity, scopes = []) => rules.filter((rule) => {
   if (!ownershipScopeIsActive(rule.scope, scopes)) return false;
+  if (rule.targetId) return rule.targetId === identity.targetId;
   if (identity.layerId && excludedHeadlineLayerIdsForVariantRule(rule).includes(identity.layerId)) return false;
   return String(rule.layerId || '').startsWith('headline-act')
     ? rule.layerId === identity.layerId
@@ -25,8 +26,156 @@ export const resolveOwnedFields = (base, baseSource, rules, field = 'props') => 
     for (const [key, value] of Object.entries(rule[field] || {})) {
       if (value === undefined || value === null || value === '') continue;
       values[key] = value;
-      provenance[key] = { kind: 'variantRule', ruleId: rule.id, scope: rule.scope || '', layerId: rule.layerId, cssClass: rule.cssClass };
+      provenance[key] = rule.ownershipSource || { kind: 'variantRule', ruleId: rule.id, scope: rule.scope || '', layerId: rule.layerId, cssClass: rule.cssClass };
     }
   }
   return { values, provenance };
+};
+
+const clone = (value) => JSON.parse(JSON.stringify(value));
+const targetParts = (targetId) => String(targetId).split('::');
+const targetIdentity = (document, size, targetId) => {
+  const [layerId, childId] = targetParts(targetId);
+  const layer = document.sizes?.[size]?.layers?.find((item) => item.id === layerId);
+  if (!layer || (childId && (!/^offer-slot-\d+$/.test(layerId) || !['offer-value', 'offer-subline'].includes(childId)))) throw new Error(`Unknown ownership target: ${size}/${targetId}`);
+  if (!/^[\w-]+(?:::[\w-]+)?$/.test(targetId)) throw new Error(`Invalid ownership target: ${targetId}`);
+  return { layerId, cssClass: childId || layer.base?.cssClass || layerId, targetId };
+};
+const scopeParts = (scope) => String(scope || '').split('.').filter(Boolean);
+const scopeFamily = (token) => {
+  if (/^(white|navy)-headlines$/.test(token)) return 'headline-ink';
+  return /^(offers|frames|tc|cta|roundel)-/.exec(token)?.[1];
+};
+const scopesOverlap = (a, b) => !scopeParts(a).some((x) => scopeParts(b).some((y) => x !== y && scopeFamily(x) && scopeFamily(x) === scopeFamily(y)));
+const memberKey = (member) => `${member.size}/${member.targetId}/${member.scope || ''}`;
+const definitionFields = (definition, size, domain, member) => Object.fromEntries(Object.entries({ ...(definition[domain] || {}), ...(definition.perSize?.[size]?.[domain] || {}) }).filter(([field]) => !(member?.exclude?.[domain] || []).includes(field)));
+
+/** Pure, idempotent compatibility compiler. Authored definitions are never rewritten. */
+export const materializeCreativeOwnership = (document) => {
+  if (!document?.sharedDefinitions?.length && !Object.values(document?.sizes || {}).some((size) => size.localOverrides?.length || size.variantRules?.some((rule) => rule.ownershipGenerated))) return document;
+  const next = clone(document);
+  const ids = new Set();
+  const assignments = [];
+  for (const definition of next.sharedDefinitions || []) {
+    if (!definition.id || !definition.name || ids.has(definition.id) || !Array.isArray(definition.members)) throw new Error('Shared definitions require unique IDs, names, and members');
+    ids.add(definition.id);
+    for (const member of definition.members) {
+      targetIdentity(next, member.size, member.targetId);
+      for (const domain of ['values', 'fit']) {
+        const fields = definitionFields(definition, member.size, domain, member);
+        for (const previous of assignments) {
+          if (previous.member.size === member.size && previous.member.targetId === member.targetId && previous.domain === domain && scopesOverlap(previous.member.scope, member.scope)) {
+            const duplicate = Object.keys(fields).find((field) => Object.hasOwn(previous.fields, field));
+            if (duplicate) throw new Error(`Shared ownership conflict for ${member.size}/${member.targetId} ${domain}.${duplicate}: ${previous.definitionId} and ${definition.id}`);
+          }
+        }
+        assignments.push({ definitionId: definition.id, member, domain, fields });
+      }
+    }
+  }
+  for (const [size, creative] of Object.entries(next.sizes || {})) {
+    creative.variantRules = (creative.variantRules || []).filter((rule) => !rule.ownershipGenerated);
+    const priority = Math.floor(Math.max(0, ...creative.variantRules.map(ownershipRuleSpecificity)) / 1000) + 2;
+    for (const definition of next.sharedDefinitions || []) for (const member of definition.members.filter((member) => member.size === size)) {
+      creative.variantRules.push({
+        id: `ownership:shared:${definition.id}:${memberKey(member)}`,
+        ...targetIdentity(next, size, member.targetId), scope: member.scope || '',
+        props: definitionFields(definition, size, 'values', member), fit: definitionFields(definition, size, 'fit', member),
+        ownershipGenerated: true, ownershipPriority: priority,
+        ownershipSource: { kind: 'sharedDefinition', definitionId: definition.id, name: definition.name, member },
+      });
+    }
+    for (const [index, local] of (creative.localOverrides || []).entries()) {
+      creative.variantRules.push({
+        id: `ownership:local:${size}:${index}`,
+        ...targetIdentity(next, size, local.targetId), scope: local.scope || '',
+        props: local.values || {}, fit: local.fit || {}, ownershipGenerated: true, ownershipPriority: priority + 1,
+        ownershipSource: { kind: 'localOverride', targetId: local.targetId, scope: local.scope || '', index },
+      });
+    }
+  }
+  return next;
+};
+
+export const activeNamedOwnership = (document, size, targetId, scopes = []) => {
+  const compiled = materializeCreativeOwnership(document);
+  return activeOwnershipRules(compiled.sizes?.[size]?.variantRules || [], targetIdentity(compiled, size, targetId), scopes).filter((rule) => rule.ownershipGenerated);
+};
+const localFor = (next, size, targetId, scopes) => {
+  const scope = [...new Set(scopes)].sort().join('.');
+  const creative = next.sizes[size];
+  creative.localOverrides ||= [];
+  let local = creative.localOverrides.find((item) => item.targetId === targetId && (item.scope || '') === scope);
+  if (!local) { local = { targetId, scope, values: {}, fit: {} }; creative.localOverrides.push(local); }
+  return local;
+};
+/** Explicit intent: local exceptions never mutate named members; shared edits name their source. */
+export const setCreativeOwnershipField = (document, size, targetId, scopes, domain, field, value, intent = 'local', definitionId) => {
+  const next = clone(document);
+  targetIdentity(next, size, targetId);
+  let destination;
+  if (intent === 'shared') {
+    destination = next.sharedDefinitions?.find((definition) => definition.id === definitionId);
+    if (!destination || !destination.members.some((member) => member.size === size && member.targetId === targetId && ownershipScopeIsActive(member.scope, scopes))) throw new Error('Choose an active named shared source');
+    // Edit the same per-format field that supplies this format, when present.
+    if (Object.hasOwn(destination.perSize?.[size]?.[domain] || {}, field)) destination = destination.perSize[size];
+  } else destination = localFor(next, size, targetId, scopes);
+  destination[domain] = { ...(destination[domain] || {}), [field]: value };
+  materializeCreativeOwnership(next); // Reject a new ambiguous field assignment.
+  return next;
+};
+
+export const resetCreativeOwnershipField = (document, size, targetId, scopes, domain, field) => {
+  const next = clone(document);
+  const rules = activeNamedOwnership(next, size, targetId, scopes).filter((rule) => rule.ownershipSource.kind === 'localOverride' && Object.hasOwn(rule[domain === 'values' ? 'props' : 'fit'] || {}, field));
+  const rule = rules.at(-1);
+  if (rule) delete next.sizes[size].localOverrides[rule.ownershipSource.index][domain][field];
+  return next;
+};
+/** Detach one explicit membership, copying its authored bundle into a local exception. */
+export const detachCreativeOwnership = (document, definitionId, member, fields) => {
+  const next = clone(document);
+  const definition = next.sharedDefinitions?.find((item) => item.id === definitionId);
+  if (!definition || !definition.members.some((item) => memberKey(item) === memberKey(member))) throw new Error('Unknown shared membership');
+  const ownedMember = definition.members.find((item) => memberKey(item) === memberKey(member));
+  const local = localFor(next, member.size, member.targetId, scopeParts(member.scope));
+  for (const domain of ['values', 'fit']) {
+    const bundle = definitionFields(definition, member.size, domain, ownedMember);
+    const copied = Object.fromEntries(Object.entries(bundle).filter(([field]) => !fields || fields[domain]?.includes(field)));
+    local[domain] = { ...copied, ...(local[domain] || {}) };
+    if (fields) {
+      ownedMember.exclude ||= {};
+      ownedMember.exclude[domain] = [...new Set([...(ownedMember.exclude[domain] || []), ...Object.keys(copied)])];
+    }
+  }
+  if (!fields) definition.members = definition.members.filter((item) => memberKey(item) !== memberKey(member));
+  return next;
+};
+
+export const linkCreativeOwnership = (document, definitionId, member) => {
+  const next = clone(document);
+  targetIdentity(next, member.size, member.targetId);
+  const definition = next.sharedDefinitions?.find((item) => item.id === definitionId);
+  if (!definition) throw new Error('Unknown shared definition');
+  if (!definition.members.some((item) => memberKey(item) === memberKey(member))) definition.members.push(member);
+  materializeCreativeOwnership(next);
+  return next;
+};
+
+export const createCreativeOwnershipDefinition = (document, definition) => {
+  const next = clone(document);
+  next.sharedDefinitions = [...(next.sharedDefinitions || []), clone(definition)];
+  materializeCreativeOwnership(next);
+  return next;
+};
+
+/** Copy the chosen source once without creating a sharing relationship. */
+export const copyCreativeOwnership = (document, definitionId, member) => {
+  const next = clone(document);
+  targetIdentity(next, member.size, member.targetId);
+  const definition = next.sharedDefinitions?.find((item) => item.id === definitionId);
+  if (!definition) throw new Error('Unknown shared definition');
+  const local = localFor(next, member.size, member.targetId, scopeParts(member.scope));
+  for (const domain of ['values', 'fit']) local[domain] = { ...(local[domain] || {}), ...definitionFields(definition, member.size, domain) };
+  return next;
 };

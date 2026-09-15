@@ -1,6 +1,10 @@
 // @ts-nocheck
 'use client';
 
+import { TextFitPolicyControls } from './TextFitPolicyControls';
+import { MotionTimingControls } from './MotionTimingControls';
+import { MotionDistanceControls, isMotionDistanceField } from './MotionDistanceControls';
+import { CreativeOwnershipControls } from './CreativeOwnershipControls';
 import { useEffect, useMemo, useState } from 'react';
 
 import { animationFamilyForLayer, animationIntentDefinitions, timelineSpanForClip } from '@/lib/animation-intents';
@@ -123,6 +127,7 @@ export function CreativeInspector() {
   const selectedTargetIds = useEditorStore((s) => s.selectedTargetIds);
   const isolationPath = useEditorStore((s) => s.isolationPath);
   const fitResults = useEditorStore((s) => s.fitResults);
+  const fitDiagnostics = useEditorStore((s) => s.fitDiagnostics);
   const fitTrackings = useEditorStore((s) => s.fitTrackings);
   const resizeMode = useEditorStore((s) => s.resizeMode);
   const offerCount = useEditorStore((s) => s.offerCount);
@@ -186,11 +191,11 @@ export function CreativeInspector() {
     : [];
   const activeBeats = useMemo(() => beatsForScopes(document, activeScopes), [activeScopes, document]);
   const keyframes = selectedClip
-    ? compileAnimationClips([selectedClip], activeBeats)
+    ? compileAnimationClips([selectedClip], activeBeats, { canvas: sizeCreative.canvas, parent: sizeCreative.canvas, durationS: document.clock.durationS })
     : [];
   const family = animationFamilyForLayer(selectedLayer || {});
   const familyMembers = (sizeCreative?.layers || []).filter((layer) => animationFamilyForLayer(layer).id === family.id);
-  const selectedClipSpan = selectedClip ? timelineSpanForClip(selectedClip, activeBeats) : null;
+  const selectedClipSpan = selectedClip ? timelineSpanForClip(selectedClip, activeBeats, document.clock.durationS) : null;
   const durationS = document?.clock?.durationS || 15;
   const playheadSeconds = ((percent / 100) * durationS).toFixed(2);
   const playheadLabel = `${playheadSeconds}s / ${Number.isInteger(percent) ? percent : percent.toFixed(1)}%`;
@@ -244,17 +249,18 @@ export function CreativeInspector() {
     && selectedLayer.id !== 'cta';
   const activeFit = selectedTarget.fit || {};
   const applyFitUpdate = (field, value) => updateTargetFit(selectedTarget.id, field, value);
-  const fittedFontSize = activeCssClass ? fitResults.get(activeCssClass) : undefined;
-  const fittedTracking = activeCssClass && fitTrackings?.has?.(activeCssClass)
+  const fittedFontSize = fitResults.get(selectedTarget.id) ?? (activeCssClass ? fitResults.get(activeCssClass) : undefined);
+  const fittedTracking = fitTrackings?.has?.(selectedTarget.id) ? fitTrackings.get(selectedTarget.id) : activeCssClass && fitTrackings?.has?.(activeCssClass)
     ? fitTrackings.get(activeCssClass)
     : undefined;
+  const fitDiagnostic = fitDiagnostics?.get(selectedTarget.id) ?? fitDiagnostics?.get(activeCssClass);
   const fitStatus = fitSizeStatus(selectedTarget.values?.fontSize, fittedFontSize);
   const trackingStatus = fitTrackingStatus(fittedTracking);
   const sourceKind = selectedTarget.writeSource?.kind || '';
   const sourceLabel = sourceKind === 'variantRule'
     ? `${selectedTarget.writeSource.scope} override`
     : sourceKind === 'classRule'
-      ? 'Shared class'
+      ? 'Legacy class'
       : 'Base layer';
   const sharedFields = Object.keys(
     selectedTarget.kind === 'nested'
@@ -300,7 +306,7 @@ export function CreativeInspector() {
               Source: {selectedTarget.writeSource?.kind === 'variantRule'
                 ? `${selectedTarget.writeSource.scope} override`
                 : selectedTarget.writeSource?.kind === 'classRule'
-                  ? 'shared group style'
+                  ? 'legacy group style'
                   : 'base layer'}
             </p>
           ) : null}
@@ -320,6 +326,8 @@ export function CreativeInspector() {
             <p className="inspector-note">This is the logical edit box for the active offer format. Drag or align it as one unit; double-click to edit inside.</p>
           )}
         </InspectorSection>
+
+        {!isGroupedSelection ? <CreativeOwnershipControls document={document} size={size} target={selectedTarget} scopes={activeScopes} /> : null}
 
         {isHeadlineSelection ? (
           <InspectorSection
@@ -420,6 +428,7 @@ export function CreativeInspector() {
               ]}
               onChange={setResizeMode}
             />
+            {fitDiagnostic?.reason ? <p role="status" className="inspector-note">Text constraint: {fitDiagnostic.reason}</p> : null}
             {fitStatus.state !== 'unknown' ? (
               <div className={`fit-status fit-status-${fitStatus.state}`}>
                 <strong>{fitStatus.state === 'scaled' ? 'Auto-fitted' : 'Stated size'}</strong>
@@ -452,6 +461,7 @@ export function CreativeInspector() {
                 />
               ) : null}
             </div>
+            {canTextFit ? <TextFitPolicyControls fit={activeFit} onChange={applyFitUpdate} /> : null}
             {canTextFit ? (
               <div className="inspector-grid">
                 <SelectControl
@@ -511,7 +521,7 @@ export function CreativeInspector() {
 
         <InspectorSection
           id="style"
-          title="Styles"
+          title="Legacy defaults"
           open={openSections.has('style')}
           onToggle={() => toggleSection('style')}
         >
@@ -521,7 +531,7 @@ export function CreativeInspector() {
               <strong>{selectedTarget.kind === 'nested' ? activeCssClass : selectedLayer.id}</strong>
               <p>
                 {selectedTarget.kind === 'nested'
-                  ? `Nested item uses the shared .${activeCssClass} class and can be overridden for ${activeScopes.join(', ')}.`
+                  ? `Nested item uses the legacy .${activeCssClass} class and can be overridden for ${activeScopes.join(', ')}.`
                   : `Layer class .${activeCssClass || selectedLayer.id} sits in the ${selectedLayer.group || 'Other'} library group.`}
               </p>
             </div>
@@ -541,7 +551,7 @@ export function CreativeInspector() {
             />
           </div>
           <div className="style-field-summary" aria-label="Reusable style fields">
-            <span title="Fields on the base layer or shared class">Shared: {sharedFields.length ? sharedFields.join(', ') : 'none'}</span>
+            <span title="Fields on the base layer or shared class">Baseline: {sharedFields.length ? sharedFields.join(', ') : 'none'}</span>
             {!isHeadlineSelection ? (
               <span title="Fields overridden for the current offer, T&C, or CTA state">Override: {overrideFields.length ? overrideFields.join(', ') : 'none'}</span>
             ) : null}
@@ -550,15 +560,15 @@ export function CreativeInspector() {
           <div className="style-action-row">
             <button
               type="button"
-              data-tip="Write the current active override values back to the shared style"
+              data-tip="Write current legacy variant values to its baseline. Named sharing is managed separately above."
               disabled={sourceKind !== 'variantRule'}
               onClick={() => promoteTargetToSharedStyle(selectedTarget.id, reusableStyleFields)}
             >
-              Promote to shared
+              Copy active values to baseline
             </button>
             <button
               type="button"
-              data-tip="Remove the current variant override and use the shared style here"
+              data-tip="Remove current legacy variant fields to use the baseline here"
               disabled={!canClearOverride}
               onClick={() => clearTargetOverrides(selectedTarget.id, reusableStyleFields)}
             >
@@ -637,21 +647,12 @@ export function CreativeInspector() {
                   value={selectedClip.preset}
                   onChange={(value) => updateClip(selectedLayer.id, selectedClip.id, 'preset', value)}
                 />
-                <FieldControl
-                  label="Start %"
-                  type="text"
-                  value={selectedClip.start}
-                  onChange={(value) => updateClip(selectedLayer.id, selectedClip.id, 'start', value)}
-                />
-                <FieldControl
-                  label="End %"
-                  type="text"
-                  value={selectedClip.end}
-                  onChange={(value) => updateClip(selectedLayer.id, selectedClip.id, 'end', value)}
-                />
+
               </div>
+              <MotionTimingControls clip={selectedClip} durationS={durationS} beats={activeBeats} onChange={(field,value,target) => updateClip(selectedLayer.id,selectedClip.id,field,value,target)} />
+              <MotionDistanceControls clip={selectedClip} onChange={(field, value, target) => updateClip(selectedLayer.id, selectedClip.id, field, value, target)} />
               <div className="param-grid">
-                {Object.entries(selectedClip.params || {}).map(([field, value]) => (
+                {Object.entries(selectedClip.params || {}).filter(([field, value]) => !isMotionDistanceField(field) && !["enter_duration","enter_duration_pct","fade_duration","fade_pct"].includes(field) && typeof value !== "object").map(([field, value]) => (
                   <FieldControl
                     key={field}
                     label={field}

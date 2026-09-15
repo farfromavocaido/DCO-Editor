@@ -34,3 +34,103 @@ describe('effective ownership', () => {
   expect(doc).toEqual(before);
  });
 });
+
+import { materializeCreativeOwnership, setCreativeOwnershipField, detachCreativeOwnership, resetCreativeOwnershipField } from './creative-ownership';
+it('named sharing has explicit members, local exceptions, reset, and preserved detach', () => {
+ const doc = fixture();
+ doc.sharedDefinitions = [{id:'legal',name:'Legal fit',fit:{maxLines:3},members:[{size:'300x250',targetId:'terms',scope:'offers-0'}]}];
+ const compiled = materializeCreativeOwnership(doc);
+ expect(materializeCreativeOwnership(compiled)).toEqual(compiled);
+ expect(findCreativeTarget(doc,'300x250','terms',scopes).fit.maxLines).toBe(3);
+ const local = setCreativeOwnershipField(doc,'300x250','terms',scopes,'fit','maxLines',5,'local');
+ expect(findCreativeTarget(local,'300x250','terms',scopes).fit.maxLines).toBe(5);
+ expect(local.sharedDefinitions[0].fit.maxLines).toBe(3);
+ const reset = resetCreativeOwnershipField(local,'300x250','terms',scopes,'fit','maxLines');
+ expect(findCreativeTarget(reset,'300x250','terms',scopes).fit.maxLines).toBe(3);
+ const detached = detachCreativeOwnership(doc,'legal',{size:'300x250',targetId:'terms',scope:'offers-0'});
+ expect(findCreativeTarget(detached,'300x250','terms',scopes).fit.maxLines).toBe(3);
+ expect(detached.sharedDefinitions[0].members).toEqual([]);
+ expect(findCreativeTarget(doc,'300x250','terms',['offers-1']).fit.maxLines).toBe(4);
+});
+it('rejects missing targets and overlapping shared field ownership', () => {
+ const doc = fixture();
+ doc.sharedDefinitions = [{id:'a',name:'A',fit:{maxLines:2},members:[{size:'300x250',targetId:'missing'}]}];
+ expect(() => materializeCreativeOwnership(doc)).toThrow(/target/i);
+ doc.sharedDefinitions[0].members[0].targetId = 'terms';
+ doc.sharedDefinitions.push({...structuredClone(doc.sharedDefinitions[0]),id:'b'});
+ expect(() => materializeCreativeOwnership(doc)).toThrow(/conflict/i);
+});
+
+import { createCreativeOwnershipDefinition, linkCreativeOwnership, copyCreativeOwnership } from './creative-ownership';
+import { selectorForVariantRule } from './creative-css';
+it('shared edits affect only explicit members and honor per-size sources', () => {
+ const doc = fixture();
+ doc.sizes['300x600'] = structuredClone(doc.sizes['300x250']);
+ doc.sharedDefinitions = [{id:'legal',name:'Legal',values:{fontSize:7},fit:{maxLines:3},perSize:{'300x600':{values:{fontSize:12}}},members:[{size:'300x250',targetId:'terms',scope:'offers-0'},{size:'300x600',targetId:'terms',scope:'offers-0'}]}];
+ const next = setCreativeOwnershipField(doc,'300x250','terms',scopes,'fit','maxLines',6,'shared','legal');
+ expect(findCreativeTarget(next,'300x600','terms',scopes).fit.maxLines).toBe(6);
+ const format = setCreativeOwnershipField(next,'300x600','terms',scopes,'values','fontSize',15,'shared','legal');
+ expect(findCreativeTarget(format,'300x250','terms',scopes).values.fontSize).toBe(7);
+ expect(findCreativeTarget(format,'300x600','terms',scopes).values.fontSize).toBe(15);
+ expect(findCreativeTarget(format,'300x600','terms',['offers-1']).values.fontSize).toBe(6);
+});
+it('field detach preserves that field while retaining independent shared fields', () => {
+ const doc = fixture(); const member = {size:'300x250',targetId:'terms',scope:'offers-0'};
+ doc.sharedDefinitions = [{id:'legal',name:'Legal',values:{fontSize:7},fit:{maxLines:3,minFontSize:5},members:[member]}];
+ const detached = detachCreativeOwnership(doc,'legal',member,{fit:['maxLines']});
+ const changed = setCreativeOwnershipField(detached,'300x250','terms',scopes,'fit','maxLines',8,'shared','legal');
+ expect(findCreativeTarget(changed,'300x250','terms',scopes).fit.maxLines).toBe(3);
+ expect(findCreativeTarget(changed,'300x250','terms',scopes).fitProvenance.minFontSize.kind).toBe('sharedDefinition');
+});
+it('copy once creates no member, and different states may own the same field', () => {
+ const doc = fixture();
+ doc.sharedDefinitions = [{id:'one',name:'One',fit:{maxLines:3},members:[{size:'300x250',targetId:'terms',scope:'offers-1'}]},{id:'two',name:'Two',fit:{maxLines:6},members:[{size:'300x250',targetId:'terms',scope:'offers-2'}]}];
+ expect(() => materializeCreativeOwnership(doc)).not.toThrow();
+ const next = copyCreativeOwnership(doc,'two',{size:'300x250',targetId:'terms',scope:'offers-0'});
+ expect(next.sharedDefinitions).toEqual(doc.sharedDefinitions);
+ expect(findCreativeTarget(next,'300x250','terms',scopes).fit.maxLines).toBe(6);
+ const generated = materializeCreativeOwnership(next).sizes['300x250'].variantRules.at(-1);
+ expect(selectorForVariantRule(generated)).toMatch(/\.offers-0 #terms#terms/);
+});
+it('validation rejects invalid named membership without mutating its input', () => {
+ const doc = fixture();
+ doc.sharedDefinitions = [{id:'missing',name:'Invalid member',members:[{size:'300x250',targetId:'absent'}]}];
+ const before = structuredClone(doc);
+ expect(() => validateCreativeDocument(doc)).toThrow(/target/i);
+ expect(doc).toEqual(before);
+});
+
+import { resetCreativeTargetField } from './creative-model';
+it('reset removes exactly the controlling field and exposes the inherited value', () => {
+ const doc = fixture();
+ const next = resetCreativeTargetField(doc,'300x250','terms',scopes,'fit','maxLines');
+ expect(findCreativeTarget(next,'300x250','terms',scopes).fit.maxLines).toBe(4);
+ expect(next.sizes['300x250'].variantRules[1]).toEqual(doc.sizes['300x250'].variantRules[1]);
+ expect(next.sizes['300x250'].variantRules[0].props).toEqual(doc.sizes['300x250'].variantRules[0].props);
+});
+
+import { targetIdToSelector } from './creative-css';
+it('targets the production DOM IDs for offer children and solo legal copy', () => {
+ expect(targetIdToSelector('offer-slot-2::offer-subline')).toBe('#offer2 .offer-subline');
+ expect(targetIdToSelector('offer-slot-1')).toBe('#offer1');
+ expect(targetIdToSelector('terms-solo')).toBe('#TC_Solo .terms-solo');
+ expect(targetIdToSelector('headline-act1')).toBe('#headline-act1');
+});
+
+import os from 'node:os';
+import path from 'node:path';
+import { writeCreativeDocument, readCreativeDocument } from '../server/creative-document';
+it('save and reload preserve named members, overrides, and their effective fields', async () => {
+ const doc = fixture();
+ doc.sharedDefinitions = [{id:'legal',name:'Legal',fit:{maxLines:3},members:[{size:'300x250',targetId:'terms',scope:'offers-0'}]}];
+ const next = setCreativeOwnershipField(doc,'300x250','terms',scopes,'fit','maxLines',5,'local');
+ const directory = fs.mkdtempSync(path.join(os.tmpdir(),'creative-ownership-'));
+ try {
+  const file = path.join(directory,'creative.json');
+  await writeCreativeDocument(next,file);
+  const loaded = await readCreativeDocument(file);
+  expect(loaded).toEqual(next);
+  expect(findCreativeTarget(loaded,'300x250','terms',scopes).fit.maxLines).toBe(5);
+  expect(findCreativeTarget(loaded,'300x250','terms',['offers-1']).fit.maxLines).toBe(4);
+ } finally { fs.rmSync(directory,{recursive:true,force:true}); }
+});

@@ -198,3 +198,14 @@ test('active fit undo restores the exact document without leaving an inherited o
   useEditorStore.getState().redo();
   assert.equal(useEditorStore.getState().creativeDocument.sizes['300x250'].variantRules[0].fit.maxLines,2);
 });
+
+test('named ownership membership edits undo and redo atomically', () => {
+ const doc = {version:1,sizes:{'300x250':{canvas:{width:300,height:250},layers:[{id:'terms',kind:'text',base:{fontSize:6},fit:{maxLines:4},clips:[]}]}}};
+ const next = {...doc,sharedDefinitions:[{id:'legal',name:'Legal',fit:{maxLines:2},members:[{size:'300x250',targetId:'terms'}]}]};
+ useEditorStore.setState({creativeDocument:doc,size:'300x250',history:[],historyIndex:-1});
+ useEditorStore.getState().applyCreativeOwnershipDocument(next);
+ useEditorStore.getState().undo();
+ assert.deepEqual(useEditorStore.getState().creativeDocument,doc);
+ useEditorStore.getState().redo();
+ assert.deepEqual(useEditorStore.getState().creativeDocument,next);
+});

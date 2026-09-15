@@ -1,5 +1,7 @@
 // @ts-nocheck
-import { activeOwnershipRules, resolveOwnedFields } from "./creative-ownership";
+import { resolveTimeRef } from './creative-compiler';
+import { beatsForScopes } from './timing-profiles';
+import { activeOwnershipRules, resolveOwnedFields, materializeCreativeOwnership, setCreativeOwnershipField, resetCreativeOwnershipField } from "./creative-ownership";
 
 import { excludedHeadlineLayerIdsForVariantRule } from '@/lib/creative-css';
 
@@ -451,12 +453,13 @@ const findCreativeTargetLegacy = (
 
 /** Resolve each field independently; a later unrelated rule is not its owner. */
 export const findCreativeTarget = (document, size, targetId, activeScopes = []) => {
+  document = materializeCreativeOwnership(document);
   const target = findCreativeTargetLegacy(document, size, targetId, activeScopes);
   if (!target) return null;
   const sizeCreative = currentSizeCreative(document, size);
   const parsed = parseCreativeTargetId(targetId);
   const layer = findCreativeLayer(document, size, parsed.layerId);
-  const identity = identityForTarget(layer, parsed);
+  const identity = { ...identityForTarget(layer, parsed), targetId };
   const rules = activeOwnershipRules(sizeCreative.variantRules || [], identity, activeScopes)
     .filter((rule) => !propsOnlyHideVisibility(rule.props));
   const baseline = findCreativeTargetLegacy({ ...document, sizes: { ...document.sizes, [size]: { ...sizeCreative, variantRules: [] } } }, size, targetId, []);
@@ -602,6 +605,10 @@ export const updateCreativeTargetFit = (
   field: string,
   value: unknown,
 ) => {
+  const effectiveSource = findCreativeTarget(document, size, targetId, activeScopes)?.fitProvenance?.[field];
+  if (effectiveSource?.kind === 'sharedDefinition' || effectiveSource?.kind === 'localOverride') {
+    return setCreativeOwnershipField(document, size, targetId, activeScopes, 'fit', field, value, 'local');
+  }
   const next = deepClone(document);
   const sizeCreative = currentSizeCreative(next, size);
   if (!sizeCreative) throw new Error(`Unknown size: ${size}`);
@@ -1260,8 +1267,13 @@ export const clearCreativeTargetActiveOverride = (
   if (!rule) return next;
 
   if (fields.length) {
+    const target = findCreativeTarget(document, size, targetId, activeScopes);
     for (const field of fields) {
-      delete rule.props?.[field];
+      const source = target?.valueProvenance?.[field];
+      const owner = source?.kind === 'variantRule'
+        ? (sizeCreative.variantRules || []).find((item) => item.id === source.ruleId)
+        : null;
+      if (owner) delete owner.props?.[field];
     }
   } else {
     rule.props = {};
@@ -1274,6 +1286,19 @@ export const clearCreativeTargetActiveOverride = (
   // props alone must not wipe independent wrap/shrink settings.
   if (!hasProps && !hasFit) {
     sizeCreative.variantRules = (sizeCreative.variantRules || []).filter((item: Record<string, unknown>) => item !== rule);
+  }
+  return next;
+};
+
+/** Reset only the controlling local/variant field; inherited values are untouched. */
+export const resetCreativeTargetField = (document, size, targetId, scopes, domain, field) => {
+  const target = findCreativeTarget(document, size, targetId, scopes);
+  const source = (domain === 'fit' ? target?.fitProvenance : target?.valueProvenance)?.[field];
+  if (source?.kind === 'localOverride') return resetCreativeOwnershipField(document, size, targetId, scopes, domain, field);
+  const next = deepClone(document);
+  if (source?.kind === 'variantRule') {
+    const rule = currentSizeCreative(next, size)?.variantRules?.find((item) => item.id === source.ruleId);
+    if (rule) delete rule[domain === 'fit' ? 'fit' : 'props']?.[field];
   }
   return next;
 };
@@ -1312,6 +1337,10 @@ export const updateCreativeTargetValue = (
   field: string,
   value: unknown,
 ) => {
+  const effectiveSource = findCreativeTarget(document, size, targetId, activeScopes)?.valueProvenance?.[field];
+  if (effectiveSource?.kind === 'sharedDefinition' || effectiveSource?.kind === 'localOverride') {
+    return setCreativeOwnershipField(document, size, targetId, activeScopes, 'values', field, value, 'local');
+  }
   const next = deepClone(document);
   const sizeCreative = currentSizeCreative(next, size);
   if (!sizeCreative) throw new Error(`Unknown size: ${size}`);
@@ -1410,21 +1439,24 @@ export const updateCreativeLayerClip = (
       [change.field]: change.value,
     };
   } else {
-    const nextBoundary = Number(change.value);
+    const beats = beatsForScopes(document, [clip.profile || clip.frameScope || 'frames-3']);
+    const durationS = document.clock?.durationS || 15;
+    const time = (value) => { try { return resolveTimeRef(value, beats, durationS); } catch { return Number.NaN; } };
+    const nextBoundary = time(change.value);
     if (
       (change.field === 'start' || change.field === 'end')
       && Array.isArray(clip.keyframes)
       && Number.isFinite(nextBoundary)
     ) {
-      const previousBoundary = Number(clip[change.field]);
+      const previousBoundary = time(clip[change.field]);
       const numericKeyframes = clip.keyframes
-        .map((keyframe: Record<string, unknown>) => Number(keyframe.at))
+        .map((keyframe: Record<string, unknown>) => time(keyframe.at))
         .filter((at: number) => Number.isFinite(at));
       const inferredBoundary = change.field === 'start'
         ? Math.min(...numericKeyframes)
         : Math.max(...numericKeyframes);
       clip.keyframes = clip.keyframes.map((keyframe: Record<string, unknown>) => {
-        const at = Number(keyframe.at);
+        const at = time(keyframe.at);
         if (
           Number.isFinite(at)
           && (
@@ -1432,7 +1464,7 @@ export const updateCreativeLayerClip = (
             || at === inferredBoundary
           )
         ) {
-          return { ...keyframe, at: nextBoundary };
+          return { ...keyframe, at: keyframe.at?.unit === 'seconds' ? { value: nextBoundary * durationS / 100, unit: 'seconds' } : keyframe.at?.unit === 'timeline-percent' ? { value: nextBoundary, unit: 'timeline-percent' } : nextBoundary };
         }
         return keyframe;
       });

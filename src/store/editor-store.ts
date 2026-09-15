@@ -2,6 +2,7 @@
 'use client';
 
 import { create } from 'zustand';
+import { waitForProductionStage, withProductionRestPose } from '@/lib/production-stage';
 
 import {
   activeScopesFromControls,
@@ -405,6 +406,13 @@ export const useEditorStore = create<any>((set, get) => ({
     const history = state.history.slice(0, state.historyIndex + 1);
     history.push(realChanges);
     set({ history, historyIndex: history.length - 1 });
+  },
+
+  applyCreativeOwnershipDocument: (next, message = 'Updated explicit sharing') => {
+    const before = get().creativeDocument;
+    set({ creativeDocument: next, creativeDirty: true });
+    get().setStatus(message, 'warn');
+    get().pushHistory([{ kind: 'creativeDocument', before, after: next }]);
   },
 
   applyHistoryChange: (change, value) => {
@@ -1502,23 +1510,13 @@ export const useEditorStore = create<any>((set, get) => ({
         await get().loadSize(size);
       }
       await waitForPaint();
-      try {
-        await window.document.fonts?.ready;
-      } catch {
-        // continue — fit still runs with fallback metrics
-      }
-      const stage = window.document.querySelector('[data-preview-stage]') as HTMLElement | null;
-      if (stage) {
-        get().applyPreviewTextFitting(stage);
-        await waitForPaint();
-        snapshots[size] = capturePresentationSnapshot(stage, size);
-      }
+      const stage = await waitForProductionStage(size);
+      snapshots[size] = await withProductionRestPose(stage, () => capturePresentationSnapshot(stage, size));
     }
     if (originalSize && get().size !== originalSize) {
       await get().loadSize(originalSize);
       await waitForPaint();
-      const stage = window.document.querySelector('[data-preview-stage]') as HTMLElement | null;
-      if (stage) get().applyPreviewTextFitting(stage);
+      await waitForProductionStage(originalSize);
     }
     return snapshots;
   },
@@ -2050,6 +2048,7 @@ export const useEditorStore = create<any>((set, get) => ({
   },
 
   applyPreviewTextFitting: (stageEl) => {
+    if (stageEl?.ownerDocument?.defaultView?.frameElement) return;
     const state = get();
     if (!stageEl || !state.creativeDocument) return;
     // Fit against authored boxes → symbol ink-align → gap/plus layout.

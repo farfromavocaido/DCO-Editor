@@ -1,4 +1,5 @@
 import { test } from 'vitest';
+import { JSDOM } from 'jsdom';
 import assert from 'node:assert/strict';
 
 import { readCreativeDocument, readCreativeDocumentForCampaign } from '../creative-document';
@@ -263,15 +264,30 @@ test('client preview page uses textareas for multiline headline fields', async (
   assert.match(html, /<textarea name="tc_units_text">/);
 });
 
-test('client preview page loads offers-0 sample copy when Offers changes', async () => {
+test('changing Offers applies the matching authored sample, including empty values', async () => {
   const document = await readCreativeDocument();
-  const html = renderClientPreviewPage(document, { includeValidator: false });
-  assert.match(html, /var defaultsByOfferCount = /);
-  assert.match(html, /function applyOfferCountDefaults\(offerCount\)/);
-  assert.match(html, /SEAI Grant Applications\?/);
-  assert.match(html, /Book your consultation today/);
-  assert.match(html, /"roundel_value_text":""/);
-  assert.match(html, /Sustainable Energy Authority of Ireland \(SEAI\)/);
+  const common = document.feed.sampleRows[0];
+  document.feed.sampleRows = [
+    { ...common, offer_count_num: 1, heading4_text: 'Fixture offer headline', roundel_value_text: '25%' },
+    { ...common, offer_count_num: 0, heading4_text: 'Fixture brand headline', roundel_value_text: '', tc_terms_text: 'Fixture brand terms' },
+  ];
+  const dom = new JSDOM(renderClientPreviewPage(document, { includeValidator: false }), {
+    url: 'http://localhost/', runScripts: 'dangerously', pretendToBeVisual: true,
+  });
+  try {
+    const field = (name: string) => dom.window.document.querySelector(`[name="${name}"]`) as HTMLInputElement;
+    field('offer_count_num').value = '0';
+    field('offer_count_num').dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+    assert.equal(field('heading4_text').value, 'Fixture brand headline');
+    assert.equal(field('roundel_value_text').value, '');
+    assert.equal(field('tc_terms_text').value, 'Fixture brand terms');
+    field('offer_count_num').value = '1';
+    field('offer_count_num').dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+    assert.equal(field('heading4_text').value, 'Fixture offer headline');
+    assert.equal(field('roundel_value_text').value, '25%');
+  } finally {
+    dom.window.close();
+  }
 });
 
 test('studio export still waits for Enabler init before bootstrap', async () => {

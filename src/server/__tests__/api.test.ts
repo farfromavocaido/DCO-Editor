@@ -1,7 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
-import os from 'node:os';
 import path from 'node:path';
 
 import { GET as feedGet } from '@/app/api/feed-schema/route';
@@ -300,90 +299,64 @@ test('POST /api/creative/base-package can return a canonical agency zip', async 
   assert.ok(!bytes.includes(Buffer.from('ads/assets/fonts/Museo700-Regular.otf')));
 });
 
-test('POST /api/creative/export-preview writes tracked outputs for statics + DCO agency', async () => {
-  // Snapshot committed package first — this test overwrites outputs/, and CI runs
-  // export:preview-site afterward. Wiping to an empty stub left Pages /statics/ empty.
-  const snapshotDir = await fs.mkdtemp(path.join(os.tmpdir(), 'outputs-snap-'));
-  const snapshotNames = ['campaigns', 'downloads', 'latest.json'] as const;
-  for (const name of snapshotNames) {
-    const src = path.resolve(outputsRoot, name);
-    try {
-      await fs.cp(src, path.join(snapshotDir, name), { recursive: true });
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
-    }
-  }
+test('POST /api/creative/export-preview writes isolated packages for statics + DCO agency', async () => {
+  // The Vitest storage fixture redirects every export to this suite's temp directory.
+  const campaigns = listStaticPreviewCampaigns().map((entry) => ({ id: entry.id }));
+  const response = await exportPreviewPost(new Request('http://localhost/api/creative/export-preview', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ campaigns }),
+  }));
 
-  try {
-    const campaigns = listStaticPreviewCampaigns().map((entry) => ({ id: entry.id }));
-    const response = await exportPreviewPost(new Request('http://localhost/api/creative/export-preview', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ campaigns }),
-    }));
+  assert.equal(response.status, 200);
+  const payload = await response.json();
+  assert.equal(payload.ok, true);
+  assert.ok(payload.latest?.zip?.startsWith('downloads/SSE_Statics_'));
+  assert.ok(payload.latest?.dcoZip?.startsWith('downloads/SSE_DCO_ROI_canonical_agency_'));
+  assert.ok(payload.latest?.dcoZips?.roi?.startsWith('downloads/SSE_DCO_ROI_canonical_agency_'));
+  assert.ok(payload.latest?.dcoZips?.ni?.startsWith('downloads/SSE_DCO_NIR_canonical_agency_'));
+  assert.equal(payload.latest.dcoMarkets?.length, 2);
+  assert.equal(payload.latest.campaigns.length, 3);
+  assert.equal(payload.latest.dco?.id, 'sse-dco');
+  assert.equal(payload.latest.dco?.packageKind, 'canonical-agency');
+  assert.ok(payload.latest.dco?.sizes?.includes('300x250'));
 
-    assert.equal(response.status, 200);
-    const payload = await response.json();
-    assert.equal(payload.ok, true);
-    assert.ok(payload.latest?.zip?.startsWith('downloads/SSE_Statics_'));
-    assert.ok(payload.latest?.dcoZip?.startsWith('downloads/SSE_DCO_ROI_canonical_agency_'));
-    assert.ok(payload.latest?.dcoZips?.roi?.startsWith('downloads/SSE_DCO_ROI_canonical_agency_'));
-    assert.ok(payload.latest?.dcoZips?.ni?.startsWith('downloads/SSE_DCO_NIR_canonical_agency_'));
-    assert.equal(payload.latest.dcoMarkets?.length, 2);
-    assert.equal(payload.latest.campaigns.length, 3);
-    assert.equal(payload.latest.dco?.id, 'sse-dco');
-    assert.equal(payload.latest.dco?.packageKind, 'canonical-agency');
-    assert.ok(payload.latest.dco?.sizes?.includes('300x250'));
+  const htmlPath = path.resolve(
+    outputsRoot,
+    'campaigns/sse-hiker-welcome/SSE_Hiker_Welcome_300x250.html',
+  );
+  const html = await fs.readFile(htmlPath, 'utf8');
+  const hikerClickTag = getCampaign('sse-hiker-welcome').clickTag || '';
+  assert.match(html, new RegExp(hikerClickTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  assert.match(html, /window\.clickTag = clickTag/);
 
-    const htmlPath = path.resolve(
-      outputsRoot,
-      'campaigns/sse-hiker-welcome/SSE_Hiker_Welcome_300x250.html',
-    );
-    const html = await fs.readFile(htmlPath, 'utf8');
-    const hikerClickTag = getCampaign('sse-hiker-welcome').clickTag || '';
-    assert.match(html, new RegExp(hikerClickTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-    assert.match(html, /window\.clickTag = clickTag/);
+  const agencyHtmlPath = path.resolve(outputsRoot, 'campaigns/sse-dco/ads/300x250/index.html');
+  const agencyHtml = await fs.readFile(agencyHtmlPath, 'utf8');
+  assert.match(agencyHtml, /<!DOCTYPE html>/i);
+  assert.ok(await fs.readFile(path.resolve(outputsRoot, 'campaigns/sse-dco/mapping.txt'), 'utf8'));
 
-    const agencyHtmlPath = path.resolve(outputsRoot, 'campaigns/sse-dco/ads/300x250/index.html');
-    const agencyHtml = await fs.readFile(agencyHtmlPath, 'utf8');
-    assert.match(agencyHtml, /<!DOCTYPE html>/i);
-    assert.ok(await fs.readFile(path.resolve(outputsRoot, 'campaigns/sse-dco/mapping.txt'), 'utf8'));
-
-    const zipPath = path.resolve(outputsRoot, payload.latest.zip);
-    const zip = await fs.readFile(zipPath);
-    assert.equal(zip.subarray(0, 4).toString('binary'), 'PK\u0003\u0004');
-    // Statics download: campaigns/{slug}_{size}.zip units (not loose HTML).
-    assert.ok(zip.includes(Buffer.from('campaigns/SSE_Hiker_Welcome_300x250.zip')));
-    assert.ok(!zip.includes(Buffer.from('campaigns/sse-hiker-welcome/')));
-    const dcoZipPath = path.resolve(outputsRoot, payload.latest.dcoZip);
-    const dcoZip = await fs.readFile(dcoZipPath);
-    assert.equal(dcoZip.subarray(0, 4).toString('binary'), 'PK\u0003\u0004');
-    assert.ok(dcoZip.includes(Buffer.from('ads/300x250/index.html')));
-    assert.ok(dcoZip.includes(Buffer.from('SSE_DCO_ROI_Delivery')));
-    const niZipPath = path.resolve(outputsRoot, payload.latest.dcoZips.ni);
-    const niZip = await fs.readFile(niZipPath);
-    assert.equal(niZip.subarray(0, 4).toString('binary'), 'PK\u0003\u0004');
-    assert.ok(niZip.includes(Buffer.from('SSE_DCO_NIR_Delivery')));
-    const niHtml = await fs.readFile(
-      path.resolve(outputsRoot, 'campaigns/sse-dco-nir/ads/300x250/index.html'),
-      'utf8',
-    );
-    assert.match(niHtml, /devDynamicContent\.SSE_DCO_NIR_Delivery/);
-    assert.match(niHtml, /Region = \["NIR"\]/);
-    assert.match(niHtml, /Enabler\.setProfileId\(10962603\)/);
-  } finally {
-    await fs.rm(path.resolve(outputsRoot, 'campaigns'), { recursive: true, force: true });
-    await fs.rm(path.resolve(outputsRoot, 'downloads'), { recursive: true, force: true });
-    for (const name of snapshotNames) {
-      const src = path.join(snapshotDir, name);
-      try {
-        await fs.cp(src, path.resolve(outputsRoot, name), { recursive: true });
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
-      }
-    }
-    await fs.rm(snapshotDir, { recursive: true, force: true });
-  }
+  const zipPath = path.resolve(outputsRoot, payload.latest.zip);
+  const zip = await fs.readFile(zipPath);
+  assert.equal(zip.subarray(0, 4).toString('binary'), 'PK\u0003\u0004');
+  // Statics download: campaigns/{slug}_{size}.zip units (not loose HTML).
+  assert.ok(zip.includes(Buffer.from('campaigns/SSE_Hiker_Welcome_300x250.zip')));
+  assert.ok(!zip.includes(Buffer.from('campaigns/sse-hiker-welcome/')));
+  const dcoZipPath = path.resolve(outputsRoot, payload.latest.dcoZip);
+  const dcoZip = await fs.readFile(dcoZipPath);
+  assert.equal(dcoZip.subarray(0, 4).toString('binary'), 'PK\u0003\u0004');
+  assert.ok(dcoZip.includes(Buffer.from('ads/300x250/index.html')));
+  assert.ok(dcoZip.includes(Buffer.from('SSE_DCO_ROI_Delivery')));
+  const niZipPath = path.resolve(outputsRoot, payload.latest.dcoZips.ni);
+  const niZip = await fs.readFile(niZipPath);
+  assert.equal(niZip.subarray(0, 4).toString('binary'), 'PK\u0003\u0004');
+  assert.ok(niZip.includes(Buffer.from('SSE_DCO_NIR_Delivery')));
+  const niHtml = await fs.readFile(
+    path.resolve(outputsRoot, 'campaigns/sse-dco-nir/ads/300x250/index.html'),
+    'utf8',
+  );
+  assert.match(niHtml, /devDynamicContent\.SSE_DCO_NIR_Delivery/);
+  assert.match(niHtml, /Region = \["NIR"\]/);
+  assert.match(niHtml, /Enabler\.setProfileId\(10962603\)/);
 });
 
 

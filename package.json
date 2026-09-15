@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:creative": "vitest run --config vitest.creative.config.ts",
     "export:preview-site": "tsx --tsconfig tsconfig.json scripts/export-client-preview-site.ts",
     "qa:dco": "tsx --tsconfig tsconfig.json scripts/qa-dco/run.ts",
     "qa:dco:export": "tsx --tsconfig tsconfig.json scripts/qa-dco/export-shell.ts",

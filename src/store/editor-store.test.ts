@@ -274,13 +274,16 @@ test('every fixed-copy download posts only the selected row', async () => {
   const payloads: Array<{document:{feed:{sampleRows:Array<Record<string, unknown>>}}}> = [];
   try {
     useEditorStore.setState({creativeDocument:{feed:{sampleRows:rows},sizes:{}},feedDraft:{rows,selectedIndex:1},offerCount:3,tcMode:'tcs_units',ctaShape:'rectangle',includeRoundelFrame:false,frameCount:3,
+      prepareExportPreview:async(renderMode: string)=>{useEditorStore.setState({previewRenderMode:renderMode});return useEditorStore.getState();},
       captureOutlineSnapshotsForAllSizes:async()=>({})});
     globalThis.fetch = async (_url, options) => {
       payloads.push(JSON.parse(String(options?.body || '{}')));
       return new Response(JSON.stringify({error:'test stops before file download'}),{status:400,headers:{'content-type':'application/json'}});
     };
     for (const method of ['buildHtml','exportClientPackage','exportBasePackage']) {
+      useEditorStore.setState({previewRenderMode:'font'});
       await assert.rejects(useEditorStore.getState()[method]({renderMode:'outline'}),/test stops/);
+      assert.equal(useEditorStore.getState().previewRenderMode,'outline');
     }
     assert.equal(payloads.length,3);
     for (const payload of payloads) {
@@ -290,4 +293,52 @@ test('every fixed-copy download posts only the selected row', async () => {
       assert.equal(payload.document.feed.sampleRows[0].Default,true);
     }
   } finally { globalThis.fetch=originalFetch;useEditorStore.setState(original,true); }
+});
+
+test('group creation undo and redo restore document and valid selection together', () => {
+ const doc={version:1,sizes:{'300x250':{canvas:{width:300,height:250},layers:[
+  {id:'a',kind:'shape',base:{left:5,top:10,width:20,height:20},clips:[{id:'a-in',preset:'fade'},{id:'a-out',preset:'fade'}]},
+  {id:'b',kind:'shape',base:{left:35,top:10,width:20,height:20},clips:[]},
+ ]}}};
+ useEditorStore.setState({creativeDocument:doc,size:'300x250',offerCount:0,selectedTargetId:'a',selectedLayerId:'a',selectedTargetIds:['a','b'],selectedClipId:'a-out',isolationPath:[],isolatedGroupId:'',history:[],historyIndex:-1});
+ useEditorStore.getState().groupSelectedCanvasTargets('Pair');
+ const groupId=useEditorStore.getState().selectedTargetId;
+ assert.equal(useEditorStore.getState().selectedTarget().kind,'group');
+ useEditorStore.getState().undo();
+ const undone=useEditorStore.getState();
+ assert.deepEqual(undone.creativeDocument,doc);
+ assert.equal(undone.selectedTargetId,'a');
+ assert.deepEqual(undone.selectedTargetIds,['a','b']);
+ assert.equal(undone.selectedLayerId,'a');
+ assert.equal(undone.selectedClipId,'a-out');
+ assert.equal(undone.selectedTarget().kind,'multi');
+ useEditorStore.getState().redo();
+ const redone=useEditorStore.getState();
+ assert.equal(redone.selectedTargetId,groupId);
+ assert.deepEqual(redone.selectedTargetIds,[groupId]);
+ assert.equal(redone.selectedTarget().kind,'group');
+ assert.deepEqual(redone.selectedTarget().members,['a','b']);
+});
+
+test('mixed selection ungroup retains other targets and restores all groups on undo', () => {
+ const groups=[{id:'canvas-group:first',name:'First',members:['a','b']},{id:'canvas-group:second',name:'Second',members:['c','d']}];
+ const doc={version:1,sizes:{'300x250':{canvas:{width:300,height:250},canvasGroups:groups,layers:['a','b','c','d','e'].map((id,index)=>({id,kind:'shape',base:{left:index*25,top:10,width:20,height:20},clips:[]}))}}};
+ const ids=['canvas-group:first','e','canvas-group:second'];
+ useEditorStore.setState({creativeDocument:doc,size:'300x250',offerCount:0,selectedTargetId:'e',selectedLayerId:'e',selectedTargetIds:ids,selectedClipId:'',isolationPath:[],isolatedGroupId:'',history:[],historyIndex:-1});
+ useEditorStore.getState().ungroupSelectedCanvasTargets();
+ const ungrouped=useEditorStore.getState();
+ assert.deepEqual(ungrouped.creativeDocument.sizes['300x250'].canvasGroups,[]);
+ assert.deepEqual(ungrouped.selectedTargetIds,['a','b','e','c','d']);
+ assert.equal(ungrouped.selectedTargetId,'e');
+ assert.deepEqual(ungrouped.selectedTarget().members,['a','b','e','c','d']);
+ useEditorStore.getState().undo();
+ const undone=useEditorStore.getState();
+ assert.deepEqual(undone.creativeDocument,doc);
+ assert.deepEqual(undone.selectedTargetIds,ids);
+ assert.equal(undone.selectedTargetId,'e');
+ assert.ok(undone.selectedTarget().bounds);
+ useEditorStore.getState().redo();
+ assert.deepEqual(useEditorStore.getState().selectedTargetIds,['a','b','e','c','d']);
+ assert.deepEqual(useEditorStore.getState().creativeDocument.sizes['300x250'].canvasGroups,[]);
+ assert.ok(useEditorStore.getState().selectedTarget().bounds);
 });

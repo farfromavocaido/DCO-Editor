@@ -463,7 +463,12 @@ export const findCreativeTarget = (document: any, size: string, targetId: string
   const rules = activeOwnershipRules(sizeCreative.variantRules || [], identity, activeScopes);
   const baseline = findCreativeTargetLegacy({ ...document, sizes: { ...document.sizes, [size]: { ...sizeCreative, variantRules: [] } } }, size, targetId, []);
   const props = resolveOwnedFields(baseline.values, baseline.writeSource, rules.map((rule) => ({ ...rule, props: variantRuleProps(sizeCreative, rule) })));
-  const fit = resolveOwnedFields(baseline.fit, { kind: parsed.isNested ? 'classRule' : 'layerFit', layerId: layer.id, cssClass: target.cssClass }, rules, 'fit');
+  const classFit = findClassRule(sizeCreative, target.cssClass)?.fit || {};
+  const layerFitRules = parsed.isNested ? [] : [{
+    fit: layer.fit || {},
+    ownershipSource: { kind: 'layerFit', layerId: layer.id, cssClass: target.cssClass },
+  }];
+  const fit = resolveOwnedFields(classFit, { kind: 'classRule', cssClass: target.cssClass }, [...layerFitRules, ...rules], 'fit');
   return { ...target, values: props.values, base: props.values, fit: fit.values, valueProvenance: props.provenance, fitProvenance: fit.provenance };
 };
 

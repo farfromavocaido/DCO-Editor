@@ -7,7 +7,7 @@ import { jsonResponse, errorResponse } from '@/server/http';
 
 export const runtime = 'nodejs';
 
-export async function GET(request = new Request('http://localhost/api/creative')) {
+export async function GET(request: Request) {
   try {
     const campaignId = resolveCampaignId(request);
     return jsonResponse(await readCreativeDocumentForCampaign(campaignId));
@@ -16,7 +16,7 @@ export async function GET(request = new Request('http://localhost/api/creative')
   }
 }
 
-export async function POST(request = new Request('http://localhost/api/creative', { method: 'POST' })) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     // Campaign id comes from ?campaign= (body.campaign is the document's { id, name } object).

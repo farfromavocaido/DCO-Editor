@@ -8,6 +8,7 @@ import {
 } from '@/lib/production-stage';
 
 type Props = {
+  renderMode: 'font' | 'outline';
   document: Record<string, any>;
   row: Record<string, unknown>;
   size: string;
@@ -20,10 +21,10 @@ type Props = {
   onContextMenu: (event: React.MouseEvent, targetId: string) => void;
 };
 
-type RenderedCreative = { html: string; generation: number; document: Props['document']; row: Props['row']; size: string };
+type RenderedCreative = { html: string; generation: number; document: Props['document']; row: Props['row']; size: string; renderMode: Props['renderMode'] };
 
 export function ProductionCreativeStage(props: Props) {
-  const { document, row, size, percent, layerIds, hiddenLayerIds, onTargets } = props;
+  const { document, row, size, renderMode, percent, layerIds, hiddenLayerIds, onTargets } = props;
   const frameRefs = useRef(new Map<number, HTMLIFrameElement>());
   const requests = useRef(createRenderGeneration());
   const latest = useRef(props);
@@ -68,11 +69,11 @@ export function ProductionCreativeStage(props: Props) {
       try {
         const response = await fetch(`/api/creative/${encodeURIComponent(size)}/view`, {
           method: 'POST', headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ document, row }), signal: controller.signal,
+          body: JSON.stringify({ document, row, renderMode }), signal: controller.signal,
         });
         if (!response.ok) throw new Error((await response.json()).error || 'Creative render failed');
         const html = await response.text();
-        if (requests.current.isCurrent(generation)) setPending({ html, generation, document, row, size });
+        if (requests.current.isCurrent(generation)) setPending({ html, generation, document, row, size, renderMode });
       } catch (cause) {
         if (!requests.current.isCurrent(generation) || controller.signal.aborted) return;
         const failure = cause instanceof Error ? cause : new Error(String(cause));
@@ -81,7 +82,7 @@ export function ProductionCreativeStage(props: Props) {
       }
     }, 50);
     return () => { clearTimeout(timer); controller.abort(); requests.current.next(); };
-  }, [document, row, size, onTargets]);
+  }, [document, row, size, renderMode, onTargets]);
 
   useEffect(() => { if (displayed?.size === size) measure(); }, [percent, displayed, layerIds, hiddenLayerIds, size]);
 
@@ -91,10 +92,11 @@ export function ProductionCreativeStage(props: Props) {
     if (!doc || !requests.current.isCurrent(generation)) return;
     try {
       const stage = await waitForProductionDocument(doc);
-      if (!requests.current.isCurrent(generation) || render.document !== latest.current.document || render.row !== latest.current.row || render.size !== latest.current.size) return;
+      if (!requests.current.isCurrent(generation) || render.document !== latest.current.document || render.row !== latest.current.row || render.size !== latest.current.size || render.renderMode !== latest.current.renderMode) return;
       stage.dataset.productionStage = 'true';
+      stage.dataset.previewRenderMode = render.renderMode;
       measure(frame);
-      publishProductionStage(stage);
+      publishProductionStage(stage, { document: render.document, row: render.row });
       setDisplayed(render);
       setPending(null);
     } catch (cause) {
@@ -105,7 +107,7 @@ export function ProductionCreativeStage(props: Props) {
     }
   };
 
-  const displayReady = displayed?.document === document && displayed?.row === row && displayed?.size === size;
+  const displayReady = displayed?.document === document && displayed?.row === row && displayed?.size === size && displayed?.renderMode === renderMode;
   const hasDisplay = displayed?.size === size;
   const hit = (event: React.MouseEvent) => {
     if (!displayReady) return null;
@@ -126,6 +128,7 @@ export function ProductionCreativeStage(props: Props) {
         title={isDisplayed ? 'Production creative' : 'Preparing production creative'}
         data-production-frame={isDisplayed || !displayed ? 'true' : undefined}
         data-pending-production-frame={!isDisplayed ? 'true' : undefined}
+        data-render-mode={render.renderMode}
         data-ready={isDisplayed && displayReady ? 'true' : 'false'}
         srcDoc={render.html} onLoad={event => loaded(render, event.currentTarget)}
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0, pointerEvents: 'none', visibility: isDisplayed && hasDisplay ? 'visible' : 'hidden' }} />;

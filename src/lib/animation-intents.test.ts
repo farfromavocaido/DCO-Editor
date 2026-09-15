@@ -122,6 +122,38 @@ test('copies a selected clip to matching animation-family layers', () => {
 
   const headline2Clip = next.sizes['970x250'].layers[1].clips[0];
   assert.equal(headline2Clip.intentId, 'slideInRight');
-  assert.equal(headline2Clip.id, 'headline-act2-slideInRight-12-15_333');
+  assert.match(headline2Clip.id, /^motion-copy-[A-Za-z0-9_-]+$/);
+  assert.deepEqual(headline2Clip.copiedFrom,{layerId:'headline-act1',clipId:clip.id});
   assert.equal(next.sizes['970x250'].layers[2].clips.length, 0);
+});
+
+test('repeated family copy replaces the copied clip without creating a live link', () => {
+  const {document:withClip,clip}=addAnimationIntentToLayer(document,'970x250','headline-act1','slideInRight',12);
+  const once=copyClipToAnimationFamily(withClip,'970x250','headline-act1',clip.id);
+  once.sizes['970x250'].layers[0].clips[0].keyframes[0].translate[0]=90;
+  assert.equal(once.sizes['970x250'].layers[1].clips[0].keyframes[0].translate[0],60);
+  const twice=copyClipToAnimationFamily(once,'970x250','headline-act1',clip.id);
+  assert.equal(twice.sizes['970x250'].layers[1].clips.length,1);
+  assert.equal(twice.sizes['970x250'].layers[1].clips[0].keyframes[0].translate[0],90);
+});
+
+test('typed timing copies use stable CSS-safe identity across source timing and parameter edits', async () => {
+  const {compileAnimationClips}=await import('./creative-compiler');
+  const source={...document,sizes:{'970x250':{layers:[
+    {id:'headline-act1',group:'Headlines',clips:[{id:'source clip:é',preset:'slideInRight',start:{value:2,unit:'seconds'},end:{value:8,unit:'seconds'},params:{enter_distance_px:35}}]},
+    {id:'headline-act2',group:'Headlines',clips:[]},
+  ]}}};
+  const once=copyClipToAnimationFamily(source,'970x250','headline-act1','source clip:é');
+  const copied=once.sizes['970x250'].layers[1].clips[0];
+  assert.match(copied.id,/^[A-Za-z][A-Za-z0-9_-]*$/);
+  assert.deepEqual(copied.copiedFrom,{layerId:'headline-act1',clipId:'source clip:é'});
+  const frames=compileAnimationClips([copied],{},{durationS:20});
+  assert.equal(frames.find(frame=>frame.at===10)?.translate?.[0],35);
+  once.sizes['970x250'].layers[0].clips[0].start={value:3,unit:'seconds'};
+  once.sizes['970x250'].layers[0].clips[0].params.enter_distance_px=50;
+  const twice=copyClipToAnimationFamily(once,'970x250','headline-act1','source clip:é');
+  const copies=twice.sizes['970x250'].layers[1].clips;
+  assert.equal(copies.length,1);
+  assert.equal(copies[0].id,copied.id);
+  assert.equal(compileAnimationClips(copies,{},{durationS:20}).find(frame=>frame.at===15)?.translate?.[0],50);
 });

@@ -141,8 +141,8 @@ test('stacked sublines keep authored width (ink×1.1 is not applied at runtime)'
   document.body.appendChild(stage);
 
   layoutOffers(stage);
-  assert.equal(subline.style.width, '');
-  assert.equal(subline.style.left, '');
+  assert.equal(subline.style.width, '40px');
+  assert.equal(subline.style.left, '0px');
 });
 
 test('320x50-like geometry (subline near value bottom) still counts as side-by-side', () => {
@@ -224,7 +224,7 @@ test('320x50-like geometry (subline near value bottom) still counts as side-by-s
 
 test('side-by-side re-anchors left to value ink without rewriting top', () => {
   const { document } = installDom();
-  // Authored CSS survives clearLayoutStyles (inline was the stale runtime write).
+  // Authored CSS and inline positions survive; only algorithm writes are reset.
   const sheet = document.createElement('style');
   sheet.textContent = `
     .offer-subline { position: absolute; left: 61px; top: 20px; width: 65px; height: 18px; }
@@ -258,8 +258,8 @@ test('side-by-side re-anchors left to value ink without rewriting top', () => {
   const subline = document.createElement('p');
   subline.className = 'offer-subline';
   subline.textContent = 'ELECTRICITY';
-  // Stale inline top (will be cleared); authored CSS top:20 remains.
-  subline.style.top = '99px';
+  // Inline geometry is authored too; layout only owns horizontal pairing.
+  subline.style.top = '20px';
   Object.defineProperty(subline, 'offsetHeight', { value: 18 });
   const sublineStageBox = () => {
     const top = Number.parseFloat(window.getComputedStyle(subline).top) || 20;
@@ -292,8 +292,8 @@ test('side-by-side re-anchors left to value ink without rewriting top', () => {
   layoutOffers(stage);
 
   assert.equal(subline.style.left, '61px');
-  // Authored CSS top must survive — runtime only owns horizontal pairing.
-  assert.equal(subline.style.top, '');
+  // Authored inline top must survive — runtime only owns horizontal pairing.
+  assert.equal(subline.style.top, '20px');
   assert.equal(subline.style.width, '');
 });
 
@@ -539,13 +539,11 @@ test('manual offerPlusLayout keeps authored plus left/top (no placePlus)', () =>
   stage.appendChild(plus);
   document.body.appendChild(stage);
 
-  // Seed stale auto-layout inline, then clear via manual pass → CSS class would
-  // win in the browser; here we assert layoutOffers clears without rewriting.
-  plus.style.left = '144.578px';
-  plus.style.top = '111.838px';
+  // A first manual pass must preserve authored inline positions. Actual prior
+  // auto writes are covered by the browser state-history regression.
   layoutOffers(stage);
-  assert.equal(plus.style.left, '');
-  assert.equal(plus.style.top, '');
+  assert.equal(plus.style.left, '151px');
+  assert.equal(plus.style.top, '94px');
 });
 
 test('placePlus centres glyph ink, not the tall CSS line-box', () => {

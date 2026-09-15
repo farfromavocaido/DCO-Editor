@@ -26,7 +26,7 @@ export const resolveOwnedFields = (base, baseSource, rules, field = 'props') => 
     for (const [key, value] of Object.entries(rule[field] || {})) {
       if (value === undefined || value === null || value === '') continue;
       values[key] = value;
-      provenance[key] = rule.ownershipSource || { kind: 'variantRule', ruleId: rule.id, scope: rule.scope || '', layerId: rule.layerId, cssClass: rule.cssClass };
+      provenance[key] = rule.ownershipFieldSources?.[field]?.[key] || rule.ownershipSource || { kind: 'variantRule', ruleId: rule.id, scope: rule.scope || '', layerId: rule.layerId, cssClass: rule.cssClass };
     }
   }
   return { values, provenance };
@@ -51,6 +51,38 @@ const scopeFamily = (token) => {
 const scopesOverlap = (a, b) => !scopeParts(a).some((x) => scopeParts(b).some((y) => x !== y && scopeFamily(x) && scopeFamily(x) === scopeFamily(y)));
 const memberKey = (member) => `${member.size}/${member.targetId}/${member.scope || ''}`;
 const definitionFields = (definition, size, domain, member) => Object.fromEntries(Object.entries({ ...(definition[domain] || {}), ...(definition.perSize?.[size]?.[domain] || {}) }).filter(([field]) => !(member?.exclude?.[domain] || []).includes(field)));
+
+const sharedFieldSource = (definition, member, domain, field) => {
+  const formatOverride = Object.hasOwn(definition.perSize?.[member.size]?.[domain] || {}, field);
+  return {
+    kind: 'sharedDefinition', definitionId: definition.id, name: definition.name, member,
+    domain, field, sourceLevel: formatOverride ? 'format' : 'definition',
+    ...(formatOverride ? { format: member.size } : {}),
+  };
+};
+
+/** Describe the actual authored field changed by an explicit shared-source edit. */
+export const sharedCreativeFieldReach = (document, source) => {
+  const definition = document?.sharedDefinitions?.find((item) => item.id === source?.definitionId);
+  if (!definition || source?.kind !== 'sharedDefinition') return { members: [], localExceptions: [] };
+  const { domain, field } = source;
+  const members = definition.members.filter((member) => {
+    if ((member.exclude?.[domain] || []).includes(field)) return false;
+    const formatOwns = Object.hasOwn(definition.perSize?.[member.size]?.[domain] || {}, field);
+    return source.sourceLevel === 'format'
+      ? member.size === source.format && formatOwns
+      : !formatOwns && Object.hasOwn(definition[domain] || {}, field);
+  });
+  const localExceptions = members.flatMap((member) => {
+    const scopes = (document.sizes?.[member.size]?.localOverrides || [])
+      .filter((local) => local.targetId === member.targetId
+        && scopesOverlap(local.scope, member.scope)
+        && local[domain]?.[field] !== undefined && local[domain]?.[field] !== null && local[domain]?.[field] !== '')
+      .map((local) => local.scope || '');
+    return scopes.length ? [{ member, scopes: [...new Set(scopes)] }] : [];
+  });
+  return { members, localExceptions };
+};
 
 /** Pure, idempotent compatibility compiler. Authored definitions are never rewritten. */
 export const materializeCreativeOwnership = (document: any): any => {
@@ -85,6 +117,10 @@ export const materializeCreativeOwnership = (document: any): any => {
         props: definitionFields(definition, size, 'values', member), fit: definitionFields(definition, size, 'fit', member),
         ownershipGenerated: true, ownershipPriority: priority,
         ownershipSource: { kind: 'sharedDefinition', definitionId: definition.id, name: definition.name, member },
+        ownershipFieldSources: Object.fromEntries(['values', 'fit'].map((domain) => [
+          domain === 'values' ? 'props' : 'fit',
+          Object.fromEntries(Object.keys(definitionFields(definition, size, domain, member)).map((field) => [field, sharedFieldSource(definition, member, domain, field)])),
+        ])),
       });
     }
     const detachedCount = (creative.localOverrides || []).filter((local) => local.detached).length;

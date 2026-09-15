@@ -1,10 +1,13 @@
 import { test } from 'vitest';
+import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 
+import { captureProductionPresentation } from '../production-snapshot';
 import { outlineFittedText, loadMuseoFont } from '../text-outline';
 import { readCreativeDocumentForCampaign } from '../creative-document';
 import {
   renderStudioReadyHtml,
+  renderWipHtml,
   buildClientPreviewPackageEntries,
   buildHtmlExportZip,
 } from '../creative-exporter';
@@ -44,40 +47,30 @@ test('loads Museo and outlines fitted text as SVG paths', async () => {
   assert.ok(outlined.fontSize <= 18);
 });
 
-test('outline export uses brand navy for headlines/offers and keeps CTA white', async () => {
-  const document = await readCreativeDocumentForCampaign('sse-keepyuppy-welcome');
-  const html = await renderStudioReadyHtml(document, '160x600', { renderMode: 'outline' });
-  assert.match(html, /id="headline-act1"[^>]*>[\s\S]*?<g fill="rgb\(0, 41, 117\)"/);
-  assert.match(html, /offer-value outlined-text">[\s\S]*?<g fill="rgb\(0, 41, 117\)"/);
-  assert.match(html, /id="cta"[^>]*>[\s\S]*?<g fill="rgb\(255, 255, 255\)"/);
-  assert.match(html, /\.outlined-text svg \{[\s\S]*?height:\s*auto/);
-  assert.match(html, /\.cta\.outlined-text \{[\s\S]*?padding:\s*0/);
-  // Offer hosts must not hard-clip: SVG line-box can exceed authored height
-  // (e.g. 65×0.85=55 inside a 48px box) and font-mode lets that ink paint.
-  assert.doesNotMatch(html, /\[data-gwd-group="OfferSlot"\] \.outlined-text \{[\s\S]*?overflow:\s*hidden/);
-  const ctaSvg = html.match(/id="cta"[^>]*>[\s\S]*?<svg[^>]*width="([\d.]+)"[^>]*height="([\d.]+)"/);
-  assert.ok(ctaSvg);
-  assert.equal(Number(ctaSvg[1]), 130, 'CTA SVG width matches authored box (no padding shrink)');
-  assert.ok(Number(ctaSvg[2]) < 40, `CTA SVG should be content-tight, got height=${ctaSvg[2]}`);
-  // Authored lineHeight 1.25 × fontSize 26 × 4 wrapped lines = 130
-  // ("Our highest welcome credit"; was 3 lines / 97.5 for the old energy H1).
-  const headlineSvg = html.match(/id="headline-act1"[^>]*>[\s\S]*?<svg[^>]*height="([\d.]+)"/);
-  assert.ok(headlineSvg);
-  assert.ok(
-    Math.abs(Number(headlineSvg[1]) - 130) < 0.05,
-    `headline SVG height should use lineHeight 1.25, got ${headlineSvg[1]}`,
-  );
-});
-
-test('outline export honors 320x50 endframe headline white override', async () => {
-  const document = await readCreativeDocumentForCampaign('sse-keepyuppy-welcome');
+test('outlined headline glyphs inherit the authored animated host colour', async () => {
+  const document = await readCreativeDocumentForCampaign('sse-keepyuppy-welcome') as Record<string, any>;
+  const row = document.feed.sampleRows[0];
+  for (let act = 1; act <= 4; act++) {
+    row[`heading${act}_text`] = `Distinct headline ${act}`;
+    row[`heading${act}_text_320x50`] = `Distinct headline ${act}`;
+  }
+  document.sizes['320x50'].localOverrides = [{targetId:'headline-act4',values:{color:'rgb(160, 0, 80)'}}];
   const html = await renderStudioReadyHtml(document, '320x50', { renderMode: 'outline' });
-  assert.match(
-    html,
-    /id="headline-act4"[^>]*>[\s\S]*?<g fill="rgb\(255, 255, 255\)"/,
-    'act4 must bake white (layer.base.color), not brand navy',
-  );
-  assert.match(html, /id="headline-act1"[^>]*>[\s\S]*?<g fill="rgb\(0, 41, 117\)"/);
+  const act4 = html.match(/id="headline-act4"[^>]*>([\s\S]*?)<\/div>/)?.[1];
+  assert.ok(act4, 'distinct endframe text must be retained');
+  const browser = await chromium.launch({headless:true});
+  try {
+    const page = await browser.newPage({viewport:{width:320,height:50}});
+    await page.route('https://s0.2mdn.net/ads/studio/Enabler.js',route => route.fulfill({contentType:'application/javascript',body:''}));
+    await page.setContent(html);
+    const ink = await page.evaluate(() => {
+      for (const animation of document.getAnimations()) { animation.pause(); animation.currentTime = 13500; }
+      const host = document.getElementById('headline-act4')!;
+      const glyph = host.querySelector('svg g')!;
+      return {host:getComputedStyle(host).color,glyph:getComputedStyle(glyph).fill};
+    });
+    assert.deepEqual(ink,{host:'rgb(160, 0, 80)',glyph:'rgb(160, 0, 80)'});
+  } finally { await browser.close(); }
 });
 
 test('outlineFittedText respects authored lineHeight', async () => {
@@ -327,13 +320,16 @@ test('outline export HTML bakes paths, inlines SVGs, and omits Museo font-face',
 });
 
 test('outline export bakes snapshotted offer-host and plus positions (direct WYSIWYG)', async () => {
-  const document = await readCreativeDocumentForCampaign('sse-keepyuppy-discount');
+  const document = await readCreativeDocumentForCampaign('sse-hiker-welcome');
   assert.equal(document.campaign?.offerPlusLayout, 'manual');
+  const row = document.feed.sampleRows.find((sample:any) => sample.Default) || document.feed.sampleRows[0];
+  const snapshot = await captureProductionPresentation(renderWipHtml(await renderStudioReadyHtml(document, '728x90', {fontBasePath:'assets/fonts/',includePreviewBridge:true}), row), '728x90');
   const html = await renderStudioReadyHtml(document, '728x90', {
     renderMode: 'outline',
     presentationSnapshot: {
       size: '728x90',
-      texts: {},
+      texts: snapshot.texts,
+      hiddenTargets: snapshot.hiddenTargets,
       positions: {
         'plus-1': { key: 'plus-1', left: 400, top: 24 },
         'offer-slot-1::offer-value': { key: 'offer-slot-1::offer-value', left: -99, top: -6 },

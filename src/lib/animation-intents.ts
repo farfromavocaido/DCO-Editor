@@ -151,11 +151,13 @@ const findLayer = (document: Record<string, unknown>, size: string, layerId: str
   findSize(document, size)?.layers?.find((layer: Record<string, unknown>) => layer.id === layerId)
 );
 
-const cloneClipForLayer = (clip: Record<string, unknown>, layer: Record<string, unknown>) => {
+// Encode identity losslessly; authored labels, times and Unicode never enter CSS names.
+const motionIdentityToken = (value: unknown) => Array.from(String(value)).map(char => char.codePointAt(0).toString(16)).join('_');
+
+const cloneClipForLayer = (clip: Record<string, unknown>, layer: Record<string, unknown>, sourceLayerId: string) => {
   const cloned = deepClone(clip);
-  const start = String(cloned.start).replace('.', '_');
-  const end = String(cloned.end).replace('.', '_');
-  cloned.id = `${layer.id}-${cloned.intentId || cloned.preset}-${start}-${end}`;
+  cloned.id = `motion-copy-${motionIdentityToken(layer.id)}-${motionIdentityToken(sourceLayerId)}-${motionIdentityToken(clip.id)}`;
+  cloned.copiedFrom = { layerId: sourceLayerId, clipId: clip.id };
   cloned.label = `${layer.label || layer.id} ${animationIntentDefinitions[cloned.intentId]?.label || cloned.preset || 'motion'}`;
   cloned.linked = true;
   return cloned;
@@ -197,7 +199,8 @@ export const copyClipToAnimationFamily = (
   for (const layer of sizeCreative.layers || []) {
     if (layer.id === sourceLayer.id) continue;
     if (animationFamilyForLayer(layer).id !== family.id) continue;
-    layer.clips = [cloneClipForLayer(sourceClip, layer), ...(layer.clips || []).filter((clip) => clip.id !== sourceClip.id)];
+    const cloned = cloneClipForLayer(sourceClip, layer, sourceLayerId);
+    layer.clips = [cloned, ...(layer.clips || []).filter((clip) => clip.id !== cloned.id && !(clip.copiedFrom?.layerId === sourceLayerId && clip.copiedFrom?.clipId === sourceClip.id))];
   }
   return next;
 };

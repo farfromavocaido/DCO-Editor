@@ -68,7 +68,7 @@ Loads Museo and converts fitted text boxes into inline SVG path markup for outli
 
 ### `outline-bake.ts`
 
-Server-side approximation of fit → symbol align → offer layout when outline/static export has no editor `presentationSnapshots`.
+Low-level SVG baking from captured text/position metrics. The approximate utility path remains available for isolated metric tests; production exports require browser snapshots, supplied by the editor or captured by `production-snapshot.ts`.
 
 ### `http.ts`
 
@@ -80,11 +80,36 @@ Shared helpers: `serveAsset`, `jsonResponse`, `errorResponse`, path-escape guard
 
 Zustand store holds the active campaign id, loaded creative document, feed draft, canvas selection, timeline scrubber, undo/redo for creative edits, and export actions (`renderMode` font vs outline).
 
-### Preview (`components/PreviewPane.tsx`)
+### Production-backed editor stage
 
-DOM stage mirroring the ad structure with compiled CSS, timeline scrubbing, canvas manipulation, and client-side text fitting. Shared group chrome (`OfferSlot` / T&C wrappers) comes from `src/lib/ad-plumbing-css.ts`; type defaults live on `classRules` and T&C layer bases. SSE DCO `manualCss` is empty — leftover GWD type/colour no longer sits under every size.
+`components/PreviewPane.tsx` places selection/drag/resize controls around
+`ProductionCreativeStage.tsx`, an iframe containing HTML from the production
+exporter. The stage POSTs the unsaved document and the same effective feed row
+used for export. Browser CSS animations provide playback and seeking; selection
+bounds and fit diagnostics come from the rendered DOM. Editor zoom is external. The rendition selector displays Live HTML or the actual fixed-copy outline output; exports await and display their chosen rendition. Readiness includes exact document/row identity.
+Double buffering preserves the last rendered frame during compilation; stale
+frames cannot receive new edits or be used for snapshots.
 
-Preview asset URLs are `/assets/...` — served by the Next route, mapped to `campaign/assets/...`.
+`selectPreviewFeedRow` supplies preview/view and fixed-copy export consistently.
+Font exports retain the feed; outline exports bind the selected effective row as
+the only default row. Snapshot walks detect source changes and restore editor
+state on failure. When no editor snapshot is supplied, `production-snapshot.ts`
+loads the font rendition in Chromium and executes the same snapshot collector.
+Delivered outlines require complete, current text metrics; they never silently
+fall back to approximate text fitting. Shared headline planning also drives
+outline motion, and headline SVG ink inherits animated host colour.
+
+`creative-ownership.ts` compiles optional document-level named definitions and
+per-size local overrides to exact-target rules. The model and runtime use those
+rules; inspector provenance is per property. Memberships can be scoped and span
+formats, with explicit per-format values. `canvas-groups.ts` separately defines
+virtual groups that retain child coordinates and animations. Validation checks
+these structures without seeding/deleting creative rules. Existing campaigns
+remain compatible; opening them does not migrate their fitting or layouts.
+
+Preview assets resolve `/assets/foo` to `campaign/assets/foo`. Studio agency
+packages use feed-only backgrounds; parity checks supply an explicit matching
+image to both renderers. Embed packages preserve authored background fallbacks.
 
 Offers-0 layers: `bg-blur` (`kind: "blur"`, `src/lib/blur-layer.ts`; stays hidden). Bluewave begins at stage1, moves to the exact prior committed settle (stage2) while green fades in, then returns to stage1 at the end (no opacity fade). Greenwave fades in at rest ~0.5s before Act 4 via offer-scoped clips. White logo (`logo-act3`) fades in from mid-open over 5%; blue logo (`logo-act1`) stays hidden except **320×50**, which is navy-on-green for the whole offers-0 (photo/blue/scrim hidden, green held, navy type + logo). Other sizes: T&C lines are always white and fade out at `green_in`. Photo headlines keep offers-0 box geometry (white/navy ink); Act 4 + CTA are navy over green. Offers-0 CTA and Offer Roundel (frame / copy / value) each have their own `offers-0` / `offers-0.*` rules so rearranging either stack does not move offers 1–3. `headline-scrim` (`kind: "gradient"`, `src/lib/gradient-layer.ts`) — bottom-up (`to-top`), under the blue wave; always visible under `offers-0` (supports white T&Cs).
 
@@ -138,4 +163,4 @@ All handlers use `export const runtime = 'nodejs'` because they touch the filesy
 
 ## Tests
 
-Vitest runs in Node. Suites cover creative compiler/model libs, feed schema validation, exporter output (font + outline), outline bake/snapshot, campaign registry, and live API handlers against registered campaign JSON files.
+Vitest runs engine and API tests with isolated temporary campaign/output storage. `npm run test:creative` separately runs campaign-specific appearance assertions. `npm run test:parity -- http://localhost:5184` and the same command with trailing `agency` compare editor and independently packaged HTML in Chromium. Suites cover creative compiler/model libs, feed schema validation, exporter output (font + outline), outline bake/snapshot, campaign registry, and live API handlers against registered campaign JSON files.

@@ -29,8 +29,8 @@ export function MotionTimingControls({clip,durationS,beats={},onChange}:Props) {
     {clip.preset === 'custom' && clip.keyframes?.length ? clip.keyframes.map((frame,index)=><div key={index}>{render(`Keyframe ${index+1} time`,frame.at,value=>onChange('keyframes',clip.keyframes?.map((item,i)=>i===index?{...item,at:value}:item),'clip'))}</div>) : <>
       {render('Clip start',clip.start ?? 0,value=>onChange('start',value,'clip'))}
       {render('Clip end',clip.end ?? 100,value=>onChange('end',value,'clip'))}
-      {render('Enter duration',clip.params?.enter_duration ?? clip.params?.enter_duration_pct ?? clip.durationPct ?? (clip.preset==='slideInRight'?7:clip.preset==='fadeUp'?2:clip.preset==='popPulse'?3:1),value=>onChange('enter_duration',value,'params'))}
-      {render('Exit duration',clip.params?.fade_duration ?? clip.params?.fade_pct ?? 2,value=>onChange('fade_duration',value,'params'))}
+      {render('Enter duration',clip.params?.enter_duration ?? (clip.preset==='waveSweep' ? clip.params?.sweep_duration_pct : clip.params?.enter_duration_pct) ?? clip.durationPct ?? (clip.preset==='slideInRight'||clip.preset==='waveSweep'?7:clip.preset==='fadeUp'?2:clip.preset==='popPulse'?3:1),value=>onChange('enter_duration',value,'params'))}
+      {render('Exit duration',clip.params?.fade_duration ?? clip.params?.fade_pct ?? (clip.preset==='waveSweep'?3:2),value=>onChange('fade_duration',value,'params'))}
     </>}
   </div>;
 }

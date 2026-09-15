@@ -44,6 +44,17 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
     return true;
   }
 
+  function isPolicyMemberVisible(element) {
+    // Visibility is inherited but a child may explicitly override hidden.
+    if (computedOf(element).visibility === 'hidden') return false;
+    var node = element;
+    while (node) {
+      if (computedOf(node).display === 'none') return false;
+      node = node.parentElement;
+    }
+    return true;
+  }
+
   var fitStyleKeys = ['fontSize', 'letterSpacing', 'whiteSpace', 'overflow', 'textOverflow', 'maxHeight', 'transform', 'alignItems', 'height'];
   var fitAttributeKeys = ['data-fit-clipped', 'data-fit-clip-reason', 'data-fit-status', 'data-fit-requested-size', 'data-fit-rendered-size'];
 
@@ -360,7 +371,10 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
     keys.forEach(function (key) { element.style[key] = element.__dcoExplicitFitStyles[key]; });
     var cs = computedOf(element);
     var base = cssNumber(cs.fontSize, 1);
-    var minimum = Math.max(Number(rule.minFontSize) || 1, base * (Number(rule.minFontSizeRatio) || 0));
+    // A fixed font has one permitted size; dormant shrink floors do not apply.
+    var minimum = rule.allowShrink === false || rule.static
+      ? base
+      : Math.max(Number(rule.minFontSize) || 1, base * (Number(rule.minFontSizeRatio) || 0));
     var floor = Math.min(base, minimum);
     var size = base;
     var trackingEm = 0;
@@ -390,12 +404,7 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
     var elements = Array.prototype.slice.call(root.querySelectorAll(rule.selector || '.' + rule.cssClass)).filter(function (element) {
       // Supported motion changes opacity, never visibility/display. Those
       // authored CSS properties identify state-inactive text and wrappers.
-      var node = element;
-      while (node) {
-        if (computedOf(node).display === 'none') return false;
-        node = node.parentElement;
-      }
-      return element.textContent && String(element.textContent).trim() && isVisible(element) && !excludedFromRule(element, rule, root);
+      return element.textContent && String(element.textContent).trim() && isPolicyMemberVisible(element) && !excludedFromRule(element, rule, root);
     });
     if (!elements.length) return undefined;
     var fits = elements.map(function (element) { return fitPolicyMember(element, rule); });
@@ -407,7 +416,7 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
         Math.max(sharedSize, Math.max.apply(null, fits.map(function (fit) { return fit.minimum; }))));
     }
     var diagnostics = fits.map(function (fit) {
-      var size = rule.shared ? sharedSize : fit.size;
+      var size = rule.allowShrink === false ? fit.base : (rule.shared ? sharedSize : fit.size);
       var element = fit.element;
       element.style.fontSize = size + 'px';
       var measurement = measurePolicy(element, rule, size, fit.minimum);
@@ -549,14 +558,18 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
       var floor = Math.max.apply(null, members.map(function (member) { return member.minimum; }));
       var ceiling = Math.min.apply(null, members.map(function (member) { return member.base; }));
       size = Math.min(ceiling, Math.max(size, floor));
-      members.forEach(function (member) {
+      var renderedSizes = members.map(function (member) { return member.rule.allowShrink === false ? member.base : size; });
+      var conflict = renderedSizes.some(function (rendered) { return rendered !== renderedSizes[0]; });
+      members.forEach(function (member, index) {
         var element = member.element;
-        element.style.fontSize = size + 'px';
-        var measurement = measurePolicy(element, member.rule, size, member.minimum);
-        member.diagnostic.renderedSize = size;
+        var renderedSize = renderedSizes[index];
+        element.style.fontSize = renderedSize + 'px';
+        var measurement = measurePolicy(element, member.rule, renderedSize, member.minimum);
+        if (conflict) measurement.reasons.push('shared-size-conflict');
+        member.diagnostic.renderedSize = renderedSize;
         member.diagnostic.reasons = measurement.reasons;
         member.diagnostic.lines = measurement.lines;
-        element.setAttribute('data-fit-rendered-size', String(size));
+        element.setAttribute('data-fit-rendered-size', String(renderedSize));
         element.setAttribute('data-fit-status', measurement.reasons.length ? 'failed' : 'fitted');
         if (measurement.reasons.length) {
           element.setAttribute('data-fit-clipped', 'true');

@@ -2,10 +2,11 @@
 'use client';
 import { useState } from 'react';
 import { findCreativeTarget, resetCreativeTargetField } from '@/lib/creative-model';
-import { copyCreativeOwnership, createCreativeOwnershipDefinition, detachCreativeOwnership, linkCreativeOwnership, ownershipScopeIsActive, setCreativeOwnershipField } from '@/lib/creative-ownership';
+import { copyCreativeOwnership, createCreativeOwnershipDefinition, detachCreativeOwnership, linkCreativeOwnership, ownershipScopeIsActive, setCreativeOwnershipField, sharedCreativeFieldReach } from '@/lib/creative-ownership';
 import { useEditorStore } from '@/store/editor-store';
 
 const categories = [
+  { name: 'Offer arrangement', domain: 'values', fields: { '--offer-layout-mode': 'Offer arrangement ownership' } },
   { name: 'Position', domain: 'values', fields: { left: 'Horizontal position', top: 'Vertical position' } },
   { name: 'Size', domain: 'values', fields: { width: 'Frame width', height: 'Frame height' } },
   { name: 'Colour', domain: 'values', fields: { color: 'Text colour', backgroundColor: 'Fill colour', borderColor: 'Border colour' } },
@@ -27,7 +28,7 @@ const scopeLabel = (scope) => String(scope || '').split('.').filter(Boolean).map
   'roundel-frame-on':'roundel shown','roundel-frame-off':'roundel hidden','roundel-copy-only':'copy-only roundel','roundel-split':'value and copy roundel',
   'navy-headlines':'navy headlines','white-headlines':'white headlines',
 }[token] || token.replace(/^offers-(\d+)$/, '$1 offers').replace(/^frames-(\d+)$/, '$1 frames'))).join(', ') || 'all states';
-const sourceLabel = (source) => source?.kind === 'sharedDefinition' ? `Shared: ${source.name}` : source?.kind === 'localOverride' ? `Local: ${scopeLabel(source.scope)}` : source?.kind === 'variantRule' ? `Variant: ${scopeLabel(source.scope)}` : source?.kind === 'classRule' ? 'Legacy shared class' : source?.kind === 'layerFit' ? 'Base fitting' : 'Base layer';
+const sourceLabel = (source) => source?.kind === 'sharedDefinition' ? `Shared: ${source.name} · ${source.sourceLevel === 'format' ? `${source.format} override` : 'definition default'}` : source?.kind === 'localOverride' ? `Local: ${scopeLabel(source.scope)}` : source?.kind === 'variantRule' ? `Variant: ${scopeLabel(source.scope)}` : source?.kind === 'classRule' ? 'Legacy shared class' : source?.kind === 'layerFit' ? 'Base fitting' : 'Base layer';
 const geometryFields = ['left','top','width','height'];
 const fieldKey = (domain,field) => `${domain}:${field}`;
 
@@ -52,6 +53,7 @@ export function CreativeOwnershipControls({ document, size, target, scopes }) {
   const fields = Object.fromEntries(['values','fit'].map((key)=>[key,selectedFields.filter((field)=>field.startsWith(`${key}:`)).map((field)=>field.split(':')[1])]));
   const provenance = domain === 'fit' ? target.fitProvenance : target.valueProvenance;
   const current = (domain === 'fit' ? target.fit : target.values)?.[field];
+  const sharedReach = sharedCreativeFieldReach(document, provenance?.[field]);
   const memberLabel = (member) => `${member.size} · ${findCreativeTarget(document,member.size,member.targetId,[])?.label || member.targetId} · ${scopeLabel(member.scope)}`;
   const run = (operation) => { try { apply(operation()); setError(''); } catch (failure) { setError(failure.message); } };
   const parsedDraft = draft === 'true' ? true : draft === 'false' ? false : draft !== '' && Number.isFinite(Number(draft)) ? Number(draft) : draft;
@@ -106,7 +108,10 @@ export function CreativeOwnershipControls({ document, size, target, scopes }) {
       <button type="button" disabled={!['localOverride','variantRule'].includes(provenance?.[field]?.kind)} onClick={() => run(() => resetCreativeTargetField(document,size,target.id,scopes,domain,field))}>Reset local field</button>
       <button type="button" disabled={provenance?.[field]?.kind !== 'sharedDefinition'} onClick={() => run(() => setCreativeOwnershipField(document,size,target.id,scopes,domain,field,parsedDraft,'shared',provenance[field].definitionId))}>Edit shared source</button>
     </div>
-    {provenance?.[field]?.kind === 'sharedDefinition' ? <p className="inspector-note">Shared edit affects: {document.sharedDefinitions.find((definition)=>definition.id===provenance[field].definitionId)?.members.map(memberLabel).join('; ')}</p> : null}
+    {provenance?.[field]?.kind === 'sharedDefinition' ? <>
+      <p className="inspector-note">{provenance[field].sourceLevel === 'format' ? `${provenance[field].format} shared override` : 'Shared definition default'} edit affects: {sharedReach.members.map(memberLabel).join('; ') || 'no members'}</p>
+      {sharedReach.localExceptions.length ? <p className="inspector-note">Local exceptions can keep their current values: {sharedReach.localExceptions.map(({member,scopes}) => `${memberLabel(member)} (${scopes.map(scopeLabel).join('; ')})`).join('; ')}</p> : null}
+    </> : null}
     <fieldset><legend>Apply in these states</legend>
       <p className="inspector-note">{scopeLabel(chosenScopes.join('.'))}. Unchecked conditions can vary independently.</p>
       {dimensions.filter((dimension)=>scopes.some(dimension.matches)).map((dimension)=><label key={dimension.id}><input type="checkbox" checked={selectedDimensions.includes(dimension.id)} onChange={()=>toggle(selectedDimensions,setSelectedDimensions,dimension.id)} />{dimension.label}: {scopeLabel(scopes.filter(dimension.matches).join('.'))}</label>)}

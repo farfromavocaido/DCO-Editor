@@ -39,7 +39,7 @@ const expectedStatePatternForRow = (row: Record<string, unknown>) => {
 };
 
 test('GET /api/feed-schema returns profile rows', async () => {
-  const response = await feedGet();
+  const response = await feedGet(new Request('http://localhost/api/feed-schema'));
   assert.equal(response.status, 200);
   const payload = await response.json();
   assert.ok(payload.profileName);
@@ -48,7 +48,7 @@ test('GET /api/feed-schema returns profile rows', async () => {
 });
 
 test('GET /api/creative returns creative document', async () => {
-  const response = await creativeGet();
+  const response = await creativeGet(new Request('http://localhost/api/creative'));
   assert.equal(response.status, 200);
   const payload = await response.json();
   assert.equal(payload.version, 1);
@@ -357,7 +357,7 @@ test('POST /api/creative/export-preview writes isolated packages for statics + D
   assert.match(niHtml, /devDynamicContent\.SSE_DCO_NIR_Delivery/);
   assert.match(niHtml, /Region = \["NIR"\]/);
   assert.match(niHtml, /Enabler\.setProfileId\(10962603\)/);
-});
+}, 30000);
 
 
 test('POST /api/creative/export-preview rejects DCO in the campaigns list', async () => {

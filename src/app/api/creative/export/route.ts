@@ -1,3 +1,4 @@
+import type { PresentationSnapshots } from '@/lib/outline-snapshot';
 import { NextResponse } from 'next/server';
 
 import { resolveCampaignId } from '@/server/campaign-query';
@@ -14,7 +15,7 @@ export async function POST(request: Request) {
       delivery?: string;
       document?: Record<string, unknown>;
       download?: boolean;
-      presentationSnapshots?: Record<string, unknown>;
+      presentationSnapshots?: PresentationSnapshots;
     } = {};
     try {
       body = await request.json();
@@ -23,8 +24,8 @@ export async function POST(request: Request) {
     }
     const campaignId = resolveCampaignId(request, body);
     const document = body.document || await readCreativeDocumentForCampaign(campaignId);
-    const renderMode = body.renderMode === 'outline' ? 'outline' : 'font';
-    const delivery = body.delivery === 'static' ? 'static' : 'studio';
+    const renderMode: 'outline' | 'font' = body.renderMode === 'outline' ? 'outline' : 'font';
+    const delivery: 'static' | 'studio' = body.delivery === 'static' ? 'static' : 'studio';
     const download = body.download === true;
     const exportOptions = {
       renderMode,

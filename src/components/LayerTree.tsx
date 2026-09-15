@@ -590,7 +590,7 @@ export function LayerTree() {
                 <h3>Canvas groups</h3>
                 <label>Group name<input value={canvasGroupName} onChange={(event) => setCanvasGroupName(event.target.value)} /></label>
                 <button type="button" disabled={selectedTargetIds.length < 2} onClick={() => { try { groupTargets(canvasGroupName); setGroupError(''); } catch (error) { setGroupError(error.message); } }}>Group selected items</button>
-                <button type="button" disabled={!String(selectedTargetId).startsWith('canvas-group:')} onClick={ungroupTargets}>Ungroup selected group</button>
+                <button type="button" disabled={!selectedTargetIds.some((id) => String(id).startsWith('canvas-group:'))} onClick={ungroupTargets}>Ungroup selected groups</button>
                 {groupError ? <p role="alert">{groupError}</p> : null}
                 {(sizeCreative?.canvasGroups || []).map((group) => <div key={group.id}>
                   <button type="button" className={`layer-row-main ${(selectedTargetId === group.id || selectedTargetIds.includes(group.id)) ? 'is-selected' : ''}`} onClick={(event) => handleTreeTargetClick(event,group.id,() => setCanvasSelection(group.id,[group.id]))}><EditorIcon name="group" /> {group.name} · {group.members.length} items</button>

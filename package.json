@@ -14,7 +14,9 @@
     "qa:dco": "tsx --tsconfig tsconfig.json scripts/qa-dco/run.ts",
     "qa:dco:export": "tsx --tsconfig tsconfig.json scripts/qa-dco/export-shell.ts",
     "qa:dco:holds": "tsx --tsconfig tsconfig.json scripts/qa-dco/hold-samples.ts",
-    "qa:dco:settled": "tsx --tsconfig tsconfig.json scripts/qa-dco/settled-sheets.ts"
+    "qa:dco:settled": "tsx --tsconfig tsconfig.json scripts/qa-dco/settled-sheets.ts",
+    "setup:browser": "playwright install chromium",
+    "test:parity": "tsx --tsconfig tsconfig.json scripts/verify-editor-parity.ts"
   },
   "dependencies": {
     "js-beautify": "^1.15.4",
@@ -23,7 +25,9 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "shiki": "^3.4.2",
-    "zustand": "^5.0.14"
+    "zustand": "^5.0.14",
+    "playwright": "^1.54.2",
+    "typescript": "^5"
   },
   "devDependencies": {
     "@types/node": "^20",
@@ -34,10 +38,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "jsdom": "^29.1.1",
-    "playwright": "^1.54.2",
     "sharp": "^0.34.3",
     "tsx": "^4.20.3",
-    "typescript": "^5",
     "vitest": "^4.1.8"
   }
 }

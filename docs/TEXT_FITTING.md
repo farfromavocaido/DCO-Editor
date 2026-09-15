@@ -7,6 +7,32 @@ rules from the creative JSON for both consumers. There is deliberately no
 second implementation anywhere — if the preview fits text one way, the served
 ad fits it the same way.
 
+## Explicit frame policies and effective controls
+
+Existing campaigns retain their compatibility fitting until **Text frame** is
+changed. Opening/saving a document does not change its creative geometry.
+
+- `fit.frame: "fixed"` keeps the authored outer frame; fitting measures the full
+  browser-laid-out text against width, height and max lines.
+- `fit.frame: "auto"` uses content height. Wrapping (`wrap`), size adjustment
+  (`allowShrink`), overflow (`clip`, `visible`, `ellipsis`) and shared fitting are
+  independent authored choices.
+- Class fitting contributes defaults beneath layer and active scoped settings.
+  Inspector controls resolve through the same engine as production output.
+- `shared: true` equalises active members; optional `sharedGroup` names a set
+  across exact target rules. State-hidden targets are excluded, while active
+  targets with animation opacity zero still participate. Fixed-size conflicts
+  produce a diagnostic rather than silently shrinking fixed text.
+- All fit-owned styles and diagnostics are restored/cleared before each row's
+  fitting, including empty/hidden targets. Offer layout likewise restores only
+  properties it wrote before deciding active membership. Warm and fresh rows
+  therefore cannot inherit previous rows' geometry.
+
+Per-target `data-fit-status`, requested/rendered sizes and reason codes report
+failed constraints honestly. Minimum-size contradictions are visible failures.
+The existing compatibility pipeline below is retained for imported rules without
+`fit.frame`; it is not a second editor renderer—the production stage uses it too.
+
 ## Pipeline
 
 Authored **modes** (not a draggable op-order):
@@ -189,9 +215,10 @@ presentation metrics (`src/lib/outline-snapshot.ts`), and POST them with the
 export. The outliner then **locks** those numbers — it does not re-fit at serve
 time.
 
-When no snapshot is provided (API/tests/CLI), `src/server/outline-bake.ts`
-approximates the same pipeline with Museo opentype metrics (shared size,
-authored letter-spacing → tracking squeeze, bottom-align, 0.6em symbols).
+When no snapshot is provided (API/CLI), `src/server/production-snapshot.ts`
+measures the production font rendition in Chromium using the editor collector.
+Exports reject missing/stale text metrics. Low-level metric approximation remains
+only for direct utility callers/tests, not delivered packages.
 
 Pipeline:
 
@@ -234,3 +261,20 @@ bake does not re-`wrapLines` with opentype advances.
 - `src/server/__tests__/creative-exporter.test.ts` — the exported runtime:
   engine inlined and executable, texts bound before fitting, font refit wired,
   Museo-only packaging in every export flavour.
+
+
+## Taking manual control of offer positions
+
+The offer inspector can freeze the whole active arrangement using its actual
+production rest coordinates. `--offer-layout-mode: manual` is an explicit local
+ownership property under the full active state. It disables automatic spacing,
+plus placement and side-by-side subline X anchoring together. Other states retain
+their existing behaviour. Automatic restores the captured pre-manual coordinates.
+The mode label excludes state-hidden slots; invisible animation frames do not
+change the authored arrangement membership.
+
+
+Both minimum controls are visible: absolute font size and minimum percentage of
+the designed size. The effective shrink floor is the larger value. Fixed font
+sizing ignores those dormant shrink constraints; switching back to shrinking
+reactivates them. Missing authored fields display the runtime defaults.

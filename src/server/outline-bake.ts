@@ -6,11 +6,13 @@
 
 import {
   authoredLetterSpacingToEm,
+  normalizeCapturedText,
   type SizePresentationSnapshot,
   type TextPresentationSnapshot,
 } from '@/lib/outline-snapshot';
 import { findCreativeTarget, isHeadlineLayer } from '@/lib/creative-model';
 import { visibilityForLayer } from '@/lib/offer-interaction-model';
+import { normalizeFeedLineBreaks } from '@/lib/feed-text';
 import { normalizeFitConfig } from '@/lib/text-fit-rules';
 import { outlineFittedText, type OutlineFitOptions, type OutlinedText } from './text-outline';
 
@@ -180,6 +182,8 @@ type BakeTargetArgs = {
   snapshot?: SizePresentationSnapshot | null;
   /** When set (shared equalization pass), lock this font size. */
   lockedFontSize?: number;
+  /** Exported renditions must never fall back to approximate fitting. */
+  requireSnapshot?: boolean;
 };
 
 const targetBakeOptions = ({
@@ -321,8 +325,21 @@ const targetBakeOptions = ({
 
 /** Bake one text target (snapshot-locked or metric fit). */
 export const bakeOutlinedText = async (args: BakeTargetArgs): Promise<OutlinedText> => {
+  if (args.requireSnapshot && args.text.trim()) {
+    const captured = textSnapshotForTarget(args.snapshot, args.targetId);
+    if (!captured || !Number.isFinite(captured.fontSize) || captured.fontSize <= 0) {
+      throw new Error(`Production snapshot is missing text metrics for ${args.size}/${args.targetId}`);
+    }
+    if (args.snapshot?.size !== args.size || normalizeCapturedText(captured.text) !== normalizeCapturedText(normalizeFeedLineBreaks(args.text))) {
+      throw new Error(`Production snapshot is stale for ${args.size}/${args.targetId}; capture the current creative and feed row`);
+    }
+  }
   const { baseFontSize: _base, align: _align, ...options } = targetBakeOptions(args);
-  return outlineFittedText(options);
+  const outlined = await outlineFittedText(options);
+  return {
+    ...outlined,
+    svg: outlined.svg.replace('<svg ', `<svg data-rendered-font-size="${outlined.fontSize}" data-rendered-tracking-em="${outlined.letterSpacingEm}" `),
+  };
 };
 
 /**
@@ -336,14 +353,16 @@ export const bakeOutlinedOfferSlotSvgs = async ({
   row,
   activeScopes,
   snapshot,
+  requireSnapshot = false,
 }: {
   document: Record<string, unknown>;
   size: string;
   row: Record<string, unknown>;
   activeScopes: string[];
   snapshot?: SizePresentationSnapshot | null;
+  requireSnapshot?: boolean;
 }) => {
-  const sizeCreative = document.sizes?.[size];
+  const sizeCreative = (document.sizes as Record<string, { layers?: Array<Record<string, unknown>> }> | undefined)?.[size];
   const slots = (sizeCreative?.layers || []).filter((layer: Record<string, unknown>) => (
     String(layer.id || '').startsWith('offer-slot-')
     && visibilityForLayer(document, size, String(layer.id), activeScopes) !== 'hidden'
@@ -362,8 +381,8 @@ export const bakeOutlinedOfferSlotSvgs = async ({
     return {
       layer,
       index,
-      valueText: String(row[`offer${index}_value_text`] || ''),
-      subText: String(row[`offer${index}_sub_text`] || ''),
+      valueText: snapshot?.hiddenTargets?.includes(`${layer.id}::offer-value`) ? '' : String(row[`offer${index}_value_text`] || ''),
+      subText: snapshot?.hiddenTargets?.includes(`${layer.id}::offer-subline`) ? '' : String(row[`offer${index}_sub_text`] || ''),
     };
   });
 
@@ -383,6 +402,7 @@ export const bakeOutlinedOfferSlotSvgs = async ({
         activeScopes,
         fallbackFit: { mode: 'shrink', tracking: { minEm: -0.05 } },
         snapshot,
+        requireSnapshot,
       });
       return outlined;
     }));
@@ -404,6 +424,7 @@ export const bakeOutlinedOfferSlotSvgs = async ({
         activeScopes,
         fallbackFit: { mode: 'shrink', tracking: { minEm: -0.05 }, align: 'bottom' },
         snapshot,
+        requireSnapshot,
         lockedFontSize: sharedValueSize,
       })).svg
       : '';
@@ -417,6 +438,7 @@ export const bakeOutlinedOfferSlotSvgs = async ({
         activeScopes,
         fallbackFit: { mode: 'shrink' },
         snapshot,
+        requireSnapshot,
       })).svg
       : '';
     results[String(plan.layer.id)] = { valueSvg, subSvg };
@@ -434,6 +456,7 @@ export const bakeOutlinedOfferSlotSvgs = async ({
         activeScopes,
         fallbackFit: { mode: 'shrink' },
         snapshot,
+        requireSnapshot,
       });
     }));
     const subSizes = subProbes.filter(Boolean).map((item) => item!.fontSize);
@@ -450,6 +473,7 @@ export const bakeOutlinedOfferSlotSvgs = async ({
           activeScopes,
           fallbackFit: { mode: 'shrink' },
           snapshot,
+        requireSnapshot,
           lockedFontSize: sharedSub,
         })).svg;
       }

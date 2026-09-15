@@ -99,3 +99,91 @@ failure requires reviewing the rendition; changing campaign copy or transition
 duration is not by itself a broken editor. The old client-preview literal-copy
 assertions now exercise the generated page: changing Offers applies the selected
 fixture's text and clears an empty roundel value.
+
+## Implemented worktree and verification (2026-09-15)
+
+Source snapshot: `3b4c2c7`, tagged `snapshot/editor-before-rebuild-2026-09-15`.
+Implementation branch: `codex/editor-rebuild`, worktree `.worktrees/editor-rebuild`.
+Original campaign JSON, assets and tracked delivery packages are unchanged by the
+implementation. The editor reads them directly; no ad recreation is required.
+
+Implemented: production iframe stage and buffered updates; browser animation
+seeking and DOM selection; active per-field provenance and edits; named scoped
+cross-format sharing/local exceptions; deliberate detach/reset/copy; independent
+canvas groups; exact document undo; explicit fitting policies and relative
+motion/timing controls; pure validation; isolated test storage; standalone browser
+outline capture with complete/current metrics; selected-row fixed-copy exports;
+and shared font/outline headline motion and colour.
+
+Verification observed:
+- `npm test`: 473 tests passed across 63 files.
+- `npm run test:creative`: 32 comparisons passed across 7 files.
+- `npm run build`: passed with strict production typechecking. A pre-existing
+  Turbopack dynamic filesystem tracing warning remains; broad legacy fixture
+  TypeScript debt is excluded from the app build via `tsconfig.build.json`.
+- `npm run test:parity -- http://localhost:5184`: 168 poses passed (six sizes,
+  offers 0–3, seven timeline positions); exact geometry, wrapped line records,
+  font styles, image bytes/decode, visibility and animation transforms.
+- Same command with trailing `agency`: 168 canonical-agency poses passed with
+  matching explicit feed background images and Studio font bytes.
+- `npx tsx --tsconfig tsconfig.json scripts/verify-editor-ownership.ts http://localhost:5184`:
+  active fit, undo, save/reload, modifier multiselect, group/ungroup with unchanged
+  child motion, cross-format shared edits, local exception and detach passed.
+  This check intercepts backend document storage in memory and verifies the
+  actual campaign file did not change.
+- Four Chromium font/outline motion cases passed across 13 timeline positions,
+  covering duplicate size-specific copy and zero-offer early acts in 3/4 frames.
+- Actual nondefault triple-offer outline download contained all six sizes with
+  the correct state and third offer. Forced capture failure restored editing and
+  original size without sending an export request.
+
+Browser reports and screenshots are under `output/playwright/` (gitignored).
+Use `npm run setup:browser` if Chromium is not installed on another machine.
+
+## Decisions retained for review
+
+- Legacy fitting remains available for existing campaigns; opting into explicit
+  fixed/content-height policy is deliberate, preserving current approved paint.
+- Named sharing is available but old campaigns are not silently assigned new
+  relationships. The existing scopes remain visible and editable.
+- Per-format geometry can remain independent while styles are shared. Virtual
+  groups preserve child animation instead of introducing a new transform parent.
+- The source snapshot excludes ignored dependency/build/QA caches; those remain
+  in the original checkout. No merge or publishing was performed.
+- App build checking is separated from pre-existing fixture type debt; this does
+  not disable production TypeScript checks or runtime tests.
+- Platform agent limits required reusing workers for independent cross-reviews
+  of another worker's changes. Reproduced findings were fixed with regressions.
+
+
+## Delivery rendition and automatic layout controls
+
+The canvas offers **Live HTML** and **Fixed-copy outlines**. Export actions switch
+to and await the requested rendition, then leave that delivered rendition visible.
+Native font and SVG rasterizations have small baseline differences (up to about
+1.5 px in sampled pairs); the outline preview renders the actual delivered SVG
+rather than claiming those representations are pixel-identical. An actual
+nondefault triple-offer download matched the outline preview's complete SVG
+markup and geometry for all 16 text targets in the checked scene.
+
+Offer-related selections expose **Active offer arrangement**. Choosing Manual
+captures the current production rest positions before disabling automatic slot,
+plus and subline positioning. It applies only in the full current preview state;
+other offer counts and other CTA/T&C/roundel combinations remain unchanged.
+Returning to Automatic restores the pre-manual geometry. Both changes undo as
+whole-document transactions. Measurement requires the matching Live HTML source.
+
+Motion copies are explicitly independent and copy-once; repeated copies replace
+the prior copy, including after timing changes. Portable distance/time units are
+implemented, but named live motion references are not implemented. The old inert
+Linked/Unlink UI has been removed rather than promising nonexistent propagation.
+
+Frame readiness matches exact document/row references, size and rendition, so
+an old same-size frame cannot provide metrics for a newly edited document.
+
+
+The fitting inspector also displays effective engine defaults, including the
+percentage-based minimum font floor, so an unseen ratio cannot defeat an edited
+pixel minimum. Fixed font sizing ignores dormant shrink limits. Explicit frame
+policies use their independent controls instead of a contradictory legacy mode
+selector.

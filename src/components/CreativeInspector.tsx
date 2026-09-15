@@ -5,6 +5,7 @@ import { effectiveTextFitForTarget } from '@/lib/text-fit-rules';
 import { TextFitPolicyControls } from './TextFitPolicyControls';
 import { MotionTimingControls } from './MotionTimingControls';
 import { MotionDistanceControls, isMotionDistanceField } from './MotionDistanceControls';
+import { OfferArrangementControls } from './OfferArrangementControls';
 import { CreativeOwnershipControls } from './CreativeOwnershipControls';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -18,6 +19,19 @@ import { fitSizeStatus, fitTrackingStatus } from '@/lib/selection-chrome';
 import { useEditorStore } from '@/store/editor-store';
 import { EditorIcon } from '@/components/EditorIcon';
 import HeadlineOfferLayoutSection from '@/components/HeadlineOfferLayoutSection';
+
+const fieldSourceLabel = (source) => {
+  if (!source) return 'Default';
+  if (source.kind === 'sharedDefinition') return `${source.name}${source.format ? ` · ${source.format}` : ''}`;
+  if (source.kind === 'localOverride') return 'This state';
+  if (source.kind === 'classRule') return 'Shared baseline';
+  if (source.kind === 'layerFit' || source.kind === 'layerBase') return 'Base';
+  if (source.scope) return String(source.scope).split('.').map((part) => ({
+    'tc-solo':'T&Cs only', 'tc-prices':'T&Cs + rates', 'cta-rect':'Rectangular CTA',
+    'cta-roundel':'Round CTA', 'roundel-split':'Copy + value', 'roundel-copy-only':'Copy only',
+  }[part] || part.replace(/^offers-(\d+)$/, '$1 offers').replace(/^frames-(\d+)$/, '$1 frames'))).join(' · ');
+  return 'Default';
+};
 
 const boxFields = ['left', 'top', 'width', 'height'];
 const typeFields = ['fontSize', 'lineHeight', 'letterSpacing'];
@@ -280,7 +294,7 @@ export function CreativeInspector() {
     updateTargetValue(selectedTarget.id, 'display', 'flex');
     updateTargetValue(selectedTarget.id, 'alignItems', align);
   };
-  const fitMode = activeFit?.mode || 'shrink';
+  const fitMode = activeFit?.mode || effectiveFitRule.static || (effectiveFitRule.allowShrink === false ? 'wrap' : 'shrink');
   const minFontEnabled = canTextFit && (effectiveFitRule.frame ? effectiveFitRule.allowShrink !== false && !effectiveFitRule.static : fitMode === 'shrink');
 
   return (
@@ -303,6 +317,7 @@ export function CreativeInspector() {
           onToggle={() => toggleSection('layout')}
         >
           <p className="inspector-note">{layoutNote}</p>
+          <OfferArrangementControls document={document} size={size} target={selectedTarget} scopes={activeScopes} />
           {!isGroupedSelection ? (
             <p className="inspector-note">
               Source: {selectedTarget.writeSource?.kind === 'variantRule'
@@ -317,7 +332,7 @@ export function CreativeInspector() {
             {boxFields.map((field) => (
               <FieldControl
                 key={field}
-                label={`${field} · ${selectedTarget.valueProvenance?.[field]?.scope || selectedTarget.valueProvenance?.[field]?.kind || "base"}`}
+                label={`${field} · ${fieldSourceLabel(selectedTarget.valueProvenance?.[field])}`}
                 type="text"
                 value={selectedTarget.values?.[field] ?? ''}
                 onChange={(value) => updateTargetValue(selectedTarget.id, field, value)}
@@ -457,16 +472,26 @@ export function CreativeInspector() {
                 <FieldControl
                   label="Min font size"
                   type="text"
-                  value={activeFit?.minFontSize ?? ''}
+                  value={activeFit?.minFontSize ?? effectiveFitRule.minFontSize ?? ''}
                   disabled={!minFontEnabled}
                   onChange={(value) => applyFitUpdate('minFontSize', value)}
                 />
               ) : null}
             </div>
+            {canTextFit ? <>
+              <FieldControl
+                label={`Minimum size (% of design) · ${fieldSourceLabel(selectedTarget.fitProvenance?.minFontSizeRatio)}`}
+                type="text"
+                value={Number(effectiveFitRule.minFontSizeRatio || 0) * 100}
+                disabled={!minFontEnabled}
+                onChange={(value) => applyFitUpdate('minFontSizeRatio', Number(value) / 100)}
+              />
+              <p className="inspector-note">When shrinking, the minimum is whichever is larger: the pixel minimum or this percentage of the designed font size. Fixed font sizing ignores these limits.</p>
+            </> : null}
             {canTextFit ? <TextFitPolicyControls fit={activeFit} effectiveRule={effectiveFitRule} onChange={applyFitUpdate} /> : null}
             {canTextFit ? (
               <div className="inspector-grid">
-                <SelectControl
+                {!activeFit.frame ? <SelectControl
                   label={`Fit mode · ${selectedTarget.fitProvenance?.mode?.scope || selectedTarget.fitProvenance?.mode?.kind || "default"}`}
                   value={fitMode}
                   onChange={(value) => applyFitUpdate('mode', value)}
@@ -475,11 +500,11 @@ export function CreativeInspector() {
                   <option value="wrap">wrap</option>
                   <option value="clip">clip</option>
                   <option value="truncate">truncate</option>
-                </SelectControl>
+                </SelectControl> : null}
                 <FieldControl
-                  label={`Max lines · ${selectedTarget.fitProvenance?.maxLines?.scope || selectedTarget.fitProvenance?.maxLines?.kind || "default"}`}
+                  label={`Max lines · ${fieldSourceLabel(selectedTarget.fitProvenance?.maxLines)}`}
                   type="text"
-                  value={activeFit?.maxLines ?? ''}
+                  value={activeFit?.maxLines ?? effectiveFitRule.maxLines ?? ''}
                   onChange={(value) => applyFitUpdate('maxLines', value)}
                 />
               </div>
@@ -596,11 +621,11 @@ export function CreativeInspector() {
             <div>
               <span className="panel-kicker">Motion family</span>
               <strong>{family.label}</strong>
-              <p>{familyMembers.length > 1 ? `${familyMembers.length} related layers can share this motion style.` : 'This layer uses its own motion.'}</p>
+              <p>{familyMembers.length > 1 ? `${familyMembers.length} related layers can receive an independent copy of this clip.` : 'This layer uses its own motion.'}</p>
             </div>
             {selectedClip ? (
               <button type="button" disabled={familyMembers.length < 2} onClick={() => copySelectedClipToAnimationFamily()}>
-                Apply to family
+                Copy once to family
               </button>
             ) : null}
           </div>
@@ -634,13 +659,7 @@ export function CreativeInspector() {
               <div className={`motion-summary intent-${selectedClipSpan?.intentId || selectedClip.preset}`}>
                 <strong>{selectedClipSpan?.label || selectedClip.preset}</strong>
                 <span>{spanSeconds}</span>
-                <em>{selectedClipSpan?.linked ? 'Linked style' : 'Unlinked override'}</em>
-                <button
-                  type="button"
-                  onClick={() => updateClip(selectedLayer.id, selectedClip.id, 'linked', !selectedClipSpan?.linked)}
-                >
-                  {selectedClipSpan?.linked ? 'Unlink' : 'Relink'}
-                </button>
+                <em>Independent clip</em>
               </div>
               <div className="inspector-grid">
                 <FieldControl

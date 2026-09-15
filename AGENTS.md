@@ -16,6 +16,9 @@ Local Next.js tool for editing campaign creative JSON documents and exporting St
 | `src/lib/dco-markets.ts` | ROI / NI Studio profile bindings + official enable-snippet sample (agency export) |
 | `src/server/campaign-registry.ts` | Registered campaigns (id → JSON file + export slug + optional static `clickTag`) |
 | `src/server/creative-document.ts` | Read/write/validate creative JSON |
+| `src/components/ProductionCreativeStage.tsx` + `src/lib/production-stage.ts` | Production HTML/outline iframe, rendered selection bounds and readiness |
+| `src/lib/creative-ownership.ts` + `src/lib/canvas-groups.ts` | Named style memberships/local exceptions; separate virtual canvas groups |
+| `src/server/production-snapshot.ts` | Browser measurement for fixed-copy exports without an editor snapshot |
 | `src/server/feed-schema.ts` | Feed field schema + row validation (incl. size-text overrides) |
 | `campaign/feed-field-map.json` | Sidecar: Studio→canonical field remap + size-overridable field list |
 | `src/lib/feed-size-text.ts` | Per-size text override helpers (`textFieldForSize`, blank → base) |
@@ -34,6 +37,10 @@ Local Next.js tool for editing campaign creative JSON documents and exporting St
 
 ## Conventions
 
+- Editor/output parity is mandatory: use the production renderer for creative paint and browser animation seeking; keep editor controls outside its DOM.
+- Document validation is pure. Never seed or remove creative overrides on load/save. Named sharing is authored data, not item-specific application policy.
+- Existing fitting remains compatible until explicitly switched to Fixed frame/Content height. All fit controls must display effective runtime values.
+- Delivered outlines require current browser snapshots; do not silently fall back to approximate text metrics.
 - API route handlers: `export const runtime = 'nodejs'` (filesystem).
 - Preview assets: `/assets/foo` → `campaign/assets/foo`.
 - Creative/feed/export APIs take `?campaign=<id>` (default `sse-dco`).
@@ -47,7 +54,10 @@ Local Next.js tool for editing campaign creative JSON documents and exporting St
 
 ```bash
 just editor           # from repo root → editor + live /qa at http://localhost:5174/qa (webpack; Turbopack HMR can kill the process)
-npm test              # from repo root
+npm test              # engine/API behaviour; temporary campaign/output storage
+npm run test:creative # approved-art comparisons, separate from engine correctness
+npm run test:parity -- http://localhost:5184 # independent embed output vs editor
+npm run test:parity -- http://localhost:5184 agency # canonical-agency output
 npm run build
 npm run export:preview-site   # static client preview → site/
 npm run qa:dco        # canonical-agency stress capture → qa-output/YYYYMMDD-HHMMSS/ (+ archive old, latest symlink)
@@ -55,6 +65,6 @@ npm run qa:dco        # canonical-agency stress capture → qa-output/YYYYMMDD-H
 
 ## Tests
 
-Run `npm test` after changes to `creative-document.ts`, `feed-schema.ts`, `creative-exporter.ts`, outline bake/snapshot, or API routes. API tests hit real files under `campaign/`.
+Run `npm test` after changes to `creative-document.ts`, `feed-schema.ts`, `creative-exporter.ts`, outline bake/snapshot, or API routes. API tests use real I/O redirected to per-suite temporary campaign/output copies. Never restore packages over the working `outputs/` during tests.
 
 DCO visual QA matrix: `docs/QA_DCO_MATRIX.md`, live agency hold review at `/qa` (same shell as capture), harness under `scripts/qa-dco/` (writes `hold-samples.json` from creative JSON plateaus), visual review skill `.cursor/skills/dco-qa-review`.

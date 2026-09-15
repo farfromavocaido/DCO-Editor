@@ -63,18 +63,21 @@ export function readProductionTargets(stage: HTMLElement, layerIds: string[]): P
   return targets;
 }
 
+export type ProductionStageSource = { document: object; row: object };
 let currentStage: HTMLElement | null = null;
+let currentSource: ProductionStageSource | undefined;
 let pendingSize = '';
 let stageError: Error | null = null;
-export function beginProductionStage(size: string) { pendingSize = size; currentStage = null; stageError = null; }
-export function publishProductionStage(stage: HTMLElement) { currentStage = stage; stageError = null; }
-export function failProductionStage(error: Error) { currentStage = null; stageError = error; }
+export function beginProductionStage(size: string) { pendingSize = size; currentStage = null; currentSource = undefined; stageError = null; }
+export function publishProductionStage(stage: HTMLElement, source?: ProductionStageSource) { currentStage = stage; currentSource = source; stageError = null; }
+export function failProductionStage(error: Error) { currentStage = null; currentSource = undefined; stageError = error; }
 export function getProductionStage() { return currentStage; }
-export async function waitForProductionStage(size: string, timeoutMs = 20000): Promise<HTMLElement> {
+export async function waitForProductionStage(size: string, timeoutMs = 20000, renderMode?: 'font' | 'outline', expectedSource?: ProductionStageSource): Promise<HTMLElement> {
   const started = Date.now();
   while (Date.now() - started < timeoutMs) {
     if (pendingSize === size && stageError) throw stageError;
-    if (currentStage?.dataset.size === size && currentStage.isConnected) return currentStage;
+    if (currentStage?.dataset.size === size && currentStage.isConnected && (!renderMode || currentStage.dataset.previewRenderMode === renderMode)
+      && (!expectedSource || (currentSource?.document === expectedSource.document && currentSource?.row === expectedSource.row))) return currentStage;
     await new Promise(resolve => setTimeout(resolve, 25));
   }
   throw new Error(`Production preview for ${size} did not become ready`);
@@ -87,7 +90,7 @@ export async function waitForProductionDocument(doc: Document, timeoutMs = 20000
     const stage = doc.querySelector<HTMLElement>('.stage.motion-ready');
     const fontsReady = !doc.fonts || doc.fonts.status === 'loaded';
     const images = Array.from(doc.images);
-    const imageError = images.find(img => img.complete && img.src && img.naturalWidth === 0);
+    const imageError = images.find(img => img.complete && String(img.getAttribute('src') || '').trim() && img.naturalWidth === 0);
     if (imageError) throw new Error(`Creative image failed to load: ${imageError.getAttribute('src')}`);
     if (stage && fontsReady && images.every(img => img.complete)) {
       const failedFonts = doc.fonts ? Array.from(doc.fonts).filter(font => font.status === 'error') : [];

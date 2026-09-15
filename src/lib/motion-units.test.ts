@@ -41,3 +41,9 @@ test('live headline runtime preserves relative custom movement when it overrides
   expect(plan[0].keyframes[0].translate).toEqual([30,0]);
   expect(plan[0].keyframes.find((frame:{at:number})=>frame.at===10)?.opacity).toBe(1);
 });
+
+test('wave sweep consumes timing values authored by the timing controls', () => {
+  const frames=compileAnimationClips([{id:'wave',preset:'waveSweep',start:10,end:80,params:{start_x:300,end_x:0,enter_duration:{value:2,unit:'seconds'},fade_duration:{value:1,unit:'seconds'}}}],{},context);
+  expect(frames.find(frame=>frame.at===20)?.translate).toEqual([0,0]);
+  expect(frames.find(frame=>frame.at===75)?.opacity).toBe(1);
+});

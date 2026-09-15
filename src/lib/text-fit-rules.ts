@@ -234,7 +234,10 @@ export const textFitRulesForSize = (sizeCreative) => {
 
   for (const layer of sizeCreative.layers || []) {
     if (isHeadlineLayer(layer) && layer !== headlineFitLayer) continue;
-    push(layerRule(layer, classRuleProps));
+    const cssClass = isHeadlineLayer(layer) ? HEADLINE_CSS_CLASS : layer?.base?.cssClass || layer.id;
+    const inheritedFit = classRules.find(rule => rule.cssClass === cssClass)?.fit;
+    const effectiveLayer = inheritedFit ? { ...layer, fit: { ...inheritedFit, ...(layer.fit || {}) } } : layer;
+    push(layerRule(effectiveLayer, classRuleProps));
   }
   for (const rule of classRules) {
     push(classRuleFit(rule));

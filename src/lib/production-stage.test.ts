@@ -78,3 +78,34 @@ it('selected clipping diagnostics prefer the selected object over later family m
   flags.set('offer-subline', true);
   expect(productionTargetClipped(flags, 'offer-slot-2::offer-subline', 'offer-subline')).toBe(false);
 });
+
+it('mode-specific readiness cannot resolve with a same-size frame from another rendition', async () => {
+  const {beginProductionStage,publishProductionStage,waitForProductionStage} = await import('./production-stage');
+  beginProductionStage('300x250');
+  const font = {dataset:{size:'300x250',previewRenderMode:'font'},isConnected:true} as unknown as HTMLElement;
+  const outline = {dataset:{size:'300x250',previewRenderMode:'outline'},isConnected:true} as unknown as HTMLElement;
+  publishProductionStage(font);
+  setTimeout(()=>publishProductionStage(outline),10);
+  expect(await waitForProductionStage('300x250',100,'outline')).toBe(outline);
+});
+
+it('same-mode readiness also waits for the exact source document and row', async () => {
+  const {beginProductionStage,publishProductionStage,waitForProductionStage} = await import('./production-stage');
+  const documentA = {}, documentB = {}, row = {};
+  const stageA = {dataset:{size:'300x250',previewRenderMode:'font'},isConnected:true} as unknown as HTMLElement;
+  const stageB = {...stageA} as HTMLElement;
+  beginProductionStage('300x250');
+  publishProductionStage(stageA,{document:documentA,row});
+  setTimeout(()=>publishProductionStage(stageB,{document:documentB,row}),10);
+  expect(await waitForProductionStage('300x250',100,'font',{document:documentB,row})).toBe(stageB);
+});
+
+it('readiness accepts an intentional blank image source but rejects a broken authored source', async () => {
+  const {waitForProductionDocument} = await import('./production-stage');
+  const stage = {} as HTMLElement;
+  let rawSource = '';
+  const doc = {querySelector:()=>stage,images:[{complete:true,src:'http://preview.local/current.html',naturalWidth:0,getAttribute:()=>rawSource}]} as unknown as Document;
+  expect(await waitForProductionDocument(doc,100)).toBe(stage);
+  rawSource = '/assets/missing.jpg';
+  await expect(waitForProductionDocument(doc,100)).rejects.toThrow('image failed to load');
+});

@@ -267,8 +267,9 @@ const compileClipFrames = (clip: AnimationClip, beats: Record<string, number>, c
   }
 
   if (clip.preset === 'waveSweep') {
-    const waveFadePct = numberOr(params.fade_pct, legacyMotionDefaults.waveSweep.fadePct);
-    const sweepEnd = Math.min(end, start + numberOr(params.sweep_duration_pct, legacyMotionDefaults.waveSweep.durationPct));
+    const waveFadePct = params.fade_duration ? resolveMotionTime(params.fade_duration, context.durationS) : numberOr(params.fade_pct, legacyMotionDefaults.waveSweep.fadePct);
+    const sweepDuration = params.enter_duration ? resolveMotionTime(params.enter_duration, context.durationS) : numberOr(params.sweep_duration_pct, legacyMotionDefaults.waveSweep.durationPct);
+    const sweepEnd = Math.min(end, start + sweepDuration);
     const startY = params.start_y !== undefined ? distance(params.start_y, 'y', 0) : distance(params.hold_y, 'y', 0);
     const endY = params.end_y !== undefined ? distance(params.end_y, 'y', 0) : distance(params.hold_y, 'y', 0);
     return [

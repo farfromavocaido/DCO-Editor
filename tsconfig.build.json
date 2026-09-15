@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts",
+    "src/test/**",
+    "vitest*.config.ts",
+    "output/**",
+    "outputs/**",
+    "site/**",
+    "qa-output/**",
+    ".qa-work/**",
+    ".superpowers/**",
+    ".worktrees/**"
+  ]
+}

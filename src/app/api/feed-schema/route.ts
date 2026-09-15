@@ -5,7 +5,7 @@ import { jsonResponse, errorResponse } from '@/server/http';
 
 export const runtime = 'nodejs';
 
-export async function GET(request = new Request('http://localhost/api/feed-schema')) {
+export async function GET(request: Request) {
   try {
     const campaignId = resolveCampaignId(request);
     return jsonResponse(await readFeedSchema(creativeDocumentPathFor(campaignId)));

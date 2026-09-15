@@ -162,3 +162,32 @@ test.each([
     expect(result.reused).toMatchObject({size:'16.5px',title:'Authored title',fitAttributes:[]});
   } finally {await page.close();}
 });
+
+test('a child overriding inherited visibility participates in fitting',async()=>{
+ const result=await fit('<div style="visibility:hidden"><p class="target" style="visibility:visible">a very long headline</p></div>',{frame:'fixed',wrap:false,minFontSize:8});
+ expect(result.after[0].size).toBeLessThan(20);
+ expect(result.results).toHaveLength(1);
+});
+
+test('shared fitting never silently shrinks a fixed-size member',async()=>{
+ const result=await fit('<p class="target" style="font-size:32px;height:50px;width:200px">one</p><p class="target" style="font-size:20px;height:50px;width:200px">two</p>',{frame:'fixed',wrap:false,allowShrink:false,shared:true,minFontSize:8});
+ expect(result.after.map(item=>item.size)).toEqual([32,20]);
+ expect(result.results[0].diagnostics.every(item=>item.reasons.includes('shared-size-conflict'))).toBe(true);
+});
+
+test('class fitting is inherited below authored layer fit in engine and provenance',async()=>{
+ const {findCreativeTarget}=await import('./creative-model');
+ const document={sizes:{'300x250':{canvas:{width:300,height:250},layers:[{id:'headline-act1',kind:'text',base:{fontSize:20},fit:{maxLines:2},clips:[]}],classRules:[{cssClass:'sse-headline',properties:{fontSize:20},fit:{frame:'fixed',mode:'wrap',maxLines:3,minFontSize:9}}]}}};
+ const rule=effectiveTextFitForTarget(document,'300x250','headline-act1',[]);
+ expect(rule).toMatchObject({frame:'fixed',allowShrink:false,wrap:true,maxLines:2,minFontSize:9});
+ const target=findCreativeTarget(document,'300x250','headline-act1',[]);
+ expect(target.fit).toMatchObject({frame:'fixed',mode:'wrap',maxLines:2,minFontSize:9});
+ expect(target.fitProvenance.minFontSize.kind).toBe('classRule');
+ expect(target.fitProvenance.maxLines.kind).toBe('layerFit');
+});
+
+test('fixed font sizing ignores dormant shrink minimum settings', async () => {
+  const result = await fit('<p class="target" style="font-size:6px">short</p>', {frame:'fixed',wrap:false,allowShrink:false,minFontSize:10,minFontSizeRatio:2,overflow:'clip'});
+  expect(result.after[0].size).toBe(6);
+  expect(result.results[0].diagnostics[0].reasons).toEqual([]);
+});

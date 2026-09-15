@@ -141,7 +141,6 @@ function TimelineClipBar({
         'clip-bar',
         `intent-${span.intentId}`,
         `family-${family.id}`,
-        span.linked ? 'is-linked-motion' : 'is-unlinked-motion',
         selectedClipId === clip.id ? 'is-selected' : '',
         dimmed ? 'is-dimmed' : '',
       ].filter(Boolean).join(' ')}

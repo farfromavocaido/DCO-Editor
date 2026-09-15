@@ -193,3 +193,36 @@ it('a later detach preserves an earlier detached fallback across different scope
  const second = detachCreativeOwnership(linked,'second',scopedMember);
  expect(findCreativeTarget(second,'300x250','terms',['offers-0']).values.color).toBe('blue');
 });
+
+import { sharedCreativeFieldReach } from './creative-ownership';
+it('shared provenance and edit reach distinguish format overrides from definition defaults', () => {
+ const doc = fixture();
+ doc.sizes['300x600']=structuredClone(doc.sizes['300x250']);
+ doc.sizes['728x90']=structuredClone(doc.sizes['300x250']);
+ doc.sharedDefinitions=[{id:'type',name:'Type',values:{fontSize:7},fit:{maxLines:3},perSize:{'300x600':{values:{fontSize:12}}},members:[
+  {size:'300x250',targetId:'terms',scope:'offers-0'},
+  {size:'300x600',targetId:'terms',scope:'offers-0'},
+  {size:'728x90',targetId:'terms',scope:'offers-0'},
+  {size:'728x90',targetId:'terms',scope:'offers-1',exclude:{values:['fontSize']}},
+ ]}];
+ doc.sizes['728x90'].localOverrides=[{targetId:'terms',scope:'offers-0.cta-rect',values:{fontSize:9}}];
+ const formatSource=findCreativeTarget(doc,'300x600','terms',scopes).valueProvenance.fontSize;
+ const rootSource=findCreativeTarget(doc,'300x250','terms',scopes).valueProvenance.fontSize;
+ expect(formatSource).toMatchObject({kind:'sharedDefinition',sourceLevel:'format',format:'300x600',domain:'values',field:'fontSize'});
+ expect(rootSource).toMatchObject({kind:'sharedDefinition',sourceLevel:'definition',domain:'values',field:'fontSize'});
+ expect(findCreativeTarget(doc,'300x600','terms',scopes).fitProvenance.maxLines).toMatchObject({sourceLevel:'definition',domain:'fit',field:'maxLines'});
+ const formatReach=sharedCreativeFieldReach(doc,formatSource);
+ expect(formatReach.members.map(member=>member.size)).toEqual(['300x600']);
+ const rootReach=sharedCreativeFieldReach(doc,rootSource);
+ expect(rootReach.members.map(member=>`${member.size}:${member.scope}`)).toEqual(['300x250:offers-0','728x90:offers-0']);
+ expect(rootReach.localExceptions).toMatchObject([{member:{size:'728x90',targetId:'terms'},scopes:['offers-0.cta-rect']}]);
+ const formatEdit=setCreativeOwnershipField(doc,'300x600','terms',scopes,'values','fontSize',15,'shared','type');
+ expect(findCreativeTarget(formatEdit,'300x250','terms',scopes).values.fontSize).toBe(7);
+ expect(findCreativeTarget(formatEdit,'728x90','terms',scopes).values.fontSize).toBe(7);
+ const rootEdit=setCreativeOwnershipField(formatEdit,'300x250','terms',scopes,'values','fontSize',8,'shared','type');
+ expect(findCreativeTarget(rootEdit,'300x250','terms',scopes).values.fontSize).toBe(8);
+ expect(findCreativeTarget(rootEdit,'728x90','terms',scopes).values.fontSize).toBe(8);
+ expect(findCreativeTarget(rootEdit,'300x600','terms',scopes).values.fontSize).toBe(15);
+ expect(findCreativeTarget(rootEdit,'728x90','terms',['offers-0','cta-rect']).values.fontSize).toBe(9);
+ expect(findCreativeTarget(rootEdit,'728x90','terms',['offers-1']).values.fontSize).toBe(6);
+});

@@ -68,11 +68,35 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     return true;
   }
 
+  function layoutPropertyName(key) {
+    return key.replace(/[A-Z]/g, function(letter) { return '-' + letter.toLowerCase(); });
+  }
+
+  function writeLayoutStyle(element, key, value) {
+    var writes = element.__dcoOfferLayoutWrites || (element.__dcoOfferLayoutWrites = {});
+    var name = layoutPropertyName(key);
+    if (!writes[key]) writes[key] = {
+      authored: element.style[key],
+      priority: element.style.getPropertyPriority(name),
+    };
+    element.style[key] = value;
+    writes[key].last = element.style[key];
+    writes[key].lastPriority = element.style.getPropertyPriority(name);
+  }
+
   function clearLayoutStyles(element) {
-    if (!element || !element.style) return;
-    element.style.left = '';
-    element.style.top = '';
-    element.style.width = '';
+    if (!element || !element.style || !element.__dcoOfferLayoutWrites) return;
+    var writes = element.__dcoOfferLayoutWrites;
+    Object.keys(writes).forEach(function(key) {
+      var name = layoutPropertyName(key);
+      var write = writes[key];
+      // A new author/runtime write is not ours to remove. Restore only the
+      // exact value installed by the previous automatic layout pass.
+      if (element.style[key] === write.last && element.style.getPropertyPriority(name) === write.lastPriority) {
+        element.style.setProperty(name, write.authored, write.priority);
+      }
+    });
+    delete element.__dcoOfferLayoutWrites;
   }
 
   /** Map a client rect into ancestor-local px, correcting stage scale(). */
@@ -284,9 +308,9 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     // width changes. Do NOT rewrite top — authored Y (flex-end in a real
     // height box) owns baseline pairing, and rewriting top every fit pass
     // made inspector drags look broken.
-    subline.style.left = (ink.right + SIDE_BY_SIDE_GAP_PX) + 'px';
+    writeLayoutStyle(subline, 'left', (ink.right + SIDE_BY_SIDE_GAP_PX) + 'px');
     if (window.getComputedStyle(subline).display === 'flex') {
-      subline.style.alignItems = 'flex-end';
+      writeLayoutStyle(subline, 'alignItems', 'flex-end');
     }
   }
 
@@ -296,7 +320,6 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     if (!value || !subline) return;
     var run = value.querySelector('.offer-value-run') || value;
     if (isSideBySide(value, subline, slot)) {
-      subline.style.width = '';
       layoutSideBySide(slot, run, subline);
     }
   }
@@ -524,13 +547,13 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     var isImg = plus.tagName === 'IMG' || plus.tagName === 'img';
     if (isImg) {
       // Layout box ignores CSS animation transforms (unlike getBoundingClientRect).
-      plus.style.left = (x - pw / 2) + 'px';
-      plus.style.top = (alignY === 'top' ? y : (y - ph / 2)) + 'px';
+      writeLayoutStyle(plus, 'left', (x - pw / 2) + 'px');
+      writeLayoutStyle(plus, 'top', (alignY === 'top' ? y : (y - ph / 2)) + 'px');
       return;
     }
     var parent = plus.offsetParent || plus.parentElement;
-    plus.style.left = (x - pw / 2) + 'px';
-    plus.style.top = (y - ph / 2) + 'px';
+    writeLayoutStyle(plus, 'left', (x - pw / 2) + 'px');
+    writeLayoutStyle(plus, 'top', (y - ph / 2) + 'px');
     if (!parent) return;
     withNeutralMotion(plus, function() {
       var ink = textInk(plus, parent);
@@ -539,11 +562,11 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
       var inkCy = (ink.top + ink.bottom) / 2;
       var curLeft = cssNumber(plus.style.left, 0);
       var curTop = cssNumber(plus.style.top, 0);
-      plus.style.left = (curLeft + (x - inkCx)) + 'px';
+      writeLayoutStyle(plus, 'left', (curLeft + (x - inkCx)) + 'px');
       if (alignY === 'top') {
-        plus.style.top = (curTop + (y - ink.top)) + 'px';
+        writeLayoutStyle(plus, 'top', (curTop + (y - ink.top)) + 'px');
       } else {
-        plus.style.top = (curTop + (y - inkCy)) + 'px';
+        writeLayoutStyle(plus, 'top', (curTop + (y - inkCy)) + 'px');
       }
     });
   }
@@ -635,7 +658,7 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
 
     var cursor = blockLeft;
     for (var i = 0; i < clusters.length; i += 1) {
-      clusters[i].slot.style.left = (cursor - clusters[i].insetLeft) + 'px';
+      writeLayoutStyle(clusters[i].slot, 'left', (cursor - clusters[i].insetLeft) + 'px');
       cursor += clusters[i].width + gap;
     }
     clusters = remeasureSorted(slots, 'x');
@@ -664,7 +687,7 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
 
     var cursor = blockTop;
     for (var i = 0; i < clusters.length; i += 1) {
-      clusters[i].slot.style.top = (cursor - clusters[i].insetTop) + 'px';
+      writeLayoutStyle(clusters[i].slot, 'top', (cursor - clusters[i].insetTop) + 'px');
       cursor += clusters[i].height + gap;
     }
     clusters = remeasureSorted(slots, 'y');
@@ -725,7 +748,7 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     var cursor = topBlockLeft;
     for (var t = 0; t < 2; t += 1) {
       var tr = topRow[t];
-      tr.slot.style.left = (cursor - tr.cluster.insetLeft) + 'px';
+      writeLayoutStyle(tr.slot, 'left', (cursor - tr.cluster.insetLeft) + 'px');
       cursor += tr.cluster.width + gap;
     }
 
@@ -734,7 +757,7 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     });
     var topCentroidX = (topRow[0].cluster.valueCenterX + topRow[1].cluster.valueCenterX) / 2;
     bottom = { slot: bottom.slot, box: boxOf(bottom.slot), cluster: clusterForSlot(bottom.slot) };
-    bottom.slot.style.left = (topCentroidX - bottom.cluster.width / 2 - bottom.cluster.insetLeft) + 'px';
+    writeLayoutStyle(bottom.slot, 'left', (topCentroidX - bottom.cluster.width / 2 - bottom.cluster.insetLeft) + 'px');
     bottom = { slot: bottom.slot, box: boxOf(bottom.slot), cluster: clusterForSlot(bottom.slot) };
 
     // MPU / 970×250: raise plus top to top-row subline caps.
@@ -763,41 +786,39 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
     var plusLayout = resolvePlusLayoutMode(scope);
 
     var slotNodes = scope.querySelectorAll('[data-gwd-group="OfferSlot"]');
+    var plusCandidates = [];
+    for (var p = 1; p <= 2; p += 1) {
+      var plus = scope.querySelector
+        ? (scope.querySelector('#plus-' + p) || scope.querySelector('.plus-' + p))
+        : null;
+      if (!plus && scope.ownerDocument) plus = scope.ownerDocument.getElementById('plus-' + p);
+      plusCandidates.push(plus);
+    }
+
+    // Reset before eligibility checks: a row can hide every slot and plus.
+    // Previously those nodes retained another row's re-anchored positions.
+    Array.prototype.forEach.call(slotNodes, function(slot) {
+      clearLayoutStyles(slot);
+      clearLayoutStyles(slot.querySelector('.offer-subline'));
+    });
+    plusCandidates.forEach(clearLayoutStyles);
+
     var slots = [];
     Array.prototype.forEach.call(slotNodes, function(slot) {
-      if (!isVisible(slot)) return;
-      slots.push(slot);
+      if (isVisible(slot)) slots.push(slot);
     });
     if (!slots.length) return;
-
     slots.sort(function(a, b) {
       var ai = parseInt(a.getAttribute('data-offer-index') || '0', 10);
       var bi = parseInt(b.getAttribute('data-offer-index') || '0', 10);
       return ai - bi;
     });
-
-    var pluses = [];
-    for (var p = 1; p <= 2; p += 1) {
-      var plus = scope.querySelector
-        ? (scope.querySelector('#plus-' + p) || scope.querySelector('.plus-' + p))
-        : null;
-      if (!plus && scope.ownerDocument) {
-        plus = scope.ownerDocument.getElementById('plus-' + p);
-      }
-      pluses.push(plus && isVisible(plus) ? plus : null);
-    }
-
-    for (var i = 0; i < slots.length; i += 1) {
-      clearLayoutStyles(slots[i]);
-      var sub = slots[i].querySelector('.offer-subline');
-      if (sub) {
-        clearLayoutStyles(sub);
-        sub.style.alignItems = '';
-      }
-    }
-    for (var j = 0; j < pluses.length; j += 1) {
-      if (pluses[j]) clearLayoutStyles(pluses[j]);
-    }
+    var pluses = plusCandidates.map(function(plus) { return plus && isVisible(plus) ? plus : null; });
+    // Explicit per-state ownership supersedes the legacy campaign-level policy.
+    // Missing property keeps legacy paint, including its side-by-side pairing.
+    var arrangementModes = slots.map(function(slot) { return window.getComputedStyle(slot).getPropertyValue('--offer-layout-mode').trim(); });
+    if (arrangementModes.indexOf('manual') !== -1) return;
+    var explicitAutomatic = arrangementModes.indexOf('auto') !== -1;
 
     for (var s = 0; s < slots.length; s += 1) {
       layoutSlotChildren(slots[s]);
@@ -805,7 +826,7 @@ const LAYOUT_OFFERS_SOURCE = `(function createLayoutOffers() {
 
     // Manual: keep authored slot/plus CSS (inspector). Still cleared stale inline
     // above so a prior auto pass cannot stick after switching campaigns.
-    if (plusLayout === 'manual') return;
+    if (plusLayout === 'manual' && !explicitAutomatic) return;
 
     // Match export pre-motion rest: clear slot scrub/CSS motion for ink measure.
     // Fit translateY on .offer-value children is preserved (not on the slot).

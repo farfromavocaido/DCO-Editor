@@ -159,12 +159,13 @@ const exportStaticsPreviewSite = async (latest: ExportPreviewLatest | null) => {
 const main = async () => {
   const document = await readCreativeDocument();
   const latest = await readLatest();
-  const agencyZips = (latest?.dcoZips
+  const dcoZips = latest?.dcoZips;
+  const agencyZips = (dcoZips
     ? listDcoMarkets()
       .map((market) => ({
         id: market.id,
         label: market.label,
-        href: latest.dcoZips[market.id],
+        href: dcoZips[market.id],
       }))
       .filter((zip) => zip.href)
     : latest?.dcoZip

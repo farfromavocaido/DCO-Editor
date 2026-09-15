@@ -74,9 +74,11 @@ export function PreviewPane() {
     for (const target of targets) {
       const style = target.element.ownerDocument.defaultView?.getComputedStyle(target.element);
       if (!style) continue;
-      const fontSize = Number.parseFloat(style.fontSize);
+      const outlineSvg = target.element.querySelector('svg[data-rendered-font-size]');
+      if (target.element.classList.contains('outlined-text') && !outlineSvg) continue;
+      const fontSize = Number.parseFloat(outlineSvg?.getAttribute('data-rendered-font-size') || style.fontSize);
       if (!(fontSize > 0)) continue;
-      const tracking = (Number.parseFloat(style.letterSpacing) || 0) / fontSize;
+      const tracking = outlineSvg ? Number(outlineSvg.getAttribute('data-rendered-tracking-em') || 0) : (Number.parseFloat(style.letterSpacing) || 0) / fontSize;
       for (const key of [target.id, ...target.element.classList]) {
         fitResults.set(key, fontSize);
         fitTrackings.set(key, tracking);
@@ -110,6 +112,8 @@ export function PreviewPane() {
   const frameCount = useEditorStore((s) => s.frameCount);
   const roundelMode = useEditorStore((s) => s.roundelMode);
   const row = useEditorStore(selectPreviewFeedRow);
+  const previewRenderMode = useEditorStore(s => s.previewRenderMode);
+  const setPreviewRenderMode = useEditorStore(s => s.setPreviewRenderMode);
   const canvasZoom = useEditorStore((s) => s.canvasZoom);
   const resizeMode = useEditorStore((s) => s.resizeMode);
   const selectTarget = useEditorStore((s) => s.selectTarget);
@@ -615,6 +619,10 @@ export function PreviewPane() {
       <div className="preview-toolbar">
         <div className="preview-toolbar-left">
           <PlayheadReadout seconds={seconds} percent={percent} />
+          <select aria-label="Preview rendition" value={previewRenderMode} onChange={event => setPreviewRenderMode(event.target.value)}>
+            <option value="font">Live HTML</option>
+            <option value="outline">Fixed-copy outlines</option>
+          </select>
           {offersBlockIsolated ? (
             <div className="isolation-crumb" aria-label="Offers editing path">
               <button type="button" className="isolation-crumb-link" onClick={() => selectOffersBlock()}>
@@ -681,7 +689,7 @@ export function PreviewPane() {
                 onPointerDown={() => setContextMenu(null)}
               >
             <ProductionCreativeStage
-              document={document} row={row} size={size} percent={percent}
+              document={document} row={row} size={size} percent={percent} renderMode={previewRenderMode}
               layerIds={productionLayerIds} hiddenLayerIds={hiddenLayerIds}
               onTargets={receiveProductionTargets}
               onPointerDown={startSelectionDrag}

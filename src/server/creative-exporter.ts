@@ -5,8 +5,10 @@ import path from 'node:path';
 
 import { clockLoops, layerAnimationShorthand } from '@/lib/animation-css';
 import { compileAnimationClips } from '@/lib/creative-compiler';
+import type { MotionContext } from '@/lib/motion-units';
 import { structuredRuleCss } from '@/lib/creative-css';
-import { clipsForProfile, headlineTransitionRuntimeBlock } from '@/lib/headline-motion';
+import { materializeCreativeOwnership } from '@/lib/creative-ownership';
+import { clipsForProfile, headlineTransitionRuntimeBlock, buildHeadlineMotionPlan, headlineSkipOverrideCss } from '@/lib/headline-motion';
 import {
   CDN_FONT_URLS,
   MUSEO_FONT_FILENAME,
@@ -37,6 +39,7 @@ import {
 import { studioToCanonicalFieldMap } from '@/lib/feed-field-map';
 import { activeScopesFromControls, clampOfferCount, controlsFromFeedRow } from '@/lib/feed-model';
 import {
+  applySizeTextOverridesToRow,
   SIZE_OVERRIDABLE_TEXT_FIELDS,
   sizeTextFieldDefinitions,
   textFieldForSize,
@@ -53,7 +56,7 @@ import {
   offerValueSymbolCss,
   wrapOfferValueSymbolRuntime,
 } from '@/lib/offer-value-symbols';
-import { applyOffers0BeatOverlay, beatsForFrameScope } from '@/lib/timing-profiles';
+import { applyOffers0BeatOverlay, beatsForFrameScope, beatsForScopes } from '@/lib/timing-profiles';
 import { textFitEngineSource } from '@/lib/text-fit';
 import { textFitRulesForSize } from '@/lib/text-fit-rules';
 import type { PresentationSnapshots, SizePresentationSnapshot } from '@/lib/outline-snapshot';
@@ -620,7 +623,7 @@ const layerClipsForProfile = (
 const staticRuleForLayer = (
   layer: Record<string, unknown>,
   beats: Record<string, number>,
-  options: { profile?: string; selectorPrefix?: string; activeScopes?: string[] } = {},
+  options: { profile?: string; selectorPrefix?: string; activeScopes?: string[]; motionContext?: MotionContext } = {},
 ) => {
   // Gradients are static (no clips). Scoped re-emits under `.offers-0` would
   // restate base `visibility: hidden` and override the offers-0 show rule.
@@ -629,7 +632,7 @@ const staticRuleForLayer = (
   const clips = isBlurLayer(layer) && !blurIsActive(layer.blur)
     ? []
     : layerClipsForProfile(layer, profile, options.activeScopes);
-  const firstKeyframe = clips.length ? compileAnimationClips(clips, beats)[0] : null;
+  const firstKeyframe = clips.length ? compileAnimationClips(clips, beats, options.motionContext)[0] : null;
   if (isHeadlineLayer(layer)) {
     const initialTransform = firstKeyframe ? formatTransform(firstKeyframe) : null;
     const declarations = [];
@@ -693,6 +696,7 @@ const animationCssForLayer = (
     profile?: string;
     loop?: boolean;
     activeScopes?: string[];
+    motionContext?: MotionContext;
   } = {},
 ) => {
   const profile = options.profile || 'frames-3';
@@ -700,7 +704,7 @@ const animationCssForLayer = (
   const clips = layerClipsForProfile(layer, profile, options.activeScopes);
   if (!clips.length) return '';
   const name = animationNameForLayer({ ...layer, clips }, options.suffix || '');
-  const keyframes = compileAnimationClips(clips, beats);
+  const keyframes = compileAnimationClips(clips, beats, options.motionContext);
   const cssClass = layer.base?.cssClass || layer.id;
   const selector = isHeadlineLayer(layer)
     ? `${options.selectorPrefix || ''}#${layer.id}`
@@ -773,6 +777,7 @@ const outlinedSvgMarkup = async ({
   snapshot?: SizePresentationSnapshot | null;
 }) => {
   const outlined = await bakeOutlinedText({
+    requireSnapshot: true,
     document,
     size,
     targetId,
@@ -831,9 +836,12 @@ const renderOutlinedLayer = async (
     ? HEADLINE_CSS_CLASS
     : (layer.base?.cssClass || layer.id);
   if (layer.id === 'terms-solo') return '';
+  if (options.presentationSnapshot?.hiddenTargets?.includes(String(layer.id))) return '';
   if (
     isStaticDelivery(options)
-    && visibilityForLayer(document, size, String(layer.id), activeScopes) === 'hidden'
+    && (isHeadlineLayer(layer)
+      ? findCreativeTarget(document, size, String(layer.id), activeScopes)?.values.visibility
+      : visibilityForLayer(document, size, String(layer.id), activeScopes)) === 'hidden'
   ) {
     return '';
   }
@@ -913,6 +921,7 @@ const renderOutlinedTermsWrappers = async (
   activeScopes: string[],
   options: RenderOptions = {},
 ) => {
+  if (options.presentationSnapshot?.hiddenTargets?.includes('terms-solo')) return '';
   if (
     isStaticDelivery(options)
     && visibilityForLayer(document, size, 'terms-solo', activeScopes) === 'hidden'
@@ -1064,6 +1073,11 @@ const outlinedTextCss = `
       pointer-events: none;
       flex: 0 0 auto;
     }
+    /* Headline skip/merge motion animates ink on the host. Keep outlined glyphs
+       on that same colour channel instead of freezing the snapshot's rest ink. */
+    .sse-headline.outlined-text svg g {
+      fill: currentColor;
+    }
     /* Font-mode CTA padding is for live text wrap inside the box. Outlined SVG
        is already baked to the full authored width — zero padding so glyphs stay
        at designed size. */
@@ -1079,7 +1093,7 @@ const stateClasses = (row: Record<string, unknown>) => (
 const runtimeScript = (
   fitRules: Array<Record<string, unknown>> = [],
   options: RenderOptions = {},
-  headlineRuntime: { layers?: Array<Record<string, unknown>>; beatsProfiles?: Record<string, Record<string, number>>; durationS?: number; loop?: boolean } = {},
+  headlineRuntime: { layers?: Array<Record<string, unknown>>; beatsProfiles?: Record<string, Record<string, number>>; durationS?: number; loop?: boolean; motionContext?: MotionContext } = {},
 ) => {
   const includePreviewBridge = options.includePreviewBridge !== false;
   const previewRowFallback = includePreviewBridge
@@ -1205,6 +1219,7 @@ const runtimeScript = (
           headlineRuntime.beatsProfiles || {},
           headlineRuntime.durationS || 15,
           Boolean(headlineRuntime.loop),
+          headlineRuntime.motionContext,
         )}
 
         function bindOfferTexts(data) {
@@ -1300,9 +1315,9 @@ const runtimeScript = (
           var size = root.getAttribute('data-size') || '';
           var url = backgroundImageUrlForSize(data, size);
           if (!url || url === '[object Object]') {
-            url = image.getAttribute('data-packaged-src') || image.getAttribute('src') || '';
+            url = image.getAttribute('data-packaged-src') || '';
           }
-          if (!url || url === '[object Object]') return;
+          // A row replaces the previous row. Agency blanks must not retain its photo.
           image.setAttribute('src', url);
         }
 
@@ -1419,10 +1434,14 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
   const sizeCreative = document.sizes[size];
   const duration = document.clock.durationS;
   const loop = clockLoops(document.clock);
+  // Animated layers are direct children of page-content in production HTML.
+  // Their actual parent frame is therefore the canvas, even when the editor
+  // groups their selection. Selection groups never redefine motion units.
+  const motionContext: MotionContext = { canvas: sizeCreative.canvas, parent: sizeCreative.canvas, durationS: duration };
   const defaultBeats = beatsForFrameScope(document, 'frames-3');
-  const layerCss = sizeCreative.layers.map((layer) => staticRuleForLayer(layer, defaultBeats)).join('\n\n');
+  const layerCss = sizeCreative.layers.map((layer) => staticRuleForLayer(layer, defaultBeats, { motionContext })).join('\n\n');
   const defaultAnimationCss = sizeCreative.layers
-    .map((layer) => animationCssForLayer(layer, defaultBeats, duration, { loop }))
+    .map((layer) => animationCssForLayer(layer, defaultBeats, duration, { loop, motionContext }))
     .filter(Boolean)
     .join('\n\n');
   // Static frames-3 bakes skip unused frames-4 profile CSS; frames-4 still needs
@@ -1439,6 +1458,7 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
       const beats = beatsForFrameScope(document, scope);
       return sizeCreative.layers
         .map((layer) => animationCssForLayer(layer, beats, duration, {
+          motionContext,
           suffix: scope,
           selectorPrefix: `.${scope} `,
           profile: scope,
@@ -1452,6 +1472,7 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
       const beats = beatsForFrameScope(document, scope);
       return sizeCreative.layers
         .map((layer) => staticRuleForLayer(layer, beats, {
+          motionContext,
           profile: scope,
           selectorPrefix: `.${scope} `,
         }))
@@ -1469,6 +1490,7 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
   const offers0AnimationCss = offers0Scopes
     .flatMap((item) => sizeCreative.layers
       .map((layer) => animationCssForLayer(layer, item.beats, duration, {
+        motionContext,
         suffix: item.suffix,
         selectorPrefix: item.selectorPrefix,
         profile: item.profile,
@@ -1480,12 +1502,26 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
   const offers0StaticCss = offers0Scopes
     .flatMap((item) => sizeCreative.layers
       .map((layer) => staticRuleForLayer(layer, item.beats, {
+        motionContext,
         profile: item.profile,
         selectorPrefix: item.selectorPrefix,
         activeScopes: ['offers-0'],
       }))
       .filter(Boolean))
     .join('\n\n');
+  // Font mode creates this override after applying the actual feed copy. Outline
+  // has no live feed runtime, so compile the same plan for its fixed effective row.
+  let fixedHeadlineMotionCss = '';
+  if (options.renderMode === 'outline') {
+    const row = applySizeTextOverridesToRow(sampleRowForDocument(document), size);
+    const scopes = activeScopesFromControls(controlsFromFeedRow(row));
+    const profile = scopes.includes('frames-4') ? 'frames-4' : 'frames-3';
+    const beats = beatsForScopes(document, scopes);
+    const plan = buildHeadlineMotionPlan(sizeCreative.layers, row, profile, beats, motionContext);
+    if (Number(row.offer_count_num) === 0 || plan.some((item) => item.hidden)) {
+      fixedHeadlineMotionCss = headlineSkipOverrideCss(sizeCreative.layers, row, profile, beats, duration, loop, motionContext);
+    }
+  }
   return `
 ${localFontFaceCss(options)}
 ${options.renderMode === 'outline' ? '' : packagedFontIsolationCss()}
@@ -1556,6 +1592,8 @@ ${profileAnimationCss}
 ${offers0StaticCss}
 
 ${offers0AnimationCss}
+
+${fixedHeadlineMotionCss}
 `;
 };
 
@@ -1575,6 +1613,7 @@ const renderBody = async (document: Record<string, unknown>, size: string, optio
       row,
       activeScopes,
       snapshot: presentationSnapshot,
+      requireSnapshot: true,
     });
     const layers = (await Promise.all(
       sizeCreative.layers
@@ -1612,6 +1651,22 @@ export const renderStudioReadyHtml = async (
   size: string,
   options: RenderOptions = {},
 ) => {
+  document = materializeCreativeOwnership(document);
+  if (options.renderMode === 'outline' && !options.presentationSnapshot) {
+    const { captureProductionPresentation } = await import('./production-snapshot');
+    const fontHtml = await renderStudioReadyHtml(document, size, {
+      ...options,
+      renderMode: 'font',
+      delivery: 'studio',
+      fontBasePath: options.fontBasePath || 'assets/fonts/',
+      includePreviewBridge: true,
+      includeStudioDynamicContent: false,
+    });
+    const snapshot = await captureProductionPresentation(
+      renderWipHtml(fontHtml, sampleRowForDocument(document)), size,
+    );
+    options = { ...options, presentationSnapshot: snapshot };
+  }
   const sizeCreative = document.sizes?.[size];
   if (!sizeCreative) throw new Error(`Unknown creative size: ${size}`);
   const renderMode = options.renderMode || 'font';
@@ -1629,6 +1684,9 @@ export const renderStudioReadyHtml = async (
     ...options,
     renderMode,
     delivery: renderMode === 'outline' ? delivery : 'studio',
+    // Font options above are for browser measurement, not the outlined delivery.
+    fontUrlMap: renderMode === 'outline' ? undefined : options.fontUrlMap,
+    fontBasePath: renderMode === 'outline' ? undefined : options.fontBasePath,
     assetUrlMap: options.assetUrlMap ?? defaultOutlineAssetMap,
     presentationSnapshot: options.presentationSnapshot ?? null,
   };
@@ -1646,6 +1704,7 @@ export const renderStudioReadyHtml = async (
         'frames-3': beatsForFrameScope(document, 'frames-3'),
         'frames-4': beatsForFrameScope(document, 'frames-4'),
       },
+      motionContext: { canvas: sizeCreative.canvas, parent: sizeCreative.canvas, durationS: document.clock.durationS },
       durationS: document.clock.durationS,
       loop: clockLoops(document.clock),
     });

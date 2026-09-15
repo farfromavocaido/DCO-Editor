@@ -1,3 +1,4 @@
+import type { PresentationSnapshots } from '@/lib/outline-snapshot';
 import { NextResponse } from 'next/server';
 
 import { resolveCampaignId } from '@/server/campaign-query';
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
       assetMode?: string;
       renderMode?: string;
       campaign?: string;
-      presentationSnapshots?: Record<string, unknown>;
+      presentationSnapshots?: PresentationSnapshots;
     } = {};
     try {
       body = await request.json();

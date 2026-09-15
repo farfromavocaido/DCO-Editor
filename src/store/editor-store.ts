@@ -4,7 +4,7 @@
 import { create } from 'zustand';
 import { setCreativeOwnershipField } from '@/lib/creative-ownership';
 import { createCanvasGroup, removeCanvasGroup, findCanvasGroup } from '@/lib/canvas-groups';
-import { waitForProductionStage, withProductionRestPose } from '@/lib/production-stage';
+import { beginProductionStage, waitForProductionStage, withProductionRestPose } from '@/lib/production-stage';
 
 import {
   activeScopesFromControls,
@@ -14,6 +14,7 @@ import {
   updateFeedDraftField,
 } from '@/lib/feed-model';
 import { layoutOffers } from '@/lib/offer-layout';
+import { captureProductionOfferArrangement, setOfferArrangementMode } from '@/lib/offer-arrangement';
 import {
   capturePresentationSnapshot,
   type PresentationSnapshots,
@@ -185,6 +186,7 @@ export const creativeDocumentForExport = (state, renderMode = 'font') => state.c
 
 export const outlineSnapshotSource = (state) => ({
   campaignId: state.activeCampaignId,
+  previewRenderMode: state.previewRenderMode,
   document: state.creativeDocument,
   rows: state.feedDraft.rows,
   selectedIndex: state.feedDraft.selectedIndex,
@@ -192,7 +194,7 @@ export const outlineSnapshotSource = (state) => ({
 });
 export const assertOutlineSnapshotSource = (source, state) => {
   const current = outlineSnapshotSource(state);
-  if (source.campaignId !== current.campaignId || source.document !== current.document
+  if (source.previewRenderMode !== current.previewRenderMode || source.campaignId !== current.campaignId || source.document !== current.document
     || source.rows !== current.rows || source.selectedIndex !== current.selectedIndex || source.row !== current.row) {
     throw new Error('Creative document or active feed changed during outline snapshot capture. Please export again.');
   }
@@ -228,6 +230,16 @@ const defaultDrillChildId = (state, targetId) => {
   return childParent?.children?.[0]?.id || '';
 };
 
+const canvasGroupTransactionState = (state) => ({
+  creativeDocument: state.creativeDocument,
+  selectedTargetId: state.selectedTargetId,
+  selectedTargetIds: [...state.selectedTargetIds],
+  selectedLayerId: state.selectedLayerId,
+  selectedClipId: state.selectedClipId,
+  isolationPath: [...(state.isolationPath || [])],
+  isolatedGroupId: state.isolatedGroupId || '',
+});
+
 export const useEditorStore = create<any>((set, get) => ({
   sizes: [],
   size: '',
@@ -259,6 +271,7 @@ export const useEditorStore = create<any>((set, get) => ({
   fitTrackings: new Map(),
   fitClipped: new Map(),
   scale: 1,
+  previewRenderMode: 'font',
   canvasZoom: 'auto',
   lockedLayerIds: new Set(),
   hiddenLayerIds: new Set(),
@@ -473,20 +486,46 @@ export const useEditorStore = create<any>((set, get) => ({
 
   groupSelectedCanvasTargets: (name) => {
     const state = get();
+    const before = canvasGroupTransactionState(state);
     const members = state.selectionDragTargetIds();
     const id = `canvas-group:${crypto.randomUUID()}`;
     const next = createCanvasGroup(state.creativeDocument, state.size, { id, name: String(name || 'Canvas group'), members });
-    get().applyCreativeOwnershipDocument(next, 'Created canvas group');
+    set({ creativeDocument: next, creativeDirty: true });
     get().setCanvasSelection(id, [id]);
+    get().setStatus('Created canvas group', 'warn');
+    get().pushHistory([{ kind: 'creativeCanvasGroup', before, after: canvasGroupTransactionState(get()) }]);
   },
 
   ungroupSelectedCanvasTargets: () => {
     const state = get();
-    const group = findCanvasGroup(state.creativeDocument, state.size, state.selectedTargetId);
-    if (!group) return;
-    const next = removeCanvasGroup(state.creativeDocument, state.size, group.id);
-    get().applyCreativeOwnershipDocument(next, 'Ungrouped canvas members');
-    get().setCanvasSelection(group.members[0], group.members);
+    const selectedIds = state.selectedTargetIds.length ? state.selectedTargetIds : [state.selectedTargetId];
+    const groups = selectedIds.map((id) => findCanvasGroup(state.creativeDocument, state.size, id)).filter(Boolean);
+    if (!groups.length) return;
+    const before = canvasGroupTransactionState(state);
+    const members = [...new Set(selectedIds.flatMap((id) => groups.find((group) => group.id === id)?.members || [id]))];
+    const next = groups.reduce((document, group) => removeCanvasGroup(document, state.size, group.id), state.creativeDocument);
+    const primary = groups.find((group) => group.id === state.selectedTargetId)?.members[0] || state.selectedTargetId;
+    const isolation = (state.isolationPath || []).filter((id) => !groups.some((group) => group.id === id));
+    set({ creativeDocument: next, creativeDirty: true });
+    get().setCanvasSelection(primary, members, isolation);
+    get().setStatus('Ungrouped canvas members', 'warn');
+    get().pushHistory([{ kind: 'creativeCanvasGroup', before, after: canvasGroupTransactionState(get()) }]);
+  },
+
+  setActiveOfferArrangement: async (mode) => {
+    const state = get();
+    if (state.previewRenderMode !== 'font') throw new Error('Switch to Live HTML to measure this offer arrangement.');
+    const source = outlineSnapshotSource(state);
+    await new Promise(resolve => window.requestAnimationFrame(() => window.requestAnimationFrame(resolve)));
+    const stage = await waitForProductionStage(state.size, 20000, 'font', { document: state.creativeDocument, row: selectPreviewFeedRow(state) });
+    assertOutlineSnapshotSource(source, get());
+    if (get().size !== state.size) throw new Error('Preview size changed. Please change the offer arrangement again.');
+    const positions = withProductionRestPose(stage, () => captureProductionOfferArrangement(stage,
+      (state.creativeDocument.sizes[state.size].layers || []).map(layer => String(layer.id))));
+    const next = setOfferArrangementMode(state.creativeDocument, state.size, state.activeScopes(), mode, positions);
+    get().applyCreativeOwnershipDocument(next, mode === 'manual'
+      ? 'Manual offer arrangement for this preview state'
+      : 'Automatic offer arrangement for this preview state');
   },
 
   applyCreativeOwnershipDocument: (next, message = 'Updated explicit sharing') => {
@@ -497,6 +536,10 @@ export const useEditorStore = create<any>((set, get) => ({
   },
 
   applyHistoryChange: (change, value) => {
+    if (change.kind === 'creativeCanvasGroup') {
+      set({ ...value, selectedTargetIds: [...value.selectedTargetIds], isolationPath: [...value.isolationPath], creativeDirty: true, lastSelectionClickKey: '' });
+      return;
+    }
     if (change.kind === 'creativeDocument') {
       set({ creativeDocument: value, creativeDirty: true });
       return;
@@ -1578,10 +1621,20 @@ export const useEditorStore = create<any>((set, get) => ({
   captureOutlineSnapshotsForAllSizes: async () => {
     const state = get();
     const source = outlineSnapshotSource(state);
+    const stageSource = { document: state.creativeDocument, row: selectPreviewFeedRow(state) };
     const sizes = state.sizes?.length ? state.sizes : Object.keys(state.creativeDocument?.sizes || {});
     const originalSize = state.size;
     const snapshots: PresentationSnapshots = {};
     const waitForPaint = () => new Promise(resolve => window.requestAnimationFrame(() => window.requestAnimationFrame(resolve)));
+    if (state.previewRenderMode === 'outline') {
+      // SVG hosts contain paths, not the font runs needed by the text collector.
+      // Export's server captures the frozen effective row with the font renderer.
+      await waitForPaint();
+      const stage = await waitForProductionStage(state.size, 20000, 'outline', stageSource);
+      assertOutlineSnapshotSource(source, get());
+      if (stage.dataset.previewRenderMode !== 'outline') throw new Error('Outlined preview is not ready. Please export again.');
+      return {};
+    }
     get().setStatus('Snapshotting active feed presentation for outline export…');
     const unlockInteractions = lockSnapshotInteractions();
     try {
@@ -1589,7 +1642,7 @@ export const useEditorStore = create<any>((set, get) => ({
         assertOutlineSnapshotSource(source, get());
         set({ size });
         await waitForPaint();
-        const stage = await waitForProductionStage(size);
+        const stage = await waitForProductionStage(size, 20000, 'font', stageSource);
         assertOutlineSnapshotSource(source, get());
         if (get().size !== size) throw new Error('Ad size changed during outline snapshot capture. Please export again.');
         snapshots[size] = withProductionRestPose(stage, () => capturePresentationSnapshot(stage, size));
@@ -1606,7 +1659,7 @@ export const useEditorStore = create<any>((set, get) => ({
             selectedTargetIds: state.selectedTargetIds, selectedClipId: state.selectedClipId,
             isolationPath: state.isolationPath, isolatedGroupId: state.isolatedGroupId });
           await waitForPaint();
-          await waitForProductionStage(originalSize);
+          await waitForProductionStage(originalSize, 20000, 'font', stageSource);
           assertOutlineSnapshotSource(source, get());
         }
       } finally { unlockInteractions(); }
@@ -1773,8 +1826,21 @@ export const useEditorStore = create<any>((set, get) => ({
     }
   },
 
-  buildHtml: async ({ renderMode = 'font', delivery = 'studio' } = {}) => {
+  prepareExportPreview: async (renderMode = 'font') => {
+    const mode = renderMode === 'outline' ? 'outline' : 'font';
     const state = get();
+    const source = outlineSnapshotSource({ ...state, previewRenderMode: mode });
+    if (state.previewRenderMode !== mode) {
+      beginProductionStage(state.size);
+      set({ previewRenderMode: mode });
+    }
+    await waitForProductionStage(state.size, 20000, mode, { document: state.creativeDocument, row: selectPreviewFeedRow(state) });
+    assertOutlineSnapshotSource(source, get());
+    return get();
+  },
+
+  buildHtml: async ({ renderMode = 'font', delivery = 'studio' } = {}) => {
+    const state = await get().prepareExportPreview(renderMode);
     const resolvedDelivery = renderMode === 'outline' && delivery === 'static' ? 'static' : 'studio';
     get().setStatus(
       renderMode === 'outline' && resolvedDelivery === 'static'
@@ -1835,7 +1901,7 @@ export const useEditorStore = create<any>((set, get) => ({
         ? 'Building outlined client ZIP'
         : (includeValidator ? 'Building validated client preview ZIP' : 'Building client preview ZIP'),
     );
-    const state = get();
+    const state = await get().prepareExportPreview(renderMode);
     const creativeDocument = creativeDocumentForExport(state, renderMode);
     const presentationSnapshots = renderMode === 'outline'
       ? await get().captureOutlineSnapshotsForAllSizes()
@@ -1893,7 +1959,7 @@ export const useEditorStore = create<any>((set, get) => ({
             ? 'Building canonical agency ZIP'
             : 'Building agency base ZIP';
     get().setStatus(statusLabel);
-    const state = get();
+    const state = await get().prepareExportPreview(renderMode);
     const creativeDocument = creativeDocumentForExport(state, renderMode);
     const presentationSnapshots = renderMode === 'outline'
       ? await get().captureOutlineSnapshotsForAllSizes()
@@ -1980,6 +2046,7 @@ export const useEditorStore = create<any>((set, get) => ({
     input.value = JSON.stringify({
       document: creativeDocument,
       row: selectPreviewFeedRow(state),
+      renderMode: state.previewRenderMode,
     });
     form.appendChild(input);
     window.document.body.appendChild(form);
@@ -2091,6 +2158,8 @@ export const useEditorStore = create<any>((set, get) => ({
     get().syncControlsFromFeedRow();
     get().setStatus(selectedExistingRow ? 'Loaded sample row' : 'Unsaved sample values', selectedExistingRow ? '' : 'warn');
   },
+
+  setPreviewRenderMode: (previewRenderMode) => set({ previewRenderMode: previewRenderMode === 'outline' ? 'outline' : 'font' }),
 
   setCanvasZoom: (zoom) => set({ canvasZoom: zoom }),
 

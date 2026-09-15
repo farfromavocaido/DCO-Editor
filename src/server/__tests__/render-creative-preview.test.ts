@@ -25,3 +25,19 @@ test('GET view resolves a campaign ID through its registry instead of treating i
   expect(response.status).toBe(200);
   expect(await response.text()).toContain('Hiker');
 });
+
+test('outline view uses actual SVG export with the selected nondefault row', async () => {
+  const document = await readCreativeDocument() as Record<string, any>;
+  const row = { ...document.feed.sampleRows[2], Default:false, offer_count_num:3, heading1_text:'Selected outline sample' };
+  const response = await POST(new Request('http://localhost/api/creative/300x250/view', {
+    method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({document,row,renderMode:'outline'}),
+  }), {params:Promise.resolve({size:'300x250'})});
+  expect(response.status).toBe(200);
+  const html = await response.text();
+  expect(html.includes('outlined-text')).toBe(true);
+  expect(html).toContain('<path');
+  expect(html).not.toContain('@font-face');
+  expect(html).not.toContain('Museo700-Regular.otf');
+  expect(html).toContain('stage page-content offers-3');
+  expect(html.includes('window.__SSE_DCO_PREVIEW__ =')).toBe(false);
+}, 30000);

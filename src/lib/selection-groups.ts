@@ -195,15 +195,16 @@ export const resolveSelectionMeta = (
     bounds: getGroupCanvasBounds(document, size, canvasGroup.members, activeScopes), members: canvasGroup.members,
   };
   if (selectedTargetIds.length > 1) {
-    const bounds = getGroupCanvasBounds(document, size, selectedTargetIds, activeScopes);
+    const members = dragTargetIdsForSelection(selectedTargetId, selectedTargetIds, offerCount, document, size, activeScopes);
+    const bounds = getGroupCanvasBounds(document, size, members, activeScopes);
     return {
       id: selectedTargetIds.join(','),
-      label: `${selectedTargetIds.length} items selected`,
+      label: `${members.length} items selected`,
       kind: 'multi',
       coordinateScope: 'canvas',
       description: 'Shift- or Cmd-click to add or remove items. Drag to move together.',
       bounds,
-      members: selectedTargetIds,
+      members,
     };
   }
 

@@ -87,11 +87,13 @@ export const materializeCreativeOwnership = (document: any): any => {
         ownershipSource: { kind: 'sharedDefinition', definitionId: definition.id, name: definition.name, member },
       });
     }
+    const detachedCount = (creative.localOverrides || []).filter((local) => local.detached).length;
+    let detachedPriority = detachedCount;
     for (const [index, local] of (creative.localOverrides || []).entries()) {
       creative.variantRules.push({
         id: `ownership:local:${size}:${index}`,
         ...targetIdentity(next, size, local.targetId), scope: local.scope || '',
-        props: local.values || {}, fit: local.fit || {}, ownershipGenerated: true, ownershipPriority: priority + 1,
+        props: local.values || {}, fit: local.fit || {}, ownershipGenerated: true, ownershipPriority: priority + (local.detached ? detachedPriority-- : detachedCount + 1),
         ownershipSource: { kind: 'localOverride', targetId: local.targetId, scope: local.scope || '', index },
       });
     }
@@ -107,7 +109,7 @@ const localFor = (next, size, targetId, scopes) => {
   const scope = [...new Set(scopes)].sort().join('.');
   const creative = next.sizes[size];
   creative.localOverrides ||= [];
-  let local = creative.localOverrides.find((item) => item.targetId === targetId && (item.scope || '') === scope);
+  let local = creative.localOverrides.find((item) => !item.detached && item.targetId === targetId && (item.scope || '') === scope);
   if (!local) { local = { targetId, scope, values: {}, fit: {} }; creative.localOverrides.push(local); }
   return local;
 };
@@ -140,7 +142,12 @@ export const detachCreativeOwnership = (document: any, definitionId: string, mem
   const definition = next.sharedDefinitions?.find((item) => item.id === definitionId);
   if (!definition || !definition.members.some((item) => memberKey(item) === memberKey(member))) throw new Error('Unknown shared membership');
   const ownedMember = definition.members.find((item) => memberKey(item) === memberKey(member));
-  const local = localFor(next, member.size, member.targetId, scopeParts(member.scope));
+  // A detached bundle replaces its shared source, below every pre-existing local
+  // exception. Merging into an ordinary scoped local would change the winner for
+  // fields currently supplied by a broader local override.
+  const local = { targetId: member.targetId, scope: member.scope || '', detached: true, values: {}, fit: {} };
+  next.sizes[member.size].localOverrides ||= [];
+  next.sizes[member.size].localOverrides.push(local);
   for (const domain of ['values', 'fit']) {
     const bundle = definitionFields(definition, member.size, domain, ownedMember);
     const copied = Object.fromEntries(Object.entries(bundle).filter(([field]) => !fields || fields[domain]?.includes(field)));

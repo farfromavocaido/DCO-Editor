@@ -460,8 +460,7 @@ export const findCreativeTarget = (document: any, size: string, targetId: string
   const parsed = parseCreativeTargetId(targetId);
   const layer = findCreativeLayer(document, size, parsed.layerId);
   const identity = { ...identityForTarget(layer, parsed), targetId };
-  const rules = activeOwnershipRules(sizeCreative.variantRules || [], identity, activeScopes)
-    .filter((rule) => !propsOnlyHideVisibility(rule.props));
+  const rules = activeOwnershipRules(sizeCreative.variantRules || [], identity, activeScopes);
   const baseline = findCreativeTargetLegacy({ ...document, sizes: { ...document.sizes, [size]: { ...sizeCreative, variantRules: [] } } }, size, targetId, []);
   const props = resolveOwnedFields(baseline.values, baseline.writeSource, rules.map((rule) => ({ ...rule, props: variantRuleProps(sizeCreative, rule) })));
   const fit = resolveOwnedFields(baseline.fit, { kind: parsed.isNested ? 'classRule' : 'layerFit', layerId: layer.id, cssClass: target.cssClass }, rules, 'fit');

@@ -20,3 +20,22 @@ it('rejects invalid members and overlapping group membership', () => {
  const next = createCanvasGroup(doc,'300x250',{id:'canvas-group:one',name:'One',members:['frame','copy']});
  expect(() => createCanvasGroup(next,'300x250',{id:'canvas-group:two',name:'Two',members:['frame','copy']})).toThrow(/already/i);
 });
+
+it('rejects ancestor and descendant membership across different groups in either order', () => {
+ const doc = fixture();
+ doc.sizes['300x250'].layers.push({id:'offer-slot-1',kind:'group',base:{left:10,top:10,width:50,height:50},clips:[]});
+ const parent = {id:'canvas-group:parent',name:'Parent',members:['offer-slot-1','frame']};
+ const child = {id:'canvas-group:child',name:'Child',members:['offer-slot-1::offer-value','copy']};
+ expect(()=>createCanvasGroup(createCanvasGroup(doc,'300x250',parent),'300x250',child)).toThrow(/overlap|parent|ancestor/i);
+ expect(()=>createCanvasGroup(createCanvasGroup(doc,'300x250',child),'300x250',parent)).toThrow(/overlap|parent|ancestor/i);
+});
+it('mixed group selection metadata expands the same unique members used for dragging', () => {
+ const doc = fixture();
+ doc.sizes['300x250'].layers.push({id:'extra',kind:'shape',base:{left:100,top:10,width:20,height:20},clips:[]});
+ const next = createCanvasGroup(doc,'300x250',{id:'canvas-group:a',name:'A',members:['frame','copy']});
+ const selected = ['canvas-group:a','extra','copy'];
+ const meta = resolveSelectionMeta(next,'300x250','canvas-group:a',selected,0);
+ expect(meta.members).toEqual(['frame','copy','extra']);
+ expect(meta.members).toEqual(dragTargetIdsForSelection('canvas-group:a',selected,0,next,'300x250'));
+ expect(meta.bounds).toMatchObject({left:5,top:10,width:115,height:50});
+});

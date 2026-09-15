@@ -13,6 +13,8 @@ export const validateCanvasGroups = (document) => {
       for (const member of group.members) {
         if (!findCreativeTarget(document,size,member,[])) throw new Error(`Unknown canvas group member: ${member}`);
         if (members.has(member)) throw new Error(`Target ${member} is already in a canvas group`);
+        const overlapping = [...members].find((other) => member.startsWith(`${other}::`) || other.startsWith(`${member}::`));
+        if (overlapping) throw new Error(`Canvas group members overlap: ${overlapping} and ${member}`);
         if (group.members.some((other) => other !== member && member.startsWith(`${other}::`))) throw new Error('A group cannot contain both a parent and its nested child');
         members.add(member);
       }

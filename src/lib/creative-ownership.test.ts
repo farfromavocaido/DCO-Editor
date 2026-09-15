@@ -148,3 +148,48 @@ it('roundel visibility and roundel copy mode are independent scope dimensions', 
  doc.sharedDefinitions = [{id:'a',name:'Visible',fit:{maxLines:2},members:[{size:'300x250',targetId:'terms',scope:'roundel-frame-on'}]},{id:'b',name:'Split',fit:{maxLines:3},members:[{size:'300x250',targetId:'terms',scope:'roundel-split'}]}];
  expect(()=>materializeCreativeOwnership(doc)).toThrow(/Visible and Split/);
 });
+
+it('detach preserves winning locals across overlapping scopes and domains', () => {
+ const doc = fixture();
+ const member = {size:'300x250',targetId:'terms',scope:'offers-0'};
+ doc.sharedDefinitions = [{id:'shared',name:'Shared',values:{color:'red'},fit:{maxLines:3},members:[member]}];
+ doc.sizes['300x250'].localOverrides = [
+  {targetId:'terms',scope:'',values:{color:'blue'},fit:{maxLines:6}},
+  {targetId:'terms',scope:'offers-0',values:{left:15}},
+  {targetId:'terms',scope:'offers-0.cta-rect',values:{color:'green'}},
+ ];
+ const before = ['offers-0','offers-0.cta-rect','offers-1'].map((scope)=>findCreativeTarget(doc,'300x250','terms',scope.split('.')));
+ const detached = detachCreativeOwnership(doc,'shared',member);
+ const after = ['offers-0','offers-0.cta-rect','offers-1'].map((scope)=>findCreativeTarget(detached,'300x250','terms',scope.split('.')));
+ expect(after.map((target)=>target.values)).toEqual(before.map((target)=>target.values));
+ expect(after.map((target)=>target.fit)).toEqual(before.map((target)=>target.fit));
+ const local = setCreativeOwnershipField(detached,'300x250','terms',['offers-0'],'values','color','yellow','local');
+ expect(findCreativeTarget(local,'300x250','terms',['offers-0']).values.color).toBe('yellow');
+});
+it('hidden shared values retain provenance and can be explicitly unhidden locally', () => {
+ const doc = fixture();
+ doc.sizes['300x250'].layers[0].base.visibility = 'visible';
+ doc.sharedDefinitions = [{id:'hidden',name:'Hidden',values:{visibility:'hidden'},fit:{maxLines:7},members:[{size:'300x250',targetId:'terms',scope:'offers-0'}]}];
+ const hidden = findCreativeTarget(doc,'300x250','terms',['offers-0']);
+ expect(hidden.values.visibility).toBe('hidden');
+ expect(hidden.valueProvenance.visibility.kind).toBe('sharedDefinition');
+ expect(hidden.fit.maxLines).toBe(7);
+ const visible = updateCreativeTargetValue(doc,'300x250','terms',['offers-0'],'visibility','visible');
+ expect(findCreativeTarget(visible,'300x250','terms',['offers-0']).values.visibility).toBe('visible');
+ expect(visible.sharedDefinitions[0].values.visibility).toBe('hidden');
+ const rules = materializeCreativeOwnership(visible).sizes['300x250'].variantRules;
+ expect(variantRuleProps(visible.sizes['300x250'],rules.at(-1))).toEqual({visibility:'visible'});
+ expect(selectorForVariantRule(rules.at(-1))).toContain('#terms');
+});
+
+it('a later detach preserves an earlier detached fallback across different scopes', () => {
+ const doc = fixture();
+ const globalMember = {size:'300x250',targetId:'terms',scope:''};
+ doc.sharedDefinitions = [{id:'first',name:'First',values:{color:'blue'},members:[globalMember]}];
+ const first = detachCreativeOwnership(doc,'first',globalMember);
+ const scopedMember = {...globalMember,scope:'offers-0'};
+ const linked = createCreativeOwnershipDefinition(first,{id:'second',name:'Second',values:{color:'red'},members:[scopedMember]});
+ expect(findCreativeTarget(linked,'300x250','terms',['offers-0']).values.color).toBe('blue');
+ const second = detachCreativeOwnership(linked,'second',scopedMember);
+ expect(findCreativeTarget(second,'300x250','terms',['offers-0']).values.color).toBe('blue');
+});

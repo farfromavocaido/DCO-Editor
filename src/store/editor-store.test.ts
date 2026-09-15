@@ -227,3 +227,12 @@ test('virtual group move edits local geometry, keeps clips, and undoes atomicall
  useEditorStore.getState().undo();
  assert.deepEqual(useEditorStore.getState().creativeDocument,grouped);
 });
+
+test('virtual group alignment undo removes newly authored local coordinates', () => {
+ const doc = {version:1,sizes:{'300x250':{canvas:{width:300,height:250},canvasGroups:[{id:'canvas-group:test',name:'Test',members:['a','b']}],layers:[{id:'a',kind:'shape',base:{left:10,top:10,width:20,height:20},clips:[]},{id:'b',kind:'shape',base:{left:40,top:10,width:20,height:20},clips:[]}]}}};
+ useEditorStore.setState({creativeDocument:doc,size:'300x250',offerCount:0,selectedTargetId:'canvas-group:test',selectedLayerId:'a',selectedTargetIds:['canvas-group:test'],history:[],historyIndex:-1});
+ useEditorStore.getState().alignSelectedTarget('left');
+ assert.ok(useEditorStore.getState().creativeDocument.sizes['300x250'].localOverrides?.length);
+ useEditorStore.getState().undo();
+ assert.deepEqual(useEditorStore.getState().creativeDocument,doc);
+});

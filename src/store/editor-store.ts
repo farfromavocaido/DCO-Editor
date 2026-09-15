@@ -1180,7 +1180,7 @@ export const useEditorStore = create<any>((set, get) => ({
       }
 
       if (changes.length) {
-        get().pushHistory(changes);
+        get().pushHistory([{kind:'creativeDocument',before:state.creativeDocument,after:get().creativeDocument}]);
       }
       get().setStatus(`Aligned ${selected?.label || 'selection'}`, 'info');
       return guides;
@@ -1227,7 +1227,7 @@ export const useEditorStore = create<any>((set, get) => ({
       });
     }
     if (changes.length) {
-      get().pushHistory(changes);
+      get().pushHistory([{kind:'creativeDocument',before:state.creativeDocument,after:get().creativeDocument}]);
       get().setStatus(`Aligned ${target.label || targetId}`, 'info');
     }
     return alignmentGuidesForMode(mode, canvasReference);
@@ -1308,7 +1308,7 @@ export const useEditorStore = create<any>((set, get) => ({
     }
 
     if (changes.length) {
-      get().pushHistory(changes);
+      get().pushHistory([{kind:'creativeDocument',before:state.creativeDocument,after:get().creativeDocument}]);
       get().setStatus(`Distributed ${selected?.label || 'selection'} ${axis === 'h' ? 'horizontally' : 'vertically'}`, 'info');
     }
 

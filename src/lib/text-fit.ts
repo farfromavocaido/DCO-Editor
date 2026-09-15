@@ -120,6 +120,18 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
     return overflowsWidth(element) || tooTall(element, rule, cs, fontSize);
   }
 
+  function scopeTokensOnRoot(scope, className) {
+    var parts = String(scope || '').split('.');
+    var scopeActive = false;
+    var partIndex;
+    for (partIndex = 0; partIndex < parts.length; partIndex += 1) {
+      if (!parts[partIndex]) continue;
+      if (className.indexOf(' ' + parts[partIndex] + ' ') === -1) return false;
+      scopeActive = true;
+    }
+    return scopeActive;
+  }
+
   function resolveRule(rule, root) {
     if (!rule.scopes) return rule;
     var resolved = {};
@@ -130,7 +142,7 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
     var className = ' ' + String((root && root.className) || '') + ' ';
     var matchedScope = false;
     for (var scope in rule.scopes) {
-      if (className.indexOf(' ' + scope + ' ') === -1) continue;
+      if (!scopeTokensOnRoot(scope, className)) continue;
       matchedScope = true;
       var overrides = rule.scopes[scope];
       for (key in overrides) {

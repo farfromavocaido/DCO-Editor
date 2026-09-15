@@ -51,6 +51,12 @@ export const wrapOfferValueSymbolsHtml = (text: string) => {
 
 /** Shared CSS so the run stays one flex child / one inline glyph stream. */
 export const offerValueSymbolCss = `
+    .offer-value .${OFFER_VALUE_SYMBOL_CLASS} {
+      font-size: 0.6em;
+      vertical-align: baseline;
+      position: relative;
+    }
+
     .offer-value .${OFFER_VALUE_RUN_CLASS} {
       white-space: nowrap;
     }

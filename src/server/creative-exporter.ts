@@ -47,6 +47,7 @@ import {
   OFFER_PLUS_LAYOUT_ATTR,
   resolveOfferPlusLayout,
 } from '@/lib/offer-plus-layout';
+import { adPlumbingCss } from '@/lib/ad-plumbing-css';
 import {
   alignOfferValueSymbolsRuntime,
   offerValueSymbolCss,
@@ -384,12 +385,12 @@ const fontUrl = (filename: string, options: RenderOptions = {}) => (
 
 const localFontFaceCss = (options: RenderOptions = {}) => {
   if (!options.fontBasePath && !options.fontUrlMap) return '';
-  // One face spans 100–900 so weight:400 T&Cs and weight:900 heavy copy both
-  // resolve to Museo700-Regular.otf instead of browser-synthesised impostors.
+  // Museo ships as a single 700 face. Ads must request 700 so this descriptor
+  // matches the file (no 400/900 range that implies other weights exist).
   return CLIENT_FONT_FILES.flatMap((font) => font.families.map((family) => `    @font-face {
       font-family: "${family}";
       src: ${PACKAGED_FONT_LOCAL_BLOCK}, url("${fontUrl(font.filename, options)}") format("opentype");
-      font-weight: 100 900;
+      font-weight: ${font.weight};
       font-style: normal;
       font-display: block;
     }`)).join('\n');
@@ -810,7 +811,7 @@ const renderOutlinedOfferSlot = (
   const subStyle = positionStyleAttr(snapshot, ...subIds);
   const valueSvg = placeSvgInContentBox(baked.valueSvg, snapshot, ...valueIds);
   const subSvg = placeSvgInContentBox(baked.subSvg, snapshot, ...subIds);
-  // Keep data-gwd-group / gwd-grp-* — manualCss and structured rules key off them.
+  // Keep data-gwd-group / gwd-grp-* — plumbing CSS and structured rules key off them.
   return `          <div class="stage-element ${cssClass}" data-gwd-group="OfferSlot" id="offer${index}"${slotStyle}>
             <div class="gwd-grp-offer offer-value outlined-text"${valueStyle}>${valueSvg}</div>
             <div class="gwd-grp-offer offer-subline outlined-text"${subStyle}>${subSvg}</div>
@@ -1536,6 +1537,8 @@ ${options.renderMode === 'outline' ? outlinedTextCss : ''}
       visibility: inherit;
       box-sizing: border-box;
     }
+${adPlumbingCss}
+
 ${sizeCreative.manualCss || ''}
 
 ${options.renderMode === 'outline' ? '' : offerValueSymbolCss}

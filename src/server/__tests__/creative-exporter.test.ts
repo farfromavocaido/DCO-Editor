@@ -837,7 +837,10 @@ test('local QA exports embed the packaged Museo so they measure what Studio serv
 
   assert.match(html, /@font-face/);
   assert.match(html, /font-family: "Museo";[\s\S]*?url\("\.\.\/campaign\/assets\/fonts\/Museo700-Regular\.otf"\) format\("opentype"\)/);
+  assert.match(html, /font-family: "Museo";[\s\S]*?font-weight: 700/);
   assert.match(html, /local\("☺"\)/, 'locally installed fonts must never mask the packaged file');
+  assert.doesNotMatch(html, /font-weight: 100 900/);
+  assert.doesNotMatch(html, /\.sse-text-heavy/);
   assert.doesNotMatch(html, /MuseoSans_700\.otf/);
 });
 

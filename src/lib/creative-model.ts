@@ -50,6 +50,12 @@ export const BG_IMAGE_STYLE_FIELDS = new Set([
 export const OFFERS_0_CTA_RECT_SCOPE = 'offers-0.cta-rect';
 export const OFFERS_0_CTA_ROUNDEL_SCOPE = 'offers-0.cta-roundel';
 
+/** Compound scopes: 0-offer roundel copy/value, independent of offers 1–3. */
+export const OFFERS_0_ROUNDEL_SPLIT_SCOPE = 'offers-0.roundel-split';
+export const OFFERS_0_ROUNDEL_COPY_ONLY_SCOPE = 'offers-0.roundel-copy-only';
+
+const ROUNDEL_LAYER_IDS = new Set(['roundel-frame', 'roundel-copy', 'roundel-value']);
+
 export const HEADLINE_LAYOUT_FIELDS = [
   'left',
   'top',
@@ -214,13 +220,37 @@ const isCtaIdentity = (identity: { layerId?: string; cssClass?: string }) => (
   identity.layerId === 'cta' || identity.cssClass === 'cta'
 );
 
+const isRoundelIdentity = (identity: { layerId?: string; cssClass?: string }) => (
+  ROUNDEL_LAYER_IDS.has(String(identity.layerId || ''))
+  || ROUNDEL_LAYER_IDS.has(String(identity.cssClass || ''))
+);
+
+const isOffers0OwnedScope = (scope: unknown) => {
+  const text = String(scope || '');
+  return text === 'offers-0' || text.startsWith('offers-0.');
+};
+
+const matchedVariantRulesUnfiltered = (
+  sizeCreative: Record<string, unknown>,
+  identity: { layerId?: string; cssClass?: string },
+  activeScopes: string[] = [],
+) => {
+  const scopes = (activeScopes || []).map(String);
+  return (sizeCreative?.variantRules || []).filter((rule: Record<string, unknown>) => (
+    variantScopeIsActive(rule.scope, scopes)
+    && !propsOnlyHideVisibility(rule.props)
+    && ruleMatchesIdentity(rule, identity)
+  ));
+};
+
 /**
  * Active variant rules in document order (same as structuredRuleCss emission).
  * Later rules win for both merged values and writeSource — matching equal-specificity
  * CSS cascade. Scope-list order must NOT drive this.
  *
- * For the CTA under offers-0, only compound `offers-0.cta-*` rules apply so brand
- * Rect/Round stay independent of each other and of offers 1–3 `cta-rect` / base.
+ * Offers-0 CTA and Offer Roundel only use `offers-0` / `offers-0.*` rules so
+ * brand rearranges stay independent of offers 1–3. Those two stacks are
+ * separate; each follows the same ownership rule.
  */
 const activeVariantRulesForIdentity = (
   sizeCreative: Record<string, unknown>,
@@ -228,17 +258,24 @@ const activeVariantRulesForIdentity = (
   activeScopes: string[] = [],
 ) => {
   const scopes = (activeScopes || []).map(String);
-  const offers0Cta = scopes.includes('offers-0') && isCtaIdentity(identity);
-  const matched = (sizeCreative?.variantRules || []).filter((rule: Record<string, unknown>) => (
-    variantScopeIsActive(rule.scope, scopes)
-    && !propsOnlyHideVisibility(rule.props)
-    && ruleMatchesIdentity(rule, identity)
-  ));
-  if (!offers0Cta) return matched;
-  const compound = matched.filter((rule: Record<string, unknown>) => (
-    String(rule.scope || '').startsWith('offers-0.')
-  ));
-  return compound.length ? compound : matched;
+  const matched = matchedVariantRulesUnfiltered(sizeCreative, identity, scopes);
+  if (!scopes.includes('offers-0')) return matched;
+
+  if (isCtaIdentity(identity)) {
+    const compound = matched.filter((rule: Record<string, unknown>) => (
+      String(rule.scope || '').startsWith('offers-0.')
+    ));
+    return compound.length ? compound : matched;
+  }
+
+  if (isRoundelIdentity(identity)) {
+    const owned = matched.filter((rule: Record<string, unknown>) => (
+      isOffers0OwnedScope(rule.scope)
+    ));
+    return owned.length ? owned : matched;
+  }
+
+  return matched;
 };
 
 const findActiveVariantRule = (
@@ -586,6 +623,32 @@ export const updateCreativeTargetFit = (
     const classRule = ensureClassRule(sizeCreative, child.cssClass);
     classRule.fit = {
       ...(classRule.fit || {}),
+      [field]: value,
+    };
+    return next;
+  }
+
+  const cssClass = layer.base?.cssClass || layer.id;
+  const scopes = (activeScopes || []).map(String);
+  if (
+    scopes.includes('offers-0')
+    && isRoundelIdentity({ layerId: String(layer.id || ''), cssClass })
+  ) {
+    const layerId = String(layer.id || cssClass);
+    const rule = ensureOffers0RoundelRule(
+      sizeCreative,
+      offers0RoundelWriteScope(layerId, scopes),
+      layerId,
+    );
+    if (!rule.fit) {
+      rule.fit = lastUnfilteredVariantFit(
+        sizeCreative,
+        { layerId, cssClass: layerId },
+        scopes,
+      ) || {};
+    }
+    rule.fit = {
+      ...(rule.fit || {}),
       [field]: value,
     };
     return next;
@@ -953,6 +1016,155 @@ export const normalizeOffers0CtaRules = (document: Record<string, unknown> | nul
   return document;
 };
 
+const offers0RoundelWhen = (scope: string) => {
+  if (scope === OFFERS_0_ROUNDEL_SPLIT_SCOPE) {
+    return { offer_count_num: 0, roundel_value_text: 'non-empty' };
+  }
+  if (scope === OFFERS_0_ROUNDEL_COPY_ONLY_SCOPE) {
+    return { offer_count_num: 0, roundel_value_text: '' };
+  }
+  return { offer_count_num: 0 };
+};
+
+const offers0RoundelWriteScope = (layerId: string, activeScopes: string[] = []) => {
+  if (layerId === 'roundel-frame') return 'offers-0';
+  const scopes = (activeScopes || []).map(String);
+  if (scopes.includes('roundel-split')) return OFFERS_0_ROUNDEL_SPLIT_SCOPE;
+  if (scopes.includes('roundel-copy-only')) return OFFERS_0_ROUNDEL_COPY_ONLY_SCOPE;
+  return 'offers-0';
+};
+
+const ensureOffers0RoundelRule = (
+  sizeCreative: Record<string, unknown>,
+  scope: string,
+  layerId: string,
+) => {
+  const id = `${scope}|${layerId}`;
+  sizeCreative.variantRules = Array.isArray(sizeCreative.variantRules)
+    ? sizeCreative.variantRules
+    : [];
+  let rule = sizeCreative.variantRules.find((item: Record<string, unknown>) => (
+    String(item?.id || '') === id
+    || (String(item?.scope || '') === scope && String(item?.layerId || '') === layerId)
+  ));
+  if (!rule) {
+    rule = {
+      id,
+      scope,
+      layerId,
+      cssClass: layerId,
+      when: offers0RoundelWhen(scope),
+      props: {},
+      editable: true,
+    };
+    sizeCreative.variantRules.push(rule);
+  }
+  rule.id = id;
+  rule.scope = scope;
+  rule.layerId = layerId;
+  rule.cssClass = layerId;
+  rule.editable = true;
+  rule.props = rule.props || {};
+  if (!rule.when) rule.when = offers0RoundelWhen(scope);
+  return rule;
+};
+
+const mergedUnfilteredVariantProps = (
+  sizeCreative: Record<string, unknown>,
+  identity: { layerId?: string; cssClass?: string },
+  activeScopes: string[] = [],
+) => (
+  matchedVariantRulesUnfiltered(sizeCreative, identity, activeScopes)
+    .reduce((props: Record<string, unknown>, rule: Record<string, unknown>) => (
+      { ...props, ...(rule.props || {}) }
+    ), {})
+);
+
+const lastUnfilteredVariantFit = (
+  sizeCreative: Record<string, unknown>,
+  identity: { layerId?: string; cssClass?: string },
+  activeScopes: string[] = [],
+) => {
+  const rules = matchedVariantRulesUnfiltered(sizeCreative, identity, activeScopes);
+  for (let index = rules.length - 1; index >= 0; index -= 1) {
+    const fit = rules[index]?.fit;
+    if (fit && typeof fit === 'object' && Object.keys(fit).length) return { ...fit };
+  }
+  return null;
+};
+
+const seedOffers0RoundelRuleIfEmpty = (
+  rule: Record<string, unknown>,
+  seed: Record<string, unknown>,
+  seedFit: Record<string, unknown> | null,
+) => {
+  const props = rule.props && typeof rule.props === 'object' ? rule.props : {};
+  if (!Object.keys(props).length && seed && Object.keys(seed).length) {
+    rule.props = { ...seed };
+  }
+  if (seedFit && !rule.fit) {
+    rule.fit = { ...seedFit };
+  }
+};
+
+const writeOffers0RoundelField = (
+  sizeCreative: Record<string, unknown>,
+  layerId: string,
+  activeScopes: string[],
+  field: string,
+  value: unknown,
+) => {
+  const scope = offers0RoundelWriteScope(layerId, activeScopes);
+  const identity = { layerId, cssClass: layerId };
+  const rule = ensureOffers0RoundelRule(sizeCreative, scope, layerId);
+  if (!Object.keys(rule.props || {}).length) {
+    rule.props = { ...mergedUnfilteredVariantProps(sizeCreative, identity, activeScopes) };
+  }
+  rule.props[field] = value;
+};
+
+/**
+ * Seed independent 0-offer roundel rules from the current merged boxes
+ * (shared split / copy-only + existing offers-0 colour) so isolation does
+ * not move anything. Existing owned props win; offers 1–3 rules stay put.
+ */
+export const normalizeOffers0RoundelRules = (document: Record<string, unknown> | null) => {
+  if (!document?.sizes || typeof document.sizes !== 'object') return document;
+  for (const sizeCreative of Object.values(document.sizes) as Array<Record<string, unknown>>) {
+    if (!sizeCreative || typeof sizeCreative !== 'object') continue;
+    const layers = Array.isArray(sizeCreative.layers) ? sizeCreative.layers : [];
+    const hasLayer = (layerId: string) => layers.some((layer: Record<string, unknown>) => (
+      layer?.id === layerId
+    ));
+    if (!hasLayer('roundel-frame') && !hasLayer('roundel-copy') && !hasLayer('roundel-value')) {
+      continue;
+    }
+
+    const splitScopes = ['offers-0', 'roundel-split'];
+    const copyOnlyScopes = ['offers-0', 'roundel-copy-only'];
+
+    const seedLayer = (
+      layerId: string,
+      scope: string,
+      activeScopes: string[],
+    ) => {
+      if (!hasLayer(layerId)) return;
+      const identity = { layerId, cssClass: layerId };
+      const seed = mergedUnfilteredVariantProps(sizeCreative, identity, activeScopes);
+      const seedFit = lastUnfilteredVariantFit(sizeCreative, identity, activeScopes);
+      if (!Object.keys(seed).length && !seedFit) return;
+      const rule = ensureOffers0RoundelRule(sizeCreative, scope, layerId);
+      seedOffers0RoundelRuleIfEmpty(rule, seed, seedFit);
+    };
+
+    seedLayer('roundel-copy', OFFERS_0_ROUNDEL_SPLIT_SCOPE, splitScopes);
+    seedLayer('roundel-value', OFFERS_0_ROUNDEL_SPLIT_SCOPE, splitScopes);
+    seedLayer('roundel-copy', OFFERS_0_ROUNDEL_COPY_ONLY_SCOPE, copyOnlyScopes);
+    seedLayer('roundel-value', OFFERS_0_ROUNDEL_COPY_ONLY_SCOPE, copyOnlyScopes);
+  }
+  return document;
+};
+
 /** Ensure each size has a selectable bg-image layer + classRule frame. */
 export const ensureBackgroundLayers = (document: Record<string, unknown> | null) => {
   if (!document?.sizes || typeof document.sizes !== 'object') return document;
@@ -1160,9 +1372,14 @@ export const updateCreativeTargetValue = (
     || layer.base?.cssClass
     || layer.id;
   const isCtaLayer = String(layer.id || '') === 'cta' || cssClass === 'cta';
+  const isRoundelLayer = isRoundelIdentity({ layerId: String(layer.id || ''), cssClass });
   const scopes = (activeScopes || []).map(String);
   if (isCtaLayer && scopes.includes('offers-0') && !headlineIdentity && !backgroundIdentity) {
     writeOffers0CtaField(sizeCreative, scopes, field, value);
+    return next;
+  }
+  if (isRoundelLayer && scopes.includes('offers-0') && !headlineIdentity && !backgroundIdentity) {
+    writeOffers0RoundelField(sizeCreative, String(layer.id || cssClass), scopes, field, value);
     return next;
   }
 

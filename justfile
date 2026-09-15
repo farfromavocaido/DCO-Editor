@@ -3,7 +3,8 @@
 default:
     @just --list
 
-# Start the Next.js creative editor
+# Start the Next.js creative editor (webpack — Turbopack server HMR can
+# leak async hooks until "Map maximum size exceeded" and kill the process)
 editor port="5174":
     npm run dev -- -p {{port}}
 

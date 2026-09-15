@@ -352,7 +352,7 @@
         "offer1_sub_text": "OFF ELECTRICITY*",
         "offer2_value_text": "30%",
         "offer2_sub_text": "OFF GAS*",
-        "offer3_value_text": "\u20ac125",
+        "offer3_value_text": "€125",
         "offer3_sub_text": "OFF YOUR FIRST BILL*",
         "tc_type_enum": "tcs_units",
         "tc_terms_text": "*T&Cs apply",
@@ -360,7 +360,7 @@
         "cta_type_enum": "rectangle",
         "cta_text": "Switch today",
         "include_roundel_frame_bool": true,
-        "roundel_text_text": "Switch and save",
+        "roundel_text_text": "Save up to",
         "roundel_value_text": "999",
         "background_image_url_160x600": {
           "Url": ""
@@ -449,7 +449,7 @@
         "cta_text": "Switch today",
         "include_roundel_frame_bool": true,
         "roundel_text_text": "Saving you up to",
-        "roundel_value_text": "",
+        "roundel_value_text": "99",
         "background_image_url_160x600": {
           "Url": ""
         },
@@ -492,8 +492,8 @@
         "cta_type_enum": "rectangle",
         "cta_text": "Find out more",
         "include_roundel_frame_bool": true,
-        "roundel_text_text": "Book your consultation today",
-        "roundel_value_text": "",
+        "roundel_text_text": "Book now",
+        "roundel_value_text": "999",
         "background_image_url_160x600": {
           "Url": ""
         },
@@ -712,33 +712,16 @@
             },
             {
               "id": "greenwave-fade-offers-0",
-              "label": "Greenwave fade (offers-0 Act 4)",
+              "label": "Greenwave hold (offers-0, 320x50)",
               "preset": "custom",
-              "start": "green_in",
+              "start": "start",
               "end": "end",
               "scopes": [
                 "offers-0"
               ],
               "keyframes": [
                 {
-                  "at": "green_in",
-                  "translate": [
-                    -50,
-                    0
-                  ],
-                  "opacity": 0,
-                  "easing": "ease-out"
-                },
-                {
-                  "at": "act4_in",
-                  "translate": [
-                    -50,
-                    0
-                  ],
-                  "opacity": 1
-                },
-                {
-                  "at": "end-2",
+                  "at": "start",
                   "translate": [
                     -50,
                     0
@@ -751,7 +734,7 @@
                     -50,
                     0
                   ],
-                  "opacity": 0
+                  "opacity": 1
                 }
               ]
             }
@@ -871,7 +854,7 @@
           "group": "Roundel frame",
           "zIndex": 6,
           "base": {
-            "left": 138,
+            "left": 167,
             "top": -17,
             "width": 90,
             "height": 90,
@@ -1351,7 +1334,12 @@
             "top": 42,
             "width": 160,
             "height": 8,
-            "fontSize": 6
+            "fontSize": 6,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_terms_text"
@@ -1431,7 +1419,12 @@
             "top": 42,
             "width": 132,
             "height": 8,
-            "fontSize": 6
+            "fontSize": 6,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_units_text"
@@ -1513,7 +1506,12 @@
             "display": "flex",
             "alignItems": "flex-end",
             "justifyContent": "flex-start",
-            "cssClass": "terms-solo"
+            "cssClass": "terms-solo",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_terms_text"
@@ -2040,7 +2038,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -2053,7 +2051,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -2066,7 +2064,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "backgroundColor": "rgb(0, 229, 165)",
+            "backgroundColor": "rgb(0, 41, 117)",
             "left": 175,
             "top": -12,
             "width": 75,
@@ -2163,10 +2161,10 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 153,
-            "top": 8,
-            "width": 80,
-            "height": 10,
+            "left": 181,
+            "top": 7,
+            "width": 65,
+            "height": 11,
             "fontSize": 12,
             "lineHeight": 1.05,
             "whiteSpace": "nowrap",
@@ -2184,8 +2182,8 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 155,
-            "top": 17,
+            "left": 175,
+            "top": 19,
             "width": 76,
             "height": 30,
             "fontSize": 28,
@@ -2349,7 +2347,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "visibility": "visible"
+            "visibility": "hidden"
           },
           "editable": true
         },
@@ -2367,6 +2365,19 @@
           "editable": true
         },
         {
+          "id": "offers-0|bg-image|visibility",
+          "scope": "offers-0",
+          "layerId": "bg-image",
+          "cssClass": "bg-image",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
           "id": "offers-0|logo-act1|visibility",
           "scope": "offers-0",
           "layerId": "logo-act1",
@@ -2375,7 +2386,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "visibility": "hidden"
+            "visibility": "visible"
           },
           "editable": true
         },
@@ -2387,7 +2398,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true,
           "excludeLayerIds": [
@@ -2400,7 +2411,7 @@
           "scope": "white-headlines",
           "layerId": "headline-act3",
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true,
           "when": {
@@ -2456,7 +2467,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -2468,7 +2479,7 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(0, 41, 117)"
           },
           "editable": true
         },
@@ -2495,7 +2506,7 @@
           "scope": "offers-0",
           "layerId": "headline-act4",
           "props": {
-            "color": "rgb(255, 255, 255)",
+            "color": "rgb(0, 41, 117)",
             "left": 8,
             "top": 11,
             "display": "flex",
@@ -2520,6 +2531,19 @@
           "editable": true
         },
         {
+          "id": "offers-0|bluewave|visibility",
+          "scope": "offers-0",
+          "layerId": "bluewave",
+          "cssClass": "bluewave",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
           "id": "offers-0|logo-act3",
           "scope": "offers-0",
           "layerId": "logo-act3",
@@ -2536,6 +2560,19 @@
           "editable": true
         },
         {
+          "id": "offers-0|logo-act3|visibility",
+          "scope": "offers-0",
+          "layerId": "logo-act3",
+          "cssClass": "logo-act3",
+          "when": {
+            "offer_count_num": 0
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
           "id": "offers-0.cta-rect|cta",
           "scope": "offers-0.cta-rect",
           "layerId": "cta",
@@ -2547,8 +2584,8 @@
             "height": 18,
             "fontSize": 9,
             "borderRadius": 4,
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -2564,8 +2601,8 @@
             "height": 56,
             "fontSize": 12,
             "borderRadius": "50%",
-            "backgroundColor": "rgb(0, 229, 165)",
-            "color": "rgb(0, 41, 117)"
+            "backgroundColor": "rgb(0, 41, 117)",
+            "color": "rgb(255, 255, 255)"
           },
           "editable": true
         },
@@ -2625,6 +2662,121 @@
             "minFontSize": 5,
             "align": "bottom"
           }
+        },
+        {
+          "id": "offers-0.roundel-split|roundel-copy",
+          "scope": "offers-0.roundel-split",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "color": "rgb(255, 255, 255)",
+            "left": 181,
+            "top": 7,
+            "width": 65,
+            "height": 11,
+            "fontSize": 12,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-end"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.roundel-split|roundel-value",
+          "scope": "offers-0.roundel-split",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "color": "rgb(255, 255, 255)",
+            "left": 175,
+            "top": 19,
+            "width": 76,
+            "height": 30,
+            "fontSize": 28,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-start",
+            "textAlign": "center",
+            "justifyContent": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.roundel-copy-only|roundel-copy",
+          "scope": "offers-0.roundel-copy-only",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": ""
+          },
+          "props": {
+            "color": "rgb(255, 255, 255)",
+            "left": 176,
+            "top": 9,
+            "width": 73,
+            "height": 48,
+            "fontSize": 10,
+            "lineHeight": 1.05,
+            "whiteSpace": "normal",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
+        },
+        {
+          "id": "offers-0.roundel-copy-only|roundel-value",
+          "scope": "offers-0.roundel-copy-only",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": ""
+          },
+          "props": {
+            "color": "rgb(255, 255, 255)"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-frame-off|headline-act3|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "headline-act3",
+          "cssClass": "sse-headline",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "headline-act4|endframe",
+          "layerId": "headline-act4",
+          "cssClass": "sse-headline",
+          "props": {
+            "color": "rgb(255, 255, 255)",
+            "top": 9
+          },
+          "editable": true
         }
       ],
       "classRules": [
@@ -2653,7 +2805,10 @@
             "width": 131,
             "fontSize": 16,
             "height": 34,
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           }
         },
         {
@@ -2670,7 +2825,10 @@
             "whiteSpace": "nowrap",
             "justifyContent": "flex-end",
             "display": "flex",
-            "alignItems": "flex-end"
+            "alignItems": "flex-end",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           }
         },
         {
@@ -2687,7 +2845,10 @@
             "alignItems": "flex-end",
             "whiteSpace": "normal",
             "textAlign": "left",
-            "textTransform": "uppercase"
+            "textTransform": "uppercase",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           },
           "fit": {
             "mode": "shrink",
@@ -2714,7 +2875,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .terms-prices,\n    .terms-solo,\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* \u2500\u2500 T&C wrappers (far-left tiny zone) \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n\n    /* Act 4 only: white over blue wave on 320\u00d750 */\n    #headline-act4 {\n      color: rgb(255, 255, 255);\n      top: 9px;\n    }\n"
+      "manualCss": ""
     },
     "728x90": {
       "canvas": {
@@ -2928,7 +3089,7 @@
             },
             {
               "id": "bluewave-entry-offers-0",
-              "label": "Bluewave stage1\u2194stage2 (offers-0)",
+              "label": "Bluewave stage1↔stage2 (offers-0)",
               "preset": "custom",
               "scopes": [
                 "offers-0"
@@ -3521,7 +3682,12 @@
             "top": 78,
             "width": 160,
             "height": 10,
-            "fontSize": 8
+            "fontSize": 8,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_terms_text"
@@ -3601,7 +3767,12 @@
             "top": 69,
             "width": 696,
             "height": 19,
-            "fontSize": 8
+            "fontSize": 8,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_units_text"
@@ -3680,7 +3851,12 @@
             "width": 214,
             "height": 18,
             "fontSize": 8,
-            "cssClass": "terms-solo"
+            "cssClass": "terms-solo",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_terms_text"
@@ -4208,7 +4384,7 @@
             "backgroundColor": "rgb(0, 229, 165)",
             "width": 150,
             "height": 150,
-            "left": 331,
+            "left": 326,
             "top": -25
           },
           "editable": true
@@ -4274,7 +4450,7 @@
             "roundel_value_text": ""
           },
           "props": {
-            "left": 346,
+            "left": 306,
             "top": 17,
             "width": 120,
             "height": 64,
@@ -4302,9 +4478,9 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 289,
+            "left": 310,
             "top": 18,
-            "width": 150,
+            "width": 109,
             "height": 16,
             "fontSize": 15,
             "lineHeight": 1.05,
@@ -4325,7 +4501,7 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 312,
+            "left": 313,
             "top": 37,
             "width": 105,
             "height": 48,
@@ -4760,6 +4936,122 @@
             "minFontSize": 8,
             "align": "bottom"
           }
+        },
+        {
+          "id": "offers-0.roundel-split|roundel-copy",
+          "scope": "offers-0.roundel-split",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)",
+            "left": 342,
+            "top": 14,
+            "width": 119,
+            "height": 17,
+            "fontSize": 15,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "flex-end"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.roundel-split|roundel-value",
+          "scope": "offers-0.roundel-split",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)",
+            "left": 349,
+            "top": 33,
+            "width": 105,
+            "height": 48,
+            "fontSize": 46,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "flex-start"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.roundel-copy-only|roundel-copy",
+          "scope": "offers-0.roundel-copy-only",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": ""
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)",
+            "left": 306,
+            "top": 17,
+            "width": 120,
+            "height": 64,
+            "fontSize": 24,
+            "lineHeight": 1.05,
+            "whiteSpace": "normal",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
+        },
+        {
+          "id": "offers-0.roundel-copy-only|roundel-value",
+          "scope": "offers-0.roundel-copy-only",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": ""
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-frame-off|headline-act3|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "headline-act3",
+          "cssClass": "sse-headline",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
+        },
+        {
+          "id": "headline-act4|endframe-top",
+          "layerId": "headline-act4",
+          "cssClass": "sse-headline",
+          "props": {
+            "top": 17
+          },
+          "editable": true
         }
       ],
       "classRules": [
@@ -4794,7 +5086,10 @@
             "width": 223,
             "height": 57,
             "fontSize": 25,
-            "whiteSpace": "normal"
+            "whiteSpace": "normal",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           }
         },
         {
@@ -4809,7 +5104,10 @@
             "letterSpacing": -0.5,
             "textAlign": "right",
             "whiteSpace": "nowrap",
-            "justifyContent": "flex-end"
+            "justifyContent": "flex-end",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           }
         },
         {
@@ -4827,7 +5125,10 @@
             "alignItems": "flex-end",
             "justifyContent": "flex-start",
             "textTransform": "uppercase",
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           },
           "fit": {
             "mode": "shrink",
@@ -4863,7 +5164,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .cta {\n      padding: 0px 16px;\n      box-sizing: border-box;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n\n    /* Act 4 only: lower headline placement on 728\u00d790 */\n    #headline-act4 {\n      top: 17px;\n    }\n"
+      "manualCss": ""
     },
     "300x250": {
       "canvas": {
@@ -5076,7 +5377,7 @@
             },
             {
               "id": "bluewave-entry-offers-0",
-              "label": "Bluewave stage1\u2194stage2 (offers-0)",
+              "label": "Bluewave stage1↔stage2 (offers-0)",
               "preset": "custom",
               "scopes": [
                 "offers-0"
@@ -5679,7 +5980,12 @@
             "top": 229,
             "width": 160,
             "height": 13,
-            "fontSize": 10
+            "fontSize": 10,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_terms_text"
@@ -5739,7 +6045,12 @@
             "top": 215,
             "width": 135,
             "height": 29,
-            "fontSize": 10
+            "fontSize": 10,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_units_text"
@@ -5797,7 +6108,12 @@
             "width": 80,
             "height": 30,
             "fontSize": 10,
-            "cssClass": "terms-solo"
+            "cssClass": "terms-solo",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_terms_text"
@@ -6793,6 +7109,111 @@
             "minFontSize": 10,
             "align": "bottom"
           }
+        },
+        {
+          "id": "offers-0.roundel-split|roundel-copy",
+          "scope": "offers-0.roundel-split",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)",
+            "left": 41,
+            "top": 101,
+            "width": 97,
+            "height": 18,
+            "fontSize": 16,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-end"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.roundel-split|roundel-value",
+          "scope": "offers-0.roundel-split",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)",
+            "left": 40,
+            "top": 122,
+            "width": 101,
+            "height": 48,
+            "fontSize": 58,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-start",
+            "textAlign": "center",
+            "justifyContent": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.roundel-copy-only|roundel-copy",
+          "scope": "offers-0.roundel-copy-only",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": ""
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)",
+            "left": 51,
+            "top": 117,
+            "width": 94,
+            "height": 51,
+            "fontSize": 14,
+            "lineHeight": 1.05,
+            "whiteSpace": "normal",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
+        },
+        {
+          "id": "offers-0.roundel-copy-only|roundel-value",
+          "scope": "offers-0.roundel-copy-only",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": ""
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-frame-off|headline-act3|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "headline-act3",
+          "cssClass": "sse-headline",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
         }
       ],
       "classRules": [
@@ -6819,7 +7240,10 @@
             "top": 25,
             "width": 255,
             "fontSize": 18,
-            "height": 31
+            "height": 31,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           }
         },
         {
@@ -6832,7 +7256,10 @@
             "letterSpacing": -0.5,
             "width": "100%",
             "textAlign": "center",
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           }
         },
         {
@@ -6845,7 +7272,10 @@
             "letterSpacing": 0,
             "width": "100%",
             "textAlign": "center",
-            "textTransform": "uppercase"
+            "textTransform": "uppercase",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           },
           "fit": {
             "mode": "wrap",
@@ -6871,7 +7301,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* \u2500\u2500 T&C wrappers \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": ""
     },
     "160x600": {
       "canvas": {
@@ -7648,7 +8078,12 @@
             "top": 579,
             "width": 144,
             "height": 13,
-            "fontSize": 10
+            "fontSize": 10,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_terms_text"
@@ -7708,7 +8143,12 @@
             "top": 563,
             "width": 126,
             "height": 29,
-            "fontSize": 10
+            "fontSize": 10,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_units_text"
@@ -7766,7 +8206,12 @@
             "width": 100,
             "height": 26,
             "fontSize": 10,
-            "cssClass": "terms-solo"
+            "cssClass": "terms-solo",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_terms_text"
@@ -8666,7 +9111,7 @@
           },
           "props": {
             "left": 30,
-            "top": 537,
+            "top": 533,
             "width": 100,
             "height": 36
           },
@@ -8744,8 +9189,8 @@
             "tc_type_enum": "tcs_only"
           },
           "props": {
-            "left": 8,
-            "top": 574,
+            "left": 9,
+            "top": 577,
             "width": 146,
             "height": 26,
             "fontSize": 5,
@@ -8762,6 +9207,111 @@
             "minFontSize": 8,
             "align": "bottom"
           }
+        },
+        {
+          "id": "offers-0.roundel-split|roundel-copy",
+          "scope": "offers-0.roundel-split",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)",
+            "left": 30,
+            "top": 253,
+            "width": 100,
+            "height": 24,
+            "fontSize": 16,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-end"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.roundel-split|roundel-value",
+          "scope": "offers-0.roundel-split",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)",
+            "left": 20,
+            "top": 279,
+            "width": 118,
+            "height": 59,
+            "fontSize": 42,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-start",
+            "textAlign": "center",
+            "justifyContent": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.roundel-copy-only|roundel-copy",
+          "scope": "offers-0.roundel-copy-only",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": ""
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)",
+            "left": 26,
+            "top": 262,
+            "width": 108,
+            "height": 57,
+            "fontSize": 16,
+            "lineHeight": 1.05,
+            "whiteSpace": "normal",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
+        },
+        {
+          "id": "offers-0.roundel-copy-only|roundel-value",
+          "scope": "offers-0.roundel-copy-only",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": ""
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-frame-off|headline-act3|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "headline-act3",
+          "cssClass": "sse-headline",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
         }
       ],
       "classRules": [
@@ -8791,7 +9341,10 @@
             "fontSize": 26,
             "height": 130,
             "textAlign": "center",
-            "justifyContent": "center"
+            "justifyContent": "center",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           }
         },
         {
@@ -8805,7 +9358,10 @@
             "width": 150,
             "height": 76,
             "textAlign": "center",
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           }
         },
         {
@@ -8819,7 +9375,10 @@
             "width": 150,
             "height": 20,
             "textAlign": "center",
-            "textTransform": "uppercase"
+            "textTransform": "uppercase",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           },
           "fit": {
             "mode": "shrink",
@@ -8854,7 +9413,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 18px;\n      box-sizing: border-box;\n    }\n\n    /* \u2500\u2500 T&C wrappers (bottom-left, flush like the reference) \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": ""
     },
     "300x600": {
       "canvas": {
@@ -9071,7 +9630,7 @@
             },
             {
               "id": "bluewave-entry-offers-0",
-              "label": "Bluewave stage1\u2194stage2 (offers-0)",
+              "label": "Bluewave stage1↔stage2 (offers-0)",
               "preset": "custom",
               "scopes": [
                 "offers-0"
@@ -9666,7 +10225,12 @@
             "top": 579,
             "width": 160,
             "height": 13,
-            "fontSize": 10
+            "fontSize": 10,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_terms_text"
@@ -9726,7 +10290,12 @@
             "top": 569,
             "width": 276,
             "height": 23,
-            "fontSize": 10
+            "fontSize": 10,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_units_text"
@@ -9784,7 +10353,12 @@
             "width": 100,
             "height": 26,
             "fontSize": 10,
-            "cssClass": "terms-solo"
+            "cssClass": "terms-solo",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_terms_text"
@@ -10781,6 +11355,111 @@
             "minFontSize": 8,
             "align": "bottom"
           }
+        },
+        {
+          "id": "offers-0.roundel-split|roundel-copy",
+          "scope": "offers-0.roundel-split",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)",
+            "left": 71,
+            "top": 218,
+            "width": 159,
+            "height": 25,
+            "fontSize": 22,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-end"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.roundel-split|roundel-value",
+          "scope": "offers-0.roundel-split",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)",
+            "left": 71,
+            "top": 249,
+            "width": 158,
+            "height": 70,
+            "fontSize": 64,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-start",
+            "textAlign": "center",
+            "justifyContent": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.roundel-copy-only|roundel-copy",
+          "scope": "offers-0.roundel-copy-only",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": ""
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)",
+            "left": 77,
+            "top": 228,
+            "width": 147,
+            "height": 94,
+            "fontSize": 28,
+            "lineHeight": 1,
+            "whiteSpace": "normal",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
+        },
+        {
+          "id": "offers-0.roundel-copy-only|roundel-value",
+          "scope": "offers-0.roundel-copy-only",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": ""
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-frame-off|headline-act3|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "headline-act3",
+          "cssClass": "sse-headline",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
         }
       ],
       "classRules": [
@@ -10810,7 +11489,10 @@
             "fontSize": 34,
             "height": 100,
             "textAlign": "center",
-            "justifyContent": "center"
+            "justifyContent": "center",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           }
         },
         {
@@ -10824,7 +11506,10 @@
             "textAlign": "center",
             "justifyContent": "center",
             "width": "100%",
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           }
         },
         {
@@ -10839,7 +11524,10 @@
             "justifyContent": "center",
             "width": "100%",
             "textTransform": "uppercase",
-            "whiteSpace": "nowrap"
+            "whiteSpace": "nowrap",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           },
           "fit": {
             "mode": "wrap",
@@ -10874,7 +11562,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 26px;\n      box-sizing: border-box;\n    }\n\n    /* \u2500\u2500 T&C wrappers (bottom-left) \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": ""
     },
     "970x250": {
       "canvas": {
@@ -11088,7 +11776,7 @@
             },
             {
               "id": "bluewave-entry-offers-0",
-              "label": "Bluewave stage1\u2194stage2 (offers-0)",
+              "label": "Bluewave stage1↔stage2 (offers-0)",
               "preset": "custom",
               "scopes": [
                 "offers-0"
@@ -11682,7 +12370,12 @@
             "top": 231,
             "width": 160,
             "height": 14,
-            "fontSize": 11
+            "fontSize": 11,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_terms_text"
@@ -11737,7 +12430,12 @@
             "top": 219,
             "width": 300,
             "height": 26,
-            "fontSize": 11
+            "fontSize": 11,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_units_text"
@@ -11795,7 +12493,12 @@
             "width": 120,
             "height": 24,
             "fontSize": 11,
-            "cssClass": "terms-solo"
+            "cssClass": "terms-solo",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)",
+            "lineHeight": 1.3,
+            "whiteSpace": "pre-line"
           },
           "binding": {
             "field": "tc_terms_text"
@@ -12371,7 +13074,7 @@
             "roundel_value_text": ""
           },
           "props": {
-            "left": 525,
+            "left": 528,
             "top": 80,
             "width": 138,
             "height": 79,
@@ -12806,6 +13509,113 @@
             "minFontSize": 12,
             "align": "bottom"
           }
+        },
+        {
+          "id": "offers-0.roundel-split|roundel-copy",
+          "scope": "offers-0.roundel-split",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)",
+            "left": 518,
+            "top": 66,
+            "width": 158,
+            "height": 29,
+            "fontSize": 24,
+            "lineHeight": 1.05,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "flex-end"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.roundel-split|roundel-value",
+          "scope": "offers-0.roundel-split",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": "non-empty"
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)",
+            "left": 516,
+            "top": 98,
+            "width": 159,
+            "height": 68,
+            "fontSize": 64,
+            "lineHeight": 1,
+            "whiteSpace": "nowrap",
+            "textAlign": "center",
+            "display": "flex",
+            "alignItems": "flex-start",
+            "justifyContent": "center"
+          },
+          "editable": true
+        },
+        {
+          "id": "offers-0.roundel-copy-only|roundel-copy",
+          "scope": "offers-0.roundel-copy-only",
+          "layerId": "roundel-copy",
+          "cssClass": "roundel-copy",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": ""
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)",
+            "left": 528,
+            "top": 80,
+            "width": 138,
+            "height": 79,
+            "fontSize": 28,
+            "lineHeight": 1.05,
+            "whiteSpace": "normal",
+            "textAlign": "center",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
+        },
+        {
+          "id": "offers-0.roundel-copy-only|roundel-value",
+          "scope": "offers-0.roundel-copy-only",
+          "layerId": "roundel-value",
+          "cssClass": "roundel-value",
+          "when": {
+            "offer_count_num": 0,
+            "roundel_value_text": ""
+          },
+          "props": {
+            "color": "rgb(0, 41, 117)"
+          },
+          "editable": true
+        },
+        {
+          "id": "roundel-frame-off|headline-act3|visibility",
+          "scope": "roundel-frame-off",
+          "layerId": "headline-act3",
+          "cssClass": "sse-headline",
+          "when": {
+            "include_roundel_frame_bool": false
+          },
+          "props": {
+            "visibility": "hidden"
+          },
+          "editable": true
         }
       ],
       "classRules": [
@@ -12833,7 +13643,10 @@
             "top": 80,
             "width": 246,
             "fontSize": 34,
-            "height": 90
+            "height": 90,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           }
         },
         {
@@ -12848,7 +13661,10 @@
             "textAlign": "center",
             "whiteSpace": "nowrap",
             "height": 128,
-            "justifyContent": "center"
+            "justifyContent": "center",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           }
         },
         {
@@ -12863,7 +13679,10 @@
             "textAlign": "center",
             "textTransform": "uppercase",
             "height": 39,
-            "justifyContent": "center"
+            "justifyContent": "center",
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "color": "rgb(0, 41, 117)"
           },
           "fit": {
             "mode": "shrink",
@@ -12898,7 +13717,7 @@
           }
         }
       ],
-      "manualCss": "\n    /* \u2500\u2500 Shared typography \u2500\u2500 */\n    .sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    .sse-text-heavy {\n      font-weight: 900;\n    }\n\n    .sse-text-bold {\n      font-weight: 700;\n    }\n\n    /* \u2500\u2500 OfferSlot group plumbing \u2500\u2500 */\n    [data-gwd-group=\"OfferSlot\"] {\n      width: 100%;\n      height: 100%;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .gwd-grp-offer {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      font-weight: 700;\n      color: rgb(0, 41, 117);\n      visibility: inherit;\n    }\n\n    [data-gwd-group=\"OfferSlot\"] .offer-value .sym-pct {\n      font-size: 0.6em;\n      vertical-align: baseline;\n      position: relative;\n      /* Vertical offset computed at runtime from glyph metrics\n         (alignPercentSymbols) so the % bottom-aligns with the digits. */\n    }\n\n    /* \u2500\u2500 T&C group plumbing \u2500\u2500 */\n    [data-gwd-group=\"tc_prices\"] .gwd-grp-tc.sse-text,\n    [data-gwd-group=\"tc_solo\"] .gwd-grp-tc.sse-text {\n      position: absolute;\n      font-family: Museo, Arial, sans-serif;\n      color: rgb(0, 41, 117);\n    }\n\n    /* Feed text uses \\n for forced breaks (e.g. two-line unit rate). */\n    .unit-rate-prices {\n      white-space: pre-line;\n    }\n\n    /* \u2500\u2500 T&C wrappers (bottom-left) \u2500\u2500 */\n    .tc-prices-group,\n    .tc-solo-group {\n      position: absolute;\n    }\n\n    /* CTA copy breaks into two centred lines inside the roundel (ref). */\n    .cta {\n      padding: 0 30px;\n      box-sizing: border-box;\n    }\n\n    .roundel-frame-off #headline-act3 { visibility: hidden; }\n"
+      "manualCss": ""
     }
   }
 }

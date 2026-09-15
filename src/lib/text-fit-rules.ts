@@ -194,7 +194,7 @@ export const textFitRulesForSize = (sizeCreative) => {
     push(classRuleFit(rule));
   }
   // Pricing blocks must always be governed even when the JSON has no explicit
-  // class rule for them (their identity can live entirely in manualCss).
+  // class rule for them (identity can live on layer bases / plumbing CSS).
   push(baseRule(OFFER_VALUE_CLASS, OFFER_VALUE_DEFAULTS));
   push(baseRule(OFFER_SUBLINE_CLASS, OFFER_SUBLINE_DEFAULTS));
 

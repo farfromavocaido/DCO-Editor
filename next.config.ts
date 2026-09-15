@@ -9,6 +9,23 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname),
   },
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.watchOptions = {
+        ...config.watchOptions,
+        ignored: [
+          '**/node_modules/**',
+          '**/.next/**',
+          '**/campaign/**',
+          '**/output/**',
+          '**/outputs/**',
+          '**/qa-output/**',
+          '**/site/**',
+        ],
+      };
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

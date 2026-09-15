@@ -62,7 +62,9 @@ sitting on the designed baseline.
 ## Per-variant overrides
 
 A `variantRules` entry may carry a `fit` object; it becomes a scope override
-on the class rule, applied when the ad state carries that scope class. This is
+on the class rule, applied when the ad state carries that scope class. Dotted
+compound scopes (`offers-0.roundel-copy-only`) require every class token on the
+root — same matching as CSS `.offers-0.roundel-copy-only`. This is
 how the same subline wraps to two lines in offers-1 but stays on one shrunk
 line in offers-2 / offers-3:
 
@@ -101,7 +103,7 @@ one for the other both renders the wrong brand font and invalidates every
 measurement. The canonical live URL is the Studio CDN asset in
 `src/lib/brand-font.ts` (`MUSEO_CDN_URL`). The editor layout, `/api/creative/{size}/view`,
 CDN base zips, and the GitHub Pages preview site all load that same file
-(`local("☺")` + `font-weight: 100 900`). Pages preview inlines campaign SVGs (like
+(`local("☺")` + `font-weight: 700`). Pages preview inlines campaign SVGs (like
 Canonical Agency Zip) and cache-busts iframe ad URLs with `?v=<gitSha>` (also shown
 as `version: <gitSha>` beside Preview in the ad card bar). Downloadable
 client ZIPs stay packaged/self-contained with the OTF under `campaign/assets/fonts`. Never map

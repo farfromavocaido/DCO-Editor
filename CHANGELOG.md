@@ -17,6 +17,11 @@
 
 ### Changed
 
+- **SSE DCO root CSS is plumbing only** — brand type (Museo / 700 / navy) lives on classRules and T&C layer bases; `%` start size is with the offer-value symbol sheet; `roundel-frame-off` hiding Act 3 is a variant. Banner Act 4 extras (`#headline-act4` white/top on 320×50, top on 728×90) moved to unscoped variants. `manualCss` is empty so the GWD leftover sheet no longer sits under every size.
+- **Editor dev server uses webpack** — Turbopack’s server HMR iterator can leak until `Map maximum size exceeded` and kill `just editor`. Webpack watch also ignores `campaign/` / `output/` / `outputs/` so JSON saves do not rebuild the app.
+- **Offers-0 roundel is independent of offers 1–3** — frame, copy, and value (split + copy-only) own `offers-0` / `offers-0.roundel-*` rules, same principle as the brand CTA (separate stack). Seeded from the current boxes so layout does not jump.
+- **320×50 offers-0 is navy-on-green** — green field from t=0 (photo/blue/scrim hidden); all headline + T&C ink navy; navy logo; navy CTA/roundel with white type. Multi-offer 320×50 and other sizes unchanged.
+- **Museo weight is 700 only** — `@font-face` and ad CSS request `font-weight: 700` (the CDN `Museo700-Regular.otf` file). Dropped the `100 900` descriptor and unused `.sse-text-heavy` 900 rule so called weight matches the rendered face.
 - **Offers-0 ink is colour-only** — white/navy headline scopes keep only `color`; shared box geometry lives on `offers-0|sse-headline` (and banner `offers-0|headline-act3`), seeded from the former white-ink props. Editor geometry writes skip ink scopes so navy/white stay in sync.
 - **Offers-0 Act 4 hidden on preview** — exporter `normalizeProfileRow` turns missing `include_heading4_enum` into `''`, which the offers-0 motion path treated as off and force-hid `#headline-act4`. Blank/missing now defaults to show (explicit `false` still hides). Runtime Act 4 also rebuilds onto `act4_in` like the editor plan.
 - **Offers-0 banner Act 3 sizing** — on **320×50** / **728×90** only, offers-0 H3 uses its own layer rules (`offers-0|headline-act3` + ink siblings); shared H1/H2 `sse-headline` rules exclude `#headline-act3`. Other sizes unchanged. Timing/transitions untouched.

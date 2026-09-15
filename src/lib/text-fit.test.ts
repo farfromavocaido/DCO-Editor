@@ -384,6 +384,30 @@ test('scope overrides win when the root carries the scope class', () => {
   assert.equal(style.fontSize, '20px');
 });
 
+test('compound scope overrides apply when every class token is on the root', () => {
+  const element = makeElement({
+    fontSize: 24,
+    fitsAt: (_size, _tracking, whiteSpace) => whiteSpace === 'pre-line',
+    linesAt: (_size, whiteSpace) => (whiteSpace === 'pre-line' ? 3 : 1),
+  });
+
+  engine().applyRules(
+    makeRoot([element], 'stage page-content offers-0 roundel-copy-only'),
+    [{
+      cssClass: 'target',
+      wrap: false,
+      maxLines: 1,
+      minFontSize: 8,
+      scopes: {
+        'offers-0.roundel-copy-only': { wrap: true, maxLines: 3 },
+      },
+    }],
+  );
+
+  const style = element.style as Record<string, string>;
+  assert.equal(style.whiteSpace, 'pre-line', 'dotted scope must match separate class tokens');
+});
+
 test('re-running the fit is idempotent so a post-font-load refit is safe', () => {
   const element = makeElement({
     className: 'offer-value',

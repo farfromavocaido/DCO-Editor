@@ -46,7 +46,7 @@ Local Next.js tool for editing campaign creative JSON documents and exporting St
 ## Commands
 
 ```bash
-just editor           # from repo root → editor + live /qa at http://localhost:5174/qa
+just editor           # from repo root → editor + live /qa at http://localhost:5174/qa (webpack; Turbopack HMR can kill the process)
 npm test              # from repo root
 npm run build
 npm run export:preview-site   # static client preview → site/

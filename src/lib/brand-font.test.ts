@@ -14,11 +14,12 @@ test('CDN map points Museo family file at the Studio slab OTF only', () => {
   assert.doesNotMatch(MUSEO_CDN_URL, /MuseoSans/i);
 });
 
-test('font-face CSS blocks local installs and covers the weight range', () => {
+test('font-face CSS blocks local installs and declares the 700 face only', () => {
   const css = museoFontFaceCss();
   assert.match(css, /font-family: "Museo"/);
   assert.match(css, /local\("☺"\)/);
   assert.match(css, new RegExp(MUSEO_CDN_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-  assert.match(css, /font-weight: 100 900/);
+  assert.match(css, /font-weight: 700/);
+  assert.doesNotMatch(css, /font-weight: 100 900/);
   assert.doesNotMatch(css, /MuseoSans/i);
 });

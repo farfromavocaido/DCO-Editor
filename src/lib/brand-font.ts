@@ -21,7 +21,7 @@ export const CDN_FONT_URLS: Record<string, string> = {
 export const museoFontFaceCss = (url: string = MUSEO_CDN_URL) => `@font-face {
   font-family: "Museo";
   src: local("☺"), url("${url}") format("opentype");
-  font-weight: 100 900;
+  font-weight: 700;
   font-style: normal;
   font-display: block;
 }`;

@@ -21,7 +21,7 @@ const pxNumber = (value: unknown, fallback = 0) => {
   return Number.isFinite(numeric) ? numeric : fallback;
 };
 
-/** Matches campaign manualCss `.sse-text` / OfferSlot defaults when no color is authored. */
+/** Matches brand navy when a text owner has no authored color. */
 const resolveOutlineFillColor = ({
   values,
   targetId,

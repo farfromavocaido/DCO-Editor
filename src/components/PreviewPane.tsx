@@ -42,6 +42,7 @@ import {
   targetMatchesSelection,
 } from '@/lib/selection-groups';
 import { zoomLabel, zoomScale } from '@/lib/canvas-zoom';
+import { adPlumbingCss } from '@/lib/ad-plumbing-css';
 import { offerValueSymbolCss } from '@/lib/offer-value-symbols';
 import { resolveOfferPlusLayout } from '@/lib/offer-plus-layout';
 import {
@@ -94,11 +95,12 @@ const renderLayerRule = (layer: Record<string, unknown>) => {
 
 const renderCreativeCss = (sizeCreative: Record<string, unknown>) => [
   '    p, h1, h2, h3 { margin: 0px; }',
+  adPlumbingCss,
   sizeCreative.manualCss || '',
   offerValueSymbolCss,
   ...(sizeCreative.layers || []).map(renderLayerRule),
   structuredRuleCss(sizeCreative),
-  '    .stage-element, .stage-static { cursor: move; }',
+  '    .stage-element, .stage-static { position: absolute; cursor: move; }',
 ].join('\n\n');
 
 const numberValue = (value: unknown, fallback = 0) => {

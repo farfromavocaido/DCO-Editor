@@ -49,6 +49,21 @@ test('renders compound offers-0 CTA scopes as chained classes', () => {
   assert.match(css, /left: 18px;/);
 });
 
+test('renders compound offers-0 roundel scopes as chained classes', () => {
+  const css = structuredRuleCss({
+    variantRules: [
+      {
+        scope: 'offers-0.roundel-split',
+        cssClass: 'roundel-copy',
+        props: { left: 48, top: 91 },
+      },
+    ],
+  });
+
+  assert.match(css, /\.offers-0\.roundel-split \.roundel-copy/);
+  assert.match(css, /left: 48px;/);
+});
+
 test('colour-only ink scopes do not leak class height over offers-0 geometry', () => {
   const css = structuredRuleCss({
     classRules: [

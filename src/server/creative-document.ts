@@ -6,6 +6,7 @@ import { isBlurLayer, validateBlurConfig } from '@/lib/blur-layer';
 import {
   ensureBackgroundLayers,
   normalizeOffers0CtaRules,
+  normalizeOffers0RoundelRules,
   stripOfferCountRoundelOverrides,
 } from '@/lib/creative-model';
 import { isGradientLayer, validateGradientConfig } from '@/lib/gradient-layer';
@@ -39,6 +40,7 @@ export const validateCreativeDocument = (document: CreativeDocument) => {
   ensureBackgroundLayers(document);
   stripOfferCountRoundelOverrides(document);
   normalizeOffers0CtaRules(document);
+  normalizeOffers0RoundelRules(document);
   for (const [size, sizeCreative] of Object.entries(document.sizes)) {
     if (!/^\d+x\d+$/.test(size)) throw new Error(`Bad size key: ${size}`);
     if (!sizeCreative.canvas?.width || !sizeCreative.canvas?.height) throw new Error(`Size ${size} is missing canvas`);
@@ -74,7 +76,14 @@ export const readCreativeDocumentForCampaign = async (campaignId?: string | null
 export const writeCreativeDocument = async (document: CreativeDocument, file = creativeDocumentPath) => {
   validateCreativeDocument(document);
   await fs.mkdir(path.dirname(file), { recursive: true });
-  await fs.writeFile(file, `${JSON.stringify(document, null, 2)}\n`);
+  const serialized = `${JSON.stringify(document, null, 2)}\n`;
+  try {
+    const existing = await fs.readFile(file, 'utf8');
+    if (existing === serialized) return document;
+  } catch {
+    // File is new — write below.
+  }
+  await fs.writeFile(file, serialized);
   return readCreativeDocument(file);
 };
 

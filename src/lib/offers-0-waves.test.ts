@@ -105,10 +105,21 @@ test('offers-0 greenwave fades; blue starts at stage1, stages with green, return
     const greenAtAct4 = frameAtPercent(greenFrames, act4At);
     const nearEnd = frameAtPercent(greenFrames, 99.5);
 
-    assert.ok(before.opacity < 0.05, `${size} green hidden before fade`);
-    assert.ok(midFade.opacity > 0.2 && midFade.opacity < 0.9, `${size} green mid-fade`);
-    assert.ok(greenAtAct4.opacity > 0.95, `${size} green opaque at Act 4`);
-    assert.ok(nearEnd.opacity < 0.3, `${size} green fades out at end`);
+    if (size === '320x50') {
+      assert.ok(before.opacity > 0.95, `${size} green held from start`);
+      assert.ok(greenAtAct4.opacity > 0.95, `${size} green opaque at Act 4`);
+      assert.ok(nearEnd.opacity > 0.95, `${size} green held through end`);
+      assert.equal(
+        sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|bluewave|visibility')?.props?.visibility,
+        'hidden',
+        `${size} bluewave hidden so green reads`,
+      );
+    } else {
+      assert.ok(before.opacity < 0.05, `${size} green hidden before fade`);
+      assert.ok(midFade.opacity > 0.2 && midFade.opacity < 0.9, `${size} green mid-fade`);
+      assert.ok(greenAtAct4.opacity > 0.95, `${size} green opaque at Act 4`);
+      assert.ok(nearEnd.opacity < 0.3, `${size} green fades out at end`);
+    }
     assert.equal(before.translate[0], restX, `${size} rest x before`);
     assert.equal(greenAtAct4.translate[0], restX, `${size} rest x at Act 4`);
     assert.equal(greenAtAct4.translate[1], restY, `${size} rest y at Act 4`);
@@ -175,7 +186,16 @@ test('offers-0 white logo from start; blue logo hidden with no multi fade', () =
     assert.equal(zeroWhite[0].params?.enter_duration_pct, 5, `${size} white enter 5%`);
 
     const hideBlue = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|logo-act1|visibility');
-    assert.equal(hideBlue?.props?.visibility, 'hidden', `${size} blue logo hidden`);
+    if (size === '320x50') {
+      assert.equal(hideBlue?.props?.visibility, 'visible', `${size} navy logo shown`);
+      assert.equal(
+        sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|logo-act3|visibility')?.props?.visibility,
+        'hidden',
+        `${size} white logo hidden`,
+      );
+    } else {
+      assert.equal(hideBlue?.props?.visibility, 'hidden', `${size} blue logo hidden`);
+    }
 
     const beats = beatsForScopes(creative, ['offers-0', 'frames-3']);
     const frames = compileAnimationClips(zeroWhite, beats);
@@ -202,25 +222,22 @@ test('offers-0 headlines restore shared geometry; Act 4 ink; T&Cs always white',
     assert.equal(sse.props.color, undefined, `${size} geometry rule has no colour`);
     const act4 = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|headline-act4');
     assert.ok(act4?.props?.color, `${size} act4 has colour`);
-    if (size === '320x50') {
-      assert.equal(act4.props.color, 'rgb(255, 255, 255)', `${size} act4 white`);
-    } else {
-      assert.equal(act4.props.color, NAVY, `${size} act4 navy`);
-    }
+    assert.equal(act4.props.color, NAVY, `${size} act4 navy`);
     const ctaRect = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0.cta-rect|cta');
     const ctaRoundel = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0.cta-roundel|cta');
+    assert.equal(ctaRect?.props?.backgroundColor, NAVY, `${size} CTA navy fill`);
+    assert.equal(ctaRect?.props?.color, 'rgb(255, 255, 255)', `${size} CTA white text`);
     if (size === '320x50') {
-      assert.equal(ctaRect?.props?.backgroundColor, 'rgb(0, 229, 165)', `${size} CTA green fill`);
-      assert.equal(ctaRect?.props?.color, NAVY, `${size} CTA navy text`);
-      assert.equal(ctaRoundel?.props?.backgroundColor, 'rgb(0, 229, 165)', `${size} roundel CTA green fill`);
-      assert.equal(ctaRoundel?.props?.color, NAVY, `${size} roundel CTA navy text`);
-    } else {
-      assert.equal(ctaRect?.props?.backgroundColor, NAVY, `${size} CTA navy fill`);
-      assert.equal(ctaRect?.props?.color, 'rgb(255, 255, 255)', `${size} CTA white text`);
+      assert.equal(ctaRoundel?.props?.backgroundColor, NAVY, `${size} roundel CTA navy fill`);
+      assert.equal(ctaRoundel?.props?.color, 'rgb(255, 255, 255)', `${size} roundel CTA white text`);
     }
     const whiteTc = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|terms-prices|color');
     const navyTc = sizeCreative.variantRules.find((rule) => rule.id === 'navy-headlines|terms-prices');
-    assert.equal(whiteTc?.props?.color, 'rgb(255, 255, 255)', `${size} offers-0 T&Cs always white`);
+    assert.equal(
+      whiteTc?.props?.color,
+      size === '320x50' ? NAVY : 'rgb(255, 255, 255)',
+      `${size} offers-0 T&Cs ${size === '320x50' ? 'navy on green' : 'always white'}`,
+    );
     assert.equal(navyTc, undefined, `${size} T&Cs detached from navy ink`);
     assert.ok(
       !sizeCreative.variantRules.some((rule) => rule.id === 'white-headlines|terms-prices'),
@@ -229,9 +246,15 @@ test('offers-0 headlines restore shared geometry; Act 4 ink; T&Cs always white',
     const roundelFrame = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|roundel-frame');
     const roundelCopy = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|roundel-copy');
     const roundelValue = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|roundel-value');
-    assert.equal(roundelFrame?.props?.backgroundColor, 'rgb(0, 229, 165)', `${size} roundel green fill`);
-    assert.equal(roundelCopy?.props?.color, NAVY, `${size} roundel copy navy`);
-    assert.equal(roundelValue?.props?.color, NAVY, `${size} roundel value navy`);
+    if (size === '320x50') {
+      assert.equal(roundelFrame?.props?.backgroundColor, NAVY, `${size} roundel navy fill`);
+      assert.equal(roundelCopy?.props?.color, 'rgb(255, 255, 255)', `${size} roundel copy white`);
+      assert.equal(roundelValue?.props?.color, 'rgb(255, 255, 255)', `${size} roundel value white`);
+    } else {
+      assert.equal(roundelFrame?.props?.backgroundColor, 'rgb(0, 229, 165)', `${size} roundel green fill`);
+      assert.equal(roundelCopy?.props?.color, NAVY, `${size} roundel copy navy`);
+      assert.equal(roundelValue?.props?.color, NAVY, `${size} roundel value navy`);
+    }
     assert.equal(
       sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|unit-rate-prices|visibility')?.props?.visibility,
       'hidden',
@@ -248,9 +271,12 @@ test('offers-0 headline scrim is bottom-up and under the bluewave', () => {
     assert.ok(scrim && blue, size);
     assert.equal(scrim.gradient?.direction, 'to-top', `${size} scrim to-top`);
     assert.ok(scrim.zIndex < blue.zIndex, `${size} scrim behind bluewave`);
-    assert.ok(
-      sizeCreative.variantRules.some((rule) => rule.id === 'offers-0|headline-scrim|visibility'),
-      `${size} scrim always on offers-0`,
+    const scrimVis = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|headline-scrim|visibility');
+    assert.ok(scrimVis, `${size} scrim visibility rule`);
+    assert.equal(
+      scrimVis.props?.visibility,
+      size === '320x50' ? 'hidden' : 'visible',
+      `${size} scrim ${size === '320x50' ? 'off over green field' : 'always on offers-0'}`,
     );
     assert.ok(
       !sizeCreative.variantRules.some((rule) => String(rule.id).includes('headlines|headline-scrim')),

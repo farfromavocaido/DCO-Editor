@@ -18,6 +18,7 @@ import {
   headlineOfferLayoutStatus,
   moveCreativeLayerToZIndex,
   normalizeOffers0CtaRules,
+  normalizeOffers0RoundelRules,
   reorderCreativeLayerZ,
   updateCreativeLayerBase,
   updateCreativeLayerClip,
@@ -571,7 +572,7 @@ test('banner offers-0 Act 3 geometry writes separately from shared H1/H2', () =>
   );
   assert.deepEqual(
     afterH1.sizes['320x50'].variantRules.find((rule) => rule.id === 'white-headlines|sse-headline').props,
-    { color: 'rgb(255, 255, 255)' },
+    { color: 'rgb(0, 41, 117)' },
   );
 
   const afterH3 = updateCreativeTargetValue(doc, '320x50', 'headline-act3', scopes, 'width', 77);
@@ -609,7 +610,11 @@ test('offers-0 ink scopes are colour-only; white/navy share offers-0 geometry', 
       if (white.values[key] === undefined && navy.values[key] === undefined) continue;
       assert.equal(white.values[key], navy.values[key], `${size} ${key} must match across ink`);
     }
-    assert.equal(white.values.color, 'rgb(255, 255, 255)', `${size} white ink`);
+    assert.equal(
+      white.values.color,
+      size === '320x50' ? 'rgb(0, 41, 117)' : 'rgb(255, 255, 255)',
+      `${size} ${size === '320x50' ? 'offers-0 ink is navy on green' : 'white ink'}`,
+    );
     assert.equal(navy.values.color, 'rgb(0, 41, 117)', `${size} navy ink`);
   }
 });
@@ -865,6 +870,75 @@ test('normalizeOffers0CtaRules migrates legacy offers-0|cta into compound shape 
   assert.equal(round.props.borderRadius, '50%');
   // Multi-offer rect geometry untouched.
   assert.equal(rules.find((rule) => rule.id === 'cta-rect|cta').props.left, 151);
+});
+
+test('normalizeOffers0RoundelRules seeds empty compound rules from the current boxes', () => {
+  const doc = {
+    version: 1,
+    sizes: {
+      '300x250': {
+        layers: [
+          { id: 'roundel-frame', kind: 'shape', base: { left: 48, top: 91, width: 100, height: 100, cssClass: 'roundel-frame' }, clips: [] },
+          { id: 'roundel-copy', kind: 'text', base: { left: 10, top: 10, width: 80, height: 20, cssClass: 'roundel-copy' }, clips: [] },
+          { id: 'roundel-value', kind: 'text', base: { left: 10, top: 30, width: 80, height: 40, cssClass: 'roundel-value' }, clips: [] },
+        ],
+        classRules: [],
+        variantRules: [
+          { id: 'offers-0|roundel-copy', scope: 'offers-0', layerId: 'roundel-copy', cssClass: 'roundel-copy', props: { color: 'rgb(0, 41, 117)' }, editable: true },
+          { id: 'offers-0|roundel-value', scope: 'offers-0', layerId: 'roundel-value', cssClass: 'roundel-value', props: { color: 'rgb(0, 41, 117)' }, editable: true },
+          { id: 'offers-0|roundel-frame', scope: 'offers-0', layerId: 'roundel-frame', cssClass: 'roundel-frame', props: { backgroundColor: 'rgb(0, 229, 165)', left: 48, top: 91, width: 100, height: 100 }, editable: true },
+          { id: 'roundel-copy-only|roundel-copy', scope: 'roundel-copy-only', layerId: 'roundel-copy', cssClass: 'roundel-copy', props: { left: 51, top: 117, width: 94, height: 40 }, editable: true, fit: { mode: 'shrink', minFontSize: 18, maxLines: 3 } },
+          { id: 'roundel-split|roundel-copy', scope: 'roundel-split', layerId: 'roundel-copy', cssClass: 'roundel-copy', props: { left: 41, top: 101, width: 97, height: 20 }, editable: true },
+          { id: 'roundel-split|roundel-value', scope: 'roundel-split', layerId: 'roundel-value', cssClass: 'roundel-value', props: { left: 40, top: 120, width: 90, height: 36 }, editable: true },
+        ],
+      },
+    },
+  };
+
+  normalizeOffers0RoundelRules(doc);
+  const splitCopy = doc.sizes['300x250'].variantRules.find((rule) => rule.id === 'offers-0.roundel-split|roundel-copy');
+  const copyOnly = doc.sizes['300x250'].variantRules.find((rule) => rule.id === 'offers-0.roundel-copy-only|roundel-copy');
+  assert.equal(splitCopy.props.left, 41);
+  assert.equal(splitCopy.props.color, 'rgb(0, 41, 117)');
+  assert.equal(copyOnly.props.left, 51);
+  assert.deepEqual(copyOnly.fit, { mode: 'shrink', minFontSize: 18, maxLines: 3 });
+  assert.equal(doc.sizes['300x250'].variantRules.find((rule) => rule.id === 'roundel-split|roundel-copy').props.left, 41);
+});
+
+test('offers-0 roundel writes stay off the shared offers 1–3 rules', () => {
+  const doc = loadPersistedCreative();
+  normalizeOffers0RoundelRules(doc);
+
+  for (const size of Object.keys(doc.sizes)) {
+    const splitScopes = ['offers-0', 'roundel-split', 'roundel-frame-on'];
+    const copyTarget = findCreativeTarget(doc, size, 'roundel-copy', splitScopes);
+    const frameTarget = findCreativeTarget(doc, size, 'roundel-frame', splitScopes);
+    assert.equal(copyTarget.writeSource.ruleId, 'offers-0.roundel-split|roundel-copy', `${size} copy write`);
+    assert.equal(frameTarget.writeSource.ruleId, 'offers-0|roundel-frame', `${size} frame write`);
+  }
+
+  const splitScopes = ['offers-0', 'roundel-split'];
+  const sharedLeft = doc.sizes['300x250'].variantRules.find((rule) => rule.id === 'roundel-split|roundel-copy').props.left;
+  const ownedLeft = doc.sizes['300x250'].variantRules.find((rule) => rule.id === 'offers-0.roundel-split|roundel-copy').props.left;
+  const moved = updateCreativeTargetValue(doc, '300x250', 'roundel-copy', splitScopes, 'left', 999);
+  assert.equal(
+    moved.sizes['300x250'].variantRules.find((rule) => rule.id === 'roundel-split|roundel-copy').props.left,
+    sharedLeft,
+  );
+  assert.equal(
+    moved.sizes['300x250'].variantRules.find((rule) => rule.id === 'offers-0.roundel-split|roundel-copy').props.left,
+    999,
+  );
+
+  const multi = updateCreativeTargetValue(doc, '300x250', 'roundel-copy', ['offers-1', 'roundel-split'], 'left', 1);
+  assert.equal(
+    multi.sizes['300x250'].variantRules.find((rule) => rule.id === 'offers-0.roundel-split|roundel-copy').props.left,
+    ownedLeft,
+  );
+  assert.equal(
+    multi.sizes['300x250'].variantRules.find((rule) => rule.id === 'roundel-split|roundel-copy').props.left,
+    1,
+  );
 });
 
 test('keeps the optional roundel frame as a simple editable circle layer', () => {

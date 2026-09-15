@@ -309,3 +309,12 @@ export const linkedTargetIdsForSelection = (
   }
   return [];
 };
+
+/** Layer-tree modifier clicks toggle explicit IDs, without canvas hit hierarchy. */
+export const toggleExplicitTargetSelection = (currentTargetId: string, currentTargetIds: string[], targetId: string) => {
+  const ids = new Set(currentTargetIds.length ? currentTargetIds : [currentTargetId].filter(Boolean));
+  if (ids.has(targetId)) ids.delete(targetId);
+  else ids.add(targetId);
+  const selectedTargetIds = [...ids];
+  return { selectedTargetId: selectedTargetIds.at(-1) || '', selectedTargetIds };
+};

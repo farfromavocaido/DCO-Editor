@@ -178,3 +178,16 @@ test('resolveSelectionMeta labels offer block bounds as logical', () => {
     height: 40,
   });
 });
+
+import { toggleExplicitTargetSelection } from './selection-groups';
+test('explicit tree toggle selects overlapping layers, nested targets and groups without drill ambiguity', () => {
+  const pair = toggleExplicitTargetSelection('roundel-frame',['roundel-frame'],'roundel-copy');
+  assert.deepEqual(pair.selectedTargetIds,['roundel-frame','roundel-copy']);
+  const nested = toggleExplicitTargetSelection(pair.selectedTargetId,pair.selectedTargetIds,'offer-slot-1::offer-value');
+  assert.deepEqual(nested.selectedTargetIds,['roundel-frame','roundel-copy','offer-slot-1::offer-value']);
+  const group = toggleExplicitTargetSelection(nested.selectedTargetId,nested.selectedTargetIds,'canvas-group:test');
+  assert.equal(group.selectedTargetId,'canvas-group:test');
+  const removed = toggleExplicitTargetSelection(group.selectedTargetId,group.selectedTargetIds,'roundel-copy');
+  assert.deepEqual(removed.selectedTargetIds,['roundel-frame','offer-slot-1::offer-value','canvas-group:test']);
+  assert.deepEqual(toggleExplicitTargetSelection('copy',['copy'],'copy'),{selectedTargetId:'',selectedTargetIds:[]});
+});

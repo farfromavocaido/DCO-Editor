@@ -8,7 +8,7 @@ import { SampleFeedPanel } from '@/components/SampleFeedPanel';
 import { editableTargetsForLayer, groupedCreativeLayers, currentSizeCreative, findCreativeTarget, targetIdForLayerChild } from '@/lib/creative-model';
 import { activeScopesFromControls } from '@/lib/feed-model';
 import { isOfferLayerId, offerInteractionTree } from '@/lib/offer-interaction-model';
-import { OFFERS_BLOCK_ID, selectionHierarchy } from '@/lib/selection-groups';
+import { OFFERS_BLOCK_ID, selectionHierarchy, toggleExplicitTargetSelection } from '@/lib/selection-groups';
 import { useEditorStore } from '@/store/editor-store';
 
 const iconForLayer = (layer, hasChildren = false) => {
@@ -106,6 +106,14 @@ export function LayerTree() {
   const layerById = new Map((sizeCreative?.layers || []).map((layer) => [layer.id, layer]));
   const offerTree = offerInteractionTree(document, size, activeScopes);
   const activeOfferIds = new Set(offerTree.children.map((child) => child.id));
+
+  const handleTreeTargetClick = (event, targetId, singleClick) => {
+    if (!(event.shiftKey || event.metaKey || event.ctrlKey)) { singleClick(); return; }
+    event.preventDefault();
+    const state = useEditorStore.getState();
+    const next = toggleExplicitTargetSelection(state.selectedTargetId, state.selectedTargetIds, targetId);
+    setCanvasSelection(next.selectedTargetId, next.selectedTargetIds, []);
+  };
 
   const finishLayerDrag = () => {
     setDraggingLayerId('');
@@ -275,7 +283,7 @@ export function LayerTree() {
   };
 
   const renderLayerItem = (layer) => {
-    const selected = selectedTargetId === layer.id || (!selectedTargetId && selectedLayerId === layer.id);
+    const selected = (selectedTargetId === layer.id || selectedTargetIds.includes(layer.id)) || (!selectedTargetId && selectedLayerId === layer.id);
     const clip = layer.clips?.find((item) => item.id === selectedClipId) || layer.clips?.[0];
     const childTargets = editableTargetsForLayer(layer);
     const locked = lockedLayerIds.has(String(layer.id));
@@ -298,7 +306,7 @@ export function LayerTree() {
           onContextMenu={(event) => openMenu(event, layer)}
         >
           {renderLayerDragHandle(layer.id, layer.label || layer.id)}
-          <button type="button" className="layer-row-main" aria-label={`${layer.label || layer.id} layer`} onClick={() => selectLayer(layer.id)}>
+          <button type="button" className="layer-row-main" aria-label={`${layer.label || layer.id} layer`} onClick={(event) => handleTreeTargetClick(event,layer.id,() => selectLayer(layer.id))}>
             <span className="layer-kind-icon" data-tip={layer.kind || 'Layer'}>
               <EditorIcon name={iconForLayer(layer, childTargets.length)} />
             </span>
@@ -332,7 +340,7 @@ export function LayerTree() {
             {childTargets.map((target) => (
               <div
                 key={target.id}
-                className={`layer-row layer-row-child ${selectedTargetId === target.id ? 'is-selected' : ''}`}
+                className={`layer-row layer-row-child ${(selectedTargetId === target.id || selectedTargetIds.includes(target.id)) ? 'is-selected' : ''}`}
                 data-target-id={target.id}
                 ref={(node) => {
                   if (node) rowRefs.current.set(target.id, node);
@@ -341,7 +349,7 @@ export function LayerTree() {
                 onContextMenu={(event) => openMenu(event, layer, target)}
               >
                 {renderLayerDragSpacer()}
-                <button type="button" className="layer-row-main" aria-label={`${target.label} nested item`} onClick={() => selectTarget(target.id)}>
+                <button type="button" className="layer-row-main" aria-label={`${target.label} nested item`} onClick={(event) => handleTreeTargetClick(event,target.id,() => selectTarget(target.id))}>
                   <span className="layer-kind-icon" data-tip="Nested text">
                     <EditorIcon name="text" />
                   </span>
@@ -368,7 +376,7 @@ export function LayerTree() {
     return (
       <div key={OFFERS_BLOCK_ID} className="layer-tree-item">
         <div
-          className={`layer-row ${selectedTargetId === OFFERS_BLOCK_ID ? 'is-selected' : ''}`}
+          className={`layer-row ${(selectedTargetId === OFFERS_BLOCK_ID || selectedTargetIds.includes(OFFERS_BLOCK_ID)) ? 'is-selected' : ''}`}
           data-layer-id={OFFERS_BLOCK_ID}
           ref={(node) => {
             if (node) rowRefs.current.set(OFFERS_BLOCK_ID, node);
@@ -377,7 +385,7 @@ export function LayerTree() {
           onContextMenu={(event) => openTargetMenu(event, OFFERS_BLOCK_ID, offerTree.label)}
         >
           {renderLayerDragSpacer()}
-          <button type="button" className="layer-row-main" aria-label={`${offerTree.label} group`} onClick={() => selectOffersBlock()}>
+          <button type="button" className="layer-row-main" aria-label={`${offerTree.label} group`} onClick={(event) => handleTreeTargetClick(event,OFFERS_BLOCK_ID,selectOffersBlock)}>
             <span className="layer-kind-icon" data-tip="Offer group">
               <EditorIcon name="group" />
             </span>
@@ -402,7 +410,7 @@ export function LayerTree() {
                   className={[
                     'layer-row',
                     'layer-row-child',
-                    selectedTargetId === child.id || (!selectedTargetId && selectedLayerId === child.id) ? 'is-selected' : '',
+                    (selectedTargetId === child.id || selectedTargetIds.includes(child.id)) || (!selectedTargetId && selectedLayerId === child.id) ? 'is-selected' : '',
                     locked ? 'is-locked' : '',
                     hidden ? 'is-hidden-layer' : '',
                     layer ? layerDragClass(child.id) : '',
@@ -415,7 +423,7 @@ export function LayerTree() {
                   onContextMenu={(event) => openMenu(event, layer || { id: child.id, label: child.label, kind: child.kind })}
                 >
                   {layer ? renderLayerDragHandle(child.id, child.label) : renderLayerDragSpacer()}
-                  <button type="button" className="layer-row-main" aria-label={`${child.label} layer`} onClick={() => selectLayer(child.id)}>
+                  <button type="button" className="layer-row-main" aria-label={`${child.label} layer`} onClick={(event) => handleTreeTargetClick(event,child.id,() => selectLayer(child.id))}>
                     <span className="layer-kind-icon" data-tip={child.kind === 'offer-plus' ? 'Offer separator' : 'Offer slot'}>
                       <EditorIcon name={child.kind === 'offer-plus' ? 'add' : 'group'} />
                     </span>
@@ -451,7 +459,7 @@ export function LayerTree() {
                     {child.children.map((target) => (
                       <div
                         key={target.id}
-                        className={`layer-row layer-row-child ${selectedTargetId === target.id ? 'is-selected' : ''}`}
+                        className={`layer-row layer-row-child ${(selectedTargetId === target.id || selectedTargetIds.includes(target.id)) ? 'is-selected' : ''}`}
                         data-target-id={target.id}
                         ref={(node) => {
                           if (node) rowRefs.current.set(target.id, node);
@@ -460,7 +468,7 @@ export function LayerTree() {
                         onContextMenu={(event) => openMenu(event, layer || { id: child.id, label: child.label, kind: child.kind }, target)}
                       >
                         {renderLayerDragSpacer()}
-                        <button type="button" className="layer-row-main" aria-label={`${target.label} nested item`} onClick={() => selectTarget(target.id)}>
+                        <button type="button" className="layer-row-main" aria-label={`${target.label} nested item`} onClick={(event) => handleTreeTargetClick(event,target.id,() => selectTarget(target.id))}>
                           <span className="layer-kind-icon" data-tip="Nested text">
                             <EditorIcon name="text" />
                           </span>
@@ -492,7 +500,7 @@ export function LayerTree() {
                     className={[
                       'layer-row',
                       'layer-row-child',
-                      selectedTargetId === layer.id || (!selectedTargetId && selectedLayerId === layer.id) ? 'is-selected' : '',
+                      (selectedTargetId === layer.id || selectedTargetIds.includes(layer.id)) || (!selectedTargetId && selectedLayerId === layer.id) ? 'is-selected' : '',
                       layerDragClass(layer.id),
                     ].filter(Boolean).join(' ')}
                     data-layer-id={layer.id}
@@ -503,7 +511,7 @@ export function LayerTree() {
                     onContextMenu={(event) => openMenu(event, layer)}
                   >
                     {renderLayerDragHandle(layer.id, layer.label || layer.id)}
-                    <button type="button" className="layer-row-main" aria-label={`${layer.label || layer.id} layer`} onClick={() => selectLayer(layer.id)}>
+                    <button type="button" className="layer-row-main" aria-label={`${layer.label || layer.id} layer`} onClick={(event) => handleTreeTargetClick(event,layer.id,() => selectLayer(layer.id))}>
                       <span className="layer-kind-icon" data-tip={layer.kind || 'Layer'}>
                         <EditorIcon name={iconForLayer(layer)} />
                       </span>
@@ -585,8 +593,8 @@ export function LayerTree() {
                 <button type="button" disabled={!String(selectedTargetId).startsWith('canvas-group:')} onClick={ungroupTargets}>Ungroup selected group</button>
                 {groupError ? <p role="alert">{groupError}</p> : null}
                 {(sizeCreative?.canvasGroups || []).map((group) => <div key={group.id}>
-                  <button type="button" className={`layer-row-main ${selectedTargetId === group.id ? 'is-selected' : ''}`} onClick={() => setCanvasSelection(group.id,[group.id])}><EditorIcon name="group" /> {group.name} · {group.members.length} items</button>
-                  <div className="layer-child-list">{group.members.map((member) => <button key={member} type="button" className="layer-row-main" onClick={() => setCanvasSelection(member,[member],[group.id])}>{findCreativeTarget(document,size,member,activeScopes)?.label || member}</button>)}</div>
+                  <button type="button" className={`layer-row-main ${(selectedTargetId === group.id || selectedTargetIds.includes(group.id)) ? 'is-selected' : ''}`} onClick={(event) => handleTreeTargetClick(event,group.id,() => setCanvasSelection(group.id,[group.id]))}><EditorIcon name="group" /> {group.name} · {group.members.length} items</button>
+                  <div className="layer-child-list">{group.members.map((member) => <button key={member} type="button" className="layer-row-main" onClick={(event) => handleTreeTargetClick(event,member,() => setCanvasSelection(member,[member],[group.id]))}>{findCreativeTarget(document,size,member,activeScopes)?.label || member}</button>)}</div>
                 </div>)}
               </section>
               {groups.map((group) => (

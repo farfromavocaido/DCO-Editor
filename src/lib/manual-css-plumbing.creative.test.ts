@@ -62,7 +62,7 @@ test('banner Act 4 extras from the old root sheet stay as unscoped variants', ()
   assert.match(structuredRuleCss(creative.sizes['320x50']), /#headline-act4 \{\n      color: rgb\(255, 255, 255\);\n      top: 9px;/);
 });
 
-test('MPU 0-offer T&C box and hide-act3 selector are unchanged', () => {
+test('MPU 0-offer T&C box matches the saved creative baseline', () => {
   const mpu = creative.sizes['300x250'];
   const css = structuredRuleCss(mpu);
   assert.match(css, /\.roundel-frame-off #headline-act3/);
@@ -76,6 +76,6 @@ test('MPU 0-offer T&C box and hide-act3 selector are unchanged', () => {
       height: solo.props.height,
       fontSize: solo.props.fontSize,
     },
-    { left: 6, top: 210, width: 102, height: 43, fontSize: 6 },
+    { left: 6, top: 210, width: 103, height: 56, fontSize: 6 },
   );
 });

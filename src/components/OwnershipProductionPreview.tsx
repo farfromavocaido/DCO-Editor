@@ -1,9 +1,9 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { createRenderGeneration, readProductionTargets, seekProductionAnimations, waitForProductionDocument } from '@/lib/production-stage';
+import { createRenderGeneration, readProductionTargets, unionProductionBounds, seekProductionAnimations, waitForProductionDocument } from '@/lib/production-stage';
 
 /** Isolated production HTML: thumbnails never publish editor stage readiness. */
-export function OwnershipProductionPreview({ document, row, size, percent, label, targetId, maxHeight = 155, maxWidth = 240, onRevealTime }: any) {
+export function OwnershipProductionPreview({ document, row, size, percent, label, targetId, maxHeight = 155, maxWidth = 240, onRevealTime, targetIds, editingBounds, onPlacementChange, preserveAspect }: any) {
   const frame = useRef<HTMLIFrameElement | null>(null);
   const latest = useRef({percent,document});
   latest.current = {percent,document};
@@ -13,9 +13,15 @@ export function OwnershipProductionPreview({ document, row, size, percent, label
   const [ready, setReady] = useState(false);
   const [readySource,setReadySource] = useState<any>(null);
   const [highlight,setHighlight]=useState<any>(null);
+  const [dragBounds,setDragBounds]=useState<any>(null);
+  const selectedTargets = targetIds?.length ? targetIds : targetId ? [targetId] : [];
+  const selectedIn = (stage:HTMLElement) => {
+    const found=readProductionTargets(stage,[...new Set<string>(selectedTargets.map((id:string)=>id.split('::')[0]))]).filter(item=>selectedTargets.includes(item.id));
+    return found.length ? {...found[0],...unionProductionBounds(found)} : null;
+  };
   const mark = (doc:Document) => {
     const stage=doc.querySelector<HTMLElement>('.stage');
-    setHighlight(stage && targetId ? readProductionTargets(stage,[targetId.split('::')[0]]).find(item=>item.id===targetId) || null : null);
+    setHighlight(stage && selectedTargets.length ? selectedIn(stage) : null);
   };
   useEffect(() => {
     const generation = requests.current.next();
@@ -31,9 +37,31 @@ export function OwnershipProductionPreview({ document, row, size, percent, label
     })();
     return () => { controller.abort(); requests.current.next(); };
   }, [document,row,size]);
-  useEffect(() => {if (ready && frame.current?.contentDocument) {seekProductionAnimations(frame.current.contentDocument,percent,Number(document.clock?.durationS || 15));mark(frame.current.contentDocument);}},[percent,ready,document,targetId]);
+  useEffect(() => {if (ready && frame.current?.contentDocument) {seekProductionAnimations(frame.current.contentDocument,percent,Number(document.clock?.durationS || 15));mark(frame.current.contentDocument);}},[percent,ready,document,targetId,JSON.stringify(targetIds)]);
   const [width,height] = size.split('x').map(Number);
   const scale = Math.min(maxWidth / width, maxHeight / height, 1);
+  const beginPlacement = (event:React.PointerEvent,resize=false) => {
+    if(!editingBounds || !onPlacementChange)return;
+    event.preventDefault();event.stopPropagation();
+    const start={...editingBounds},x=event.clientX,y=event.clientY;
+    let next=start;
+    const move=(e:PointerEvent)=>{
+      const dx=(e.clientX-x)/scale,dy=(e.clientY-y)/scale;
+      if(resize){
+        const ratio=Math.abs(dx/start.width)>Math.abs(dy/start.height)?1+dx/start.width:1+dy/start.height;
+        next={...start,width:Math.max(4,preserveAspect?start.width*ratio:start.width+dx),height:Math.max(4,preserveAspect?start.height*ratio:start.height+dy)};
+      } else next={...start,left:start.left+dx,top:start.top+dy};
+      setDragBounds(next);
+    };
+    const cleanup=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',cancel);setDragBounds(null);};
+    const up=()=>{cleanup();onPlacementChange(next);};
+    const cancel=()=>cleanup();
+    window.addEventListener('pointermove',move);window.addEventListener('pointerup',up,{once:true});window.addEventListener('pointercancel',cancel,{once:true});
+  };
+  const box = highlight && dragBounds && editingBounds ? {
+    left:highlight.left+dragBounds.left-editingBounds.left,top:highlight.top+dragBounds.top-editingBounds.top,
+    width:highlight.width*dragBounds.width/editingBounds.width,height:highlight.height*dragBounds.height/editingBounds.height,
+  } : highlight;
   return <figure className="relationship-preview" data-preview-ready={ready && readySource?.document===document && readySource?.row===row && readySource?.size===size ? 'true' : 'false'}><figcaption>{label}</figcaption><div style={{width:width*scale,height:height*scale,position:'relative',overflow:'hidden'}}>
     {render && <iframe tabIndex={-1} ref={frame} key={render.generation} title={label} srcDoc={render.html} style={{width,height,transform:`scale(${scale})`,transformOrigin:'top left',border:0,visibility:ready?'visible':'hidden',pointerEvents:'none'}} onLoad={async event => {
       const doc = event.currentTarget.contentDocument;
@@ -41,7 +69,7 @@ export function OwnershipProductionPreview({ document, row, size, percent, label
       try { await waitForProductionDocument(doc); if (!requests.current.isCurrent(render.generation)) return; seekProductionAnimations(doc,latest.current.percent,Number(latest.current.document.clock?.durationS || 15));
         if (targetId && onRevealTime) {
           const stage=doc.querySelector<HTMLElement>('.stage')!;
-          const visible=()=>readProductionTargets(stage,[targetId.split('::')[0]]).find(item=>item.id===targetId);
+          const visible=()=>selectedIn(stage);
           if (!visible()) {
             let found=false;
             for (let at=0;at<=100;at+=5) {
@@ -59,7 +87,7 @@ export function OwnershipProductionPreview({ document, row, size, percent, label
         mark(doc); setReadySource({document,row,size}); setReady(true); }
       catch (cause) { if (requests.current.isCurrent(render.generation)) setError(String(cause)); }
     }} />}
-    {ready && highlight && <div aria-hidden="true" style={{position:'absolute',left:highlight.left*scale,top:highlight.top*scale,width:highlight.width*scale,height:highlight.height*scale,border:'2px solid #f5a623',boxSizing:'border-box',pointerEvents:'none'}}/>}
+    {ready && box && <div aria-hidden={!onPlacementChange || undefined} data-component-placement={onPlacementChange?'true':undefined} onPointerDown={event=>beginPlacement(event)} style={{position:'absolute',left:box.left*scale,top:box.top*scale,width:box.width*scale,height:box.height*scale,border:'2px solid #f5a623',boxSizing:'border-box',pointerEvents:onPlacementChange?'auto':'none',cursor:onPlacementChange?'move':undefined}}>{onPlacementChange&&<button type="button" aria-label="Resize proposed component" onPointerDown={event=>beginPlacement(event,true)} style={{position:'absolute',right:-5,bottom:-5,width:12,height:12,padding:0,border:'1px solid white',background:'#f5a623',cursor:'nwse-resize'}}/>}</div>}
     {!ready && <span role="status">{error || 'Rendering…'}</span>}
   </div>{ready && targetId && !highlight && <small>Element not visible at this time</small>}</figure>;
 }

@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { materializeComponentLinks } from './creative-components';
 import { campaignConditionFamilies } from './campaign-variants';
 import { excludedHeadlineLayerIdsForVariantRule, selectorForVariantRule } from './creative-css';
 
@@ -25,7 +26,7 @@ export const resolveOwnedFields = (base, baseSource, rules, field = 'props') => 
   const provenance = Object.fromEntries(Object.keys(values).map((key) => [key, baseSource]));
   for (const rule of rules) {
     for (const [key, value] of Object.entries(rule[field] || {})) {
-      if (value === undefined || value === null || value === '') continue;
+      if (value === undefined || value === null || (value === '' && !(field === 'fit' && ['frame', 'sharedGroup'].includes(key)))) continue;
       values[key] = value;
       provenance[key] = rule.ownershipFieldSources?.[field]?.[key] || rule.ownershipSource || { kind: 'variantRule', ruleId: rule.id, scope: rule.scope || '', layerId: rule.layerId, cssClass: rule.cssClass };
     }
@@ -81,6 +82,7 @@ export const sharedCreativeFieldReach = (document, source) => {
 
 /** Pure, idempotent compatibility compiler. Authored definitions are never rewritten. */
 export const materializeCreativeOwnership = (document: any): any => {
+  document = materializeComponentLinks(document);
   if (!document?.sharedDefinitions?.length && !Object.values(document?.sizes || {}).some((size) => size.localOverrides?.length || size.variantRules?.some((rule) => rule.ownershipGenerated))) return document;
   const next = clone(document);
   const ids = new Set();

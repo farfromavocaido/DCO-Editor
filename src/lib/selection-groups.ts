@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { findCreativeComponent, componentForTarget, componentBounds } from "./creative-components";
 import { findCanvasGroup, canvasGroupForMember } from "./canvas-groups";
 
 import {
@@ -104,12 +105,16 @@ export const selectionHierarchy = (
   activeScopes: string[] = [],
 ) => {
   if (document && size) {
+    const selectedComponent = findCreativeComponent(document, size, deepestTargetId);
+    if (selectedComponent) return [selectedComponent.id];
+    const component = componentForTarget(document, size, deepestTargetId);
     const selectedGroup = findCanvasGroup(document, size, deepestTargetId);
     if (selectedGroup) return [selectedGroup.id];
     const group = canvasGroupForMember(document, size, deepestTargetId);
     const path = selectionPathForTarget(document, size, deepestTargetId, activeScopes, offerCount);
-    if (group) return [group.id, ...path.filter((id) => id !== OFFERS_BLOCK_ID)];
-    return path;
+    const componentPath = component ? [component.id, ...path] : path;
+    if (group) return [group.id, ...componentPath.filter((id) => id !== OFFERS_BLOCK_ID)];
+    return componentPath;
   }
 
   const parsedCount = Number(offerCount);
@@ -134,6 +139,8 @@ export const selectionHierarchy = (
 };
 
 export const resolveLayerIdForSelection = (targetId: string, document: any = null, size = '') => {
+  const component = findCreativeComponent(document, size, targetId);
+  if (component) return parseCreativeTargetId(component.parts[0]?.targetId || "").layerId;
   const group = findCanvasGroup(document, size, targetId);
   if (group) return parseCreativeTargetId(group.members[0]).layerId;
   if (targetId === OFFERS_BLOCK_ID) return offerBlockLayerIds(2)[0] || 'offer-slot-1';
@@ -152,10 +159,13 @@ export const dragTargetIdsForSelection = (
   size = '',
   activeScopes: string[] = [],
 ) => {
-  const groupMembers = (id) => findCanvasGroup(document, size, id)?.members || [id];
-  if (selectedTargetIds.some((id) => findCanvasGroup(document, size, id))) {
+  const componentMembers = (id) => findCreativeComponent(document, size, id)?.parts.map((part) => part.targetId);
+  const groupMembers = (id) => componentMembers(id) || findCanvasGroup(document, size, id)?.members || [id];
+  if (selectedTargetIds.some((id) => findCanvasGroup(document, size, id) || findCreativeComponent(document, size, id))) {
     return [...new Set(selectedTargetIds.flatMap(groupMembers))];
   }
+  const component = componentMembers(selectedTargetId);
+  if (component) return component;
   const group = findCanvasGroup(document, size, selectedTargetId);
   if (group) return group.members;
   if (selectedTargetIds.length > 1) {
@@ -188,6 +198,15 @@ export const resolveSelectionMeta = (
   offerCount: number,
   activeScopes: string[] = [],
 ) => {
+  const component = findCreativeComponent(document, size, selectedTargetId);
+  if (component && selectedTargetIds.length <= 1) {
+    const bounds = componentBounds(document, size, component.id, activeScopes);
+    return { id: component.id, componentId: component.id, label: component.name, kind: 'component',
+      coordinateScope: 'canvas', bounds, values: bounds || {}, fit: {},
+      resize: component.resize, frameTargetId: component.frameTargetId,
+      parts: component.parts, members: component.parts.map((part) => part.targetId),
+      description: 'Double-click to edit parts.' };
+  }
   const canvasGroup = findCanvasGroup(document, size, selectedTargetId);
   if (canvasGroup && selectedTargetIds.length <= 1) return {
     id: canvasGroup.id, label: canvasGroup.name, kind: 'group', coordinateScope: 'canvas',

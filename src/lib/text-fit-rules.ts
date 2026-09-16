@@ -83,6 +83,8 @@ export const normalizeFitConfig = (fit = {}): Record<string, any> => {
   }
 
   // Explicit fields win over mode defaults (scope overrides use this).
+  if (fit.disabled !== undefined) normalized.disabled = Boolean(fit.disabled);
+  if (fit.static !== undefined) normalized.static = fit.static;
   if (fit.wrap !== undefined) normalized.wrap = Boolean(fit.wrap);
   if (fit.allowShrink !== undefined) normalized.allowShrink = Boolean(fit.allowShrink);
   if (fit.shared !== undefined) normalized.shared = Boolean(fit.shared);
@@ -160,12 +162,12 @@ const classRuleFit = (rule) => {
 };
 
 const attachScopeOverrides = (rules, variantRules = [], layers = []) => {
-  const targeted = variantRules.filter(rule => rule.fit && (rule.targetId || String(rule.layerId || '').startsWith('headline-act')));
+  const targeted = variantRules.filter(rule => rule.fit && Object.keys(rule.fit).length && (rule.targetId || String(rule.layerId || '').startsWith('headline-act')));
   variantRules = variantRules.filter(rule => !targeted.includes(rule));
   const ordered = variantRules.map((rule, index) => ({ rule, index }))
     .sort((a, b) => ownershipRuleSpecificity(a.rule) - ownershipRuleSpecificity(b.rule) || a.index - b.index);
   for (const { rule: variant } of ordered) {
-    if (!variant?.fit) continue;
+    if (!variant?.fit || !Object.keys(variant.fit).length) continue;
     const cssClass = String(variant.cssClass || variant.layerId || '');
     let rule = rules.find((item) => item.cssClass === cssClass);
     if (!rule) {
@@ -258,7 +260,7 @@ export const effectiveTextFitForTarget = (document, size, targetId, activeScopes
   const layer = (creative.layers || []).find(item => item.id === layerId);
   if (!layer) return {};
   const cssClass = childClass || (isHeadlineLayer(layer) ? HEADLINE_CSS_CLASS : layer.base?.cssClass || layer.id);
-  const rules = textFitRulesForSize(creative);
+  const rules = textFitRulesForSize(creative, Boolean(document?.variantModel));
   const specific = rules.find(rule => rule.targetId === targetId);
   const resolved = specific && resolveTextFitRule(specific, activeScopes);
   if (resolved) return resolved;

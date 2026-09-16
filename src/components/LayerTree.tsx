@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EditorIcon } from '@/components/EditorIcon';
 import { SampleFeedPanel } from '@/components/SampleFeedPanel';
 import { editableTargetsForLayer, groupedCreativeLayers, currentSizeCreative, findCreativeTarget, targetIdForLayerChild } from '@/lib/creative-model';
+import { creativeComponents } from '@/lib/creative-components';
 import { campaignScopes } from '@/lib/campaign-variants';
 import { isOfferLayerId, offerInteractionTree } from '@/lib/offer-interaction-model';
 import { OFFERS_BLOCK_ID, selectionHierarchy, toggleExplicitTargetSelection } from '@/lib/selection-groups';
@@ -94,7 +95,9 @@ export function LayerTree() {
   const sizeCreative = currentSizeCreative(document, size);
   const zOrderedLayers = [...(sizeCreative?.layers || [])].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
   const zOrderedLayerIds = zOrderedLayers.map((layer) => layer.id);
-  const groups = groupedCreativeLayers(zOrderedLayers);
+  const components = creativeComponents(document, size);
+  const componentLayerIds = new Set(components.flatMap((component) => component.parts.map((part) => part.targetId).filter((id) => !id.includes('::'))));
+  const groups = groupedCreativeLayers(zOrderedLayers.filter((layer) => !componentLayerIds.has(layer.id)));
   const activeTargetId = selectedTargetId || selectedLayerId;
   const activeScopes = useMemo(() => campaignScopes(document, previewRow), [document, previewRow]);
   const layerById = new Map((sizeCreative?.layers || []).map((layer) => [layer.id, layer]));
@@ -580,6 +583,28 @@ export function LayerTree() {
         {layersOpen ? (
           <div className="sidebar-section-body layer-section-body">
             <div className="layer-group-list">
+              {components.map((component) => (
+                <section className="layer-group" key={component.id}>
+                  <div className={`layer-row ${activeTargetId === component.id || selectedTargetIds.includes(component.id) ? 'is-selected' : ''}`}>
+                    <button type="button" className="layer-row-main" aria-label={`${component.name} component`}
+                      onClick={(event) => handleTreeTargetClick(event, component.id, () => setCanvasSelection(component.id, [component.id]))}
+                      onDoubleClick={() => setCanvasSelection(component.parts[0].targetId, [component.parts[0].targetId], [component.id])}>
+                      <EditorIcon name="group" /><span className="layer-name">{component.name}</span>
+                    </button>
+                  </div>
+                  <div className="layer-child-list">
+                    {component.parts.map((part) => {
+                      const layer = layerById.get(part.targetId);
+                      return layer ? renderLayerItem(layer) : (
+                        <button key={part.targetId} type="button" className="layer-row-main"
+                          onClick={(event) => handleTreeTargetClick(event, part.targetId, () => setCanvasSelection(part.targetId, [part.targetId], [component.id]))}>
+                          {findCreativeTarget(document, size, part.targetId, activeScopes)?.label || part.role}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+              ))}
               <section className="layer-group">
                 <h3>Canvas groups</h3>
                 <label>Group name<input value={canvasGroupName} onChange={(event) => setCanvasGroupName(event.target.value)} /></label>

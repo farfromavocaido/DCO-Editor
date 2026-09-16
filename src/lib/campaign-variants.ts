@@ -9,7 +9,7 @@ const legacy = { dimensions: [
   dimension('ctaShape','CTA','cta_type_enum','roundel',[['roundel','Round','cta-roundel'],['rectangle','Rect','cta-rect']]),
   dimension('includeRoundelFrame','Frame','include_roundel_frame_bool',false,[[false,'3 Acts','roundel-frame-off'],[true,'Offer roundel','roundel-frame-on']]),
   dimension('frameCount','Frames','include_roundel_frame_bool',false,[[false,'3 frames','frames-3'],[true,'4 frames','frames-4']],{derived:true,header:false}),
-  dimension('roundelMode','Roundel copy','roundel_value_text','',[['','Copy only','roundel-copy-only'],['value','Split','roundel-split']],{derived:true,header:false}),
+  dimension('roundelMode','Roundel copy','roundel_value_text','',[['','Text only','roundel-copy-only'],['value','Text + number','roundel-split']],{derived:true,header:false}),
   dimension('navyHeadlines','Ink','navy_headlines_bool',false,[[false,'White','white-headlines'],[true,'Navy','navy-headlines']]),
 ] };
 export const isGenericCampaign = document => Boolean(document?.variantModel);

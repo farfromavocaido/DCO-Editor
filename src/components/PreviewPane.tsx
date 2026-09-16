@@ -1,6 +1,8 @@
 // @ts-nocheck
 'use client';
 
+import { componentLinkForTarget } from '@/lib/creative-components';
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ProductionCreativeStage } from '@/components/ProductionCreativeStage';
@@ -226,6 +228,8 @@ export function PreviewPane() {
     if (!dragTargets.length) return;
     const beforeDocument = state.creativeDocument;
     const ghostStart = unionProductionBounds(productionTargets.filter(target => dragTargetIds.includes(target.id)));
+    const componentSelection = state.selectedTarget();
+    const componentStartBounds = componentSelection?.kind === 'component' ? componentSelection.bounds : null;
 
     const startX = event.clientX;
     const startY = event.clientY;
@@ -275,6 +279,10 @@ export function PreviewPane() {
 
       manipulationActive.current = true;
       if (ghostStart) setManipulationBounds({ ...ghostStart, left: ghostStart.left + deltaLeft, top: ghostStart.top + deltaTop });
+      if (componentStartBounds) {
+        useEditorStore.getState().updateSelectedComponentBounds({ ...componentStartBounds, left: componentStartBounds.left + deltaLeft, top: componentStartBounds.top + deltaTop }, { record: false, before: beforeDocument });
+        return;
+      }
       lastPositions = dragTargets.map((item) => {
         const left = Math.round(item.startLeft + deltaLeft);
         const top = Math.round(item.startTop + deltaTop);
@@ -357,6 +365,14 @@ export function PreviewPane() {
 
     const applyScale = (scaleFactor: number, record: boolean) => {
       lastScale = scaleFactor;
+      if (selectedTarget.kind === 'component') {
+        useEditorStore.getState().updateSelectedComponentBounds({
+          left: anchor.x + (startBounds.left - anchor.x) * scaleFactor,
+          top: anchor.y + (startBounds.top - anchor.y) * scaleFactor,
+          width: startBounds.width * scaleFactor, height: startBounds.height * scaleFactor,
+        }, { record: false, before: beforeDocument });
+        return;
+      }
       for (const snapshot of layerSnapshots) {
         for (const write of scaledFieldWritesForSnapshot(snapshot, scaleFactor, anchor)) {
           updateTargetValue(snapshot.targetId, write.field, write.value, { record });
@@ -375,8 +391,13 @@ export function PreviewPane() {
       const dy = (moveEvent.clientY - startY) / scale;
       manipulationActive.current = true;
       if (ghostStart) setManipulationBounds(frameResizeWritesFromHandle(ghostStart, handle, dx, dy, { keepRatio: resizeMode === 'scale' || moveEvent.shiftKey }).next);
-      const nextScale = uniformScaleFromHandle(startBounds, handle, dx, dy);
-      applyScale(nextScale, false);
+      if (selectedTarget.kind === 'component' && selectedTarget.resize === 'frame') {
+        const { next } = frameResizeWritesFromHandle(startBounds, handle, dx, dy, { keepRatio: moveEvent.shiftKey });
+        useEditorStore.getState().updateSelectedComponentBounds(next, { record: false, before: beforeDocument });
+      } else {
+        const nextScale = uniformScaleFromHandle(startBounds, handle, dx, dy);
+        applyScale(nextScale, false);
+      }
     };
 
     const onUp = () => {
@@ -396,11 +417,14 @@ export function PreviewPane() {
 
   const startTargetResize = useCallback((event: React.PointerEvent, handle: string) => {
     if (!getProductionStage()) return;
-    if (selectedTarget?.kind === 'group' || selectedTarget?.kind === 'multi') {
+    if (selectedTarget?.kind !== 'component' && componentLinkForTarget(document, size, selectedTarget?.id, activeScopes)) return;
+    if (selectedTarget?.kind === 'group' || selectedTarget?.kind === 'multi' || selectedTarget?.kind === 'component') {
       startGroupResize(event, handle);
       return;
     }
-    const targetId = selectedTarget?.members?.length === 1
+    const targetId = selectedTarget?.kind === 'component' && selectedTarget.frameTargetId
+      ? selectedTarget.frameTargetId
+      : selectedTarget?.members?.length === 1
       ? selectedTarget.members[0]
       : (selectedTarget?.id && !String(selectedTarget.id).startsWith('group:') ? selectedTarget.id : selectedTargetId);
     const target = targetId ? findCreativeTarget(document, size, targetId, activeScopes) : null;

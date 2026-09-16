@@ -5,6 +5,7 @@ import { campaignScopes, campaignVariantModel, campaignRowForScopes, isGenericCa
 
 import { create } from 'zustand';
 import { setCreativeOwnershipField } from '@/lib/creative-ownership';
+import { findCreativeComponent, componentLinkForTarget, moveCreativeComponent, componentBounds } from '@/lib/creative-components';
 import { createCanvasGroup, removeCanvasGroup, findCanvasGroup } from '@/lib/canvas-groups';
 import { beginProductionStage, waitForProductionStage, withProductionRestPose } from '@/lib/production-stage';
 
@@ -223,6 +224,8 @@ const editableBeatName = (value) => (
 );
 
 const defaultDrillChildId = (state, targetId) => {
+  const component = findCreativeComponent(state.creativeDocument, state.size, targetId);
+  if (component) return component.parts[0]?.targetId || '';
   const tree = offerInteractionTree(
     state.creativeDocument,
     state.size,
@@ -363,6 +366,8 @@ export const useEditorStore = create<any>((set, get) => ({
 
   selectionDragTargetIds: () => {
     const state = get();
+    if (!findCreativeComponent(state.creativeDocument, state.size, state.selectedTargetId)
+      && componentLinkForTarget(state.creativeDocument, state.size, state.selectedTargetId, state.activeScopes())) return [];
     const targetIds = dragTargetIdsForSelection(
       state.selectedTargetId || state.selectedLayerId,
       state.selectedTargetIds,
@@ -1108,7 +1113,8 @@ export const useEditorStore = create<any>((set, get) => ({
     const state = get();
     if (!state.creativeDocument) return;
     const selectedGroup = findCanvasGroup(state.creativeDocument, size, state.selectedTargetId);
-    const next = isGenericCampaign(state.creativeDocument) || selectedGroup?.members.includes(targetId)
+    const selectedComponent = findCreativeComponent(state.creativeDocument, size, state.selectedTargetId);
+    const next = isGenericCampaign(state.creativeDocument) || selectedGroup?.members.includes(targetId) || selectedComponent?.parts.some((part) => part.targetId === targetId)
       ? setCreativeOwnershipField(state.creativeDocument, size, targetId, activeScopes, 'values', field, value, 'local')
       : updateCreativeTargetDocumentValue(state.creativeDocument, size, targetId, activeScopes, field, value);
     set({ creativeDocument: next, creativeDirty: true });
@@ -1203,11 +1209,25 @@ export const useEditorStore = create<any>((set, get) => ({
     }]);
   },
 
+  updateSelectedComponentBounds: (bounds, { record = true, before } = {}) => {
+    const state = get();
+    const source = before || state.creativeDocument;
+    const next = moveCreativeComponent(source, state.size, state.selectedTargetId, state.activeScopes(), bounds);
+    set({ creativeDocument: next, creativeDirty: true });
+    get().setStatus('Unsaved creative changes', 'warn');
+    if (record && next !== source) get().pushHistory([{ kind: 'creativeDocument', before: source, after: next }]);
+  },
+
   nudgeSelectedTarget: (dx, dy) => {
     const state = get();
     const activeScopes = state.activeScopes();
     const targetIds = state.selectionDragTargetIds();
     if (!targetIds.length) return;
+    if (state.selectedTargetIds.length <= 1 && findCreativeComponent(state.creativeDocument, state.size, state.selectedTargetId)) {
+      const bounds = componentBounds(state.creativeDocument, state.size, state.selectedTargetId, activeScopes);
+      if (bounds) get().updateSelectedComponentBounds({ ...bounds, left: bounds.left + dx, top: bounds.top + dy });
+      return;
+    }
     const changes = [];
     for (const targetId of targetIds) {
       const target = findCreativeTarget(state.creativeDocument, state.size, targetId, activeScopes);
@@ -1244,7 +1264,7 @@ export const useEditorStore = create<any>((set, get) => ({
       state.offerCount,
       activeScopes,
     );
-    const isGroupSelection = selected?.kind === 'group'
+    const isGroupSelection = selected?.kind === 'component' || selected?.kind === 'group'
       || selected?.kind === 'multi'
       || targetIds.length > 1;
 
@@ -1263,6 +1283,10 @@ export const useEditorStore = create<any>((set, get) => ({
       );
       const { dx, dy } = computeGroupAlignDelta(groupBounds, reference, mode);
       const guides = alignmentGuidesForMode(mode, reference);
+      if (selected?.kind === 'component') {
+        get().updateSelectedComponentBounds({ ...groupBounds, left: groupBounds.left + dx, top: groupBounds.top + dy });
+        return guides;
+      }
       const changes = [];
 
       for (const targetId of targetIds) {

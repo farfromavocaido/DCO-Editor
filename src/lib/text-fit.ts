@@ -449,6 +449,7 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
 
   function applyRule(root, rule) {
     var resolved = resolveRule(rule, root);
+    if (resolved && resolved.disabled) return;
     if (!resolved) return undefined;
     if (resolved.frame) return applyPolicy(root, resolved);
     var elements = [];

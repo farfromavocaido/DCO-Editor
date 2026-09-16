@@ -11,7 +11,7 @@ export const selectionChromeKind = (
 ) => {
   if (!selectedTarget) return 'none';
   if (boundsMode === 'logical' || selectedTarget.boundsMode === 'logical') return 'logical-group';
-  if (selectedTarget.kind === 'group' || selectedTarget.kind === 'multi') return 'selection-group';
+  if (selectedTarget.kind === 'group' || selectedTarget.kind === 'multi' || selectedTarget.kind === 'component') return 'selection-group';
   if (selectedTarget.kind === 'nested') return 'text-box';
   if (selectedTarget.kind === 'text') return 'text-box';
   if (selectedTarget.kind === 'image') return 'image-box';
@@ -24,7 +24,7 @@ export const resizeHandlesForSelection = (
   selectedTargetId = '',
 ) => {
   if (!selectedTarget) return [];
-  if (selectedTarget.kind === 'group' || selectedTarget.kind === 'multi') return cornerHandles;
+  if (selectedTarget.kind === 'group' || selectedTarget.kind === 'multi' || selectedTarget.kind === 'component') return cornerHandles;
   if (selectedTarget.kind === 'nested') return cornerHandles;
   if (String(selectedTargetId || selectedTarget.id || '').startsWith('plus-')) return [];
   return cornerHandles;

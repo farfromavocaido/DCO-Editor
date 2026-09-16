@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import { validateCampaignVariantModel } from '@/lib/campaign-variants';
 import path from 'node:path';
 
+import { validateCreativeComponents, validateComponentLinks } from '@/lib/creative-components';
 import { validateCanvasGroups } from '@/lib/canvas-groups';
 import { materializeCreativeOwnership } from '@/lib/creative-ownership';
 import { isBlurLayer, validateBlurConfig } from '@/lib/blur-layer';
@@ -48,6 +49,8 @@ export const validateCreativeDocument = (document: CreativeDocument) => {
   validateCampaignVariantModel(document);
   materializeCreativeOwnership(document);
   validateCanvasGroups(document);
+  validateCreativeComponents(document);
+  validateComponentLinks(document);
   return document;
 };
 

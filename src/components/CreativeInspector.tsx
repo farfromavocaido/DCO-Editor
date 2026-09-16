@@ -12,7 +12,9 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { animationFamilyForLayer, animationIntentDefinitions, timelineSpanForClip } from '@/lib/animation-intents';
 import { compileAnimationClips } from '@/lib/creative-compiler';
-import { currentSizeCreative, isHeadlineLayer } from '@/lib/creative-model';
+import { componentLinkForTarget } from '@/lib/creative-components';
+import { ComponentLinkControls } from './ComponentLinkControls';
+import { currentSizeCreative, isHeadlineLayer, findCreativeTarget } from '@/lib/creative-model';
 import { campaignScopes } from '@/lib/campaign-variants';
 import { beatsForScopes } from '@/lib/timing-profiles';
 import { deriveSelectedTarget, OFFERS_BLOCK_ID } from '@/lib/selection-groups';
@@ -237,6 +239,41 @@ export function CreativeInspector() {
             <span className="panel-kicker">Inspector</span>
             <h2>No layer</h2>
           </div>
+        </div>
+      </aside>
+    );
+  }
+
+  const componentLink = componentLinkForTarget(document, size, selectedTarget.id, activeScopes);
+  const editComponentBounds = (field, raw) => {
+    const value = Number(raw);
+    const bounds = selectedTarget.bounds;
+    if (!bounds || !Number.isFinite(value) || (['width', 'height'].includes(field) && value <= 0)) return;
+    const next = { ...bounds, [field]: value };
+    if (selectedTarget.resize === 'proportional' && ['width', 'height'].includes(field)) {
+      const ratio = value / bounds[field];
+      next.width = bounds.width * ratio;
+      next.height = bounds.height * ratio;
+    }
+    useEditorStore.getState().updateSelectedComponentBounds(next);
+  };
+  if (selectedTarget.kind === 'component' || componentLink) {
+    return (
+      <aside className="creative-inspector" aria-label="Inspector">
+        <div className="workspace-panel-head"><div><span className="panel-kicker">Component</span><h2>{selectedTarget.label}</h2></div></div>
+        <div className="inspector-scroll">
+          {selectedTarget.kind === 'component' && <div className="inspector-grid">
+            {boxFields.map(field => <FieldControl key={field} label={({left:'X',top:'Y',width:'Width',height:'Height'})[field]} type="number"
+              value={selectedTarget.values?.[field] ?? ''} onChange={value => editComponentBounds(field, value)} />)}
+          </div>}
+          <ComponentLinkControls document={document} size={size} targetId={selectedTarget.id} scopes={activeScopes} />
+          {selectedTarget.kind === 'component' && <CreativeOwnershipControls key={`${size}/${selectedTarget.id}/${activeScopes.join('.')}`} document={document} size={size} target={selectedTarget} scopes={activeScopes} />}
+          {selectedTarget.kind === 'component' && <InspectorSection id="component-parts" title="Parts" open={true} onToggle={() => {}}>
+            {selectedTarget.parts.map((part) => <button key={part.targetId} type="button" className="layer-row-main"
+              onClick={() => useEditorStore.getState().setCanvasSelection(part.targetId, [part.targetId], [selectedTarget.id])}>
+              {findCreativeTarget(document, size, part.targetId, activeScopes)?.label || part.role}
+            </button>)}
+          </InspectorSection>}
         </div>
       </aside>
     );

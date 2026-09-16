@@ -1110,10 +1110,24 @@ const runtimeScript = (
         });`
     : '';
   return `
+    <script type="application/json" id="sse-production-fit-rules">${JSON.stringify(fitRules).replace(/</g, '\\u003c')}</script>
     <script>
       (function() {
         var root = null;
-        var textFitRules = ${JSON.stringify(fitRules)};
+        var textFitRules = JSON.parse(document.getElementById('sse-production-fit-rules').textContent);
+        window.updateSseDcoFitRules = function(rules) { textFitRules = rules; };
+        var settlementGeneration = 0;
+        function settleRuntime() {
+          var generation = ++settlementGeneration;
+          window.__SSE_DCO_SETTLED__ = Promise.resolve(document.fonts && document.fonts.ready).then(function() {
+            return new Promise(function(resolve) {
+              window.requestAnimationFrame(function() {
+                if (generation === settlementGeneration) commitOfferLayout();
+                window.requestAnimationFrame(resolve);
+              });
+            });
+          });
+        }
 
         function fieldValue(value) {
           if (value === undefined || value === null) return '';
@@ -1322,6 +1336,7 @@ const runtimeScript = (
         }
 
         function applyRuntimeState(row) {
+          window.__SSE_DCO_APPLIED_ROW__ = row;
           root = root || document.getElementById('page-content');
           if (!root) return;
           var data = normalizeProfileRow(row);
@@ -1369,6 +1384,7 @@ const runtimeScript = (
           commitOfferLayout();
           wireExit(data);
           startMotionWhenReady();
+          settleRuntime();
           window.__SSE_DCO_READY__ = true;
         }
 

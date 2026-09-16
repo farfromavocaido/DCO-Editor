@@ -187,3 +187,19 @@ percentage-based minimum font floor, so an unseen ratio cannot defeat an edited
 pixel minimum. Fixed font sizing ignores dormant shrink limits. Explicit frame
 policies use their independent controls instead of a contradictory legacy mode
 selector.
+
+## Inspector clarity and QA revisions (September 2026)
+
+Ordinary single-item inspector values now author a local value for the current format and feed conditions. Copy & share properties provides explicit offer-count and format destinations. Copy snapshots selected fields; Share with creates a named live link. Selected destination overrides are replaced, while overrides outside the selected scope and unrelated fields remain intact. Advanced conditions narrow a destination and are optional. Property inheritance exposes effective values and explicit source/local/reset actions; field labels stay compact. Grouped edits retain their existing group semantics.
+
+Preview renditions are called **Dynamic text** and **Fixed text as outlines**. Both are production HTML; the latter bakes the current fitted text as SVG paths and remains fixed-copy. Feed changes reuse the loaded font runtime without a render request. Compatible CSS/fitting changes use exporter-generated HTML as authority and retain the iframe. Structural/runtime/rendition changes replace it. A separate applied-source and settling gate prevents undo or superseded updates from publishing stale DOM as ready. Outline measurement reuses Chromium startup with fresh isolated contexts.
+
+QA uses immutable shell revisions keyed by saved document and renderer fingerprints. Holds and served HTML refer to the same saved snapshot; refresh publishes a new pointer without removing readers' old revisions. The sheet displays its document/renderer revision and feed identity, and checks freshness on focus/every 15 seconds. Unsaved editor changes are explicitly excluded. The sheet stays pinned during review and prompts Refresh shell when saved inputs change. Runtime settlement includes font readiness and refitting; both live QA and capture wait for it before seeking, rather than forcing motion-ready.
+
+Verification commands:
+
+- `npx tsx --tsconfig tsconfig.json scripts/verify-preview-updates.ts http://localhost:5186` — retained iframe, feed requests, layout/undo (including pending fitting), rendition replacement.
+- `npx tsx --tsconfig tsconfig.json scripts/verify-editor-ownership.ts http://localhost:5186` — local scope, copy/share, independence, undo/save, grouping, valid property selection.
+- `npx tsx --tsconfig tsconfig.json scripts/verify-qa-parity.ts http://localhost:5186` — actual QA sheet versus independently built agency output, including delayed fonts.
+
+These scripts leave campaign files unchanged. QA stress-copy clipping that also occurs in the exported ad remains an authored fitting concern; it is not corrected by changing campaign artwork to satisfy tests.

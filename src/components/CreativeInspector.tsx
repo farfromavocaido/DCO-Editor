@@ -1,6 +1,7 @@
 // @ts-nocheck
 'use client';
 
+import { editOwnershipVersion } from '@/lib/ownership-ui';
 import { effectiveTextFitForTarget } from '@/lib/text-fit-rules';
 import { TextFitPolicyControls } from './TextFitPolicyControls';
 import { MotionTimingControls } from './MotionTimingControls';
@@ -131,7 +132,7 @@ function InspectorSection({ id, title, open, onToggle, children }) {
 }
 
 export function CreativeInspector() {
-  const [openSections, setOpenSections] = useState(() => new Set(['layout', 'headline-offers', 'gradient', 'blur', 'type', 'style', 'animation']));
+  const [openSections, setOpenSections] = useState(() => new Set(['layout', 'headline-offers', 'gradient', 'blur', 'type', 'animation']));
   const [layerCode, setLayerCode] = useState('');
   const [codeError, setCodeError] = useState('');
   const document = useEditorStore((s) => s.creativeDocument);
@@ -153,14 +154,14 @@ export function CreativeInspector() {
   const roundelMode = useEditorStore((s) => s.roundelMode);
   const selectedLayer = useEditorStore((s) => s.selectedLayer());
   const selectedClip = useEditorStore((s) => s.selectedClip());
-  const updateTargetValue = useEditorStore((s) => s.updateCreativeTargetValue);
+  const updateGroupedTargetValue = useEditorStore((s) => s.updateCreativeTargetValue);
   const updateLayerMetadata = useEditorStore((s) => s.updateCreativeLayerMetadataValue);
   const updateLayerGradient = useEditorStore((s) => s.updateCreativeLayerGradientValue);
   const updateLayerBlur = useEditorStore((s) => s.updateCreativeLayerBlurValue);
   const promoteTargetToSharedStyle = useEditorStore((s) => s.promoteCreativeTargetToSharedStyle);
   const clearTargetOverrides = useEditorStore((s) => s.clearCreativeTargetOverrides);
   const updateLayerFit = useEditorStore((s) => s.updateCreativeLayerFitValue);
-  const updateTargetFit = useEditorStore((s) => s.updateCreativeTargetFitValue);
+  const updateGroupedTargetFit = useEditorStore((s) => s.updateCreativeTargetFitValue);
   const setResizeMode = useEditorStore((s) => s.setResizeMode);
   const replaceSelectedLayerFromCode = useEditorStore((s) => s.replaceSelectedLayerFromCode);
   const updateClip = useEditorStore((s) => s.updateCreativeLayerClipValue);
@@ -264,7 +265,17 @@ export function CreativeInspector() {
     && selectedLayer.id !== 'cta';
   const activeFit = selectedTarget.fit || {};
   const effectiveFitRule = effectiveTextFitForTarget(document, size, selectedTarget.id, activeScopes);
-  const applyFitUpdate = (field, value) => updateTargetFit(selectedTarget.id, field, value);
+  const editVersion = (targetId, domain, patch) => {
+    if (isGroupedSelection) {
+      for (const [field,value] of Object.entries(patch)) (domain === 'fit' ? updateGroupedTargetFit : updateGroupedTargetValue)(targetId,field,value);
+      return;
+    }
+    const state = useEditorStore.getState();
+    const next = editOwnershipVersion(state.creativeDocument,size,targetId,activeScopes,domain,patch);
+    state.applyCreativeOwnershipDocument(next, 'Updated this version');
+  };
+  const updateTargetValue = (targetId,field,value) => editVersion(targetId,'values',{[field]:value});
+  const applyFitUpdate = (field, value) => editVersion(selectedTarget.id,'fit',{[field]:value});
   const fittedFontSize = fitResults.get(selectedTarget.id) ?? (activeCssClass ? fitResults.get(activeCssClass) : undefined);
   const fittedTracking = fitTrackings?.has?.(selectedTarget.id) ? fitTrackings.get(selectedTarget.id) : activeCssClass && fitTrackings?.has?.(activeCssClass)
     ? fitTrackings.get(activeCssClass)
@@ -287,12 +298,10 @@ export function CreativeInspector() {
   const canClearOverride = overrideFields.some((field) => reusableStyleFields.includes(field));
   const setTextHorizontalAlign = (align) => {
     const justify = align === 'right' ? 'flex-end' : align === 'center' ? 'center' : 'flex-start';
-    updateTargetValue(selectedTarget.id, 'textAlign', align);
-    updateTargetValue(selectedTarget.id, 'justifyContent', justify);
+    editVersion(selectedTarget.id,'values',{textAlign:align,justifyContent:justify});
   };
   const setTextVerticalAlign = (align) => {
-    updateTargetValue(selectedTarget.id, 'display', 'flex');
-    updateTargetValue(selectedTarget.id, 'alignItems', align);
+    editVersion(selectedTarget.id,'values',{display:'flex',alignItems:align});
   };
   const fitMode = activeFit?.mode || effectiveFitRule.static || (effectiveFitRule.allowShrink === false ? 'wrap' : 'shrink');
   const minFontEnabled = canTextFit && (effectiveFitRule.frame ? effectiveFitRule.allowShrink !== false && !effectiveFitRule.static : fitMode === 'shrink');
@@ -312,27 +321,18 @@ export function CreativeInspector() {
       <div className="inspector-scroll">
         <InspectorSection
           id="layout"
-          title="Layout"
+          title={isGroupedSelection ? "Layout" : "Edit this version"}
           open={openSections.has('layout')}
           onToggle={() => toggleSection('layout')}
         >
-          <p className="inspector-note">{layoutNote}</p>
+          <p className="inspector-note">{isGroupedSelection ? layoutNote : "Changes apply to this format and the current feed conditions."}</p>
           <OfferArrangementControls document={document} size={size} target={selectedTarget} scopes={activeScopes} />
-          {!isGroupedSelection ? (
-            <p className="inspector-note">
-              Source: {selectedTarget.writeSource?.kind === 'variantRule'
-                ? `${selectedTarget.writeSource.scope} override`
-                : selectedTarget.writeSource?.kind === 'classRule'
-                  ? 'legacy group style'
-                  : 'base layer'}
-            </p>
-          ) : null}
           {!isGroupedSelection ? (
           <div className="inspector-grid">
             {boxFields.map((field) => (
               <FieldControl
                 key={field}
-                label={`${field} · ${fieldSourceLabel(selectedTarget.valueProvenance?.[field])}`}
+                label={({left:'X',top:'Y',width:'Width',height:'Height'})[field]}
                 type="text"
                 value={selectedTarget.values?.[field] ?? ''}
                 onChange={(value) => updateTargetValue(selectedTarget.id, field, value)}
@@ -344,7 +344,7 @@ export function CreativeInspector() {
           )}
         </InspectorSection>
 
-        {!isGroupedSelection ? <CreativeOwnershipControls document={document} size={size} target={selectedTarget} scopes={activeScopes} /> : null}
+        {!isGroupedSelection ? <CreativeOwnershipControls key={`${size}/${selectedTarget.id}/${activeScopes.join(".")}`} document={document} size={size} target={selectedTarget} scopes={activeScopes} /> : null}
 
         {isHeadlineSelection ? (
           <InspectorSection
@@ -480,7 +480,7 @@ export function CreativeInspector() {
             </div>
             {canTextFit ? <>
               <FieldControl
-                label={`Minimum size (% of design) · ${fieldSourceLabel(selectedTarget.fitProvenance?.minFontSizeRatio)}`}
+                label="Minimum size (% of design)"
                 type="text"
                 value={Number(effectiveFitRule.minFontSizeRatio || 0) * 100}
                 disabled={!minFontEnabled}
@@ -502,7 +502,7 @@ export function CreativeInspector() {
                   <option value="truncate">truncate</option>
                 </SelectControl> : null}
                 <FieldControl
-                  label={`Max lines · ${fieldSourceLabel(selectedTarget.fitProvenance?.maxLines)}`}
+                  label="Max lines"
                   type="text"
                   value={activeFit?.maxLines ?? effectiveFitRule.maxLines ?? ''}
                   onChange={(value) => applyFitUpdate('maxLines', value)}
@@ -548,21 +548,10 @@ export function CreativeInspector() {
 
         <InspectorSection
           id="style"
-          title="Legacy defaults"
+          title="Template defaults"
           open={openSections.has('style')}
           onToggle={() => toggleSection('style')}
         >
-          <div className="style-source-card">
-            <div>
-              <span className={`style-source-pill source-${sourceKind || 'base'}`}>{sourceLabel}</span>
-              <strong>{selectedTarget.kind === 'nested' ? activeCssClass : selectedLayer.id}</strong>
-              <p>
-                {selectedTarget.kind === 'nested'
-                  ? `Nested item uses the legacy .${activeCssClass} class and can be overridden for ${activeScopes.join(', ')}.`
-                  : `Layer class .${activeCssClass || selectedLayer.id} sits in the ${selectedLayer.group || 'Other'} library group.`}
-              </p>
-            </div>
-          </div>
           <div className="inspector-grid">
             <FieldControl
               label="template name"
@@ -578,7 +567,7 @@ export function CreativeInspector() {
             />
           </div>
           <div className="style-field-summary" aria-label="Reusable style fields">
-            <span title="Fields on the base layer or shared class">Baseline: {sharedFields.length ? sharedFields.join(', ') : 'none'}</span>
+            <span title="Fields on the base layer or shared class">Template: {sharedFields.length ? sharedFields.join(', ') : 'none'}</span>
             {!isHeadlineSelection ? (
               <span title="Fields overridden for the current offer, T&C, or CTA state">Override: {overrideFields.length ? overrideFields.join(', ') : 'none'}</span>
             ) : null}
@@ -591,7 +580,7 @@ export function CreativeInspector() {
               disabled={sourceKind !== 'variantRule'}
               onClick={() => promoteTargetToSharedStyle(selectedTarget.id, reusableStyleFields)}
             >
-              Copy active values to baseline
+              Update template defaults
             </button>
             <button
               type="button"
@@ -599,7 +588,7 @@ export function CreativeInspector() {
               disabled={!canClearOverride}
               onClick={() => clearTargetOverrides(selectedTarget.id, reusableStyleFields)}
             >
-              Clear override
+              Use template defaults
             </button>
           </div>
           ) : (

@@ -916,7 +916,7 @@ test('exports creative text fit rules for dynamic headline binding', async () =>
 
   const html = await renderStudioReadyHtml(document, '300x250');
 
-  assert.match(html, /var textFitRules = .*"cssClass":"sse-headline"/);
+  assert.match(html, /id="sse-production-fit-rules">.*"cssClass":"sse-headline"/);
   assert.match(html, /"minFontSize":22/);
   assert.match(html, /"maxLines":2/);
   assert.match(html, /bindOfferTexts\(data\);[\s\S]*?commitOfferLayout\(\);/);
@@ -943,7 +943,7 @@ test('uses sensible default text-fit minimums based on designed font size', asyn
   const document = await readCreativeDocument();
   const html = await renderStudioReadyHtml(document, '300x250');
 
-  const rulesJson = html.match(/var textFitRules = (\[.*\]);/)?.[1];
+  const rulesJson = html.match(/id="sse-production-fit-rules">(\[.*\])<\/script>/)?.[1];
   assert.ok(rulesJson, 'textFitRules missing from runtime');
   const rules = JSON.parse(rulesJson!);
   const headline = rules.find((rule: Record<string, unknown>) => rule.cssClass === 'sse-headline');

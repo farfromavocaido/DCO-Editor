@@ -46,6 +46,13 @@ export const startQaServer = async (
   workDir: string,
   port = 0,
 ): Promise<QaServer> => {
+  // A published cache root points at a complete immutable revision. Pin it for
+  // the lifetime of this capture server, including --skip-export runs.
+  const marker = path.join(workDir, '.qa-shell.json');
+  if (fs.existsSync(marker)) {
+    const info = JSON.parse(fs.readFileSync(marker, 'utf8')) as { workDir?: string };
+    if (info.workDir) workDir = info.workDir;
+  }
   const server = http.createServer((req, res) => {
     try {
       const urlPath = req.url || '/';

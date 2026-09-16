@@ -8,6 +8,8 @@ import {
   useState,
 } from 'react';
 
+import { waitForProductionDocument } from '@/lib/production-stage';
+import type { QaShellInfo } from '@/server/qa-agency-shell';
 import { seekAgencyTimeline } from '@/lib/agency-timeline-seek';
 import { backgroundImageFieldName, CREATIVE_AD_SIZES } from '@/lib/feed-background';
 import type { HoldSample } from '@/lib/hold-samples';
@@ -94,21 +96,30 @@ const waitForAgencyReady = async (win: Window, timeoutMs = 8000) => {
   throw new Error('Agency runtime did not become ready');
 };
 
+const frameGenerations = new WeakMap<HTMLIFrameElement, number>();
+
 const injectHoldFrame = async (
   iframe: HTMLIFrameElement,
   row: Record<string, unknown>,
   tMs: number,
 ) => {
+  const generation = (frameGenerations.get(iframe) || 0) + 1;
+  frameGenerations.set(iframe, generation);
+  iframe.dataset.ready = 'false';
   const win = iframe.contentWindow;
   if (!win) return;
   await waitForAgencyReady(win);
+  await waitForProductionDocument(win.document);
+  if (frameGenerations.get(iframe) !== generation || !iframe.isConnected) return;
   const apply = (win as Window & {
     applySseDcoRuntimeState: (next: Record<string, unknown>) => void;
   }).applySseDcoRuntimeState;
   apply(row);
+  await waitForProductionDocument(win.document);
+  if (frameGenerations.get(iframe) !== generation || !iframe.isConnected) return;
   seekAgencyTimeline(win.document.getElementById('page-content'), tMs);
-  await new Promise((resolve) => window.setTimeout(resolve, 80));
-  seekAgencyTimeline(win.document.getElementById('page-content'), tMs);
+  iframe.dataset.ready = 'true';
+  iframe.dataset.holdMs = String(tMs);
 };
 
 function QaSegmentedControl({
@@ -164,6 +175,8 @@ export function QaReviewApp() {
   const [cellMaxEdge, setCellMaxEdge] = useState(CELL_EDGE_DEFAULT);
   const [holdsBySize, setHoldsBySize] = useState<HoldsResponse['bySize']>({});
   const [shellReady, setShellReady] = useState(false);
+  const [shellInfo, setShellInfo] = useState<QaShellInfo | null>(null);
+  const [freshness, setFreshness] = useState('Checking saved document…');
   const [iframeNonce, setIframeNonce] = useState(0);
   const [status, setStatus] = useState('Loading…');
   const [error, setError] = useState('');
@@ -235,6 +248,8 @@ export function QaReviewApp() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Shell export failed');
+    setShellInfo(data);
+    setFreshness('Current saved document');
     setShellReady(true);
     setIframeNonce((n) => n + 1);
     setStatus(`Agency shell ready (${data.sizes?.length || 0} sizes)`);
@@ -298,14 +313,14 @@ export function QaReviewApp() {
   }, [sessionKey]);
 
   useEffect(() => {
-    if (!mergedRow || !monitoredSizes.length) return;
+    if (!mergedRow || !monitoredSizes.length || !shellInfo) return;
     let cancelled = false;
     const timer = window.setTimeout(async () => {
       try {
         const res = await fetch('/api/qa/holds', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ row: mergedRow, sizes: monitoredSizes }),
+          body: JSON.stringify({ row: mergedRow, sizes: monitoredSizes, revision: shellInfo?.revision }),
         });
         const data = await res.json() as HoldsResponse & { error?: string };
         if (!res.ok) throw new Error(data.error || 'Failed to derive holds');
@@ -323,7 +338,24 @@ export function QaReviewApp() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [mergedRow, monitoredSizes]);
+  }, [mergedRow, monitoredSizes, shellInfo]);
+
+  useEffect(() => {
+    if (!shellInfo) return;
+    let cancelled = false;
+    const check = async () => {
+      try {
+        const response = await fetch('/api/qa/shell', { cache: 'no-store' });
+        if (!response.ok) throw new Error('Freshness check failed');
+        const latest = await response.json() as QaShellInfo;
+        if (!cancelled) setFreshness(latest.documentRevision === shellInfo.documentRevision && latest.rendererRevision === shellInfo.rendererRevision
+          ? 'Current saved document' : 'Saved document or renderer changed — refresh shell');
+      } catch { if (!cancelled) setFreshness('Freshness check unavailable — refresh to retry'); }
+    };
+    const timer = window.setInterval(check, 15000);
+    window.addEventListener('focus', check);
+    return () => { cancelled = true; window.clearInterval(timer); window.removeEventListener('focus', check); };
+  }, [shellInfo]);
 
   const holdTimesKey = samples.map((sample) => sample.tMs).join(',');
 
@@ -450,7 +482,7 @@ export function QaReviewApp() {
   const zoomPct = Math.round((cellMaxEdge / CELL_EDGE_DEFAULT) * 100);
 
   const iframeSrc = viewSize && shellReady
-    ? `/qa-shell/ads/${viewSize}/index.html?n=${iframeNonce}`
+    ? `/qa-shell/revisions/${shellInfo?.revision}/ads/${viewSize}/index.html?n=${iframeNonce}`
     : 'about:blank';
 
   return (
@@ -459,7 +491,7 @@ export function QaReviewApp() {
         <div>
           <h1>Agency QA</h1>
           <p className="qa-sub">
-            Canonical-agency hold sheet · same shell as capture.
+            Saved document · canonical-agency hold sheet. Unsaved editor changes are not included.
             {' '}
             <a href="/">Editor</a>
           </p>
@@ -597,6 +629,12 @@ export function QaReviewApp() {
           </div>
         </div>
 
+        <p className="qa-sub" aria-live="polite">
+          {freshness}<br />
+          {shellInfo ? `Document ${shellInfo.documentRevision.slice(0, 12)} · renderer ${shellInfo.rendererRevision.slice(0, 12)}` : ''}<br />
+          {shellInfo ? `Exported ${new Date(shellInfo.exportedAt).toLocaleString()}` : ''}<br />
+          Feed: {activePreset ? `${activePreset} stress copy` : 'custom QA copy'} · {sessionKey}
+        </p>
         <p className={`qa-status${error ? ' is-error' : ''}`}>
           {error || status}
         </p>
@@ -782,7 +820,7 @@ export function QaReviewApp() {
                           iframeRefs.current.get(index)!,
                           mergedRow,
                           sample.tMs,
-                        ).catch(() => {});
+                        ).catch((err) => setError(err instanceof Error ? err.message : String(err)));
                       }}
                     />
                   </div>

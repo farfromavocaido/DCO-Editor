@@ -4,12 +4,13 @@ import {
   controlsFromFeedRow,
 } from '@/lib/feed-model';
 import { readCreativeDocumentForCampaign } from '@/server/creative-document';
-import { QA_DCO_CAMPAIGN_ID } from '@/server/qa-agency-shell';
+import { QA_DCO_CAMPAIGN_ID, readQaRevisionDocument } from '@/server/qa-agency-shell';
 import { errorResponse, jsonResponse } from '@/server/http';
 
 export const runtime = 'nodejs';
 
 type HoldsBody = {
+  revision?: string;
   row?: Record<string, unknown>;
   sizes?: string[];
   intervalMs?: number;
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as HoldsBody;
     const row = body.row || {};
-    const document = await readCreativeDocumentForCampaign(QA_DCO_CAMPAIGN_ID);
+    const document = body.revision ? await readQaRevisionDocument(body.revision) : await readCreativeDocumentForCampaign(QA_DCO_CAMPAIGN_ID);
     const allSizes = Object.keys(document.sizes || {});
     const sizes = (body.sizes?.length ? body.sizes : allSizes)
       .filter((size) => allSizes.includes(size));

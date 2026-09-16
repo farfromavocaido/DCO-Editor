@@ -87,6 +87,14 @@ export async function waitForProductionDocument(doc: Document, timeoutMs = 20000
   const started = Date.now();
   // The production runtime releases .motion-ready only after fit and offer layout.
   while (Date.now() - started < timeoutMs) {
+    const settled = (doc.defaultView as (Window & { __SSE_DCO_SETTLED__?: Promise<void> }) | null)?.__SSE_DCO_SETTLED__;
+    if (settled) {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        await Promise.race([settled, new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Production fitting did not settle')), Math.max(1, timeoutMs - (Date.now() - started))); })]);
+      } finally { if (timer) clearTimeout(timer); }
+      if (settled !== (doc.defaultView as any)?.__SSE_DCO_SETTLED__) continue;
+    }
     const stage = doc.querySelector<HTMLElement>('.stage.motion-ready');
     const fontsReady = !doc.fonts || doc.fonts.status === 'loaded';
     const images = Array.from(doc.images);

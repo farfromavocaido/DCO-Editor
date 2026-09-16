@@ -272,7 +272,7 @@ export function TopBar() {
                   setMoreOpen(false);
                 }}
               >
-                Export HTML (font)
+                Export HTML (dynamic text)
               </button>
               <button
                 type="button"
@@ -282,7 +282,7 @@ export function TopBar() {
                   setMoreOpen(false);
                 }}
               >
-                Export HTML (SVG outlines)
+                Export HTML (fixed text as outlines)
               </button>
               <button
                 type="button"
@@ -353,7 +353,7 @@ export function TopBar() {
                   setMoreOpen(false);
                 }}
               >
-                Export client ZIP (SVG outlines)
+                Export client ZIP (fixed text as outlines)
               </button>
               <button
                 type="button"

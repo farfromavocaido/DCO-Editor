@@ -1,3 +1,4 @@
+import { waitForProductionDocument } from '../../src/lib/production-stage';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -164,11 +165,7 @@ const waitForRuntime = async (page: Page) => {
     { timeout: 45_000 },
   );
 
-  await page.evaluate(`(async () => {
-    if (document.fonts && document.fonts.ready) {
-      try { await document.fonts.ready; } catch (e) {}
-    }
-  })()`);
+  await page.evaluate(`(${waitForProductionDocument.toString()})(document, 45000)`);
 };
 
 const applyFeedRow = async (page: Page, row: Record<string, unknown>) => {
@@ -180,8 +177,6 @@ const applyFeedRow = async (page: Page, row: Record<string, unknown>) => {
       throw new Error('applySseDcoRuntimeState is not available');
     }
     api(feedRow);
-    const root = document.getElementById('page-content');
-    if (root) root.classList.add('motion-ready');
     const h1 = document.querySelector('#headline-act1');
     const slot = document.getElementById('offer1');
     const value = slot && slot.querySelector('.offer-value');
@@ -200,19 +195,7 @@ const applyFeedRow = async (page: Page, row: Record<string, unknown>) => {
     );
   }
 
-  await page.evaluate(`(async () => {
-    const img = document.getElementById('bg-image');
-    if (!img || !img.getAttribute('src')) return false;
-    if (img.complete && img.naturalWidth > 0) return true;
-    await new Promise((resolve) => {
-      const done = () => resolve(true);
-      img.addEventListener('load', done, { once: true });
-      img.addEventListener('error', done, { once: true });
-      setTimeout(done, 5000);
-    });
-    return !!(img.complete && img.naturalWidth > 0);
-  })()`);
-  await page.waitForTimeout(100);
+  await page.evaluate(`(${waitForProductionDocument.toString()})(document, 45000)`);
 };
 
 const withBackgroundUrls = (
@@ -398,7 +381,10 @@ const writeReport = async (
 
 export const runCapture = async (options: CaptureOptions) => {
   const matrix = loadCopyMatrix();
-  const workDir = options.workDir || DEFAULT_QA_WORK_DIR;
+  let workDir = options.workDir || DEFAULT_QA_WORK_DIR;
+  const shellInfo = JSON.parse(await fs.readFile(path.join(workDir, '.qa-shell.json'), 'utf8'));
+  workDir = shellInfo.workDir || workDir;
+  const capturedDocument = JSON.parse(await fs.readFile(path.join(workDir, '.qa-document.json'), 'utf8'));
   const sizes = (options.filters?.sizes?.length ? options.filters.sizes : matrix.sizes)
     .filter((size) => matrix.sizes.includes(size));
   if (!sizes.length) throw new Error('No sizes selected');
@@ -524,6 +510,7 @@ export const runCapture = async (options: CaptureOptions) => {
       matrix,
       filters: options.filters,
       matrixRows,
+      document: capturedDocument,
     });
     process.stdout.write(`Hold samples: ${holdSamples.sessionCount} sessions → ${holdSamples.path}\n`);
 

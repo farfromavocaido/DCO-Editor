@@ -10,9 +10,7 @@ export const seekAgencyTimeline = (
 ): number => {
   if (!root) return 0;
   const t = Number(timeMs) || 0;
-  if (!root.classList.contains('motion-ready')) {
-    root.classList.add('motion-ready');
-  }
+  if (!root.classList.contains('motion-ready')) return 0;
   const getAnimations = (root as Element & {
     getAnimations?: (opts?: { subtree?: boolean }) => Animation[];
   }).getAnimations;
@@ -38,9 +36,7 @@ export const agencyTimelineSeekEvaluateSource = (timeMs: number) => (
     var t = ${Number(timeMs)};
     var root = document.getElementById('page-content');
     if (!root) return 0;
-    if (!root.classList.contains('motion-ready')) {
-      root.classList.add('motion-ready');
-    }
+    if (!root.classList.contains('motion-ready')) return 0;
     var animations = root.getAnimations ? root.getAnimations({ subtree: true }) : [];
     for (var i = 0; i < animations.length; i += 1) {
       try {

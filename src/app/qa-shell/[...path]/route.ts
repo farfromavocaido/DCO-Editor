@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { ensureCanonicalAgencyShell, DEFAULT_QA_WORK_DIR } from '@/server/qa-agency-shell';
+import { ensureCanonicalAgencyShell, qaRevisionDirectory } from '@/server/qa-agency-shell';
 import { errorResponse, safeJoin } from '@/server/http';
 import { projectRoot } from '@/server/paths';
 
@@ -26,7 +26,6 @@ const MIME: Record<string, string> = {
 type Params = { params: Promise<{ path: string[] }> };
 
 const resolveQaShellFile = async (parts: string[]) => {
-  await ensureCanonicalAgencyShell();
   const joined = parts.map((part) => decodeURIComponent(part)).join('/');
 
   // `/qa-shell/assets/…` → campaign/assets (same alias as capture server)
@@ -35,7 +34,13 @@ const resolveQaShellFile = async (parts: string[]) => {
     return safeJoin(path.resolve(projectRoot, 'assets'), relative || '.');
   }
 
-  return safeJoin(DEFAULT_QA_WORK_DIR, joined);
+  if (parts[0] === 'revisions' && parts[1]) {
+    const relative = parts.slice(2).join('/');
+    if (relative.startsWith('.')) throw new Error('ENOENT');
+    return safeJoin(qaRevisionDirectory(parts[1]), relative);
+  }
+  const info = await ensureCanonicalAgencyShell();
+  return safeJoin(info.workDir, joined);
 };
 
 export async function GET(_request: Request, { params }: Params) {

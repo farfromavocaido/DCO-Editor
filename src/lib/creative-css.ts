@@ -77,7 +77,11 @@ export const targetIdToSelector = (targetId, priority = 1) => {
 
 export const selectorForVariantRule = (rule: Record<string, unknown>) => {
   if (rule.targetId) {
-    const scope = selectorForVariantScope(rule.scope);
+    const matchingScope = selectorForVariantScope(rule.scope);
+    // Splitting a local rule changes its match, never its original cascade weight.
+    const scope = rule.ownershipScopeSpecificity !== undefined
+      ? `${'.stage'.repeat(Math.max(0, Number(rule.ownershipScopeSpecificity)))}${matchingScope ? `:where(${matchingScope})` : ''}`
+      : matchingScope;
     return `${scope} ${targetIdToSelector(rule.targetId, rule.ownershipPriority || 1)}`.trim();
   }
   const layerId = String(rule.layerId || '');

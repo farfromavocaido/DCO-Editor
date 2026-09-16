@@ -118,6 +118,7 @@ const main = async () => {
   if (!args.skipExport) {
     console.log('Exporting canonical-agency shell…');
     const exported = await exportCanonicalAgencyShell(args.workDir);
+    args.workDir = exported.workDir;
     console.log(`Shell ready: ${exported.entryCount} entries → ${exported.workDir}`);
   } else {
     console.log(`Skipping export; using ${args.workDir}`);

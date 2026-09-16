@@ -7,6 +7,8 @@ import {
   type ProductionTarget,
 } from '@/lib/production-stage';
 
+import { applyProductionUpdate, describeProductionUpdate, type ProductionUpdate } from '@/lib/production-update';
+
 type Props = {
   renderMode: 'font' | 'outline';
   document: Record<string, any>;
@@ -21,7 +23,7 @@ type Props = {
   onContextMenu: (event: React.MouseEvent, targetId: string) => void;
 };
 
-type RenderedCreative = { html: string; generation: number; document: Props['document']; row: Props['row']; size: string; renderMode: Props['renderMode'] };
+type RenderedCreative = { html: string; generation: number; document: Props['document']; row: Props['row']; size: string; renderMode: Props['renderMode']; update: ProductionUpdate | null };
 
 export function ProductionCreativeStage(props: Props) {
   const { document, row, size, renderMode, percent, layerIds, hiddenLayerIds, onTargets } = props;
@@ -30,6 +32,13 @@ export function ProductionCreativeStage(props: Props) {
   const latest = useRef(props);
   latest.current = props;
   const [displayed, setDisplayed] = useState<RenderedCreative | null>(null);
+  // DOM can be updated before asynchronous fitting finishes. Track that separately
+  // from the published frame so undo during settlement cannot reuse stale CSS.
+  const appliedDocument = useRef<Props['document'] | null>(null);
+  const appliedRow = useRef<Props['row'] | null>(null);
+  const [settling, setSettling] = useState(true);
+  const displayedRef = useRef<RenderedCreative | null>(null);
+  displayedRef.current = displayed;
   const [pending, setPending] = useState<RenderedCreative | null>(null);
   const [error, setError] = useState('');
   const [targets, setTargets] = useState<ProductionTarget[]>([]);
@@ -61,26 +70,57 @@ export function ProductionCreativeStage(props: Props) {
     const generation = requests.current.next();
     const controller = new AbortController();
     beginProductionStage(size);
+    setSettling(true);
     setError('');
     setPending(null);
     if (displayed?.size !== size) { setTargets([]); onTargets([]); }
-    // Coalesce pointer-move writes, while generation invalidation is immediate.
+    // Keep the production iframe for feed and compatible CSS/fitting changes.
+    // No creative paint is reconstructed by the editor.
     const timer = setTimeout(async () => {
       try {
-        const response = await fetch(`/api/creative/${encodeURIComponent(size)}/view`, {
-          method: 'POST', headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ document, row, renderMode }), signal: controller.signal,
-        });
-        if (!response.ok) throw new Error((await response.json()).error || 'Creative render failed');
-        const html = await response.text();
-        if (requests.current.isCurrent(generation)) setPending({ html, generation, document, row, size, renderMode });
+        const previous = displayedRef.current;
+        const frame = previous && frameRefs.current.get(previous.generation);
+        const doc = frame?.contentDocument;
+        const reusable = previous?.size === size && previous.renderMode === 'font' && renderMode === 'font' && doc;
+        let html = previous?.html || '';
+        let update = previous?.update || null;
+        let reused = false;
+        if (reusable && previous.document === document && appliedDocument.current === document) {
+          const runtime = doc.defaultView as Window & { applySseDcoRuntimeState?: (row: Props['row']) => void };
+          if (runtime.applySseDcoRuntimeState) { runtime.applySseDcoRuntimeState(row); appliedRow.current = row; reused = true; }
+        } else {
+          const response = await fetch(`/api/creative/${encodeURIComponent(size)}/view`, {
+            method: 'POST', headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ document, row, renderMode }), signal: controller.signal,
+          });
+          if (!response.ok) throw new Error((await response.json()).error || 'Creative render failed');
+          html = await response.text();
+          if (!requests.current.isCurrent(generation)) return;
+          update = renderMode === 'font' ? describeProductionUpdate(html, new DOMParser()) : null;
+          if (reusable) {
+            reused = applyProductionUpdate(doc, previous.update, update, row);
+            if (reused) { appliedDocument.current = document; appliedRow.current = row; }
+          }
+        }
+        if (reused && doc && previous && frame) {
+          const stage = await waitForProductionDocument(doc);
+          if (!requests.current.isCurrent(generation)) return;
+          measure(frame);
+          publishProductionStage(stage, { document, row });
+          // Retain srcDoc and frame key: changing either would trigger another load.
+          setDisplayed({ ...previous, document, row, update });
+          setSettling(false);
+          setPending(null);
+        } else if (requests.current.isCurrent(generation)) {
+          setPending({ html, generation, document, row, size, renderMode, update });
+        }
       } catch (cause) {
         if (!requests.current.isCurrent(generation) || controller.signal.aborted) return;
         const failure = cause instanceof Error ? cause : new Error(String(cause));
         failProductionStage(failure);
         setError(failure.message);
       }
-    }, 50);
+    }, renderMode === 'outline' ? 180 : 16);
     return () => { clearTimeout(timer); controller.abort(); requests.current.next(); };
   }, [document, row, size, renderMode, onTargets]);
 
@@ -93,10 +133,16 @@ export function ProductionCreativeStage(props: Props) {
     try {
       const stage = await waitForProductionDocument(doc);
       if (!requests.current.isCurrent(generation) || render.document !== latest.current.document || render.row !== latest.current.row || render.size !== latest.current.size || render.renderMode !== latest.current.renderMode) return;
+      // Only the initial exporter styles participate in live replacement.
+      // Runtime/headline and editor styles remain runtime-owned.
+      Array.from(doc.querySelectorAll('style')).slice(0, render.update?.css.length || 0).forEach(style => { style.dataset.productionStyle = 'true'; });
       stage.dataset.productionStage = 'true';
       stage.dataset.previewRenderMode = render.renderMode;
       measure(frame);
       publishProductionStage(stage, { document: render.document, row: render.row });
+      appliedDocument.current = render.document;
+      appliedRow.current = render.row;
+      setSettling(false);
       setDisplayed(render);
       setPending(null);
     } catch (cause) {
@@ -107,7 +153,7 @@ export function ProductionCreativeStage(props: Props) {
     }
   };
 
-  const displayReady = displayed?.document === document && displayed?.row === row && displayed?.size === size && displayed?.renderMode === renderMode;
+  const displayReady = !settling && appliedDocument.current === document && appliedRow.current === row && displayed?.document === document && displayed?.row === row && displayed?.size === size && displayed?.renderMode === renderMode;
   const hasDisplay = displayed?.size === size;
   const hit = (event: React.MouseEvent) => {
     if (!displayReady) return null;

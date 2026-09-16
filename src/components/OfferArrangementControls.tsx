@@ -25,7 +25,7 @@ export function OfferArrangementControls({document,size,target,scopes}:Props) {
       ? 'You own slot, plus and subline positions for this preview state. Automatic spacing and subline positioning are off.'
       : 'Automatic layout can adjust offer spacing, plus positions and side-by-side subline X. Choose Manual to preserve the current arrangement and move these items.'}</p>
     <p className="inspector-note">Applies to the whole active offer arrangement. Other preview states are unchanged. Returning to Automatic restores the authored arrangement before this manual session.</p>
-    {renderMode!=='font'?<button type="button" onClick={()=>setRenderMode('font')}>Switch to Live HTML to measure arrangement</button>:null}
+    {renderMode!=='font'?<button type="button" onClick={()=>setRenderMode('font')}>Switch to Dynamic text to measure arrangement</button>:null}
     {busy?<p role="status">Measuring the production arrangement…</p>:null}
     {error?<p role="alert">{error}</p>:null}
   </div>;

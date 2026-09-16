@@ -25,7 +25,7 @@ test('seekAgencyTimeline pauses animations and sets currentTime', () => {
   };
   const root = {
     classList: {
-      contains: () => false,
+      contains: () => true,
       add() {},
     },
     getAnimations() { return [anim]; },
@@ -33,4 +33,15 @@ test('seekAgencyTimeline pauses animations and sets currentTime', () => {
 
   assert.equal(seekAgencyTimeline(root, 1500), 1);
   assert.deepEqual(calls, [{ pause: true }, { time: 1500 }]);
+});
+
+
+test('seeking never releases a runtime that is still fitting', () => {
+  const root = {
+    classList: { contains: () => false, add() { throw new Error('must not force readiness'); } },
+    getAnimations() { throw new Error('must not seek before readiness'); },
+  } as unknown as Element;
+  assert.equal(seekAgencyTimeline(root, 1500), 0);
+  const evaluate = new Function('document', `return ${agencyTimelineSeekEvaluateSource(1500)}`);
+  assert.equal(evaluate({ getElementById: () => root }), 0);
 });

@@ -6,7 +6,7 @@ export const ownershipScopeIsActive = (scope: unknown, scopes: string[] = []) =>
 
 /** Mirror the selectors emitted for legacy documents until migration is explicit. */
 export const ownershipRuleSpecificity = (rule) => {
-  const selector = selectorForVariantRule(rule);
+  const selector = selectorForVariantRule(rule).replace(/:where\([^)]*\)/g, '');
   return (selector.match(/#[\w-]+/g) || []).length * 1000
     + (selector.match(/\.[\w-]+|\[[^\]]+\]/g) || []).length;
 };
@@ -130,6 +130,7 @@ export const materializeCreativeOwnership = (document: any): any => {
         id: `ownership:local:${size}:${index}`,
         ...targetIdentity(next, size, local.targetId), scope: local.scope || '',
         props: local.values || {}, fit: local.fit || {}, ownershipGenerated: true, ownershipPriority: priority + (local.detached ? detachedPriority-- : detachedCount + 1),
+        ...(local.scopeSpecificity !== undefined ? { ownershipScopeSpecificity: local.scopeSpecificity } : {}),
         ownershipSource: { kind: 'localOverride', targetId: local.targetId, scope: local.scope || '', index },
       });
     }
@@ -145,7 +146,7 @@ const localFor = (next, size, targetId, scopes) => {
   const scope = [...new Set(scopes)].sort().join('.');
   const creative = next.sizes[size];
   creative.localOverrides ||= [];
-  let local = creative.localOverrides.find((item) => !item.detached && item.targetId === targetId && (item.scope || '') === scope);
+  let local = creative.localOverrides.find((item) => !item.detached && item.scopeSpecificity === undefined && item.targetId === targetId && (item.scope || '') === scope);
   if (!local) { local = { targetId, scope, values: {}, fit: {} }; creative.localOverrides.push(local); }
   return local;
 };

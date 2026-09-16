@@ -71,6 +71,12 @@ async function main() {
       }, scenario, {timeout:30000});
       assert.ok(payload, 'editor must render its document through the production endpoint');
       const current = structuredClone(payload);
+      const activeFrame = await editor.locator('[data-production-frame]').elementHandle().then(handle => handle!.contentFrame()) as Frame;
+      current.row = await activeFrame.evaluate(() => (window as any).__SSE_DCO_APPLIED_ROW__);
+      if (delivery === 'canonical-agency') {
+        const field = `background_image_url_${scenario.size}`;
+        if (!current.row[field]?.Url) current.row[field] = {Url:`${origin}/${current.document.sizes[scenario.size].assets.background}`};
+      }
       const doc = { ...current.document, sizes: { [scenario.size]: current.document.sizes[scenario.size] } };
       // Embed delivery intentionally uses the same authored packaged-background
       // fallback as the local editor. Agency feed-only backgrounds require an

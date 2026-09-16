@@ -1,9 +1,36 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { chromium } from 'playwright';
+import { chromium, type Browser } from 'playwright';
 import ts from 'typescript';
 import type { SizePresentationSnapshot } from '@/lib/outline-snapshot';
 import { appRoot, projectRoot } from './paths';
+
+// Reuse Chromium startup, but isolate every measurement in a fresh context.
+let browserPromise: Promise<Browser> | undefined;
+let activeCaptures = 0;
+let idleTimer: ReturnType<typeof setTimeout> | undefined;
+async function acquireBrowser() {
+  if (idleTimer) clearTimeout(idleTimer);
+  activeCaptures++;
+  if (!browserPromise) {
+    const launched = chromium.launch({ headless: true }).then(browser => {
+      browser.on('disconnected', () => { if (browserPromise === launched) browserPromise = undefined; });
+      return browser;
+    }).catch(error => { if (browserPromise === launched) browserPromise = undefined; throw error; });
+    browserPromise = launched;
+  }
+  try { return await browserPromise; }
+  catch (error) { activeCaptures--; throw error; }
+}
+function releaseBrowser() {
+  if (--activeCaptures > 0) return;
+  idleTimer = setTimeout(() => {
+    const idle = browserPromise;
+    browserPromise = undefined;
+    void idle?.then(browser => browser.close());
+  }, 5000);
+  idleTimer.unref?.();
+}
 
 const captureOrigin = 'http://sse-creative-capture.local';
 // Compile the editor's exact collector with its helper closure. Read the source
@@ -20,9 +47,10 @@ export async function productionSnapshotCollectorScript() {
 export async function captureProductionPresentation(html: string, size: string): Promise<SizePresentationSnapshot> {
   const [width, height] = size.split('x').map(Number);
   if (!Number.isInteger(width) || !Number.isInteger(height) || width <= 0 || height <= 0) throw new Error(`Invalid creative size: ${size}`);
-  const browser = await chromium.launch({ headless: true });
+  const browser = await acquireBrowser();
+  const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 1 }).catch(error => { releaseBrowser(); throw error; });
   try {
-    const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 });
+    const page = await context.newPage();
     await page.route(`${captureOrigin}/**`, async route => {
       const url = new URL(route.request().url());
       if (url.pathname === '/index.html') {
@@ -52,6 +80,7 @@ export async function captureProductionPresentation(html: string, size: string):
       if (fontFailure) throw new Error('Creative font failed to load');
       return document.querySelector('.stage.motion-ready') && (!document.fonts || document.fonts.status === 'loaded') && Array.from(document.images).every(img => img.complete);
     }, undefined, { timeout: 20000 });
+    await page.evaluate(async () => { await (window as unknown as { __SSE_DCO_SETTLED__?: Promise<void> }).__SSE_DCO_SETTLED__; });
     await page.addScriptTag({ content: await productionSnapshotCollectorScript() });
     // Snapshot rest geometry while retaining fit's content alignment transforms.
     // Pausing at t=0 alone leaves enter scales/translations on the elements.
@@ -65,6 +94,6 @@ export async function captureProductionPresentation(html: string, size: string):
     }, size);
     return result;
   } finally {
-    await browser.close();
+    try { await context.close(); } finally { releaseBrowser(); }
   }
 }

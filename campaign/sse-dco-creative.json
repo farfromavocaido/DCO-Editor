@@ -360,7 +360,7 @@
         "cta_type_enum": "rectangle",
         "cta_text": "Switch today",
         "include_roundel_frame_bool": true,
-        "roundel_text_text": "Save up to",
+        "roundel_text_text": "Saving you up to",
         "roundel_value_text": "999",
         "background_image_url_160x600": {
           "Url": ""
@@ -513,7 +513,7 @@
           "Url": ""
         },
         "include_heading4_enum": true,
-        "navy_headlines_bool": false
+        "navy_headlines_bool": true
       }
     ],
     "studioProfileId": 10964545,
@@ -854,10 +854,10 @@
           "group": "Roundel frame",
           "zIndex": 6,
           "base": {
-            "left": 167,
-            "top": -17,
-            "width": 90,
-            "height": 90,
+            "left": 170,
+            "top": -15,
+            "width": 85,
+            "height": 85,
             "cssClass": "roundel-frame",
             "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
@@ -2161,9 +2161,9 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 181,
+            "left": 176,
             "top": 7,
-            "width": 65,
+            "width": 73,
             "height": 11,
             "fontSize": 12,
             "lineHeight": 1.05,
@@ -5497,10 +5497,10 @@
           "group": "Roundel frame",
           "zIndex": 6,
           "base": {
-            "left": 32,
+            "left": 26,
             "top": 80,
-            "width": 118,
-            "height": 118,
+            "width": 125,
+            "height": 125,
             "cssClass": "roundel-frame",
             "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
@@ -6599,10 +6599,10 @@
           },
           "props": {
             "backgroundColor": "rgb(0, 229, 165)",
-            "left": 48,
-            "top": 91,
-            "width": 100,
-            "height": 100
+            "left": 29,
+            "top": 80,
+            "width": 121,
+            "height": 121
           },
           "editable": true
         },
@@ -6669,8 +6669,8 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 41,
-            "top": 101,
+            "left": 40,
+            "top": 102,
             "width": 97,
             "height": 18,
             "fontSize": 16,
@@ -6679,7 +6679,11 @@
             "display": "flex",
             "alignItems": "flex-end"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "maxLines": 1,
+            "mode": "shrink"
+          }
         },
         {
           "id": "roundel-split|roundel-value",
@@ -6690,7 +6694,7 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 40,
+            "left": 39,
             "top": 122,
             "width": 101,
             "height": 48,
@@ -7093,8 +7097,8 @@
           "props": {
             "left": 6,
             "top": 210,
-            "width": 102,
-            "height": 43,
+            "width": 103,
+            "height": 56,
             "fontSize": 6,
             "visibility": "visible",
             "display": "flex",
@@ -7105,7 +7109,7 @@
           "editable": true,
           "fit": {
             "mode": "shrink",
-            "maxLines": 2,
+            "maxLines": 4,
             "minFontSize": 10,
             "align": "bottom"
           }
@@ -7596,10 +7600,10 @@
           "group": "Roundel frame",
           "zIndex": 6,
           "base": {
-            "left": 18,
-            "top": 229,
-            "width": 125,
-            "height": 125,
+            "left": 15,
+            "top": 224,
+            "width": 130,
+            "height": 130,
             "cssClass": "roundel-frame",
             "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
@@ -8801,9 +8805,9 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 30,
-            "top": 253,
-            "width": 100,
+            "left": 28,
+            "top": 251,
+            "width": 104,
             "height": 24,
             "fontSize": 16,
             "lineHeight": 1.05,
@@ -8811,7 +8815,11 @@
             "display": "flex",
             "alignItems": "flex-end"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "maxLines": 1,
+            "mode": "shrink"
+          }
         },
         {
           "id": "roundel-split|roundel-value",
@@ -8822,11 +8830,11 @@
             "roundel_value_text": "non-empty"
           },
           "props": {
-            "left": 20,
-            "top": 279,
-            "width": 118,
+            "left": 25,
+            "top": 278,
+            "width": 110,
             "height": 59,
-            "fontSize": 42,
+            "fontSize": 48,
             "lineHeight": 1,
             "whiteSpace": "nowrap",
             "display": "flex",

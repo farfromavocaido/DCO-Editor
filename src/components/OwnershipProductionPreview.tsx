@@ -11,6 +11,7 @@ export function OwnershipProductionPreview({ document, row, size, percent, label
   const [render, setRender] = useState<{html:string;generation:number} | null>(null);
   const [error, setError] = useState('');
   const [ready, setReady] = useState(false);
+  const [readySource,setReadySource] = useState<any>(null);
   const [highlight,setHighlight]=useState<any>(null);
   const mark = (doc:Document) => {
     const stage=doc.querySelector<HTMLElement>('.stage');
@@ -33,8 +34,8 @@ export function OwnershipProductionPreview({ document, row, size, percent, label
   useEffect(() => {if (ready && frame.current?.contentDocument) {seekProductionAnimations(frame.current.contentDocument,percent,Number(document.clock?.durationS || 15));mark(frame.current.contentDocument);}},[percent,ready,document,targetId]);
   const [width,height] = size.split('x').map(Number);
   const scale = Math.min(maxWidth / width, maxHeight / height, 1);
-  return <figure className="relationship-preview"><figcaption>{label}</figcaption><div style={{width:width*scale,height:height*scale,position:'relative',overflow:'hidden'}}>
-    {render && <iframe ref={frame} key={render.generation} title={label} srcDoc={render.html} style={{width,height,transform:`scale(${scale})`,transformOrigin:'top left',border:0,visibility:ready?'visible':'hidden',pointerEvents:'none'}} onLoad={async event => {
+  return <figure className="relationship-preview" data-preview-ready={ready && readySource?.document===document && readySource?.row===row && readySource?.size===size ? 'true' : 'false'}><figcaption>{label}</figcaption><div style={{width:width*scale,height:height*scale,position:'relative',overflow:'hidden'}}>
+    {render && <iframe tabIndex={-1} ref={frame} key={render.generation} title={label} srcDoc={render.html} style={{width,height,transform:`scale(${scale})`,transformOrigin:'top left',border:0,visibility:ready?'visible':'hidden',pointerEvents:'none'}} onLoad={async event => {
       const doc = event.currentTarget.contentDocument;
       if (!doc) return;
       try { await waitForProductionDocument(doc); if (!requests.current.isCurrent(render.generation)) return; seekProductionAnimations(doc,latest.current.percent,Number(latest.current.document.clock?.durationS || 15));
@@ -55,7 +56,7 @@ export function OwnershipProductionPreview({ document, row, size, percent, label
             if(!found)seekProductionAnimations(doc,latest.current.percent,Number(latest.current.document.clock?.durationS||15));
           }
         }
-        mark(doc); setReady(true); }
+        mark(doc); setReadySource({document,row,size}); setReady(true); }
       catch (cause) { if (requests.current.isCurrent(render.generation)) setError(String(cause)); }
     }} />}
     {ready && highlight && <div aria-hidden="true" style={{position:'absolute',left:highlight.left*scale,top:highlight.top*scale,width:highlight.width*scale,height:highlight.height*scale,border:'2px solid #f5a623',boxSizing:'border-box',pointerEvents:'none'}}/>}

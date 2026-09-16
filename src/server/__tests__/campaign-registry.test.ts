@@ -11,10 +11,11 @@ import {
 test('lists registered campaigns including the default SSE DCO', () => {
   const campaigns = listCampaigns();
   assert.ok(campaigns.some((entry) => entry.id === DEFAULT_CAMPAIGN_ID));
-  assert.equal(campaigns.length, 4);
+  assert.equal(campaigns.length, 5);
   assert.deepEqual(
     campaigns.map((entry) => entry.id).sort(),
     [
+      'product-demo',
       'sse-dco',
       'sse-hiker-welcome',
       'sse-keepyuppy-discount',

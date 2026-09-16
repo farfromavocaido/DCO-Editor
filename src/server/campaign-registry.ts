@@ -9,11 +9,14 @@ export type CampaignEntry = {
    * When omitted, exporters fall back to the shared homepage default.
    */
   clickTag?: string;
+  /** Editor demos need not enter the published SSE static client package. */
+  excludeFromStaticPreview?: boolean;
 };
 
 export const DEFAULT_CAMPAIGN_ID = 'sse-dco';
 
 export const CAMPAIGNS: CampaignEntry[] = [
+  { id: 'product-demo', name: 'Product / Language / Theme', file: 'product-demo-creative.json', exportSlug: 'Product_Demo', clickTag: 'https://example.com/products', excludeFromStaticPreview: true },
   {
     id: 'sse-dco',
     name: 'SSE DCO',
@@ -76,5 +79,5 @@ export const clickTagForCampaign = (campaignId: string | null | undefined): stri
 
 /** Non-DCO campaigns hosted on the statics preview Pages route. */
 export const listStaticPreviewCampaigns = () => (
-  CAMPAIGNS.filter((entry) => entry.id !== DEFAULT_CAMPAIGN_ID)
+  CAMPAIGNS.filter((entry) => entry.id !== DEFAULT_CAMPAIGN_ID && !entry.excludeFromStaticPreview)
 );

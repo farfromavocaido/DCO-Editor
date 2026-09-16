@@ -1,5 +1,6 @@
 // @ts-nocheck
 import fs from 'node:fs/promises';
+import { validateCampaignVariantModel } from '@/lib/campaign-variants';
 import path from 'node:path';
 
 import { validateCanvasGroups } from '@/lib/canvas-groups';
@@ -44,6 +45,7 @@ export const validateCreativeDocument = (document: CreativeDocument) => {
       if (isBlurLayer(layer)) validateBlurConfig(layer.blur, String(layer.id));
     }
   }
+  validateCampaignVariantModel(document);
   materializeCreativeOwnership(document);
   validateCanvasGroups(document);
   return document;

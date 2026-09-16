@@ -37,6 +37,8 @@ import {
   type DcoMarketId,
 } from '@/lib/dco-markets';
 import { studioToCanonicalFieldMap } from '@/lib/feed-field-map';
+import { campaignScopes, isGenericCampaign, validateCampaignVariantModel } from '@/lib/campaign-variants';
+import { campaignRuntimeScript, campaignStudioDynamicContentScript } from './campaign-runtime';
 import { activeScopesFromControls, clampOfferCount, controlsFromFeedRow } from '@/lib/feed-model';
 import {
   applySizeTextOverridesToRow,
@@ -633,7 +635,7 @@ const staticRuleForLayer = (
     ? []
     : layerClipsForProfile(layer, profile, options.activeScopes);
   const firstKeyframe = clips.length ? compileAnimationClips(clips, beats, options.motionContext)[0] : null;
-  if (isHeadlineLayer(layer)) {
+  if (!options.generic && isHeadlineLayer(layer)) {
     const initialTransform = firstKeyframe ? formatTransform(firstKeyframe) : null;
     const declarations = [];
     if (initialTransform) declarations.push(`      transform: ${initialTransform};`);
@@ -644,7 +646,7 @@ ${declarations.join('\n')}
     }`;
   }
   // Frame lives on the shared .bg-image classRule; avoid an empty layer override.
-  if (isBackgroundLayer(layer)) return '';
+  if (!options.generic && isBackgroundLayer(layer)) return '';
   const base = layer.base || {};
   const cssClass = base.cssClass || layer.id;
   const initialTransform = firstKeyframe ? formatTransform(firstKeyframe) : null;
@@ -832,31 +834,34 @@ const renderOutlinedLayer = async (
   options: RenderOptions = {},
   offerBakes: Record<string, { valueSvg: string; subSvg: string }> = {},
 ) => {
-  const cssClass = isHeadlineLayer(layer)
+  const generic = isGenericCampaign(document);
+  const cssClass = !generic && isHeadlineLayer(layer)
     ? HEADLINE_CSS_CLASS
     : (layer.base?.cssClass || layer.id);
-  if (layer.id === 'terms-solo') return '';
+  if (!generic && layer.id === 'terms-solo') return '';
   if (options.presentationSnapshot?.hiddenTargets?.includes(String(layer.id))) return '';
   if (
     isStaticDelivery(options)
-    && (isHeadlineLayer(layer)
+    && (!generic && isHeadlineLayer(layer)
       ? findCreativeTarget(document, size, String(layer.id), activeScopes)?.values.visibility
       : visibilityForLayer(document, size, String(layer.id), activeScopes)) === 'hidden'
   ) {
     return '';
   }
-  if (layer.id.startsWith('offer-slot-')) {
+  if (!generic && layer.id.startsWith('offer-slot-')) {
     const baked = offerBakes[String(layer.id)] || { valueSvg: '', subSvg: '' };
     return renderOutlinedOfferSlot(layer, baked, options.presentationSnapshot);
   }
   const positionAttr = positionStyleAttr(options.presentationSnapshot, String(layer.id));
   if (layer.kind === 'image') {
-    return `          <img alt="" draggable="false" class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}" src="${escapeAttr(assetSrc(layer.asset, options))}"${positionAttr}>`;
+    return `          <img alt="" draggable="false" class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}" src="${escapeAttr(assetSrc(generic && layer.binding?.field ? (row[layer.binding.field]?.Url ?? row[layer.binding.field] ?? '') : layer.asset, options))}"${positionAttr}>`;
   }
   if (isGradientLayer(layer) || isBlurLayer(layer)) {
     return `          <div class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}"${positionAttr}></div>`;
   }
-  const text = textForLayerFromRow(String(layer.id), row, size);
+  const text = isGenericCampaign(document) && layer.binding?.field
+    ? String(row[layer.binding.field] ?? '')
+    : textForLayerFromRow(String(layer.id), row, size);
   const svg = await outlinedSvgMarkup({
     document,
     size,
@@ -869,34 +874,34 @@ const renderOutlinedLayer = async (
   const className = [
     'stage-element',
     'outlined-text',
-    /headline/.test(layer.id) ? 'sse-text sse-text-bold' : '',
-    /terms|unit-rate/.test(layer.id) ? 'sse-text sse-bottom-line' : '',
+    !generic && /headline/.test(layer.id) ? 'sse-text sse-text-bold' : '',
+    !generic && /terms|unit-rate/.test(layer.id) ? 'sse-text sse-bottom-line' : '',
     cssClass,
   ].filter(Boolean).join(' ');
   const layerIdAttr = isStaticDelivery(options) ? '' : ` data-layer-id="${escapeAttr(layer.id)}"`;
   return `          <div class="${className}" id="${escapeAttr(layer.id)}"${layerIdAttr}${positionAttr}>${svg}</div>`;
 };
 
-const renderLayer = (layer: Record<string, unknown>, options: RenderOptions = {}) => {
-  const cssClass = isHeadlineLayer(layer)
+const renderLayer = (layer: Record<string, unknown>, options: RenderOptions = {}, generic = false) => {
+  const cssClass = !generic && isHeadlineLayer(layer)
     ? HEADLINE_CSS_CLASS
     : (layer.base?.cssClass || layer.id);
-  if (layer.id === 'terms-solo') return '';
-  if (layer.id.startsWith('offer-slot-')) return renderOfferSlot(layer);
+  if (!generic && layer.id === 'terms-solo') return '';
+  if (!generic && layer.id.startsWith('offer-slot-')) return renderOfferSlot(layer);
   if (layer.kind === 'image') {
-    return `          <img alt="" draggable="false" class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}" src="${escapeAttr(assetSrc(layer.asset, options))}">`;
+    return `          <img alt="" draggable="false" class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}" src="${escapeAttr(assetSrc(layer.asset, options))}"${generic && layer.binding?.field ? ` data-dco-field="${escapeAttr(layer.binding.field)}"` : ''}>`;
   }
   if (isGradientLayer(layer) || isBlurLayer(layer)) {
     return `          <div class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}" data-layer-id="${escapeAttr(layer.id)}"></div>`;
   }
-  const tag = layer.id === 'cta' ? 'div' : 'p';
+  const tag = !generic && layer.id === 'cta' ? 'div' : 'p';
   const className = [
     'stage-element',
-    /headline/.test(layer.id) ? 'sse-text sse-text-bold' : '',
-    /terms|unit-rate/.test(layer.id) ? 'sse-text sse-bottom-line' : '',
+    !generic && /headline/.test(layer.id) ? 'sse-text sse-text-bold' : '',
+    !generic && /terms|unit-rate/.test(layer.id) ? 'sse-text sse-bottom-line' : '',
     cssClass,
   ].filter(Boolean).join(' ');
-  const dcoField = dcoFieldForLayer(layer);
+  const dcoField = generic ? String(layer.binding?.field || '') : dcoFieldForLayer(layer);
   const dcoAttr = dcoField ? ` data-dco-field="${escapeAttr(dcoField)}"` : '';
   return `          <${tag} class="${className}" id="${escapeAttr(layer.id)}" data-layer-id="${escapeAttr(layer.id)}"${dcoAttr}></${tag}>`;
 };
@@ -948,6 +953,10 @@ export const DEFAULT_STATIC_CLICK_TAG = 'https://www.sseairtricity.com/uk';
 
 /** Resolve static clickTag: campaign product URL when set, else homepage default. */
 export const staticClickTagForDocument = (document: Record<string, unknown> | null | undefined) => {
+  if (isGenericCampaign(document) && document.variantModel.exitField) {
+    const value = sampleRowForDocument(document)[document.variantModel.exitField];
+    if (value) return String(typeof value === 'object' ? value.Url || '' : value);
+  }
   const campaignId = document?.campaign && typeof document.campaign === 'object'
     ? (document.campaign as { id?: string }).id
     : undefined;
@@ -1455,7 +1464,7 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
   // groups their selection. Selection groups never redefine motion units.
   const motionContext: MotionContext = { canvas: sizeCreative.canvas, parent: sizeCreative.canvas, durationS: duration };
   const defaultBeats = beatsForFrameScope(document, 'frames-3');
-  const layerCss = sizeCreative.layers.map((layer) => staticRuleForLayer(layer, defaultBeats, { motionContext })).join('\n\n');
+  const layerCss = sizeCreative.layers.map((layer) => staticRuleForLayer(layer, defaultBeats, { motionContext, generic: isGenericCampaign(document) })).join('\n\n');
   const defaultAnimationCss = sizeCreative.layers
     .map((layer) => animationCssForLayer(layer, defaultBeats, duration, { loop, motionContext }))
     .filter(Boolean)
@@ -1528,9 +1537,9 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
   // Font mode creates this override after applying the actual feed copy. Outline
   // has no live feed runtime, so compile the same plan for its fixed effective row.
   let fixedHeadlineMotionCss = '';
-  if (options.renderMode === 'outline') {
+  if (options.renderMode === 'outline' && !isGenericCampaign(document)) {
     const row = applySizeTextOverridesToRow(sampleRowForDocument(document), size);
-    const scopes = activeScopesFromControls(controlsFromFeedRow(row));
+    const scopes = campaignScopes(document, row);
     const profile = scopes.includes('frames-4') ? 'frames-4' : 'frames-3';
     const beats = beatsForScopes(document, scopes);
     const plan = buildHeadlineMotionPlan(sizeCreative.layers, row, profile, beats, motionContext);
@@ -1615,12 +1624,20 @@ ${fixedHeadlineMotionCss}
 
 const renderBody = async (document: Record<string, unknown>, size: string, options: RenderOptions = {}) => {
   const sizeCreative = document.sizes[size];
+  if (isGenericCampaign(document)) {
+    const row = sampleRowForDocument(document);
+    const scopes = campaignScopes(document, row);
+    const layers = options.renderMode === 'outline'
+      ? (await Promise.all(sizeCreative.layers.map(layer => renderOutlinedLayer(document, size, layer, row, scopes, options, {})))).filter(Boolean).join('\n')
+      : sizeCreative.layers.map(layer => renderLayer(layer, options, true)).filter(Boolean).join('\n');
+    return `<main id="page-content" class="stage page-content ${scopes.join(' ')}" data-size="${escapeAttr(size)}">${layers}<a id="clickbox" href="javascript:void(0)" aria-label="Click through"></a></main>`;
+  }
   const background = options.includePackagedBackground === false ? '' : assetSrc(sizeCreative.assets.background, options);
   const row = sampleRowForDocument(document);
   const stateClass = options.renderMode === 'outline' ? stateClasses(row) : DEFAULT_STATE;
   const plusLayoutAttr = ` ${OFFER_PLUS_LAYOUT_ATTR}="${escapeAttr(resolveOfferPlusLayout(document))}"`;
   if (options.renderMode === 'outline') {
-    const activeScopes = activeScopesFromControls(controlsFromFeedRow(row));
+    const activeScopes = campaignScopes(document, row);
     const presentationSnapshot = outlineSnapshotForDocument(document, options.presentationSnapshot);
     const outlineOptions = { ...options, presentationSnapshot };
     const offerBakes = await bakeOutlinedOfferSlotSvgs({
@@ -1667,6 +1684,7 @@ export const renderStudioReadyHtml = async (
   size: string,
   options: RenderOptions = {},
 ) => {
+  validateCampaignVariantModel(document);
   document = materializeCreativeOwnership(document);
   if (options.renderMode === 'outline' && !options.presentationSnapshot) {
     const { captureProductionPresentation } = await import('./production-snapshot');
@@ -1707,14 +1725,18 @@ export const renderStudioReadyHtml = async (
     presentationSnapshot: options.presentationSnapshot ?? null,
   };
   const studioDynamicContentScript = options.includeStudioDynamicContent && renderMode === 'font'
-    ? `\n${renderStudioDynamicContentScript(document, {}, {
+    ? isGenericCampaign(document)
+      ? campaignStudioDynamicContentScript(document)
+      : `\n${renderStudioDynamicContentScript(document, {}, {
       backgroundUrlForSize: options.studioBackgroundUrlForSize,
       market: options.market,
     })}\n`
     : '';
   const scripts = renderMode === 'outline'
     ? outlineRuntimeScript(resolvedOptions.delivery, staticClickTagForDocument(document))
-    : runtimeScript(textFitRulesForSize(sizeCreative), resolvedOptions, {
+    : isGenericCampaign(document)
+      ? campaignRuntimeScript(document, textFitRulesForSize(sizeCreative, true), resolvedOptions)
+      : runtimeScript(textFitRulesForSize(sizeCreative), resolvedOptions, {
       layers: sizeCreative.layers,
       beatsProfiles: {
         'frames-3': beatsForFrameScope(document, 'frames-3'),
@@ -1826,6 +1848,7 @@ const collectOutlineHtmlSidecarAssetsForSize = (
     const assetPath = String(layer.asset || '');
     if (assetPath.startsWith('assets/') && !isSvgAssetPath(assetPath)) assets.add(assetPath);
   }
+  for (const asset of genericBoundImageAssets(document, sizeCreative)) if (!isSvgAssetPath(asset)) assets.add(asset);
   return [...assets].sort();
 };
 
@@ -2195,12 +2218,21 @@ const canvasMetaForClient = (document: Record<string, unknown>) => {
   }));
 };
 
+const genericBoundImageAssets = (document, creative) => {
+  if (!isGenericCampaign(document)) return [];
+  return (creative.layers || []).filter(layer => layer.kind === 'image' && layer.binding?.field).flatMap(layer => (document.feed?.sampleRows || []).map(row => {
+    const value = row[layer.binding.field];
+    return String(value?.Url ?? value ?? '');
+  })).filter(asset => asset.startsWith('assets/'));
+};
+
 const collectClientAssetPaths = (document: Record<string, unknown>) => {
   const assets = new Set<string>();
   for (const sizeCreative of Object.values(document.sizes || {}) as Array<Record<string, unknown>>) {
     for (const asset of Object.values(sizeCreative.assets || {})) {
       if (String(asset).startsWith('assets/')) assets.add(String(asset));
     }
+    for (const asset of genericBoundImageAssets(document, sizeCreative)) assets.add(asset);
     for (const layer of sizeCreative.layers || []) {
       if (String(layer.asset || '').startsWith('assets/')) assets.add(String(layer.asset));
     }

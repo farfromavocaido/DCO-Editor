@@ -121,13 +121,13 @@ const headlineRule = (layer, classRuleProps = {}) => {
   }, layer?.fit);
 };
 
-const layerRule = (layer, classRuleProps = {}) => {
-  const cssClass = isHeadlineLayer(layer)
+const layerRule = (layer, classRuleProps = {}, generic = false) => {
+  const cssClass = !generic && isHeadlineLayer(layer)
     ? HEADLINE_CSS_CLASS
     : (layer?.base?.cssClass || layer?.id);
   if (!cssClass || layer.kind === 'image' || layer.kind === 'shape' || layer.kind === 'group' || layer.kind === 'gradient' || layer.kind === 'blur') return null;
-  if (String(layer.id || '') === 'cta') return null;
-  if (isHeadlineLayer(layer)) return headlineRule(layer, classRuleProps);
+  if (!generic && String(layer.id || '') === 'cta') return null;
+  if (!generic && isHeadlineLayer(layer)) return headlineRule(layer, classRuleProps);
   const baseFontSize = Number(layer?.base?.fontSize);
   if (layer.fit) {
     return baseRule(cssClass, {
@@ -216,7 +216,7 @@ const attachScopeOverrides = (rules, variantRules = [], layers = []) => {
   return [...rules, ...targetRules];
 };
 
-export const textFitRulesForSize = (sizeCreative) => {
+export const textFitRulesForSize = (sizeCreative, generic = false) => {
   if (!sizeCreative) return [];
   const classRules = sizeCreative.classRules || [];
   const headlineClassRule = classRules.find((rule) => rule.cssClass === HEADLINE_CSS_CLASS);
@@ -233,11 +233,11 @@ export const textFitRulesForSize = (sizeCreative) => {
   };
 
   for (const layer of sizeCreative.layers || []) {
-    if (isHeadlineLayer(layer) && layer !== headlineFitLayer) continue;
-    const cssClass = isHeadlineLayer(layer) ? HEADLINE_CSS_CLASS : layer?.base?.cssClass || layer.id;
+    if (!generic && isHeadlineLayer(layer) && layer !== headlineFitLayer) continue;
+    const cssClass = !generic && isHeadlineLayer(layer) ? HEADLINE_CSS_CLASS : layer?.base?.cssClass || layer.id;
     const inheritedFit = classRules.find(rule => rule.cssClass === cssClass)?.fit;
     const effectiveLayer = inheritedFit ? { ...layer, fit: { ...inheritedFit, ...(layer.fit || {}) } } : layer;
-    push(layerRule(effectiveLayer, classRuleProps));
+    push(layerRule(effectiveLayer, classRuleProps, generic));
   }
   for (const rule of classRules) {
     push(classRuleFit(rule));

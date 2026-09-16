@@ -40,7 +40,7 @@ import {
   feedFieldForEditableTarget,
 } from '@/lib/preview-utils';
 import { resizeHandlesForSelection, selectionChromeKind } from '@/lib/selection-chrome';
-import { activeScopesFromControls } from '@/lib/feed-model';
+import { campaignScopes } from '@/lib/campaign-variants';
 import { useStageResize } from '@/hooks/useStageResize';
 import { EditorIcon } from '@/components/EditorIcon';
 import { PlayheadReadout } from '@/components/PlayheadReadout';
@@ -151,14 +151,7 @@ export function PreviewPane() {
     width: sizeCreative.canvas.width * scale,
     height: sizeCreative.canvas.height * scale,
   } : autoShellStyle;
-  const activeScopes = useMemo(() => activeScopesFromControls({
-    offerCount,
-    tcMode,
-    ctaShape,
-    includeRoundelFrame,
-    frameCount,
-    roundelMode,
-  }), [ctaShape, frameCount, includeRoundelFrame, offerCount, roundelMode, tcMode]);
+  const activeScopes = useMemo(() => campaignScopes(document, row), [document, row]);
   const selectedTarget = useMemo(
     () => deriveSelectedTarget(
       document,

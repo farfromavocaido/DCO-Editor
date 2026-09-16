@@ -6,10 +6,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EditorIcon } from '@/components/EditorIcon';
 import { SampleFeedPanel } from '@/components/SampleFeedPanel';
 import { editableTargetsForLayer, groupedCreativeLayers, currentSizeCreative, findCreativeTarget, targetIdForLayerChild } from '@/lib/creative-model';
-import { activeScopesFromControls } from '@/lib/feed-model';
+import { campaignScopes } from '@/lib/campaign-variants';
 import { isOfferLayerId, offerInteractionTree } from '@/lib/offer-interaction-model';
 import { OFFERS_BLOCK_ID, selectionHierarchy, toggleExplicitTargetSelection } from '@/lib/selection-groups';
-import { useEditorStore } from '@/store/editor-store';
+import { selectPreviewFeedRow, useEditorStore } from '@/store/editor-store';
 
 const iconForLayer = (layer, hasChildren = false) => {
   if (hasChildren) return 'group';
@@ -60,6 +60,7 @@ export function LayerTree() {
   const layersOpen = openSections.has('layers');
   const focusFeedFieldRequest = useEditorStore((s) => s.focusFeedFieldRequest);
   const document = useEditorStore((s) => s.creativeDocument);
+  const previewRow = useEditorStore(selectPreviewFeedRow);
   const size = useEditorStore((s) => s.size);
   const selectedLayerId = useEditorStore((s) => s.selectedLayerId);
   const selectedTargetId = useEditorStore((s) => s.selectedTargetId);
@@ -95,14 +96,7 @@ export function LayerTree() {
   const zOrderedLayerIds = zOrderedLayers.map((layer) => layer.id);
   const groups = groupedCreativeLayers(zOrderedLayers);
   const activeTargetId = selectedTargetId || selectedLayerId;
-  const activeScopes = useMemo(() => activeScopesFromControls({
-    offerCount,
-    tcMode,
-    ctaShape,
-    includeRoundelFrame,
-    frameCount,
-    roundelMode,
-  }), [ctaShape, frameCount, includeRoundelFrame, offerCount, roundelMode, tcMode]);
+  const activeScopes = useMemo(() => campaignScopes(document, previewRow), [document, previewRow]);
   const layerById = new Map((sizeCreative?.layers || []).map((layer) => [layer.id, layer]));
   const offerTree = offerInteractionTree(document, size, activeScopes);
   const activeOfferIds = new Set(offerTree.children.map((child) => child.id));

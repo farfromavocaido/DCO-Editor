@@ -1,6 +1,8 @@
 // @ts-nocheck
 'use client';
 
+import { campaignScopes, campaignVariantModel, campaignRowForScopes, isGenericCampaign } from '@/lib/campaign-variants';
+
 import { create } from 'zustand';
 import { setCreativeOwnershipField } from '@/lib/creative-ownership';
 import { createCanvasGroup, removeCanvasGroup, findCanvasGroup } from '@/lib/canvas-groups';
@@ -151,6 +153,7 @@ export const selectSelectedFeedRow = (state) => {
 const previewRowCache = new WeakMap();
 export const selectPreviewFeedRow = (state) => {
   const row = selectSelectedFeedRow(state);
+  if (isGenericCampaign(state.creativeDocument)) return row;
   const defaults = controlsFromFeedRow(row);
   const controls = {
     offerCount: state.offerCount ?? defaults.offerCount,
@@ -258,6 +261,7 @@ export const useEditorStore = create<any>((set, get) => ({
   campaigns: [],
   // Always default on both SSR and first client paint — restore from localStorage in init().
   activeCampaignId: 'sse-dco',
+  campaignLoadGeneration: 0,
   creativeDocument: null,
   creativeDirty: false,
   selectedLayerId: '',
@@ -305,6 +309,7 @@ export const useEditorStore = create<any>((set, get) => ({
   togglePlaying: () => set({ isPlaying: !get().isPlaying }),
 
   activeScopes: () => {
+    if (isGenericCampaign(get().creativeDocument)) return campaignScopes(get().creativeDocument, selectPreviewFeedRow(get()));
     const { offerCount, tcMode, ctaShape, includeRoundelFrame, frameCount, roundelMode, navyHeadlines } = get();
     return activeScopesFromControls({
       offerCount,
@@ -320,6 +325,10 @@ export const useEditorStore = create<any>((set, get) => ({
   selectedFeedRow: () => selectSelectedFeedRow(get()),
 
   syncControlsFromFeedRow: (row) => {
+    if (isGenericCampaign(get().creativeDocument)) {
+      set({offerCount:0, tcMode:'tcs_only', ctaShape:'rectangle', includeRoundelFrame:false, frameCount:0, roundelMode:'copy-only', navyHeadlines:false});
+      return;
+    }
     const controls = controlsFromFeedRow(row || selectSelectedFeedRow(get()));
     set({
       offerCount: controls.offerCount,
@@ -869,6 +878,7 @@ export const useEditorStore = create<any>((set, get) => ({
   loadCreativeDocument: async () => {
     const state = get();
     const document = await api(withCampaign('/api/creative', state.activeCampaignId));
+    if (get().activeCampaignId !== state.activeCampaignId || get().campaignLoadGeneration !== state.campaignLoadGeneration) return;
     const activeSize = state.size || Object.keys(document.sizes || {})[0] || '';
     const selectedLayer = document.sizes?.[activeSize]?.layers?.[0];
     set({
@@ -890,8 +900,10 @@ export const useEditorStore = create<any>((set, get) => ({
       const confirmed = window.confirm('You have unsaved changes. Discard them and switch campaigns?');
       if (!confirmed) return;
     }
+    const generation = state.campaignLoadGeneration + 1;
     set({
       activeCampaignId: campaignId,
+      campaignLoadGeneration: generation,
       creativeDirty: false,
       saveFeedDisabled: true,
       history: [],
@@ -907,6 +919,8 @@ export const useEditorStore = create<any>((set, get) => ({
       get().loadFeedSchema(),
       get().loadCreativeDocument(),
     ]);
+    if (get().activeCampaignId !== campaignId || get().campaignLoadGeneration !== generation) return;
+    get().syncControlsFromFeedRow();
     const document = get().creativeDocument;
     const sizes = Object.keys(document?.sizes || {}).sort();
     set({ sizes });
@@ -1035,7 +1049,9 @@ export const useEditorStore = create<any>((set, get) => ({
   applyCreativeTargetFitValue: (size, targetId, activeScopes, field, value) => {
     const state = get();
     if (!state.creativeDocument) return;
-    const next = updateCreativeTargetFitDocument(
+    const next = isGenericCampaign(state.creativeDocument)
+      ? setCreativeOwnershipField(state.creativeDocument,size,targetId,activeScopes,'fit',field,value,'local')
+      : updateCreativeTargetFitDocument(
       state.creativeDocument,
       size,
       targetId,
@@ -1092,7 +1108,7 @@ export const useEditorStore = create<any>((set, get) => ({
     const state = get();
     if (!state.creativeDocument) return;
     const selectedGroup = findCanvasGroup(state.creativeDocument, size, state.selectedTargetId);
-    const next = selectedGroup?.members.includes(targetId)
+    const next = isGenericCampaign(state.creativeDocument) || selectedGroup?.members.includes(targetId)
       ? setCreativeOwnershipField(state.creativeDocument, size, targetId, activeScopes, 'values', field, value, 'local')
       : updateCreativeTargetDocumentValue(state.creativeDocument, size, targetId, activeScopes, field, value);
     set({ creativeDocument: next, creativeDirty: true });
@@ -1544,6 +1560,7 @@ export const useEditorStore = create<any>((set, get) => ({
   loadFeedSchema: async () => {
     const state = get();
     const payload = await api(withCampaign('/api/feed-schema', state.activeCampaignId));
+    if (get().activeCampaignId !== state.activeCampaignId || get().campaignLoadGeneration !== state.campaignLoadGeneration) return;
     set({
       feedProfileName: payload.profileName,
       feedFields: payload.fields || [],
@@ -2132,6 +2149,20 @@ export const useEditorStore = create<any>((set, get) => ({
 
   updateSelectedFeedField: (fieldName, value) => {
     const state = get();
+    if (isGenericCampaign(state.creativeDocument)) {
+      const field = state.feedFields.find(item => item.name === fieldName);
+      if (!field) throw new Error(`Unknown feed field: ${fieldName}`);
+      let parsed = value;
+      if(field.type === 'boolean') parsed = value === true || value === 'true';
+      else if(field.type === 'integer') {parsed = Number(value); if(!Number.isInteger(parsed)) throw new Error('Enter a whole number');}
+      else if(field.type === 'enum') {parsed = field.options.find(option => String(option) === String(value)); if(parsed === undefined) throw new Error('Choose a listed value');}
+      else if(field.type === 'image' || field.type === 'url') parsed = {Url:String(value?.Url ?? value ?? '')};
+      const candidate = {...selectSelectedFeedRow(state),[fieldName]:parsed};
+      const row = campaignRowForScopes(state.creativeDocument,candidate,campaignScopes(state.creativeDocument,candidate));
+      const rows = [...state.feedDraft.rows]; rows[state.feedDraft.selectedIndex] = row;
+      set({feedDraft:{...state.feedDraft,rows,dirty:true},saveFeedDisabled:false});
+      get().setStatus('Unsaved sample values','warn'); return;
+    }
     const feedDraft = updateFeedDraftField(state.feedDraft, state.feedFields, fieldName, value);
     set({ feedDraft, saveFeedDisabled: false });
     get().syncControlsFromFeedRow();
@@ -2149,6 +2180,26 @@ export const useEditorStore = create<any>((set, get) => ({
 
   setVariantControl: (field, value) => {
     const state = get();
+    if (isGenericCampaign(state.creativeDocument)) {
+      const model = campaignVariantModel(state.creativeDocument);
+      const dimension = model.dimensions.find(item => item.field === field && !item.derived);
+      const option = dimension?.options.find(item => String(item.value) === String(value));
+      if (!option) throw new Error('Choose a valid campaign version');
+      const desiredScopes = campaignScopes(state.creativeDocument, {...selectSelectedFeedRow(state),[field]:option.value});
+      const row = campaignRowForScopes(state.creativeDocument, selectSelectedFeedRow(state), desiredScopes);
+      const exactIndex = state.feedDraft.rows.findIndex(candidate => model.dimensions.filter(item => !item.derived).every(item => String(candidate[item.field] ?? item.defaultValue) === String(row[item.field] ?? item.defaultValue)));
+      if (exactIndex >= 0) {
+        set({feedDraft:{...state.feedDraft,selectedIndex:exactIndex}});
+        get().setStatus('Loaded campaign version');
+      } else {
+        // A new version must never overwrite the source version's authored copy.
+        const draftRow = {...row, ...(row.Unique_ID !== undefined ? {Unique_ID:`${row.Unique_ID}-${crypto.randomUUID()}`} : {}), ...(row.Default !== undefined ? {Default:false} : {})};
+        const rows = [...state.feedDraft.rows,draftRow];
+        set({feedDraft:{...state.feedDraft,rows,selectedIndex:rows.length-1,dirty:true},saveFeedDisabled:false});
+        get().setStatus('New draft version; sample content copied from the previous version','warn');
+      }
+      return;
+    }
     const feedDraft = selectFeedDraftVariant(state.feedDraft, state.feedFields, field, value);
     const selectedExistingRow = feedDraft.rows === state.feedDraft.rows;
     set({
@@ -2183,8 +2234,10 @@ export const useEditorStore = create<any>((set, get) => ({
   },
 
   init: async () => {
+    const generation = get().campaignLoadGeneration;
     const session = readEditorSession();
     await get().loadCampaigns();
+    if (get().campaignLoadGeneration !== generation) return;
     const campaigns = get().campaigns || [];
     const campaignIds = new Set(campaigns.map((entry) => entry.id));
     const campaignId = campaignIds.has(session.campaignId)
@@ -2198,6 +2251,8 @@ export const useEditorStore = create<any>((set, get) => ({
       get().loadFeedSchema(),
       get().loadCreativeDocument(),
     ]);
+    if (get().activeCampaignId !== campaignId || get().campaignLoadGeneration !== generation) return;
+    get().syncControlsFromFeedRow();
     const document = get().creativeDocument;
     const sizes = Object.keys(document?.sizes || {}).sort();
     set({ sizes });

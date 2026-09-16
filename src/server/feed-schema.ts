@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { isGenericCampaign, campaignVariantModel } from '@/lib/campaign-variants';
 import { backgroundImageFieldDefinitions } from '@/lib/feed-background';
 import { remapStudioRowToCanonical } from '@/lib/feed-field-map';
 import { sizeTextFieldDefinitions } from '@/lib/feed-size-text';
@@ -89,7 +90,18 @@ const coerceField = (field: FeedField, value: unknown) => {
   return normalizeFeedLineBreaks(value);
 };
 
-export const validateFeedRows = (rows: Record<string, unknown>[]) => rows.map((row, index) => {
+export const validateFeedRows = (rows: Record<string, unknown>[], document?: Record<string, unknown>) => rows.map((row, index) => {
+  if (isGenericCampaign(document)) {
+    const out = { ...row };
+    for (const field of document.feed?.fields || []) {
+      if (row[field.name] !== undefined) out[field.name] = coerceField(field, row[field.name]);
+    }
+    for (const d of campaignVariantModel(document).dimensions) {
+      out[d.field] = out[d.field] ?? d.defaultValue;
+      if (!d.options.some(o => o.value === out[d.field])) throw new Error(`Invalid value for variant field ${d.field}`);
+    }
+    return out;
+  }
   const remapped = remapStudioRowToCanonical(row);
   const out: Record<string, unknown> = {};
   for (const field of FEED_SCHEMA_FIELDS) {
@@ -108,6 +120,7 @@ const normalizeFeedFields = (fields) => fields.map((field) => (
 export const readFeedSchema = async (documentPath?: string) => {
   const document = await readCreativeDocument(documentPath);
   const feed = document.feed || {};
+  if (isGenericCampaign(document)) return { profileName: feed.profileName, studioProfileId: feed.studioProfileId, studioProfileElement: feed.studioProfileElement, fields: feed.fields || [], rows: feed.sampleRows || [] };
   // FEED_SCHEMA_FIELDS is source of truth (includes provisional size-text overrides).
   // Overlay document field metadata when present so legacy label tweaks still apply.
   const fromDocument = Array.isArray(feed.fields) && feed.fields.length
@@ -128,7 +141,7 @@ export const readFeedSchema = async (documentPath?: string) => {
 
 export const writeFeedSchemaRows = async (rows: Record<string, unknown>[], documentPath?: string) => {
   const document = await readCreativeDocument(documentPath);
-  const nextRows = validateFeedRows(rows);
+  const nextRows = validateFeedRows(rows, document);
   const nextDocument = {
     ...document,
     feed: {

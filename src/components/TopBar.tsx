@@ -6,7 +6,9 @@ import Image from 'next/image';
 
 import { EditorIcon } from '@/components/EditorIcon';
 import { ToolbarTip } from '@/components/ToolbarTip';
-import { useEditorStore } from '@/store/editor-store';
+import { selectPreviewFeedRow, useEditorStore } from '@/store/editor-store';
+import { campaignHeaderDimensions, campaignScopes, campaignVariantModel } from '@/lib/campaign-variants';
+import { CampaignHeaderSettings } from './CampaignHeaderSettings';
 
 function SegmentedControl({
   label,
@@ -49,6 +51,10 @@ function SegmentedControl({
 }
 
 export function TopBar() {
+  const document = useEditorStore((s) => s.creativeDocument);
+  const previewRow = useEditorStore(selectPreviewFeedRow);
+  const dimensions = campaignHeaderDimensions(document, previewRow);
+  const scopes = campaignScopes(document, previewRow);
   const sizes = useEditorStore((s) => s.sizes);
   const size = useEditorStore((s) => s.size);
   const campaigns = useEditorStore((s) => s.campaigns);
@@ -140,62 +146,13 @@ export function TopBar() {
           </label>
         </ToolbarTip>
 
-        <SegmentedControl
-          label="Offers"
-          tip="Number of offers shown in the ad"
-          value={offerCount}
-          options={[
-            ...(activeCampaignId === 'sse-dco'
-              ? [{ value: '0', label: '0', tip: 'No offers (brand / awareness)' }]
-              : []),
-            { value: '1', label: '1', tip: 'Single offer' },
-            { value: '2', label: '2', tip: 'Dual offers' },
-            { value: '3', label: '3', tip: 'Triple offers' },
-          ]}
-          onChange={(value) => setVariantControl('offer_count_num', value)}
-        />
-        <SegmentedControl
-          label="T&Cs"
-          tip="Terms and conditions layout"
-          value={tcMode}
-          options={[
-            { value: 'tcs_only', label: 'Solo', tip: 'T&Cs only' },
-            { value: 'tcs_units', label: 'Prices', tip: 'T&Cs with unit rates' },
-          ]}
-          onChange={(value) => setVariantControl('tc_type_enum', value)}
-        />
-        {Number(offerCount) === 0 ? (
-          <SegmentedControl
-            label="Ink"
-            tip="Headline + T&C colour on photo acts (offers-0 only)"
-            value={navyHeadlines ? 'navy' : 'white'}
-            options={[
-              { value: 'white', label: 'White', tip: 'White photo-act headlines (default); T&Cs stay white' },
-              { value: 'navy', label: 'Navy', tip: 'Navy photo-act headlines; T&Cs stay white' },
-            ]}
-            onChange={(value) => setVariantControl('navy_headlines_bool', value === 'navy' ? 'true' : 'false')}
-          />
-        ) : null}
-        <SegmentedControl
-          label="CTA"
-          tip="Call-to-action button shape"
-          value={ctaShape}
-          options={[
-            { value: 'roundel', label: 'Round', tip: 'Round CTA button' },
-            { value: 'rectangle', label: 'Rect', tip: 'Rectangular CTA button' },
-          ]}
-          onChange={(value) => setVariantControl('cta_type_enum', value)}
-        />
-        <SegmentedControl
-          label="Frame"
-          tip="Optional Act 3 offer roundel frame"
-          value={includeRoundelFrame ? 'roundel' : 'standard'}
-          options={[
-            { value: 'standard', label: '3 Acts', tip: 'No offer roundel (headlines 1, 2, and 4)' },
-            { value: 'roundel', label: 'Offer roundel', tip: 'Four headline acts with offer roundel frame' },
-          ]}
-          onChange={(value) => setVariantControl('include_roundel_frame_bool', value === 'roundel' ? 'true' : 'false')}
-        />
+        {dimensions.map(dimension => <SegmentedControl key={dimension.id}
+          label={dimension.label}
+          value={String(dimension.options.find(option => scopes.includes(option.scope))?.value ?? dimension.defaultValue)}
+          options={dimension.options.map(option => ({...option, value:String(option.value)}))}
+          onChange={value => {try {setVariantControl(dimension.field,value);} catch(error) {setStatus(error.message,'error');}}}
+        />)}
+        {document ? <CampaignHeaderSettings document={document} dimensions={campaignVariantModel(document).dimensions} /> : null}
       </div>
 
       <div className="actions">
@@ -385,7 +342,7 @@ export function TopBar() {
         <ToolbarTip tip="Live agency QA — settled holds in canonical-agency HTML">
           <a
             className="icon-button icon-button-compact"
-            href="/qa"
+            href={`/qa?campaign=${encodeURIComponent(activeCampaignId)}`}
             aria-label="Open agency QA"
           >
             QA

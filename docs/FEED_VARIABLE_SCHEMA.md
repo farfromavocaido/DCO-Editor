@@ -425,3 +425,23 @@ These are not separate feed fields; they are computed from the fields above (`co
 ## Sample row
 
 Default sample rows for offer counts 1/2/3 in `campaign/sse-dco-creative.json` share the same demo copy: H1–H4 energy / best plan / switch and save / energy; `tcs_units`; roundel CTA; roundel frame on (`Save up to` / `€1,080`); offers `15%` / `30%` / `€125`. An `offers-0` brand row is also present. Use these as working examples when authoring new rows.
+
+
+## Campaign-defined variants
+
+Opt-in generic campaigns define `variantModel.dimensions`, with named feed fields,
+scalar options, default values and CSS scopes. `variantModel.exitField` identifies
+the row's click-through URL. Dimensions can be empty. Header presentation lives
+in `variantPresentation.order` and `variantPresentation.hidden`.
+
+`derived: true` is reserved for the SSE compatibility adapter and is rejected in
+authored generic dimensions; generic options are explicit feed values. No
+executable derivation rules are supported.
+
+Generic layers use campaign-specific IDs and CSS classes. Legacy synthetic DOM
+identifiers are reserved and rejected, including `headline-act*`, `bg-image`,
+`offer-slot-*`, `offerN`, `offer-value`, `offer-subline`, `terms-solo`,
+`terms-prices`, `unit-rate-prices`, `cta`, `roundel-frame`, `roundel-copy`,
+`roundel-value`, `TC_Solo`, `sse-headline`, `sse-text` and `sse-bottom-line`.
+Choose names such as `product-title`, `legal-copy`, or `action-label`; text and
+image content is bound through each layer's `binding.field`.

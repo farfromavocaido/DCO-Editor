@@ -19,9 +19,9 @@ import {
   timelineLayerLabel,
 } from '@/lib/timeline-rows';
 import { beatsForScopes, activeFrameScope } from '@/lib/timing-profiles';
-import { activeScopesFromControls } from '@/lib/feed-model';
+import { campaignScopes } from '@/lib/campaign-variants';
 import { PlayheadReadout } from '@/components/PlayheadReadout';
-import { useEditorStore } from '@/store/editor-store';
+import { selectPreviewFeedRow, useEditorStore } from '@/store/editor-store';
 
 const roundTimelinePercent = (value) => Math.round(value * 10) / 10;
 
@@ -320,6 +320,7 @@ function TimelineLayerRow({
 
 export function TimelinePanel() {
   const document = useEditorStore((s) => s.creativeDocument);
+  const previewRow = useEditorStore(selectPreviewFeedRow);
   const size = useEditorStore((s) => s.size);
   const percent = useEditorStore((s) => s.percent);
   const isPlaying = useEditorStore((s) => s.isPlaying);
@@ -346,14 +347,7 @@ export function TimelinePanel() {
   const [dropTargetLayerId, setDropTargetLayerId] = useState('');
 
   const sizeCreative = currentSizeCreative(document, size);
-  const activeScopes = useMemo(() => activeScopesFromControls({
-    offerCount,
-    tcMode,
-    ctaShape,
-    includeRoundelFrame,
-    frameCount,
-    roundelMode,
-  }), [ctaShape, frameCount, includeRoundelFrame, offerCount, roundelMode, tcMode]);
+  const activeScopes = useMemo(() => campaignScopes(document, previewRow), [document, previewRow]);
   const beats = beatsForScopes(document, activeScopes);
   const frameScope = activeFrameScope(activeScopes);
   const durationS = Number(document?.clock?.durationS) || 15;

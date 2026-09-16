@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { campaignConditionFamilies } from './campaign-variants';
 import { excludedHeadlineLayerIdsForVariantRule, selectorForVariantRule } from './creative-css';
 
 /** Empty scopes apply globally; compound scopes require every token. */
@@ -42,13 +43,7 @@ const targetIdentity = (document, size, targetId) => {
   return { layerId, cssClass: childId || layer.base?.cssClass || layerId, targetId };
 };
 const scopeParts = (scope) => String(scope || '').split('.').filter(Boolean);
-const scopeFamily = (token) => {
-  if (/^(white|navy)-headlines$/.test(token)) return 'headline-ink';
-  if (/^roundel-frame-/.test(token)) return 'roundel-frame';
-  if (/^roundel-(split|copy-only)$/.test(token)) return 'roundel-copy';
-  return /^(offers|frames|tc|cta|roundel)-/.exec(token)?.[1];
-};
-const scopesOverlap = (a, b) => !scopeParts(a).some((x) => scopeParts(b).some((y) => x !== y && scopeFamily(x) && scopeFamily(x) === scopeFamily(y)));
+const scopesOverlap = (document, a, b) => !campaignConditionFamilies(document).some(family => scopeParts(a).some(x => family.includes(x) && scopeParts(b).some(y => y !== x && family.includes(y))));
 const memberKey = (member) => `${member.size}/${member.targetId}/${member.scope || ''}`;
 const definitionFields = (definition, size, domain, member) => Object.fromEntries(Object.entries({ ...(definition[domain] || {}), ...(definition.perSize?.[size]?.[domain] || {}) }).filter(([field]) => !(member?.exclude?.[domain] || []).includes(field)));
 
@@ -76,7 +71,7 @@ export const sharedCreativeFieldReach = (document, source) => {
   const localExceptions = members.flatMap((member) => {
     const scopes = (document.sizes?.[member.size]?.localOverrides || [])
       .filter((local) => local.targetId === member.targetId
-        && scopesOverlap(local.scope, member.scope)
+        && scopesOverlap(document, local.scope, member.scope)
         && local[domain]?.[field] !== undefined && local[domain]?.[field] !== null && local[domain]?.[field] !== '')
       .map((local) => local.scope || '');
     return scopes.length ? [{ member, scopes: [...new Set(scopes)] }] : [];
@@ -98,7 +93,7 @@ export const materializeCreativeOwnership = (document: any): any => {
       for (const domain of ['values', 'fit']) {
         const fields = definitionFields(definition, member.size, domain, member);
         for (const previous of assignments) {
-          if (previous.member.size === member.size && previous.member.targetId === member.targetId && previous.domain === domain && scopesOverlap(previous.member.scope, member.scope)) {
+          if (previous.member.size === member.size && previous.member.targetId === member.targetId && previous.domain === domain && scopesOverlap(document, previous.member.scope, member.scope)) {
             const duplicate = Object.keys(fields).find((field) => Object.hasOwn(previous.fields, field));
             if (duplicate) throw new Error(`Shared ownership conflict for ${member.size}/${member.targetId} ${domain}.${duplicate}: ${previous.definitionName} and ${definition.name}`);
           }

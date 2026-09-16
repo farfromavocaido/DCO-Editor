@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { fieldInputValue, rowLabel } from '@/lib/feed-model';
+import { isGenericCampaign, campaignVariantModel, campaignVersionLabel } from '@/lib/campaign-variants';
 import {
   SIZE_OVERRIDABLE_TEXT_FIELDS,
   sizeOverrideFieldNamesForSize,
@@ -70,6 +71,7 @@ function textareaRowsFor(value) {
 export function SampleFeedPanel({ ensureOpen }: SampleFeedPanelProps) {
   const [overallOpen, setOverallOpen] = useState(false);
   const [sizeOverridesOpen, setSizeOverridesOpen] = useState(false);
+  const document = useEditorStore((s) => s.creativeDocument);
   const feedFields = useEditorStore((s) => s.feedFields);
   const feedDraft = useEditorStore((s) => s.feedDraft);
   const focusFeedFieldRequest = useEditorStore((s) => s.focusFeedFieldRequest);
@@ -200,6 +202,18 @@ export function SampleFeedPanel({ ensureOpen }: SampleFeedPanelProps) {
 
   const offerCountField = fieldByName(feedFields, 'offer_count_num');
   const tcModeField = fieldByName(feedFields, 'tc_type_enum');
+  if (isGenericCampaign(document)) {
+    const variableFields = new Set(campaignVariantModel(document).dimensions.map(d => d.field));
+    const groups = [...new Set(feedFields.filter(field => !variableFields.has(field.name) && field.group !== 'Meta').map(field => field.group || 'Content'))];
+    return <div className="sample-feed-panel">
+      <label className="inspector-field full sample-row-field"><span>Sample row</span><select aria-label="Sample row" value={feedDraft.selectedIndex} onChange={event => setFeedRowIndex(Number(event.target.value))}>
+        {feedDraft.rows.map((feedRow,index) => <option key={index} value={index}>{campaignVersionLabel(document,feedRow)} · {feedRow.Unique_ID || index + 1}</option>)}
+      </select></label>
+      <p className="inspector-note">Choose a version above. Edit its sample content here.</p>
+      {groups.map(group => <section className="sample-block" key={group}><h3>{group}</h3>{feedFields.filter(field => (field.group || 'Content') === group && !variableFields.has(field.name)).map(field => renderControl(field))}</section>)}
+    </div>;
+  }
+
   const ctaShapeField = fieldByName(feedFields, 'cta_type_enum');
   const roundelFrameField = fieldByName(feedFields, 'include_roundel_frame_bool');
   const heading4Field = fieldByName(feedFields, 'include_heading4_enum');

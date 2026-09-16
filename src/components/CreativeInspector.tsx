@@ -13,11 +13,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { animationFamilyForLayer, animationIntentDefinitions, timelineSpanForClip } from '@/lib/animation-intents';
 import { compileAnimationClips } from '@/lib/creative-compiler';
 import { currentSizeCreative, isHeadlineLayer } from '@/lib/creative-model';
-import { activeScopesFromControls } from '@/lib/feed-model';
+import { campaignScopes } from '@/lib/campaign-variants';
 import { beatsForScopes } from '@/lib/timing-profiles';
 import { deriveSelectedTarget, OFFERS_BLOCK_ID } from '@/lib/selection-groups';
 import { fitSizeStatus, fitTrackingStatus } from '@/lib/selection-chrome';
-import { useEditorStore } from '@/store/editor-store';
+import { selectPreviewFeedRow, useEditorStore } from '@/store/editor-store';
 import { EditorIcon } from '@/components/EditorIcon';
 import HeadlineOfferLayoutSection from '@/components/HeadlineOfferLayoutSection';
 
@@ -136,6 +136,7 @@ export function CreativeInspector() {
   const [layerCode, setLayerCode] = useState('');
   const [codeError, setCodeError] = useState('');
   const document = useEditorStore((s) => s.creativeDocument);
+  const previewRow = useEditorStore(selectPreviewFeedRow);
   const size = useEditorStore((s) => s.size);
   const percent = useEditorStore((s) => s.percent);
   const selectedLayerId = useEditorStore((s) => s.selectedLayerId);
@@ -171,14 +172,7 @@ export function CreativeInspector() {
   const selectClip = useEditorStore((s) => s.selectClip);
 
   const sizeCreative = currentSizeCreative(document, size);
-  const activeScopes = useMemo(() => activeScopesFromControls({
-    offerCount,
-    tcMode,
-    ctaShape,
-    includeRoundelFrame,
-    frameCount,
-    roundelMode,
-  }), [ctaShape, frameCount, includeRoundelFrame, offerCount, roundelMode, tcMode]);
+  const activeScopes = useMemo(() => campaignScopes(document, previewRow), [document, previewRow]);
   const selectedTarget = useMemo(
     () => deriveSelectedTarget(
       document,

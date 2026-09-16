@@ -371,3 +371,15 @@ test('POST /api/creative/export-preview rejects DCO in the campaigns list', asyn
   const payload = await response.json();
   assert.match(payload.error || '', /not a statics preview campaign/);
 });
+
+
+test('generic campaign feed schema returns authored rows and fields without SSE defaults', async () => {
+  const response = await feedGet(new Request('http://localhost/api/feed-schema?campaign=product-demo'));
+  assert.equal(response.status, 200);
+  const payload = await response.json();
+  assert.equal(payload.rows.length, 8);
+  assert.equal(payload.rows[0].product, 'lamp');
+  assert.ok(payload.fields.some((field: { name: string }) => field.name === 'language'));
+  assert.ok(!payload.fields.some((field: { name: string }) => field.name === 'offer_count_num'));
+  assert.equal(payload.sampleRows, undefined);
+});

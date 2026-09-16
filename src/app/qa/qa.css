@@ -571,3 +571,12 @@ body {
   font-size: 13px;
   padding: 24px 8px;
 }
+.campaign-qa { padding: 24px; background:#101820; color:#e2e8ed; min-height:100vh; font-family:Arial,sans-serif; }
+.campaign-qa header p,.campaign-qa article p { color:#a9b6c0; font-size:12px; }
+.campaign-qa button,.campaign-qa select { border:1px solid #465966; background:#20303b; color:#e2e8ed; border-radius:5px; padding:7px; }
+.campaign-qa a { color:#77ecd0; margin-right:15px; }
+.campaign-qa-controls { display:flex; gap:24px; margin:24px 0; align-items:center; }
+.campaign-qa-controls label { display:flex; align-items:center; gap:10px; }
+.campaign-qa-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:18px; }
+.campaign-qa-grid article { padding:16px;background:#1b2730;border:1px solid #35434d;border-radius:9px; }
+.campaign-qa-grid h2 { font-size:15px; margin-top:0; }

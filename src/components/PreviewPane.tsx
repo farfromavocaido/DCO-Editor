@@ -612,11 +612,11 @@ export function PreviewPane() {
       <div className="preview-toolbar">
         <div className="preview-toolbar-left">
           <PlayheadReadout seconds={seconds} percent={percent} />
-          <select aria-label="Preview rendition" value={previewRenderMode} onChange={event => setPreviewRenderMode(event.target.value)}>
+          <select title="Dynamic text refits when copy changes. Fixed text as outlines bakes the current copy into SVG shapes." aria-label="Preview rendition" value={previewRenderMode} onChange={event => setPreviewRenderMode(event.target.value)}>
             <option value="font">Dynamic text</option>
             <option value="outline">Fixed text as outlines</option>
           </select>
-          <details className="preview-rendition-help"><summary>About text output</summary><p>{previewRenderMode === 'font' ? 'Dynamic text uses the font and refits when feed copy changes.' : 'Fixed text as outlines converts this copy into SVG shapes. Different copy needs another export; animation is preserved.'} The preview shows the selected output type.</p></details>
+
           {offersBlockIsolated ? (
             <div className="isolation-crumb" aria-label="Offers editing path">
               <button type="button" className="isolation-crumb-link" onClick={() => selectOffersBlock()}>

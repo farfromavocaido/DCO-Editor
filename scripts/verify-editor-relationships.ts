@@ -16,6 +16,7 @@ async function main(){
    const page=await browser.newPage({viewport:{width:1600,height:1100}});const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
    await page.route(url=>url.pathname==='/api/creative',async route=>{if(route.request().method()==='POST'){saved=route.request().postDataJSON();saves++;}await route.fulfill({contentType:'application/json',body:JSON.stringify(saved)});});
    await page.goto(origin);
+   assert.equal(await page.getByText('About text output',{exact:true}).count(),0);
    const ready=async()=>{await page.locator('[data-production-frame][data-ready="true"]').waitFor({timeout:45000});};await ready();
    await page.getByLabel('Campaign',{exact:true}).selectOption(id);await ready();
    await page.getByLabel('Ad size',{exact:true}).selectOption('300x250');await ready();
@@ -24,28 +25,33 @@ async function main(){
    await page.getByRole('button',{name:id==='sse-dco'?'Roundel Text layer':'title layer',exact:true}).click();
    const targetId=id==='sse-dco'?'roundel-copy':'title';
    const save=async()=>{const count=saves;await Promise.all([page.waitForResponse(response=>new URL(response.url()).pathname==='/api/creative' && response.request().method()==='POST'),page.getByRole('button',{name:'Save creative',exact:true}).click()]);assert.equal(saves,count+1);};
-   const dialog=page.getByRole('dialog');const field=()=>dialog.locator('.relationship-property').filter({hasText:/^Font size/}).locator('input');
-   await page.getByRole('button',{name:'Copy to…',exact:true}).click();await dialog.waitFor();await field().check();
-   if(id==='product-demo'){await dialog.getByRole('button',{name:'All language values',exact:true}).click();await dialog.getByRole('button',{name:'All theme values',exact:true}).click();await dialog.getByRole('button',{name:'Apply copy to 4 versions',exact:true}).waitFor();assert.equal(await dialog.getByLabel('Review destination').locator('option').count(),4);}
-   await dialog.locator('iframe[title="Proposed — production"]').waitFor();
-   await page.waitForFunction(()=>[...document.querySelectorAll('.relationship-dialog iframe')].length===3 && [...document.querySelectorAll('.relationship-dialog iframe')].every(frame=>getComputedStyle(frame).visibility==='visible'),{},{timeout:45000});
+   const dialog=page.getByRole('dialog');const field=()=>dialog.locator('.copy-bundle label').filter({hasText:/^Font size/}).locator('input');
+   const chooseFont=async()=>{await dialog.getByRole('button',{name:'Choose properties',exact:true}).click();await dialog.locator('.copy-bundle').filter({hasText:'Typography'}).locator('summary').click();await field().check();};
+   const chooseIrish=async()=>{await dialog.locator('.copy-choice-row').filter({hasText:'Language'}).getByRole('button',{name:'Gaeilge',exact:true}).click();};
+   await page.getByRole('button',{name:'Copy to…',exact:true}).click();await dialog.waitFor();
+   if(id==='product-demo'){await chooseIrish();await dialog.locator('.copy-choice-row').filter({hasText:'Theme'}).getByRole('button',{name:'Dark',exact:true}).click();}
+   await chooseFont();await dialog.getByRole('button',{name:'Review changes',exact:true}).click();
+   if(id==='product-demo')assert.equal(await dialog.getByLabel('Review destination').locator('option').count(),4);
+   await page.waitForFunction(()=>[...document.querySelectorAll('.relationship-dialog iframe')].length===2 && [...document.querySelectorAll('.relationship-dialog iframe')].every(frame=>getComputedStyle(frame).visibility==='visible'),{},{timeout:45000});
    if(id==='product-demo'){
     const option=await dialog.getByLabel('Review destination').locator('option').evaluateAll(options=>(options.find(option=>option.textContent?.includes('Language: Gaeilge') && option.textContent?.includes('Theme: Light')) as HTMLOptionElement | undefined)?.value);
     await dialog.getByLabel('Review destination').selectOption(option!);
     const expected=saved.feed.sampleRows.find((row:Record<string,unknown>)=>row.language==='ga' && row.product==='lamp' && row.theme==='light');
-    await page.waitForFunction(title=>[...document.querySelectorAll('.relationship-previews iframe')].length===2 && [...document.querySelectorAll('.relationship-previews iframe')].every((frame:any)=>frame.contentDocument?.querySelector('#title')?.textContent===title && getComputedStyle(frame).visibility==='visible'),expected.title,{timeout:45000});
-    const fit=await dialog.locator('.relationship-previews iframe').first().evaluate((frame:any)=>{const title=frame.contentDocument.querySelector('#title');return {width:title.clientWidth,scrollWidth:title.scrollWidth};});
+    await page.waitForFunction(title=>[...document.querySelectorAll('.copy-review-previews iframe')].length===2 && [...document.querySelectorAll('.copy-review-previews iframe')].every((frame:any)=>frame.contentDocument?.querySelector('#title')?.textContent===title && getComputedStyle(frame).visibility==='visible'),expected.title,{timeout:45000});
+    const fit=await dialog.locator('.copy-review-previews iframe').first().evaluate((frame:any)=>{const title=frame.contentDocument.querySelector('#title');return {width:title.clientWidth,scrollWidth:title.scrollWidth};});
     assert.ok(fit.scrollWidth<=fit.width+1,'Irish destination title fits its production frame');
    }
+   assert.equal(await dialog.locator('.copy-review-previews [aria-hidden="true"]').count(),2,'selected element is highlighted in both comparisons');
    await page.screenshot({path:path.join(output,`${id}-comparison.png`)});
-   await dialog.getByRole('button',{name:/^Apply copy to \d+ versions$/}).click();await dialog.waitFor({state:'detached'});await ready();
+   await dialog.getByRole('button',{name:/^Copy to \d+ versions?$/}).click();await dialog.waitFor({state:'detached'});await ready();
    await page.locator('.ownership-controls').getByRole('button',{name:'Undo',exact:true}).waitFor();await save();
    const copied=structuredClone(saved);assert.ok(saved.sizes['300x250'].localOverrides.some((rule:{targetId:string;values:Record<string,unknown>})=>rule.targetId===targetId && rule.values.fontSize!==undefined));
-   await page.getByRole('button',{name:'Copy to…',exact:true}).click();assert.equal(await field().isChecked(),false);await dialog.getByRole('button',{name:'Cancel',exact:true}).click();assert.deepEqual(saved,copied);
-   await page.getByRole('button',{name:'Copy from…',exact:true}).click();await field().check();await dialog.getByRole('button',{name:'Apply copy to 1 versions',exact:true}).click();await dialog.waitFor({state:'detached'});await ready();
-   await page.getByRole('button',{name:'Link properties…',exact:true}).click();await field().check();await dialog.getByLabel('Link name',{exact:true}).fill('Browser typography');
-   if(id==='product-demo')await dialog.getByRole('button',{name:'All language values',exact:true}).click();
-   await dialog.getByRole('button',{name:/^Apply link to \d+ versions$/}).click();await dialog.waitFor({state:'detached'});await ready();await save();
+   await page.getByRole('button',{name:'Copy to…',exact:true}).click();await dialog.getByRole('button',{name:'Choose properties',exact:true}).click();assert.equal(await field().isChecked(),false);await dialog.getByRole('button',{name:'Close comparison',exact:true}).click();assert.deepEqual(saved,copied);
+   await page.getByRole('button',{name:'Copy from…',exact:true}).click();await chooseFont();await dialog.getByRole('button',{name:'Review changes',exact:true}).click();await dialog.getByRole('button',{name:'Copy to 1 version',exact:true}).click();await dialog.waitFor({state:'detached'});await ready();
+   await page.getByRole('button',{name:'Link properties…',exact:true}).click();await dialog.getByLabel('Link name',{exact:true}).fill('Browser typography');
+   if(id==='product-demo')await chooseIrish();
+   await chooseFont();await dialog.getByRole('button',{name:'Review changes',exact:true}).click();
+   await dialog.getByRole('button',{name:/^Link to \d+ versions?$/}).click();await dialog.waitFor({state:'detached'});await ready();await save();
    let definition=saved.sharedDefinitions.find((item:{name:string})=>item.name==='Browser typography');assert.ok(definition);assert.equal(definition.members.length,id==='product-demo'?2:1);
    await page.getByRole('button',{name:'Edit shared…',exact:true}).click();await page.getByLabel('Shared property',{exact:true}).selectOption('values:fontSize');await page.getByLabel('Shared value',{exact:true}).fill('21');await page.getByRole('button',{name:'Apply shared edit',exact:true}).click();await ready();await save();
    definition=saved.sharedDefinitions.find((item:{name:string})=>item.name==='Browser typography');assert.equal(definition.values.fontSize,21);

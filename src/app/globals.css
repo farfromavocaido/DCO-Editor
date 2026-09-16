@@ -35,7 +35,3 @@ a {
   color: inherit;
   text-decoration: none;
 }
-
-.preview-rendition-help { position: relative; font-size: 11px; color: var(--muted, #8996a2); }
-.preview-rendition-help summary { cursor: pointer; }
-.preview-rendition-help p { position: absolute; z-index: 50; top: 20px; left: 0; width: 270px; padding: 12px; border: 1px solid #3d4d5b; border-radius: 8px; background: #202c37; color: #dce3e9; line-height: 1.5; box-shadow: 0 8px 24px #0006; }

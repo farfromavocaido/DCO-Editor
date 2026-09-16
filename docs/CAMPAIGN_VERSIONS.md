@@ -4,7 +4,7 @@ The header chooses the version you are viewing. Normal single-item inspector cha
 
 ## Copying and linking
 
-Copy from / Copy to opens a transaction. Choose source and concrete destinations, select properties, and review current/proposed values and production-rendered thumbnails. Matching unsaved sample rows supply the copy; if no sample exists, the preview explicitly says it is using current copy as a fallback. No document change happens until Apply. Apply closes and resets the transaction; Undo reverses it.
+Copy from / Copy to opens a three-step transaction: Versions, Properties, Review. The source and destination summary stays visible. Choose concrete destinations, select property groups (or individual fields), then review larger Before/After production previews. The selected element is outlined and the timeline automatically seeks a visible moment when needed; exact value differences are available on demand. Matching unsaved sample rows supply the copy; if no sample exists, the preview explicitly says it is using current copy as a fallback. No document change happens until Apply. Apply closes and resets the transaction; Undo reverses it.
 
 Link properties uses the same review but creates a named persistent relationship. Existing ownership for the chosen fields is replaced only in those destinations. Linked properties lists members and explicit shared-edit / unlink actions. Unlink keeps current appearance; Use inherited value separately removes a local exception. Different formats can keep their own geometry within one named relationship.
 

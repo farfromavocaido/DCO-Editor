@@ -51,11 +51,12 @@ export const CAMPAIGNS: CampaignEntry[] = [
 
 const byId = new Map(CAMPAIGNS.map((entry) => [entry.id, entry]));
 
-export const listCampaigns = () => CAMPAIGNS.map(({ id, name, file, exportSlug }) => ({
+export const listCampaigns = () => CAMPAIGNS.map(({ id, name, file, exportSlug, excludeFromStaticPreview }) => ({
   id,
   name,
   file,
   exportSlug,
+  staticPreview: id !== DEFAULT_CAMPAIGN_ID && !excludeFromStaticPreview,
 }));
 
 export const getCampaign = (campaignId: string | null | undefined): CampaignEntry => {

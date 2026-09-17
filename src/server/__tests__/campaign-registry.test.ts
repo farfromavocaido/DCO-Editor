@@ -6,6 +6,7 @@ import {
   getCampaign,
   isRegisteredCampaignId,
   listCampaigns,
+  listStaticPreviewCampaigns,
 } from '../campaign-registry';
 
 test('lists registered campaigns including the default SSE DCO', () => {
@@ -46,4 +47,9 @@ test('non-DCO campaigns carry product clickTags', () => {
     'https://sseairtricity.com/uk/home/products/electricity-top-discount',
   );
   assert.equal(getCampaign('sse-dco').clickTag, undefined);
+});
+
+test('editor sync eligibility matches the server export allowlist',()=>{
+ assert.deepEqual(listCampaigns().filter(c=>c.staticPreview).map(c=>c.id),listStaticPreviewCampaigns().map(c=>c.id));
+ assert.equal(listCampaigns().find(c=>c.id==='product-demo')?.staticPreview,false);
 });

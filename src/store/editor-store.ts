@@ -1810,7 +1810,8 @@ export const useEditorStore = create<any>((set, get) => ({
       await waitForPaint();
     };
 
-    const previewCampaigns = (get().campaigns || []).filter((entry) => entry.id !== 'sse-dco');
+    await get().loadCampaigns();
+    const previewCampaigns = (get().campaigns || []).filter((entry) => entry.staticPreview === true);
     if (!previewCampaigns.length) {
       throw new Error('No non-DCO campaigns registered for Sync Zips');
     }

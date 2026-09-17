@@ -83,6 +83,8 @@ export function TopBar() {
   const setVariantControl = useEditorStore((s) => s.setVariantControl);
   const setStatus = useEditorStore((s) => s.setStatus);
 
+  const [syncResult,setSyncResult]=useState(null);
+  const [syncBusy,setSyncBusy]=useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
 
@@ -255,12 +257,14 @@ export function TopBar() {
               <button
                 type="button"
                 role="menuitem"
+                disabled={syncBusy}
                 onClick={() => {
-                  exportForPreview().catch((error) => setStatus(error.message, 'error'));
+                  setSyncBusy(true);setSyncResult(null);
+                  exportForPreview().then(()=>setSyncResult({ok:true,message:'ZIPs synced. Commit outputs/ to publish.'})).catch((error)=>{console.error('Sync Zips failed',error);setSyncResult({ok:false,message:error.message});setStatus(error.message,'error');}).finally(()=>setSyncBusy(false));
                   setMoreOpen(false);
                 }}
               >
-                Sync Zips
+                {syncBusy?'Syncing ZIPs…':'Sync Zips'}
               </button>
               <button
                 type="button"
@@ -349,6 +353,7 @@ export function TopBar() {
           </a>
         </ToolbarTip>
       </div>
+      {(syncBusy||syncResult)&&<div className="sync-result" role={syncResult?.ok===false?'alert':'status'}>{syncBusy?'Syncing ZIPs…':syncResult.message}{!syncBusy&&<button type="button" onClick={()=>setSyncResult(null)}>Dismiss</button>}</div>}
     </header>
   );
 }

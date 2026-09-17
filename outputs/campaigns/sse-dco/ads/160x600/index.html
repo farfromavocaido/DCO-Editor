@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=160, initial-scale=1.0">
     <title>SSE DCO 160x600</title>
     <link rel="preload" href="https://s0.2mdn.net/creatives/assets/5627648/Museo700-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="https://s0.2mdn.net/creatives/assets/5627648/Museo300-Regular.otf" as="font" type="font/otf" crossorigin>
     <script src="https://s0.2mdn.net/ads/studio/Enabler.js"></script>
     <script type="text/javascript">
       Enabler.setProfileId(10964545);
@@ -98,13 +99,8 @@
 
     <style>
 
-    @font-face {
-      font-family: "Museo";
-      src: local("☺"), url("https://s0.2mdn.net/creatives/assets/5627648/Museo700-Regular.otf") format("opentype");
-      font-weight: 100 900;
-      font-style: normal;
-      font-display: block;
-    }
+@font-face{font-family:"Museo";src:url("https://s0.2mdn.net/creatives/assets/5627648/Museo700-Regular.otf");font-weight:700;font-style:normal;font-display:block;}
+@font-face{font-family:"Museo";src:url("https://s0.2mdn.net/creatives/assets/5627648/Museo300-Regular.otf");font-weight:300;font-style:normal;font-display:block;}
 
     html,
     body,
@@ -163,73 +159,30 @@
       visibility: inherit;
       box-sizing: border-box;
     }
-
-    /* ── Shared typography ── */
-    .sse-text {
-      position: absolute;
-      font-family: Museo, Arial, sans-serif;
-      color: rgb(0, 41, 117);
-    }
-
-    .sse-text-heavy {
-      font-weight: 900;
-    }
-
-    .sse-text-bold {
-      font-weight: 700;
-    }
-
-    /* ── OfferSlot group plumbing ── */
-    [data-gwd-group="OfferSlot"] {
+[data-gwd-group="OfferSlot"] {
       width: 100%;
       height: 100%;
     }
 
     [data-gwd-group="OfferSlot"] .gwd-grp-offer {
       position: absolute;
-      font-family: Museo, Arial, sans-serif;
-      font-weight: 700;
-      color: rgb(0, 41, 117);
       visibility: inherit;
     }
 
-    [data-gwd-group="OfferSlot"] .offer-value .sym-pct {
-      font-size: 0.6em;
-      vertical-align: baseline;
-      position: relative;
-      /* Vertical offset computed at runtime from glyph metrics
-         (alignPercentSymbols) so the % bottom-aligns with the digits. */
-    }
-
-    /* ── T&C group plumbing ── */
-    [data-gwd-group="tc_prices"] .gwd-grp-tc.sse-text,
-    [data-gwd-group="tc_solo"] .gwd-grp-tc.sse-text {
-      position: absolute;
-      font-family: Museo, Arial, sans-serif;
-      color: rgb(0, 41, 117);
-    }
-
-    /* Feed text uses \n for forced breaks (e.g. two-line unit rate). */
-    .unit-rate-prices {
-      white-space: pre-line;
-    }
-
-    /* CTA copy breaks into two centred lines inside the roundel (ref). */
-    .cta {
-      padding: 0 18px;
-      box-sizing: border-box;
-    }
-
-    /* ── T&C wrappers (bottom-left, flush like the reference) ── */
     .tc-prices-group,
     .tc-solo-group {
       position: absolute;
     }
 
-    .roundel-frame-off #headline-act3 { visibility: hidden; }
 
 
-.offer-value .offer-value-run {
+.offer-value .sym-pct {
+      font-size: 0.6em;
+      vertical-align: baseline;
+      position: relative;
+    }
+
+    .offer-value .offer-value-run {
       white-space: nowrap;
     }
 
@@ -284,10 +237,10 @@
 
 
     .roundel-frame {
-      left: 18px;
-      top: 229px;
-      width: 125px;
-      height: 125px;
+      left: 15px;
+      top: 224px;
+      width: 130px;
+      height: 130px;
       background-color: rgb(0, 41, 117);
       border-radius: 50%;
       overflow: hidden;
@@ -457,6 +410,11 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -473,6 +431,11 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -485,6 +448,11 @@
       width: 100px;
       height: 26px;
       font-size: 10px;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -517,6 +485,9 @@
       height: 130px;
       text-align: center;
       justify-content: center;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
     }
 
     [data-gwd-group="OfferSlot"] .offer-value {
@@ -529,6 +500,9 @@
       height: 76px;
       text-align: center;
       white-space: nowrap;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
     }
 
     [data-gwd-group="OfferSlot"] .offer-subline {
@@ -541,6 +515,9 @@
       height: 20px;
       text-align: center;
       text-transform: uppercase;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
     }
 
     .cta {
@@ -680,7 +657,6 @@
 
     .tc-solo .tc-prices-group {
       visibility: hidden;
-      height: 34px;
     }
 
     .tc-prices .terms-solo {
@@ -689,7 +665,6 @@
 
     .tc-prices .tc-solo-group {
       visibility: hidden;
-      height: 34px;
     }
 
     .offers-1 .offer-slot-2 {
@@ -763,9 +738,9 @@
     }
 
     .roundel-split .roundel-copy {
-      left: 30px;
-      top: 253px;
-      width: 100px;
+      left: 28px;
+      top: 251px;
+      width: 104px;
       height: 24px;
       font-size: 16px;
       line-height: 1.05;
@@ -775,11 +750,11 @@
     }
 
     .roundel-split .roundel-value {
-      left: 20px;
-      top: 279px;
-      width: 118px;
+      left: 25px;
+      top: 278px;
+      width: 110px;
       height: 59px;
-      font-size: 42px;
+      font-size: 48px;
       line-height: 1;
       white-space: nowrap;
       display: flex;
@@ -789,9 +764,10 @@
     }
 
     .offers-0 .sse-headline:not(#headline-act4) {
-      left: 11px;
-      top: 17px;
-      height: 130px;
+      left: 7px;
+      top: 16px;
+      width: 146px;
+      height: 131px;
     }
 
     .offers-2 .sse-headline {
@@ -854,15 +830,10 @@
 
     .white-headlines .sse-headline:not(#headline-act4) {
       color: rgb(255, 255, 255);
-      left: 7px;
-      top: 16px;
-      width: 146px;
-      height: 131px;
     }
 
     .navy-headlines .sse-headline:not(#headline-act4) {
       color: rgb(0, 41, 117);
-      height: 130px;
     }
 
     .offers-0 .unit-rate-prices {
@@ -871,10 +842,12 @@
 
     .offers-0 .terms-prices {
       color: rgb(255, 255, 255);
+      font-weight: 300;
     }
 
     .offers-0 .terms-solo {
       color: rgb(255, 255, 255);
+      font-weight: 300;
     }
 
     .white-headlines .unit-rate-prices {
@@ -898,7 +871,7 @@
 
     .offers-0 .logo-act3 {
       left: 30px;
-      top: 537px;
+      top: 531px;
       width: 100px;
       height: 36px;
     }
@@ -931,12 +904,11 @@
 
     .offers-0.tc-solo .tc-solo-group {
       visibility: hidden;
-      height: 34px;
     }
 
     .offers-0.tc-solo .terms-prices {
-      left: 8px;
-      top: 574px;
+      left: 9px;
+      top: 577px;
       width: 146px;
       height: 26px;
       font-size: 5px;
@@ -945,6 +917,233 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+    }
+
+    .offers-0.roundel-split .roundel-copy {
+      color: rgb(0, 41, 117);
+      left: 30px;
+      top: 253px;
+      width: 100px;
+      height: 24px;
+      font-size: 16px;
+      line-height: 1.05;
+      white-space: nowrap;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .offers-0.roundel-split .roundel-value {
+      color: rgb(0, 41, 117);
+      left: 20px;
+      top: 279px;
+      width: 118px;
+      height: 59px;
+      font-size: 42px;
+      line-height: 1;
+      white-space: nowrap;
+      display: flex;
+      align-items: flex-start;
+      text-align: center;
+      justify-content: center;
+    }
+
+    .offers-0.roundel-copy-only .roundel-copy {
+      color: rgb(0, 41, 117);
+      left: 30px;
+      top: 250px;
+      width: 100px;
+      height: 80px;
+      font-size: 16px;
+      line-height: 1.05;
+      white-space: normal;
+      text-align: center;
+      justify-content: center;
+      display: flex;
+      align-items: center;
+    }
+
+    .offers-0.roundel-copy-only .roundel-value {
+      color: rgb(0, 41, 117);
+    }
+
+    .roundel-frame-off #headline-act3 {
+      visibility: hidden;
+    }
+
+    .offers-2 #roundel-frame#roundel-frame#roundel-frame#roundel-frame {
+      left: 15px;
+      top: 224px;
+      width: 130px;
+      height: 130px;
+    }
+
+    .offers-2.roundel-split #roundel-copy#roundel-copy#roundel-copy#roundel-copy {
+      left: 28px;
+      top: 251px;
+      width: 104px;
+      height: 24px;
+      font-size: 16px;
+      line-height: 1.05;
+    }
+
+    .offers-2.roundel-copy-only #roundel-copy#roundel-copy#roundel-copy#roundel-copy {
+      left: 26px;
+      top: 262px;
+      width: 108px;
+      height: 57px;
+      font-size: 16px;
+      line-height: 1.05;
+    }
+
+    .offers-2.roundel-split #roundel-value#roundel-value#roundel-value#roundel-value {
+      left: 25px;
+      top: 278px;
+      width: 110px;
+      height: 59px;
+      font-size: 48px;
+      line-height: 1;
+    }
+
+    .offers-2.roundel-copy-only #roundel-value#roundel-value#roundel-value#roundel-value {
+      left: 12px;
+      top: 282px;
+      width: 136px;
+      height: 60px;
+      font-size: 38px;
+      line-height: 1;
+    }
+
+    .offers-3 #roundel-frame#roundel-frame#roundel-frame#roundel-frame {
+      left: 15px;
+      top: 224px;
+      width: 130px;
+      height: 130px;
+    }
+
+    .offers-3.roundel-split #roundel-copy#roundel-copy#roundel-copy#roundel-copy {
+      left: 28px;
+      top: 251px;
+      width: 104px;
+      height: 24px;
+      font-size: 16px;
+      line-height: 1.05;
+    }
+
+    .offers-3.roundel-copy-only #roundel-copy#roundel-copy#roundel-copy#roundel-copy {
+      left: 26px;
+      top: 262px;
+      width: 108px;
+      height: 57px;
+      font-size: 16px;
+      line-height: 1.05;
+    }
+
+    .offers-3.roundel-split #roundel-value#roundel-value#roundel-value#roundel-value {
+      left: 25px;
+      top: 278px;
+      width: 110px;
+      height: 59px;
+      font-size: 48px;
+      line-height: 1;
+    }
+
+    .offers-3.roundel-copy-only #roundel-value#roundel-value#roundel-value#roundel-value {
+      left: 12px;
+      top: 282px;
+      width: 136px;
+      height: 60px;
+      font-size: 38px;
+      line-height: 1;
+    }
+
+    .cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo #terms-prices#terms-prices#terms-prices#terms-prices {
+      font-size: 6px;
+      width: 140px;
+    }
+
+    .cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo #roundel-frame#roundel-frame#roundel-frame#roundel-frame {
+      left: 24px;
+      top: 230px;
+      width: 115px;
+      height: 115px;
+      background-color: rgb(0, 229, 165);
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo #roundel-copy#roundel-copy#roundel-copy#roundel-copy {
+      left: 31px;
+      top: 249px;
+      width: 100px;
+      height: 80px;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      line-height: 1.05;
+      color: rgb(0, 41, 117);
+      text-align: center;
+      white-space: normal;
+      justify-content: center;
+      display: flex;
+      align-items: center;
+    }
+
+    .cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo #roundel-value#roundel-value#roundel-value#roundel-value {
+      left: 13px;
+      top: 281px;
+      width: 136px;
+      height: 60px;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      font-size: 38px;
+      line-height: 1;
+      color: rgb(0, 41, 117);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo #roundel-frame#roundel-frame#roundel-frame#roundel-frame {
+      left: 21px;
+      top: 232px;
+      width: 115px;
+      height: 115px;
+      background-color: rgb(0, 229, 165);
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo #roundel-copy#roundel-copy#roundel-copy#roundel-copy {
+      left: 28px;
+      top: 252px;
+      width: 100px;
+      height: 24px;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 1.05;
+      color: rgb(0, 41, 117);
+      text-align: center;
+      white-space: nowrap;
+      justify-content: center;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo #roundel-value#roundel-value#roundel-value#roundel-value {
+      left: 18px;
+      top: 278px;
+      width: 118px;
+      height: 59px;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      font-size: 42px;
+      line-height: 1;
+      color: rgb(0, 41, 117);
+      text-align: center;
+      white-space: nowrap;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
     }
 
     @keyframes bg-blur-bg-blur-fade-frames-3 {
@@ -1663,10 +1862,10 @@
     }
 
     .roundel-frame {
-      left: 18px;
-      top: 229px;
-      width: 125px;
-      height: 125px;
+      left: 15px;
+      top: 224px;
+      width: 130px;
+      height: 130px;
       background-color: rgb(0, 41, 117);
       border-radius: 50%;
       overflow: hidden;
@@ -1836,6 +2035,11 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -1852,6 +2056,11 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -1864,6 +2073,11 @@
       width: 100px;
       height: 26px;
       font-size: 10px;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -2618,10 +2832,10 @@
     }
 
     .roundel-frame {
-      left: 18px;
-      top: 229px;
-      width: 125px;
-      height: 125px;
+      left: 15px;
+      top: 224px;
+      width: 130px;
+      height: 130px;
       background-color: rgb(0, 41, 117);
       border-radius: 50%;
       overflow: hidden;
@@ -2789,6 +3003,11 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -2805,6 +3024,11 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -2817,6 +3041,11 @@
       width: 100px;
       height: 26px;
       font-size: 10px;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -2870,10 +3099,10 @@
     }
 
     .roundel-frame {
-      left: 18px;
-      top: 229px;
-      width: 125px;
-      height: 125px;
+      left: 15px;
+      top: 224px;
+      width: 130px;
+      height: 130px;
       background-color: rgb(0, 41, 117);
       border-radius: 50%;
       overflow: hidden;
@@ -3041,6 +3270,11 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -3057,6 +3291,11 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -3069,6 +3308,11 @@
       width: 100px;
       height: 26px;
       font-size: 10px;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -4379,13 +4623,279 @@
     .offers-0.frames-4 #headline-act4 {
       animation: 15s linear 0s infinite normal forwards running headline-act4-headline-act4-slideInRight-offers-0-frames-4;
     }
+    @keyframes bluewave-bluewave-entry-offers-0-geometry-0-0 {
+      0% {
+        transform: translate3d(0px, 0px, 0px);
+        left: -56px;
+        top: 305px;
+        width: 250px;
+        height: 296px;
+        opacity: 1;
+      }
+      100% {
+        transform: translate3d(0px, 0px, 0px);
+        left: -56px;
+        top: 305px;
+        width: 250px;
+        height: 296px;
+        opacity: 1;
+      }
+    }
+    .stage.cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo .bluewave {
+      animation: 15s linear 0s infinite normal forwards running bluewave-bluewave-entry-offers-0-geometry-0-0;
+    }
+
+
 
     </style>
 
+    <script type="application/json" id="dco-layout-rules">[{"id":"f71df2cb-b4b3-4a1d-b62c-628c3ad43bbe","name":"Layout area 1","type":"distribute","enabled":true,"areas":{"160x600":{"left":9.290312498807907,"top":532.724609375,"width":139.78265503048897,"height":62.19062519073486}},"axis":"y","single":"center","crossAlign":"center","minGap":0,"overflow":"authored","when":["offers-0","tc-solo","cta-rect","roundel-frame-on","navy-headlines"],"layoutAnimations":[{"id":"9e61921c-f1d8-41a2-a31b-b07197340051","enabled":true,"kind":"enter","subjectId":"terms-prices","clipId":"terms-prices-fade-offers-0","segmentIndex":0,"start":"with","duration":"follow","durationS":0.5,"startS":13.5,"endS":15,"hidden":false},{"id":"07171864-fb9b-4a6e-a99d-f07cd95b48a9","enabled":true,"kind":"exit","subjectId":"terms-prices","clipId":"terms-prices-fade-offers-0","segmentIndex":0,"start":"with","duration":"follow","durationS":0.5}],"startingArrangement":"present","size":"160x600","transitionCases":[],"sequenceCases":[{"scopes":["offers-0","tc-solo","cta-rect","roundel-frame-on","navy-headlines","frames-3"],"events":[{"id":"9e61921c-f1d8-41a2-a31b-b07197340051","enabled":true,"kind":"enter","subjectId":"terms-prices","clipId":"terms-prices-fade-offers-0","segmentIndex":0,"start":19.1,"duration":"follow","durationS":0.5,"startS":13.5,"endS":15,"hidden":false,"easingCss":"ease-in-out","end":21.1},{"id":"07171864-fb9b-4a6e-a99d-f07cd95b48a9","enabled":true,"kind":"exit","subjectId":"terms-prices","clipId":"terms-prices-fade-offers-0","segmentIndex":0,"start":60.8,"duration":"follow","durationS":0.5,"easingCss":"ease-in-out","end":61.8}],"initialAbsent":["terms-prices"],"durationMs":15000,"loop":true},{"scopes":["offers-0","tc-solo","cta-rect","roundel-frame-on","navy-headlines","frames-4"],"events":[{"id":"9e61921c-f1d8-41a2-a31b-b07197340051","enabled":true,"kind":"enter","subjectId":"terms-prices","clipId":"terms-prices-fade-offers-0","segmentIndex":0,"start":19.1,"duration":"follow","durationS":0.5,"startS":13.5,"endS":15,"hidden":false,"easingCss":"ease-in-out","end":21.1},{"id":"07171864-fb9b-4a6e-a99d-f07cd95b48a9","enabled":true,"kind":"exit","subjectId":"terms-prices","clipId":"terms-prices-fade-offers-0","segmentIndex":0,"start":71.7,"duration":"follow","durationS":0.5,"easingCss":"ease-in-out","end":72.7}],"initialAbsent":["terms-prices"],"durationMs":15000,"loop":true}],"area":{"left":9.290312498807907,"top":532.724609375,"width":139.78265503048897,"height":62.19062519073486},"members":["logo-act3","terms-prices"],"textMembers":["terms-prices"],"targetId":"logo-act3","scope":""}]</script>
+    <script type="application/json" id="sse-production-fit-rules">[{"cssClass":"sse-headline","shared":true,"wrap":true,"maxLines":4,"minFontSize":2,"allowShrink":true},{"cssClass":"roundel-copy","shared":false,"wrap":true,"minFontSize":12,"maxLines":3,"allowShrink":true,"scopes":{"roundel-copy-only":{"maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18},"roundel-split":{"maxLines":1,"allowShrink":true,"wrap":false},"offers-0.roundel-copy-only":{"maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18}},"excludeTargets":[{"selector":"#roundel-copy","scopes":["offers-2.roundel-split","offers-2.roundel-copy-only","offers-3.roundel-split","offers-3.roundel-copy-only","cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo","cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo"]}]},{"cssClass":"roundel-value","shared":false,"wrap":false,"minFontSize":18,"maxLines":1,"excludeTargets":[{"selector":"#roundel-value","scopes":["offers-2.roundel-split","offers-2.roundel-copy-only","offers-3.roundel-split","offers-3.roundel-copy-only","cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo","cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo"]}]},{"cssClass":"terms-prices","shared":false,"wrap":true,"minFontSize":5,"maxLines":3,"allowShrink":true,"scopes":{"offers-0.tc-solo":{"maxLines":2,"allowShrink":true,"wrap":true,"minFontSize":8,"align":"bottom"}},"excludeTargets":[{"selector":"#terms-prices","scopes":["cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo"]}]},{"cssClass":"unit-rate-prices","shared":false,"wrap":true,"minFontSize":8,"maxLines":2,"allowShrink":true,"align":"bottom"},{"cssClass":"terms-solo","shared":false,"wrap":false,"maxLines":2,"minFontSize":8},{"cssClass":"offer-value","shared":true,"wrap":false,"minFontSize":8,"minFontSizeRatio":0.5,"tracking":{"minEm":-0.05},"align":"bottom"},{"cssClass":"offer-subline","shared":true,"wrap":false,"minFontSize":6,"minFontSizeRatio":0.6,"maxLines":1,"allowShrink":true},{"cssClass":"roundel-copy","shared":false,"wrap":true,"minFontSize":12,"maxLines":3,"allowShrink":true,"scopes":{"roundel-copy-only":{"maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18},"roundel-split":{"maxLines":1,"allowShrink":true,"wrap":false},"offers-0.roundel-copy-only":{"maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18}},"selector":"#roundel-copy","targetId":"roundel-copy","targetOverrides":[{"scope":"offers-2.roundel-split","maxLines":1,"allowShrink":true,"wrap":false,"minFontSize":12},{"scope":"offers-2.roundel-copy-only","maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18},{"scope":"offers-3.roundel-split","maxLines":1,"allowShrink":true,"wrap":false,"minFontSize":12},{"scope":"offers-3.roundel-copy-only","maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18},{"scope":"cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo","maxLines":3,"allowShrink":true,"wrap":true,"disabled":false,"static":false,"shared":false,"sharedGroup":"","minFontSize":18,"minFontSizeRatio":0,"tracking":{"minEm":0},"align":"normal","frame":"","overflow":"clip"},{"scope":"cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo","maxLines":1,"allowShrink":true,"wrap":false,"disabled":false,"static":false,"shared":false,"sharedGroup":"","minFontSize":12,"minFontSizeRatio":0,"tracking":{"minEm":0},"align":"normal","frame":"","overflow":"clip"}]},{"cssClass":"roundel-value","shared":false,"wrap":false,"minFontSize":18,"maxLines":1,"selector":"#roundel-value","targetId":"roundel-value","targetOverrides":[{"scope":"offers-2.roundel-split","maxLines":1,"minFontSize":18},{"scope":"offers-2.roundel-copy-only","maxLines":1,"minFontSize":18},{"scope":"offers-3.roundel-split","maxLines":1,"minFontSize":18},{"scope":"offers-3.roundel-copy-only","maxLines":1,"minFontSize":18},{"scope":"cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo","maxLines":1,"allowShrink":true,"wrap":false,"disabled":false,"static":false,"shared":false,"sharedGroup":"","minFontSize":18,"minFontSizeRatio":0,"tracking":{"minEm":0},"align":"normal","frame":"","overflow":"clip"},{"scope":"cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo","maxLines":1,"allowShrink":true,"wrap":false,"disabled":false,"static":false,"shared":false,"sharedGroup":"","minFontSize":18,"minFontSizeRatio":0,"tracking":{"minEm":0},"align":"normal","frame":"","overflow":"clip"}]},{"cssClass":"terms-prices","shared":false,"wrap":true,"minFontSize":5,"maxLines":3,"allowShrink":true,"scopes":{"offers-0.tc-solo":{"maxLines":2,"allowShrink":true,"wrap":true,"minFontSize":8,"align":"bottom"}},"selector":"#terms-prices","targetId":"terms-prices","targetOverrides":[{"scope":"cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo","maxLines":2,"minFontSize":5}]}]</script>
     <script>
       (function() {
         var root = null;
-        var textFitRules = [{"cssClass":"sse-headline","shared":true,"wrap":true,"maxLines":4,"minFontSize":2,"allowShrink":true},{"cssClass":"roundel-copy","shared":false,"wrap":true,"minFontSize":12,"maxLines":3,"allowShrink":true,"scopes":{"roundel-copy-only":{"maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18}}},{"cssClass":"roundel-value","shared":false,"wrap":false,"minFontSize":18,"maxLines":1},{"cssClass":"terms-prices","shared":false,"wrap":true,"minFontSize":5,"maxLines":3,"allowShrink":true,"scopes":{"offers-0.tc-solo":{"maxLines":2,"allowShrink":true,"wrap":true,"minFontSize":8,"align":"bottom"}}},{"cssClass":"unit-rate-prices","shared":false,"wrap":true,"minFontSize":8,"maxLines":2,"allowShrink":true,"align":"bottom"},{"cssClass":"terms-solo","shared":false,"wrap":false,"maxLines":2,"minFontSize":8},{"cssClass":"offer-value","shared":true,"wrap":false,"minFontSize":8,"minFontSizeRatio":0.5,"tracking":{"minEm":-0.05},"align":"bottom"},{"cssClass":"offer-subline","shared":true,"wrap":false,"minFontSize":6,"minFontSizeRatio":0.6,"maxLines":1,"allowShrink":true}];
+        
+        var responsiveLayout = (function(win){
+ var doc=win.document,writes=new Map(),imageCache=new WeakMap(),ctx=doc.createElement('canvas').getContext('2d'),diagnostics=[];
+ function element(id){var p=id.split('::'),parent=p[0]==='terms-solo'?'TC_Solo':p[0].replace(/^offer-slot-(\d+)$/,'offer$1');var el=doc.getElementById(parent);return p[0]==='terms-solo'?el&&el.querySelector('.terms-solo'):p[1]?el&&el.querySelector('.'+p[1]):el;}
+ function box(r){return {left:r.left,top:r.top,width:r.width,height:r.height,right:r.left+r.width,bottom:r.top+r.height};}
+ function union(items){if(!items.length)return null;var x=Math.min.apply(null,items.map(r=>r.left)),y=Math.min.apply(null,items.map(r=>r.top)),right=Math.max.apply(null,items.map(r=>r.right)),bottom=Math.max.apply(null,items.map(r=>r.bottom));return box({left:x,top:y,width:right-x,height:bottom-y});}
+ function present(el){if(!el||win.getComputedStyle(el).visibility==='hidden')return false;for(var n=el;n&&n!==doc.documentElement;n=n.parentElement){var s=win.getComputedStyle(n);if(s.display==='none')return false;}return true;}
+ function clipInk(r,owner,stop){for(var n=owner;n&&n!==stop;n=n.parentElement){var s=win.getComputedStyle(n),b=n.getBoundingClientRect(),left=r.left,top=r.top,right=r.right,bottom=r.bottom;if(s.overflowX!=='visible'){left=Math.max(left,b.left+n.clientLeft);right=Math.min(right,b.left+n.clientLeft+n.clientWidth);}if(s.overflowY!=='visible'){top=Math.max(top,b.top+n.clientTop);bottom=Math.min(bottom,b.top+n.clientTop+n.clientHeight);}if(right<=left||bottom<=top)return null;r=box({left:left,top:top,width:right-left,height:bottom-top});}return r;}
+ function font(s){return s.fontStyle+' '+s.fontWeight+' '+s.fontSize+' '+s.fontFamily;}
+ function textInk(el){
+  var ink=[],walker=doc.createTreeWalker(el,win.NodeFilter.SHOW_TEXT),node;
+  while(node=walker.nextNode()){
+   var owner=node.parentElement;if(!present(owner))continue;var s=win.getComputedStyle(owner),groups=[],offset=0,current=null;
+   // Ranges locate the actual wrapped lines; full runs retain kerning and ligatures.
+   for(var ch of Array.from(node.textContent||'')){
+    var length=ch.length,range=doc.createRange();range.setStart(node,offset);range.setEnd(node,offset+length);var rect=range.getBoundingClientRect();
+    if(ch.trim()&&(rect.width||rect.height)){
+     if(!current||Math.abs(current.top-rect.top)>.25){current={start:offset,end:offset+length,top:rect.top};groups.push(current);}else current.end=offset+length;
+    }
+    offset+=length;
+   }
+   groups.forEach(function(group){
+    var range=doc.createRange();range.setStart(node,group.start);range.setEnd(node,group.end);var rect=range.getBoundingClientRect();
+    var sample=node.textContent.slice(group.start,group.end);if(['normal','nowrap','pre-line'].includes(s.whiteSpace))sample=sample.replace(/\s+/g,' ');
+    if(s.textTransform==='uppercase')sample=sample.toUpperCase();else if(s.textTransform==='lowercase')sample=sample.toLowerCase();
+    ctx.font=font(s);if('fontKerning' in ctx)ctx.fontKerning=s.fontKerning;if('letterSpacing' in ctx)ctx.letterSpacing=s.letterSpacing==='normal'?'0px':s.letterSpacing;
+    var m=ctx.measureText(sample);if(!Number.isFinite(m.actualBoundingBoxAscent))throw new Error('Font ink metrics unavailable');
+    var fa=m.fontBoundingBoxAscent,fd=m.fontBoundingBoxDescent;if(!Number.isFinite(fa)||!Number.isFinite(fd))throw new Error('Font baseline metrics unavailable');
+    var baseline=rect.top+Math.max(0,rect.height-fa-fd)/2+fa;
+    var left=rect.left-m.actualBoundingBoxLeft,right=rect.right-(m.width-m.actualBoundingBoxRight);
+    var painted=clipInk(box({left:left,top:baseline-m.actualBoundingBoxAscent,width:Math.max(0,right-left),height:m.actualBoundingBoxAscent+m.actualBoundingBoxDescent}),owner,el.parentElement);if(painted)ink.push(painted);
+   });
+  }
+  return union(ink);
+ }
+ function imageInk(el){
+  if(!present(el)||!el.getAttribute('src'))return null;if(!el.complete||!el.naturalWidth)throw new Error('Image not ready for ink measurement');
+  var cached=imageCache.get(el),src=el.currentSrc||el.src;
+  if(!cached||cached.src!==src){
+   var canvas=doc.createElement('canvas');canvas.width=el.naturalWidth;canvas.height=el.naturalHeight;
+   var c=canvas.getContext('2d',{willReadFrequently:true});c.drawImage(el,0,0);var pixels;
+   try{pixels=c.getImageData(0,0,canvas.width,canvas.height).data;}catch(error){throw new Error('Image ink unavailable: use a same-origin or CORS-enabled image');}
+   var minX=canvas.width,minY=canvas.height,maxX=-1,maxY=-1;
+   for(var y=0;y<canvas.height;y++)for(var x=0;x<canvas.width;x++)if(pixels[(y*canvas.width+x)*4+3]>0){minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);}
+   cached={src:src,empty:maxX<0,left:minX,top:minY,width:maxX-minX+1,height:maxY-minY+1};imageCache.set(el,cached);
+  }
+  if(cached.empty)return null;
+  var r=el.getBoundingClientRect(),s=win.getComputedStyle(el),w=r.width,h=r.height,nw=el.naturalWidth,nh=el.naturalHeight;
+  if(s.objectFit==='contain'||s.objectFit==='cover'){var scale=s.objectFit==='cover'?Math.max(w/nw,h/nh):Math.min(w/nw,h/nh);w=nw*scale;h=nh*scale;}
+  var position=(s.objectPosition||'50% 50%').split(' '),px=position[0].endsWith('%')?parseFloat(position[0])/100:.5,py=(position[1]||'50%').endsWith('%')?parseFloat(position[1]||'50')/100:.5;
+  var left=r.left+(r.width-w)*px+cached.left/nw*w,top=r.top+(r.height-h)*py+cached.top/nh*h;
+  var result=box({left:left,top:top,width:cached.width/nw*w,height:cached.height/nh*h});
+  var right=Math.min(result.right,r.right),bottom=Math.min(result.bottom,r.bottom);result.left=Math.max(result.left,r.left);result.top=Math.max(result.top,r.top);return box({left:result.left,top:result.top,width:Math.max(0,right-result.left),height:Math.max(0,bottom-result.top)});
+ }
+ function ink(el){
+  if(!present(el))return null;
+  if(el.tagName==='IMG')return imageInk(el);
+  if(el.namespaceURI==='http://www.w3.org/2000/svg'){var b=el.getBBox({stroke:true}),matrix=el.getScreenCTM();if(!matrix||!b.width||!b.height)return null;var points=[[b.x,b.y],[b.x+b.width,b.y],[b.x,b.y+b.height],[b.x+b.width,b.y+b.height]].map(function(p){return new win.DOMPoint(p[0],p[1]).matrixTransform(matrix);});return union(points.map(function(p){return box({left:p.x,top:p.y,width:0,height:0});}));}
+  var style=win.getComputedStyle(el),rect=el.getBoundingClientRect();
+  var painted=style.backgroundColor!=='rgba(0, 0, 0, 0)'&&style.backgroundColor!=='transparent'||style.backgroundImage!=='none'||parseFloat(style.borderWidth)>0;
+  if(painted)return rect.width&&rect.height?box(rect):null;
+  var texts=textInk(el),images=Array.from(el.querySelectorAll('img')).map(imageInk).filter(Boolean);
+  return union([texts].concat(images,Array.from(el.querySelectorAll('svg')).map(ink)).filter(Boolean));
+ }
+ function write(el,key,value){var entry=writes.get(el);if(!entry){entry={};writes.set(el,entry);}if(!entry[key])entry[key]={value:el.style.getPropertyValue(key),priority:el.style.getPropertyPriority(key)};el.style.setProperty(key,value,'important');entry[key].last=el.style.getPropertyValue(key);}
+ function reset(){doc.getAnimations().filter(a=>a.id.indexOf('dco-layout-')===0).forEach(a=>a.cancel());if(conditionalStyle){conditionalStyle.remove();conditionalStyle=null;}writes.forEach(function(entry,el){Object.keys(entry).forEach(function(key){if(el.style.getPropertyValue(key)===entry[key].last)el.style.setProperty(key,entry[key].value,entry[key].priority);});});writes.clear();}
+ function active(rule,root){return rule.enabled&&(rule.when||[]).concat((rule.scope||'').split('.').filter(Boolean)).every(s=>root.classList.contains(s));}
+ function authored(el){var s=win.getComputedStyle(el);return {left:parseFloat(s.left)||0,top:parseFloat(s.top)||0,width:parseFloat(s.width)||0,height:parseFloat(s.height)||0};}
+ function edge(r,e,axis){return axis==='x'?(e==='start'?r.left:e==='end'?r.right:r.left+r.width/2):(e==='start'?r.top:e==='end'?r.bottom:r.top+r.height/2);}
+ function local(r,root){if(!r)return null;var b=root.getBoundingClientRect();return box({left:r.left-b.left,top:r.top-b.top,width:r.width,height:r.height});}
+ function anchorText(root,rules,resolve){
+  var neutral=doc.createElement('style');neutral.textContent='.stage,.stage *{animation:none!important}';doc.head.append(neutral);var diagnostics=[];
+  try{rules.forEach(function(raw){var rule=resolve(raw,root);if(!rule||rule.disabled||!rule.anchor)return;
+   root.querySelectorAll(rule.selector||'.'+rule.cssClass).forEach(function(el){
+    if((rule.excludeTargets||[]).some(function(t){return el.matches(t.selector)&&t.scopes.some(scope=>!scope||scope.split('.').every(s=>root.classList.contains(s)));}))return;
+    var paint=ink(el);if(!paint)return;var anchor=rule.anchor,origin=root.getBoundingClientRect(),current=edge(paint,anchor.edge,'y'),delta=origin.top+anchor.position-current;
+    write(el,'top',((parseFloat(win.getComputedStyle(el).top)||0)+delta)+'px');diagnostics.push({targetId:el.id||el.closest('[id]')?.id,edge:anchor.edge,position:anchor.position,top:parseFloat(win.getComputedStyle(el).top),height:parseFloat(win.getComputedStyle(el).height)});
+   });});
+  }finally{neutral.remove();}win.__DCO_ANCHOR_DIAGNOSTICS__=diagnostics;
+ }
+ function facts(el){
+  var text=el?String(el.textContent||'').trim():'',shown=present(el),paint=shown?ink(el):null,tops=[];
+  if(shown&&text){var walker=doc.createTreeWalker(el,win.NodeFilter.SHOW_TEXT),node;while(node=walker.nextNode()){if(!present(node.parentElement))continue;var offset=0;for(var ch of Array.from(node.textContent||'')){var range=doc.createRange();range.setStart(node,offset);range.setEnd(node,offset+ch.length);offset+=ch.length;if(!ch.trim())continue;var r=range.getBoundingClientRect();if(r.width&&r.height&&!tops.some(line=>Math.abs(line.top-r.top)<1||Math.abs(line.height-r.height)>1&&Math.min(line.bottom,r.bottom)-Math.max(line.top,r.top)>=Math.min(line.height,r.height)*.6))tops.push({top:r.top,bottom:r.bottom,height:r.height});}}}
+  return {hasText:!!text,shown:!!paint,lines:tops.length,height:paint?paint.height:0};
+ }
+ function matches(c,f){return c.test==='has-text'?f.hasText:c.test==='empty'?!f.hasText:c.test==='shown'?f.shown:c.test==='hidden'?!f.shown:c.test==='lines-at-least'?f.lines>=c.value:c.test==='lines-at-most'?f.lines<=c.value:c.test==='lines-equal'?f.lines===c.value:f.height>=c.value;}
+ var conditionalStyle=null;
+ function run(root,rules,refit){
+  diagnostics=[];var motionPlans=[];var neutral=doc.createElement('style');neutral.textContent='.stage,.stage *,.stage *::before,.stage *::after{animation:none!important;transition:none!important}';doc.head.append(neutral);
+  var css=[],records=[...rules].sort((a,b)=>Number(b.type==='conditional')-Number(a.type==='conditional')).map(function(rule,index){var ids=rule.members||[rule.targetId];return {rule:rule,index:index,ids:ids,done:false,visiting:false};});
+  function diagnostic(rule,id,status){var item={id:rule.id,name:rule.name,targetId:id,size:rule.size,status:status};diagnostics.push(item);return item;}
+  function process(record){
+   if(record.done)return;if(record.visiting)throw new Error('Circular layout dependency');record.visiting=true;
+   var rule=record.rule,enabled=active(rule,root),measurement=rule.condition&&!['has-text','empty'].includes(rule.condition.test);
+   if(enabled)records.filter(function(other){if(other===record)return false;if(rule.type==='spacing')return other.ids.includes(rule.reference.targetId);if(rule.type==='distribute')return other.rule.type==='conditional'&&other.ids.some(id=>record.ids.includes(id));return measurement&&other.ids.includes(rule.condition.targetId)&&other.rule.type==='conditional'&&Object.keys(Object.assign({},other.rule.values,other.rule.otherwise)).some(k=>['width','height','visibility','fontSize','lineHeight','letterSpacing'].includes(k));}).forEach(process);
+   if(!enabled){record.ids.forEach(id=>diagnostic(rule,id,rule.enabled?'inactive':'disabled'));record.done=true;record.visiting=false;return;}
+   if(rule.type==='distribute'){
+    var items=record.ids.map(function(id){var el=element(id),item=diagnostic(rule,id,'active');item.area=rule.area;item.kind='distribute';item.before=el?authored(el):null;return {el:el,item:item,paint:el&&(!(rule.textMembers||[]).includes(id)||String(el.textContent||'').trim())?ink(el):null};});
+    var visible=items.filter(x=>x.paint);items.filter(x=>!x.paint).forEach(x=>{x.item.status='inactive';x.item.message='Empty or hidden — left out';});
+    var length=rule.axis==='x'?rule.area.width:rule.area.height,extent=visible.reduce((n,x)=>n+(rule.axis==='x'?x.paint.width:x.paint.height),0),gap=visible.length>1?(length-extent)/(visible.length-1):0;
+    if(extent>length||visible.length>1&&gap<rule.minGap){if(rule.overflow==='authored'){visible.forEach(x=>{x.item.status='error';x.item.message='Not enough room. Enlarge the area or reduce the minimum gap.';});record.done=true;record.visiting=false;return;}gap=rule.minGap;visible.forEach(x=>x.item.message='Minimum gap kept; artwork extends beyond the area');}
+    var origin=root.getBoundingClientRect(),cursor=(rule.axis==='x'?origin.left+rule.area.left:origin.top+rule.area.top);
+    if(visible.length===1)cursor+=(length-extent)*(rule.single==='end'?1:rule.single==='center'?.5:0);
+    var transition=rule.transition,cases=rule.transitionCases||[],timing=cases.find(t=>t.scopes.every(scope=>root.classList.contains(scope)));
+    var subject=transition&&visible.find(x=>x.item.targetId===transition.subjectId);
+    var survivors=subject?visible.filter(x=>x!==subject):[],solo=new Map();
+    if(subject&&timing&&survivors.length){
+     var soloExtent=survivors.reduce((n,x)=>n+(rule.axis==='x'?x.paint.width:x.paint.height),0),soloGap=survivors.length>1?(length-soloExtent)/(survivors.length-1):0,soloCursor=(rule.axis==='x'?origin.left+rule.area.left:origin.top+rule.area.top);
+     if(survivors.length===1)soloCursor+=(length-soloExtent)*(rule.single==='end'?1:rule.single==='center'?.5:0);
+     survivors.forEach(x=>{solo.set(x.item.targetId,x.item.before[rule.axis==='x'?'left':'top']+soloCursor-edge(x.paint,'start',rule.axis));soloCursor+=(rule.axis==='x'?x.paint.width:x.paint.height)+soloGap;});
+    }
+    visible.forEach(function(x){var key=rule.axis==='x'?'left':'top';write(x.el,key,(x.item.before[key]+cursor-edge(x.paint,'start',rule.axis))+'px');if(rule.crossAlign&&rule.crossAlign!=='keep'){var cross=rule.axis==='x'?'y':'x',crossKey=cross==='x'?'left':'top',crossStart=cross==='x'?origin.left+rule.area.left:origin.top+rule.area.top,crossLength=cross==='x'?rule.area.width:rule.area.height,fraction=rule.crossAlign==='end'?1:rule.crossAlign==='center'?.5:0;write(x.el,crossKey,(x.item.before[crossKey]+crossStart+crossLength*fraction-edge(x.paint,rule.crossAlign,cross))+'px');}x.item.after=authored(x.el);x.item.targetInk=local(ink(x.el),root);cursor+=(rule.axis==='x'?x.paint.width:x.paint.height)+gap;});
+    if(!rule.sequenceCases&&subject&&timing)survivors.forEach(function(x){var field=rule.axis==='x'?'left':'top',delta=solo.get(x.item.targetId)-x.item.after[field];if(Math.abs(delta)<.001)return;var translated=rule.axis==='x'?delta+'px 0px':'0px '+delta+'px';var keyframes=[{offset:0,translate:'0px 0px'},{offset:timing.start/100,translate:'0px 0px',easing:'ease-in-out'},{offset:timing.end/100,translate:translated}];if(timing.returnMode!=='none'){keyframes.push({offset:timing.returnStart/100,translate:translated,easing:timing.returnMode==='hidden'?'steps(1,end)':'ease-in-out'});keyframes.push({offset:timing.returnEnd/100,translate:'0px 0px'});}keyframes.push({offset:1,translate:timing.returnMode==='none'?translated:'0px 0px'});motionPlans.push({id:rule.id,targetId:x.item.targetId,keyframes,durationMs:timing.durationMs,loop:timing.loop});x.item.transition={start:timing.start,end:timing.end,returnStart:timing.returnStart,returnEnd:timing.returnEnd};});
+    var sequence=(rule.sequenceCases||[]).find(t=>t.scopes.every(scope=>root.classList.contains(scope)));
+    if(sequence){var areaStart=rule.axis==='x'?origin.left+rule.area.left:origin.top+rule.area.top;var members=visible.map(x=>({id:x.item.targetId,extent:rule.axis==='x'?x.paint.width:x.paint.height,fullStart:edge(x.paint,'start',rule.axis)+(x.item.after[rule.axis==='x'?'left':'top']-x.item.before[rule.axis==='x'?'left':'top'])-areaStart}));motionPlans.push.apply(motionPlans,(function layoutSequencePlans(rule, timing, members) {
+    const length = rule.axis === 'x' ? rule.area.width : rule.area.height;
+    const positions = (absent, previous)=>{
+        const present = members.filter((m)=>!absent.has(m.id)), extent = present.reduce((n, m)=>n + m.extent, 0);
+        let gap = present.length > 1 ? (length - extent) / (present.length - 1) : 0;
+        if (extent > length || present.length > 1 && gap < rule.minGap) {
+            if (rule.overflow === 'authored') throw new Error('Not enough room for a layout animation');
+            gap = rule.minGap;
+        }
+        let cursor = present.length === 1 ? (length - extent) * (rule.single === 'end' ? 1 : rule.single === 'center' ? .5 : 0) : 0;
+        const result = {
+            ...previous
+        };
+        present.forEach((m)=>{
+            result[m.id] = cursor - m.fullStart;
+            cursor += m.extent + gap;
+        });
+        return result;
+    };
+    const absent = new Set(timing.initialAbsent), zero = Object.fromEntries(members.map((m)=>[
+            m.id,
+            0
+        ]));
+    const initial = positions(absent, zero);
+    let current = {
+        ...initial
+    };
+    const frames = Object.fromEntries(members.map((m)=>[
+            m.id,
+            [
+                {
+                    offset: 0,
+                    value: initial[m.id]
+                }
+            ]
+        ]));
+    for (const e of timing.events){
+        if (e.kind !== 'return' && !members.some((m)=>m.id === e.subjectId)) continue;
+        if (e.kind === 'return') {
+            absent.clear();
+            timing.initialAbsent.forEach((id)=>absent.add(id));
+        } else if (e.kind === 'enter') absent.delete(e.subjectId);
+        else absent.add(e.subjectId);
+        const next = e.kind === 'return' ? {
+            ...initial
+        } : positions(absent, current);
+        members.forEach((m)=>{
+            frames[m.id].push({
+                offset: e.start / 100,
+                value: current[m.id],
+                easing: e.hidden ? 'steps(1,end)' : e.easingCss || 'ease-in-out'
+            }, {
+                offset: e.end / 100,
+                value: next[m.id]
+            });
+        });
+        current = next;
+    }
+    return members.flatMap((m)=>{
+        const values = frames[m.id];
+        values.push({
+            offset: 1,
+            value: current[m.id]
+        });
+        if (values.every((f)=>Math.abs(f.value) < .001)) return [];
+        return [
+            {
+                id: rule.id,
+                targetId: m.id,
+                durationMs: timing.durationMs,
+                loop: timing.loop,
+                keyframes: values.map((f)=>({
+                        offset: f.offset,
+                        translate: rule.axis === 'x' ? f.value + 'px 0px' : '0px ' + f.value + 'px',
+                        ...f.easing ? {
+                            easing: f.easing
+                        } : {}
+                    }))
+            }
+        ];
+    });
+})(rule,sequence,members));}
+   }else{
+    var target=element(rule.targetId),item=diagnostic(rule,rule.targetId,'active');item.before=target?authored(target):null;
+    if(rule.type==='conditional'){
+     if(rule.condition){var measured=facts(element(rule.condition.targetId)),pass=matches(rule.condition,measured),values=pass?rule.values:rule.otherwise;item.facts=measured;item.branch=pass?'when':'otherwise';item.values=values||{};
+      if(!values||!Object.keys(values).length){item.status='inactive';item.message=pass?'Condition met — original placement':'Condition not met — original placement';}
+      else if(target){target.setAttribute('data-layout-rule-node',rule.targetId);var declarations=Object.keys(values).map(function(key){return key.replace(/[A-Z]/g,c=>'-'+c.toLowerCase())+':'+values[key]+(['left','top','width','height'].includes(key)?'px':'')+'!important';});css.push('[data-layout-rule-node="'+win.CSS.escape(rule.targetId)+'"]{'+declarations.join(';')+'}');if(!conditionalStyle){conditionalStyle=doc.createElement('style');doc.head.append(conditionalStyle);}conditionalStyle.textContent=css.join('\n');if(refit)refit();}
+     }
+     item.after=target?authored(target):null;
+    }else{
+     if(!target||!present(target)){item.status='inactive';}
+     else{var targetInk=ink(target);if(!targetInk){item.status='missing';item.message='Target has no visible ink';}
+      else{var reference=rule.reference.targetId==='canvas'?box(root.getBoundingClientRect()):ink(element(rule.reference.targetId)),refEdge=rule.reference.edge,gap=rule.gap||0;
+       var fontSize=parseFloat(win.getComputedStyle(target).fontSize)||0,canvasBox=root.getBoundingClientRect(),gapScale=rule.gapUnit==='em'?fontSize:rule.gapUnit==='percent'?(rule.axis==='x'?canvasBox.width:canvasBox.height)/100:1;
+       if(!reference){item.message='Reference has no visible ink';if(rule.onMissing==='canvas'){reference=box(root.getBoundingClientRect());refEdge=rule.fallbackEdge;gap=rule.fallbackGap||0;item.message='Using canvas fallback';item.usingFallback=true;}else item.status='missing';}
+       if(reference){gap*=gapScale;var delta=edge(reference,refEdge,rule.axis)+gap-edge(targetInk,rule.targetEdge,rule.axis),property=rule.axis==='x'?'left':'top';write(target,property,(item.before[property]+delta)+'px');item.after=authored(target);item.axis=rule.axis;item.targetEdge=rule.targetEdge;item.referenceEdge=refEdge;item.targetInk=local(ink(target),root);item.referenceInk=local(reference,root);item.gap=gap;item.gapScale=gapScale;}
+      }
+     }
+    }
+   }
+   record.done=true;record.visiting=false;
+  }
+  try{records.forEach(function(record){try{process(record);}catch(error){record.ids.forEach(function(id){var item=diagnostics.find(d=>d.id===record.rule.id&&d.targetId===id)||diagnostic(record.rule,id,'error');item.status='error';item.message=error.message;});record.done=true;record.visiting=false;}});
+   diagnostics.filter(item=>item.status==='active').forEach(function(item){var target=element(item.targetId);if(target){item.after=authored(target);if(item.axis||item.kind==='distribute')item.targetInk=local(ink(target),root);}});
+  }finally{neutral.remove();}
+  win.__DCO_LAYOUT_DIAGNOSTICS__=diagnostics;win.__DCO_LAYOUT_TRANSITIONS__=motionPlans;if(motionPlans.length)(function(win){return function(plans){
+ var doc=win.document;doc.getAnimations().filter(a=>a.id.indexOf('dco-layout-')===0).forEach(a=>a.cancel());
+ var created=plans.map(function(plan){var p=plan.targetId.split('::'),id=p[0]==='terms-solo'?'TC_Solo':p[0].replace(/^offer-slot-(\d+)$/,'offer$1'),el=doc.getElementById(id);if(p[0]==='terms-solo')el=el&&el.querySelector('.terms-solo');else if(p[1])el=el&&el.querySelector('.'+p[1]);if(!el)return null;var animation=el.animate(plan.keyframes,{duration:plan.durationMs,iterations:plan.loop?Infinity:1,fill:'both',easing:'linear',composite:'add'});animation.id='dco-layout-'+plan.id+'-'+plan.targetId;animation.pause();animation.currentTime=0;return animation;}).filter(Boolean);
+ win.requestAnimationFrame(function sync(){var root=doc.querySelector('.stage');if(root&&!root.classList.contains('motion-ready')){win.requestAnimationFrame(sync);return;}var clock=doc.getAnimations().find(a=>a.id.indexOf('dco-layout-')!==0&&a.animationName);created.forEach(function(animation){if(animation.playState==='idle')return;if(typeof win.__DCO_SEEK_TIME__==='number'){animation.currentTime=win.__DCO_SEEK_TIME__;animation.pause();return;}animation.currentTime=clock&&clock.currentTime!=null?clock.currentTime:0;if(!clock||clock.playState==='running'){animation.play();if(clock&&typeof clock.startTime==='number')animation.startTime=clock.startTime;}});});
+ };})(win)(motionPlans);return diagnostics;
+ }
+ return {reset:reset,run:run,anchorText:anchorText,ink:ink,facts:facts,element:element,getDiagnostics:function(){return diagnostics;}};
+})(window);var layoutRules=JSON.parse(document.getElementById('dco-layout-rules').textContent);window.updateSseDcoLayoutRules=function(next){layoutRules=next;};
+        var textFitRules = JSON.parse(document.getElementById('sse-production-fit-rules').textContent);
+        window.updateSseDcoFitRules = function(rules) { textFitRules = rules; };
+        var settlementGeneration = 0;
+        function settleRuntime() {
+          var generation = ++settlementGeneration;
+          window.__SSE_DCO_SETTLED__ = Promise.all([document.fonts && document.fonts.ready,...Array.from(document.images).map(function(img){return img.complete?Promise.resolve():new Promise(function(resolve){img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true});});})]).then(function() {
+            return new Promise(function(resolve) {
+              window.requestAnimationFrame(function() {
+                if (generation === settlementGeneration) {commitOfferLayout();releaseMotionClock();}
+                window.requestAnimationFrame(resolve);
+              });
+            });
+          });
+        }
 
         function fieldValue(value) {
           if (value === undefined || value === null) return '';
@@ -4523,8 +5033,8 @@
           var enterDuration = Number(params.enter_duration_pct || 7);
           var fadePct = Number(params.fade_pct || 2);
           var settled = Math.min(end, start + enterDuration);
-          var enterDistance = Number(params.enter_distance_px || 320);
-          var exitDy = Number(params.exit_dy || 5);
+          var enterDistance = Number(params.enter_distance_px === undefined ? 320 : params.enter_distance_px);
+          var exitDy = Number(params.exit_dy === undefined ? 5 : params.exit_dy);
           return [
             { at: start, translate: [enterDistance, 0], opacity: 0 },
             { at: settled, translate: [0, 0], opacity: 1 },
@@ -4558,6 +5068,30 @@
         function __compileHeadlineClips(clips, beats) {
           if (!clips || !clips.length) {
             return [{ at: 0, translate: [0, 0], opacity: 0 }, { at: 100, translate: [0, 0], opacity: 0 }];
+          }
+          if (clips[0].preset === 'custom') {
+            var frames = [];
+            var translate = [0, 0];
+            var scale = 1;
+            var opacity = 1;
+            clips.forEach(function(clip) {
+              (clip.keyframes || []).forEach(function(frame) {
+                var next = {};
+                Object.keys(frame).forEach(function(key) { next[key] = frame[key]; });
+                next.at = __resolveBeat(frame.at, beats);
+                frames.push(next);
+              });
+            });
+            frames.sort(function(a,b) { return a.at - b.at; });
+            return frames.map(function(frame) {
+              if (frame.translate) translate = frame.translate;
+              if (frame.scale !== undefined) scale = frame.scale;
+              if (frame.opacity !== undefined) opacity = frame.opacity;
+              frame.translate = translate;
+              frame.scale = scale;
+              frame.opacity = opacity;
+              return frame;
+            });
           }
           if (clips[0].preset === 'fade') return __compileFade(clips[0], beats);
           return __compileSlideInRight(clips[0], beats);
@@ -4685,7 +5219,9 @@
           if (!data || data.include_heading4_enum === undefined || data.include_heading4_enum === null) return true;
           if (typeof data.include_heading4_enum === 'boolean') return data.include_heading4_enum;
           var normalized = String(data.include_heading4_enum).trim().toLowerCase();
-          if (normalized === 'false' || normalized === '0' || normalized === 'no' || normalized === 'off' || normalized === '') return false;
+          // Empty string is normalizeProfileRow/fieldValue(undefined) — treat as missing.
+          if (!normalized) return true;
+          if (normalized === 'false' || normalized === '0' || normalized === 'no' || normalized === 'off') return false;
           return true;
         }
 
@@ -4739,6 +5275,23 @@
                 if (!(heading4Enabled && headings[3])) {
                   window.hidden = true;
                   window.keyframes = [{ at: 0, translate: [0, 0], opacity: 0 }, { at: 100, translate: [0, 0], opacity: 0 }];
+                } else {
+                  // Match buildHeadlineMotionPlan: pin Act 4 to act4_in (not banner bn_cta_in).
+                  var act4Start = Number(
+                    beats.act4_in != null ? beats.act4_in
+                      : (beats.bn_cta_in != null ? beats.bn_cta_in
+                        : (beats.cta_in != null ? beats.cta_in : window.start))
+                  );
+                  var source = (window.clips && window.clips[0]) || {};
+                  var rebuilt = [{
+                    preset: source.preset || 'slideInRight',
+                    start: act4Start,
+                    end: window.end,
+                    params: source.params || {}
+                  }];
+                  window.start = act4Start;
+                  window.hidden = false;
+                  window.keyframes = __compileHeadlineClips(rebuilt, beats);
                 }
                 return;
               }
@@ -4850,7 +5403,49 @@
     return true;
   }
 
+  function isPolicyMemberVisible(element) {
+    // Visibility is inherited but a child may explicitly override hidden.
+    if (computedOf(element).visibility === 'hidden') return false;
+    var node = element;
+    while (node) {
+      if (computedOf(node).display === 'none') return false;
+      node = node.parentElement;
+    }
+    return true;
+  }
+
+  var fitStyleKeys = ['fontSize', 'letterSpacing', 'whiteSpace', 'overflow', 'textOverflow', 'maxHeight', 'transform', 'alignItems', 'height'];
+  var fitAttributeKeys = ['data-fit-clipped', 'data-fit-clip-reason', 'data-fit-status', 'data-fit-requested-size', 'data-fit-rendered-size'];
+
+  function cssStyleName(key) {
+    return key.replace(/[A-Z]/g, function (letter) { return '-' + letter.toLowerCase(); });
+  }
+
+  function rememberAuthoredFitStyles(element) {
+    if (element.__dcoFitAuthored) return;
+    var authored = { values: {}, priorities: {}, title: element.getAttribute('title') };
+    fitStyleKeys.forEach(function (key) {
+      authored.values[key] = element.style[key];
+      authored.priorities[key] = element.style.getPropertyPriority ? element.style.getPropertyPriority(cssStyleName(key)) : '';
+    });
+    element.__dcoFitAuthored = authored;
+  }
+
+  function restoreAuthoredFitStyles(element) {
+    var authored = element.__dcoFitAuthored;
+    if (!authored) return;
+    fitStyleKeys.forEach(function (key) {
+      if (element.style.setProperty) element.style.setProperty(cssStyleName(key), authored.values[key] || '', authored.priorities[key]);
+      else element.style[key] = authored.values[key];
+    });
+    fitAttributeKeys.forEach(function (key) { element.removeAttribute(key); });
+    if (authored.title === null) element.removeAttribute('title');
+    else element.setAttribute('title', authored.title);
+  }
+
   function resetStyles(element) {
+    rememberAuthoredFitStyles(element);
+    if (element.__dcoExplicitFitStyles) element.style.height = element.__dcoExplicitFitStyles.height;
     element.style.fontSize = '';
     element.style.letterSpacing = '';
     element.style.whiteSpace = '';
@@ -4926,8 +5521,32 @@
     return overflowsWidth(element) || tooTall(element, rule, cs, fontSize);
   }
 
+  function scopeTokensOnRoot(scope, className) {
+    var parts = String(scope || '').split('.');
+    var scopeActive = false;
+    var partIndex;
+    for (partIndex = 0; partIndex < parts.length; partIndex += 1) {
+      if (!parts[partIndex]) continue;
+      if (className.indexOf(' ' + parts[partIndex] + ' ') === -1) return false;
+      scopeActive = true;
+    }
+    return scopeActive;
+  }
+
+  function explicitPolicyRule(rule) {
+    if (!rule.frame || !rule.static) return rule;
+    var resolved = {};
+    for (var key in rule) resolved[key] = rule[key];
+    // A scoped legacy mode may arrive after the frame policy. Resolve the
+    // final merged policy so explicit sizing remains independent of overflow.
+    if (resolved.allowShrink === undefined) resolved.allowShrink = false;
+    if (!resolved.overflow) resolved.overflow = resolved.static === 'truncate' ? 'ellipsis' : 'clip';
+    delete resolved.static;
+    return resolved;
+  }
+
   function resolveRule(rule, root) {
-    if (!rule.scopes) return rule;
+    if (!rule.scopes && !rule.targetOverrides) return explicitPolicyRule(rule);
     var resolved = {};
     var key;
     for (key in rule) {
@@ -4936,7 +5555,7 @@
     var className = ' ' + String((root && root.className) || '') + ' ';
     var matchedScope = false;
     for (var scope in rule.scopes) {
-      if (className.indexOf(' ' + scope + ' ') === -1) continue;
+      if (!scopeTokensOnRoot(scope, className)) continue;
       matchedScope = true;
       var overrides = rule.scopes[scope];
       for (key in overrides) {
@@ -4944,8 +5563,25 @@
       }
     }
     // Host rules created only to carry variant fit must not run when idle.
-    if (rule.scopeOnly && !matchedScope) return null;
-    return resolved;
+    if (rule.targetOverrides) {
+      var targetActive = false;
+      rule.targetOverrides.forEach(function (override) {
+        if (override.scope && !scopeTokensOnRoot(override.scope, className)) return;
+        targetActive = true;
+        for (var property in override) if (property !== 'scope') resolved[property] = override[property];
+      });
+      if (!targetActive) return null;
+    } else if (rule.scopeOnly && !matchedScope) return null;
+    return explicitPolicyRule(resolved);
+  }
+
+  function excludedFromRule(element, rule, root) {
+    var className = ' ' + String((root && root.className) || '') + ' ';
+    return (rule.excludeTargets || []).some(function (target) {
+      return element.matches(target.selector) && target.scopes.some(function (scope) {
+        return !scope || scopeTokensOnRoot(scope, className);
+      });
+    });
   }
 
   function applyStatic(element, rule) {
@@ -5008,7 +5644,7 @@
     // Bottom-aligned flex boxes (align-items: flex-end) keep that alignment
     // when copy wraps: the last line stays on the baseline and earlier lines
     // stack upward. Do not flip to flex-start — that was fighting Text Y = Bottom.
-    if (rule.align === 'bottom' && size < fit.base) {
+    if (rule.align === 'bottom' && size < fit.base && !rule.anchor) {
       var delta = (fit.base - size) * fit.lineRatio;
       if (delta > 0.25) element.style.transform = 'translateY(' + delta.toFixed(2) + 'px)';
     }
@@ -5043,12 +5679,142 @@
     return clipped;
   }
 
+  // Explicit policy measures the entire browser-shaped text. It does not
+  // rewrite frame geometry or transform, and never treats clipping as a fit.
+  function measurePolicy(element, rule, size, minimum) {
+    var cs = computedOf(element);
+    var reasons = [];
+    var lines = 0;
+    var range = element.ownerDocument.createRange();
+    range.selectNodeContents(element);
+    var rects = Array.prototype.slice.call(range.getClientRects());
+    var frame = element.getBoundingClientRect();
+    var scaleX = element.offsetWidth ? frame.width / element.offsetWidth : 1;
+    var scaleY = element.offsetHeight ? frame.height / element.offsetHeight : 1;
+    if (!scaleX || !scaleY || !rects.length || !element.clientWidth) {
+      reasons.push('unmeasurable');
+    } else {
+      var tops = [];
+      var widthOverflow = overflowsWidth(element);
+      var heightOverflow = false;
+      var left = frame.left + (element.clientLeft + cssNumber(cs.paddingLeft)) * scaleX;
+      var right = frame.left + (element.clientLeft + element.clientWidth - cssNumber(cs.paddingRight)) * scaleX;
+      var top = frame.top + (element.clientTop + cssNumber(cs.paddingTop)) * scaleY;
+      var bottom = frame.top + (element.clientTop + element.clientHeight - cssNumber(cs.paddingBottom)) * scaleY;
+      rects.forEach(function (rect) {
+        if (!rect.width && !rect.height) return;
+        var center = (rect.top + rect.bottom) / 2;
+        if (!tops.some(function (value) { return Math.abs(value - center) < lineHeightPx(cs, size) * scaleY * 0.45; })) tops.push(center);
+        if (rect.left < left - 0.5 * scaleX || rect.right > right + 0.5 * scaleX) widthOverflow = true;
+        if (rect.top < top - 0.5 * scaleY || rect.bottom > bottom + 0.5 * scaleY) heightOverflow = true;
+      });
+      lines = tops.length;
+      if (widthOverflow) reasons.push('width');
+      if (rule.frame === 'fixed' && heightOverflow) reasons.push('height');
+      if (Number(rule.maxLines) > 0 && lines > Number(rule.maxLines)) reasons.push('max-lines');
+    }
+    if (size < minimum) reasons.push('minimum-size');
+    if (range.detach) range.detach();
+    return { reasons: reasons, lines: lines };
+  }
+
+  function fitPolicyMember(element, rule) {
+    rememberAuthoredFitStyles(element);
+    var keys = ['fontSize', 'letterSpacing', 'whiteSpace', 'overflow', 'textOverflow', 'height'];
+    // Preserve authored inline values, including font size. Repeated font-load
+    // fitting starts from authored styles rather than the previous fitted size.
+    if (!element.__dcoExplicitFitStyles) {
+      element.__dcoExplicitFitStyles = {};
+      keys.forEach(function (key) { element.__dcoExplicitFitStyles[key] = element.style[key]; });
+    }
+    keys.forEach(function (key) { element.style[key] = element.__dcoExplicitFitStyles[key]; });
+    var cs = computedOf(element);
+    var base = cssNumber(cs.fontSize, 1);
+    // A fixed font has one permitted size; dormant shrink floors do not apply.
+    var minimum = rule.allowShrink === false || rule.static
+      ? base
+      : Math.max(Number(rule.minFontSize) || 1, base * (Number(rule.minFontSizeRatio) || 0));
+    var floor = Math.min(base, minimum);
+    var size = base;
+    var trackingEm = 0;
+    element.style.whiteSpace = rule.wrap ? 'pre-line' : 'nowrap';
+    if (rule.frame === 'auto') element.style.height = 'auto';
+    element.style.overflow = 'visible';
+    element.style.textOverflow = 'clip';
+    if (rule.tracking) {
+      var minEm = Number(rule.tracking.minEm) || 0;
+      while (trackingEm > minEm && overflowsWidth(element)) {
+        trackingEm = Math.max(minEm, Number((trackingEm - 0.005).toFixed(3)));
+        element.style.letterSpacing = trackingEm + 'em';
+      }
+    }
+    var measurement = measurePolicy(element, rule, size, minimum);
+    if (rule.allowShrink !== false && !rule.static) {
+      while (size > floor && measurement.reasons.some(function (reason) { return reason !== 'minimum-size'; })) {
+        size = Math.max(floor, Number((size - 0.5).toFixed(3)));
+        element.style.fontSize = size + 'px';
+        measurement = measurePolicy(element, rule, size, minimum);
+      }
+    }
+    return { element: element, base: base, minimum: minimum, size: size, trackingEm: trackingEm };
+  }
+
+  function applyPolicy(root, rule) {
+    var elements = Array.prototype.slice.call(root.querySelectorAll(rule.selector || '.' + rule.cssClass)).filter(function (element) {
+      // Supported motion changes opacity, never visibility/display. Those
+      // authored CSS properties identify state-inactive text and wrappers.
+      return element.textContent && String(element.textContent).trim() && isPolicyMemberVisible(element) && !excludedFromRule(element, rule, root);
+    });
+    if (!elements.length) return undefined;
+    var fits = elements.map(function (element) { return fitPolicyMember(element, rule); });
+    var sharedSize = Math.min.apply(null, fits.map(function (fit) { return fit.size; }));
+    if (rule.shared) {
+      // Respect every member's floor. Conflicts are diagnosed below, not hidden
+      // by forcing one member below its minimum for another member's copy.
+      sharedSize = Math.min(Math.min.apply(null, fits.map(function (fit) { return fit.base; })),
+        Math.max(sharedSize, Math.max.apply(null, fits.map(function (fit) { return fit.minimum; }))));
+    }
+    var diagnostics = fits.map(function (fit) {
+      var size = rule.allowShrink === false ? fit.base : (rule.shared ? sharedSize : fit.size);
+      var element = fit.element;
+      element.style.fontSize = size + 'px';
+      var measurement = measurePolicy(element, rule, size, fit.minimum);
+      var overflow = rule.overflow || (rule.static === 'truncate' ? 'ellipsis' : 'clip');
+      element.style.overflow = overflow === 'visible' ? 'visible' : 'hidden';
+      element.style.textOverflow = overflow === 'ellipsis' ? 'ellipsis' : 'clip';
+      var failed = measurement.reasons.length > 0;
+      element.setAttribute('data-fit-status', failed ? 'failed' : 'fitted');
+      element.setAttribute('data-fit-requested-size', String(fit.base));
+      element.setAttribute('data-fit-rendered-size', String(size));
+      if (failed) {
+        element.setAttribute('data-fit-clipped', 'true');
+        element.setAttribute('data-fit-clip-reason', measurement.reasons.join(','));
+      } else {
+        element.removeAttribute('data-fit-clipped');
+        element.removeAttribute('data-fit-clip-reason');
+      }
+      fit.rule = rule;
+      fit.diagnostic = { targetId: element.id || null, requestedSize: fit.base, renderedSize: size, reasons: measurement.reasons, lines: measurement.lines };
+      return fit.diagnostic;
+    });
+    return {
+      size: Math.min.apply(null, diagnostics.map(function (item) { return item.renderedSize; })),
+      trackingEm: Math.min.apply(null, fits.map(function (fit) { return fit.trackingEm; })),
+      clipped: diagnostics.some(function (item) { return item.reasons.length > 0; }),
+      diagnostics: diagnostics,
+      members: fits,
+    };
+  }
+
   function applyRule(root, rule) {
     var resolved = resolveRule(rule, root);
+    if (resolved && resolved.disabled) return;
     if (!resolved) return undefined;
+    if (resolved.frame) return applyPolicy(root, resolved);
     var elements = [];
-    root.querySelectorAll('.' + resolved.cssClass).forEach(function (element) {
+    root.querySelectorAll(resolved.selector || '.' + resolved.cssClass).forEach(function (element) {
       if (!element.textContent || !String(element.textContent).trim()) return;
+      if (excludedFromRule(element, resolved, root)) return;
       if (!isVisible(element)) return;
       elements.push(element);
     });
@@ -5116,22 +5882,73 @@
   }
 
   function applyRules(root, rules) {
+    // A feed update can empty or hide a previously fitted node. Restore every
+    // candidate before membership checks, including now-inactive scoped rules,
+    // so prior rows cannot leave font sizes, clipping or transforms behind.
+    (rules || []).forEach(function (rule) {
+      root.querySelectorAll(rule.selector || '.' + rule.cssClass).forEach(restoreAuthoredFitStyles);
+    });
     var results = [];
+    var policyGroups = {};
     (rules || []).forEach(function (rule) {
       var result = applyRule(root, rule);
       if (result !== undefined) {
-        results.push({
+        (result.members || []).forEach(function (member) {
+          if (!member.rule.shared) return;
+          var key = member.rule.sharedGroup || member.rule.cssClass;
+          if (!policyGroups[key]) policyGroups[key] = [];
+          policyGroups[key].push(member);
+        });
+        var entry = {
           cssClass: rule.cssClass,
           size: result.size,
           trackingEm: Number(result.trackingEm) || 0,
           clipped: Boolean(result.clipped),
-        });
+        };
+        if (result.diagnostics) entry.diagnostics = result.diagnostics;
+        results.push(entry);
       }
+    });
+    // A local text policy does not detach a member from its fit relationship.
+    // Equalise across resolved target rules as well as within each selector.
+    Object.keys(policyGroups).forEach(function (key) {
+      var members = policyGroups[key];
+      if (members.length < 2) return;
+      var size = Math.min.apply(null, members.map(function (member) { return member.diagnostic.renderedSize; }));
+      var floor = Math.max.apply(null, members.map(function (member) { return member.minimum; }));
+      var ceiling = Math.min.apply(null, members.map(function (member) { return member.base; }));
+      size = Math.min(ceiling, Math.max(size, floor));
+      var renderedSizes = members.map(function (member) { return member.rule.allowShrink === false ? member.base : size; });
+      var conflict = renderedSizes.some(function (rendered) { return rendered !== renderedSizes[0]; });
+      members.forEach(function (member, index) {
+        var element = member.element;
+        var renderedSize = renderedSizes[index];
+        element.style.fontSize = renderedSize + 'px';
+        var measurement = measurePolicy(element, member.rule, renderedSize, member.minimum);
+        if (conflict) measurement.reasons.push('shared-size-conflict');
+        member.diagnostic.renderedSize = renderedSize;
+        member.diagnostic.reasons = measurement.reasons;
+        member.diagnostic.lines = measurement.lines;
+        element.setAttribute('data-fit-rendered-size', String(renderedSize));
+        element.setAttribute('data-fit-status', measurement.reasons.length ? 'failed' : 'fitted');
+        if (measurement.reasons.length) {
+          element.setAttribute('data-fit-clipped', 'true');
+          element.setAttribute('data-fit-clip-reason', measurement.reasons.join(','));
+        } else {
+          element.removeAttribute('data-fit-clipped');
+          element.removeAttribute('data-fit-clip-reason');
+        }
+      });
+    });
+    results.forEach(function (entry) {
+      if (!entry.diagnostics) return;
+      entry.size = Math.min.apply(null, entry.diagnostics.map(function (item) { return item.renderedSize; }));
+      entry.clipped = entry.diagnostics.some(function (item) { return item.reasons.length > 0; });
     });
     return results;
   }
 
-  return { applyRules: applyRules };
+  return { applyRules: applyRules, resolveRule: resolveRule };
 })(window);
 
         function fitBoundText() {
@@ -5141,9 +5958,12 @@
 
         function commitOfferLayout() {
           if (!root) return;
+          responsiveLayout.reset();
           fitBoundText();
           alignOfferValueSymbols(root);
           layoutOffers(root);
+          responsiveLayout.anchorText(root,textFitRules,textFitEngine.resolveRule);
+          responsiveLayout.run(root,layoutRules,function(){fitBoundText();alignOfferValueSymbols(root);layoutOffers(root);responsiveLayout.anchorText(root,textFitRules,textFitEngine.resolveRule);});
         }
 
         // Cold CDN Museo must settle before the 15s clock runs. Pausing via
@@ -5236,11 +6056,35 @@
     return true;
   }
 
+  function layoutPropertyName(key) {
+    return key.replace(/[A-Z]/g, function(letter) { return '-' + letter.toLowerCase(); });
+  }
+
+  function writeLayoutStyle(element, key, value) {
+    var writes = element.__dcoOfferLayoutWrites || (element.__dcoOfferLayoutWrites = {});
+    var name = layoutPropertyName(key);
+    if (!writes[key]) writes[key] = {
+      authored: element.style[key],
+      priority: element.style.getPropertyPriority(name),
+    };
+    element.style[key] = value;
+    writes[key].last = element.style[key];
+    writes[key].lastPriority = element.style.getPropertyPriority(name);
+  }
+
   function clearLayoutStyles(element) {
-    if (!element || !element.style) return;
-    element.style.left = '';
-    element.style.top = '';
-    element.style.width = '';
+    if (!element || !element.style || !element.__dcoOfferLayoutWrites) return;
+    var writes = element.__dcoOfferLayoutWrites;
+    Object.keys(writes).forEach(function(key) {
+      var name = layoutPropertyName(key);
+      var write = writes[key];
+      // A new author/runtime write is not ours to remove. Restore only the
+      // exact value installed by the previous automatic layout pass.
+      if (element.style[key] === write.last && element.style.getPropertyPriority(name) === write.lastPriority) {
+        element.style.setProperty(name, write.authored, write.priority);
+      }
+    });
+    delete element.__dcoOfferLayoutWrites;
   }
 
   /** Map a client rect into ancestor-local px, correcting stage scale(). */
@@ -5452,9 +6296,9 @@
     // width changes. Do NOT rewrite top — authored Y (flex-end in a real
     // height box) owns baseline pairing, and rewriting top every fit pass
     // made inspector drags look broken.
-    subline.style.left = (ink.right + SIDE_BY_SIDE_GAP_PX) + 'px';
+    writeLayoutStyle(subline, 'left', (ink.right + SIDE_BY_SIDE_GAP_PX) + 'px');
     if (window.getComputedStyle(subline).display === 'flex') {
-      subline.style.alignItems = 'flex-end';
+      writeLayoutStyle(subline, 'alignItems', 'flex-end');
     }
   }
 
@@ -5464,7 +6308,6 @@
     if (!value || !subline) return;
     var run = value.querySelector('.offer-value-run') || value;
     if (isSideBySide(value, subline, slot)) {
-      subline.style.width = '';
       layoutSideBySide(slot, run, subline);
     }
   }
@@ -5692,13 +6535,13 @@
     var isImg = plus.tagName === 'IMG' || plus.tagName === 'img';
     if (isImg) {
       // Layout box ignores CSS animation transforms (unlike getBoundingClientRect).
-      plus.style.left = (x - pw / 2) + 'px';
-      plus.style.top = (alignY === 'top' ? y : (y - ph / 2)) + 'px';
+      writeLayoutStyle(plus, 'left', (x - pw / 2) + 'px');
+      writeLayoutStyle(plus, 'top', (alignY === 'top' ? y : (y - ph / 2)) + 'px');
       return;
     }
     var parent = plus.offsetParent || plus.parentElement;
-    plus.style.left = (x - pw / 2) + 'px';
-    plus.style.top = (y - ph / 2) + 'px';
+    writeLayoutStyle(plus, 'left', (x - pw / 2) + 'px');
+    writeLayoutStyle(plus, 'top', (y - ph / 2) + 'px');
     if (!parent) return;
     withNeutralMotion(plus, function() {
       var ink = textInk(plus, parent);
@@ -5707,11 +6550,11 @@
       var inkCy = (ink.top + ink.bottom) / 2;
       var curLeft = cssNumber(plus.style.left, 0);
       var curTop = cssNumber(plus.style.top, 0);
-      plus.style.left = (curLeft + (x - inkCx)) + 'px';
+      writeLayoutStyle(plus, 'left', (curLeft + (x - inkCx)) + 'px');
       if (alignY === 'top') {
-        plus.style.top = (curTop + (y - ink.top)) + 'px';
+        writeLayoutStyle(plus, 'top', (curTop + (y - ink.top)) + 'px');
       } else {
-        plus.style.top = (curTop + (y - inkCy)) + 'px';
+        writeLayoutStyle(plus, 'top', (curTop + (y - inkCy)) + 'px');
       }
     });
   }
@@ -5803,7 +6646,7 @@
 
     var cursor = blockLeft;
     for (var i = 0; i < clusters.length; i += 1) {
-      clusters[i].slot.style.left = (cursor - clusters[i].insetLeft) + 'px';
+      writeLayoutStyle(clusters[i].slot, 'left', (cursor - clusters[i].insetLeft) + 'px');
       cursor += clusters[i].width + gap;
     }
     clusters = remeasureSorted(slots, 'x');
@@ -5832,7 +6675,7 @@
 
     var cursor = blockTop;
     for (var i = 0; i < clusters.length; i += 1) {
-      clusters[i].slot.style.top = (cursor - clusters[i].insetTop) + 'px';
+      writeLayoutStyle(clusters[i].slot, 'top', (cursor - clusters[i].insetTop) + 'px');
       cursor += clusters[i].height + gap;
     }
     clusters = remeasureSorted(slots, 'y');
@@ -5893,7 +6736,7 @@
     var cursor = topBlockLeft;
     for (var t = 0; t < 2; t += 1) {
       var tr = topRow[t];
-      tr.slot.style.left = (cursor - tr.cluster.insetLeft) + 'px';
+      writeLayoutStyle(tr.slot, 'left', (cursor - tr.cluster.insetLeft) + 'px');
       cursor += tr.cluster.width + gap;
     }
 
@@ -5902,7 +6745,7 @@
     });
     var topCentroidX = (topRow[0].cluster.valueCenterX + topRow[1].cluster.valueCenterX) / 2;
     bottom = { slot: bottom.slot, box: boxOf(bottom.slot), cluster: clusterForSlot(bottom.slot) };
-    bottom.slot.style.left = (topCentroidX - bottom.cluster.width / 2 - bottom.cluster.insetLeft) + 'px';
+    writeLayoutStyle(bottom.slot, 'left', (topCentroidX - bottom.cluster.width / 2 - bottom.cluster.insetLeft) + 'px');
     bottom = { slot: bottom.slot, box: boxOf(bottom.slot), cluster: clusterForSlot(bottom.slot) };
 
     // MPU / 970×250: raise plus top to top-row subline caps.
@@ -5931,41 +6774,39 @@
     var plusLayout = resolvePlusLayoutMode(scope);
 
     var slotNodes = scope.querySelectorAll('[data-gwd-group="OfferSlot"]');
+    var plusCandidates = [];
+    for (var p = 1; p <= 2; p += 1) {
+      var plus = scope.querySelector
+        ? (scope.querySelector('#plus-' + p) || scope.querySelector('.plus-' + p))
+        : null;
+      if (!plus && scope.ownerDocument) plus = scope.ownerDocument.getElementById('plus-' + p);
+      plusCandidates.push(plus);
+    }
+
+    // Reset before eligibility checks: a row can hide every slot and plus.
+    // Previously those nodes retained another row's re-anchored positions.
+    Array.prototype.forEach.call(slotNodes, function(slot) {
+      clearLayoutStyles(slot);
+      clearLayoutStyles(slot.querySelector('.offer-subline'));
+    });
+    plusCandidates.forEach(clearLayoutStyles);
+
     var slots = [];
     Array.prototype.forEach.call(slotNodes, function(slot) {
-      if (!isVisible(slot)) return;
-      slots.push(slot);
+      if (isVisible(slot)) slots.push(slot);
     });
     if (!slots.length) return;
-
     slots.sort(function(a, b) {
       var ai = parseInt(a.getAttribute('data-offer-index') || '0', 10);
       var bi = parseInt(b.getAttribute('data-offer-index') || '0', 10);
       return ai - bi;
     });
-
-    var pluses = [];
-    for (var p = 1; p <= 2; p += 1) {
-      var plus = scope.querySelector
-        ? (scope.querySelector('#plus-' + p) || scope.querySelector('.plus-' + p))
-        : null;
-      if (!plus && scope.ownerDocument) {
-        plus = scope.ownerDocument.getElementById('plus-' + p);
-      }
-      pluses.push(plus && isVisible(plus) ? plus : null);
-    }
-
-    for (var i = 0; i < slots.length; i += 1) {
-      clearLayoutStyles(slots[i]);
-      var sub = slots[i].querySelector('.offer-subline');
-      if (sub) {
-        clearLayoutStyles(sub);
-        sub.style.alignItems = '';
-      }
-    }
-    for (var j = 0; j < pluses.length; j += 1) {
-      if (pluses[j]) clearLayoutStyles(pluses[j]);
-    }
+    var pluses = plusCandidates.map(function(plus) { return plus && isVisible(plus) ? plus : null; });
+    // Explicit per-state ownership supersedes the legacy campaign-level policy.
+    // Missing property keeps legacy paint, including its side-by-side pairing.
+    var arrangementModes = slots.map(function(slot) { return window.getComputedStyle(slot).getPropertyValue('--offer-layout-mode').trim(); });
+    if (arrangementModes.indexOf('manual') !== -1) return;
+    var explicitAutomatic = arrangementModes.indexOf('auto') !== -1;
 
     for (var s = 0; s < slots.length; s += 1) {
       layoutSlotChildren(slots[s]);
@@ -5973,7 +6814,7 @@
 
     // Manual: keep authored slot/plus CSS (inspector). Still cleared stale inline
     // above so a prior auto pass cannot stick after switching campaigns.
-    if (plusLayout === 'manual') return;
+    if (plusLayout === 'manual' && !explicitAutomatic) return;
 
     // Match export pre-motion rest: clear slot scrub/CSS motion for ink measure.
     // Fit translateY on .offer-value children is preserved (not on the slot).
@@ -6014,13 +6855,16 @@
           var size = root.getAttribute('data-size') || '';
           var url = backgroundImageUrlForSize(data, size);
           if (!url || url === '[object Object]') {
-            url = image.getAttribute('data-packaged-src') || image.getAttribute('src') || '';
+            url = image.getAttribute('data-packaged-src') || '';
           }
-          if (!url || url === '[object Object]') return;
+          // A row replaces the previous row. Agency blanks must not retain its photo.
           image.setAttribute('src', url);
         }
 
         function applyRuntimeState(row) {
+          
+          
+          window.__SSE_DCO_APPLIED_ROW__ = row;
           root = root || document.getElementById('page-content');
           if (!root) return;
           var data = normalizeProfileRow(row);
@@ -6067,7 +6911,8 @@
           // still holds the clock until startMotionWhenReady releases it.
           commitOfferLayout();
           wireExit(data);
-          startMotionWhenReady();
+          
+          settleRuntime();
           window.__SSE_DCO_READY__ = true;
         }
 
@@ -6111,6 +6956,7 @@
       })();
     </script>
 
+
   </head>
   <body>
       <main id="page-content" class="stage page-content offers-1 tc-solo cta-roundel frames-3 roundel-frame-off roundel-copy-only" data-size="160x600" data-offer-plus-layout="auto" data-dco-state="offer_count_num,tc_type_enum,cta_type_enum,include_roundel_frame_bool,roundel_value_text">
@@ -6127,7 +6973,7 @@
           <p class="stage-element sse-text sse-text-bold sse-headline" id="headline-act1" data-layer-id="headline-act1" data-dco-field="heading1_text"></p>
           <div class="stage-element cta" id="cta" data-layer-id="cta" data-dco-field="cta_text"></div>
           <img alt="" draggable="false" class="stage-element logo-act1" id="logo-act1" src="data:image/svg+xml;charset=utf-8,%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22UTF-8%22%3F%3E%0A%3Csvg%20id%3D%22Layer_2%22%20data-name%3D%22Layer%202%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20652.69%20267.08%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3Cstyle%3E%0A%20%20%20%20%20%20.cls-1%20%7B%0A%20%20%20%20%20%20%20%20fill%3A%20%23002d72%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%3C%2Fstyle%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Cg%20id%3D%22SSE_Airtricity_ID_Blue_RGB%22%20data-name%3D%22SSE%20Airtricity%20ID%20Blue%20RGB%22%3E%0A%20%20%20%20%3Cg%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M282.29%2C148.12c.47-1.63%2C1.64-2.33%2C3.16-2.33h3.85c1.53%2C0%2C2.7.7%2C3.17%2C2.33l28.29%2C76.23c.59%2C2.11-.23%2C3.38-2.34%2C3.38h-2.57c-1.65%2C0-2.81-.69-3.27-2.33l-8.78-23.77h-32.97l-8.66%2C23.77c-.46%2C1.64-1.63%2C2.33-3.27%2C2.33h-2.46c-2.23%2C0-3.04-1.27-2.45-3.38l28.29-76.23ZM301.48%2C194.63l-10.87-29.72c-1.3-3.85-3.04-10.73-3.04-10.73h-.23s-1.88%2C6.88-3.16%2C10.73l-10.99%2C29.72h28.3Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M329.61%2C152.9v-4.19c0-1.87.93-2.92%2C2.8-2.92h2.93c1.88%2C0%2C2.8%2C1.05%2C2.8%2C2.92v4.19c0%2C1.87-.92%2C2.8-2.8%2C2.8h-2.93c-1.87%2C0-2.8-.93-2.8-2.8M329.84%2C172.01c0-1.87%2C1.05-2.91%2C2.92-2.91h2.23c1.87%2C0%2C2.8%2C1.04%2C2.8%2C2.91v52.8c0%2C1.87-.92%2C2.92-2.8%2C2.92h-2.23c-1.87%2C0-2.92-1.05-2.92-2.92v-52.8Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M352.78%2C172.01c0-1.87%2C1.05-2.91%2C2.92-2.91h2.11c1.75%2C0%2C2.81%2C1.04%2C2.81%2C2.91v7.92c0%2C2.57-.46%2C4.67-.46%2C4.67h.23c2.8-8.51%2C9.59-15.85%2C18.94-15.85%2C2.1%2C0%2C3.04.93%2C3.04%2C2.79v2.1c0%2C1.86-1.28%2C2.92-3.27%2C2.92-12.4%2C0-18.37%2C14.1-18.37%2C26.34v21.91c0%2C1.87-.92%2C2.92-2.8%2C2.92h-2.23c-1.87%2C0-2.92-1.05-2.92-2.92v-52.8Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M395.29%2C176.21h-4.91c-1.87%2C0-2.8-.93-2.8-2.79v-.94c0-1.87.93-2.92%2C2.8-2.92h5.03v-13.75c0-1.87%2C1.06-2.91%2C2.92-2.91h2.11c1.87%2C0%2C2.79%2C1.04%2C2.79%2C2.91v13.75h11.94c1.86%2C0%2C2.92%2C1.05%2C2.92%2C2.92v.94c0%2C1.86-1.06%2C2.79-2.92%2C2.79h-11.94v29.37c0%2C13.53%2C8.31%2C15.16%2C12.88%2C15.39%2C2.34.23%2C3.15.93%2C3.15%2C2.91v1.52c0%2C1.87-.92%2C2.8-3.27%2C2.8-12.86%2C0-20.7-7.81-20.7-21.57v-30.42Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M427.43%2C172.01c0-1.87%2C1.05-2.91%2C2.92-2.91h2.11c1.75%2C0%2C2.81%2C1.04%2C2.81%2C2.91v7.92c0%2C2.57-.46%2C4.67-.46%2C4.67h.22c2.81-8.51%2C9.59-15.85%2C18.95-15.85%2C2.1%2C0%2C3.04.93%2C3.04%2C2.79v2.1c0%2C1.86-1.28%2C2.92-3.27%2C2.92-12.4%2C0-18.37%2C14.1-18.37%2C26.34v21.91c0%2C1.87-.92%2C2.92-2.8%2C2.92h-2.23c-1.87%2C0-2.92-1.05-2.92-2.92v-52.8Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M464.41%2C152.9v-4.19c0-1.87.93-2.92%2C2.8-2.92h2.93c1.88%2C0%2C2.8%2C1.05%2C2.8%2C2.92v4.19c0%2C1.87-.92%2C2.8-2.8%2C2.8h-2.93c-1.87%2C0-2.8-.93-2.8-2.8M464.64%2C172.01c0-1.87%2C1.05-2.91%2C2.92-2.91h2.23c1.87%2C0%2C2.8%2C1.04%2C2.8%2C2.91v52.8c0%2C1.87-.92%2C2.92-2.8%2C2.92h-2.23c-1.87%2C0-2.92-1.05-2.92-2.92v-52.8Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M514.75%2C167.7c10.06%2C0%2C16.61%2C4.31%2C19.53%2C6.65%2C1.4%2C1.05%2C1.52%2C2.44.35%2C3.96l-.82%2C1.28c-1.05%2C1.63-2.34%2C1.63-3.97.59-2.58-1.99-7.71-5.37-14.85-5.37-12.86%2C0-22.92%2C9.68-22.92%2C23.66s10.06%2C23.55%2C23.04%2C23.55c8.19%2C0%2C13.8-3.85%2C16.6-6.18%2C1.53-1.16%2C2.81-.93%2C3.87.7l.82%2C1.17c.92%2C1.51.57%2C2.8-.7%2C3.96-3.05%2C2.45-10.06%2C7.46-20.94%2C7.46-17.53%2C0-30.87-12.47-30.87-30.66s13.44-30.77%2C30.87-30.77%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M545.87%2C152.9v-4.19c0-1.87.93-2.92%2C2.8-2.92h2.93c1.88%2C0%2C2.8%2C1.05%2C2.8%2C2.92v4.19c0%2C1.87-.92%2C2.8-2.8%2C2.8h-2.93c-1.87%2C0-2.8-.93-2.8-2.8M546.1%2C172.01c0-1.87%2C1.05-2.91%2C2.92-2.91h2.23c1.88%2C0%2C2.8%2C1.04%2C2.8%2C2.91v52.8c0%2C1.87-.92%2C2.92-2.8%2C2.92h-2.23c-1.87%2C0-2.92-1.05-2.92-2.92v-52.8Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M570.6%2C176.21h-4.92c-1.87%2C0-2.8-.93-2.8-2.79v-.94c0-1.87.93-2.92%2C2.8-2.92h5.04v-13.75c0-1.87%2C1.06-2.91%2C2.92-2.91h2.11c1.87%2C0%2C2.79%2C1.04%2C2.79%2C2.91v13.75h11.94c1.86%2C0%2C2.92%2C1.05%2C2.92%2C2.92v.94c0%2C1.86-1.06%2C2.79-2.92%2C2.79h-11.94v29.37c0%2C13.53%2C8.31%2C15.16%2C12.88%2C15.39%2C2.34.23%2C3.15.93%2C3.15%2C2.91v1.52c0%2C1.87-.93%2C2.8-3.27%2C2.8-12.86%2C0-20.7-7.81-20.7-21.57v-30.42Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M602.64%2C243.71c1.28.58%2C3.04%2C1.51%2C5.15%2C1.51%2C5.25%2C0%2C8.77-4.54%2C10.99-9.67l3.5-8.28-23.14-54.78c-.82-1.98.11-3.38%2C2.22-3.38h2.69c1.74%2C0%2C2.69.7%2C3.27%2C2.21l16.49%2C40.57c1.04%2C2.91%2C2.09%2C6.17%2C2.09%2C6.17h.24s.81-3.26%2C1.99-6.17l16.14-40.45c.58-1.63%2C1.51-2.33%2C3.27-2.33h2.57c2.11%2C0%2C3.05%2C1.28%2C2.35%2C3.38l-27.71%2C67.14c-3.04%2C7.57-9.12%2C12.59-16.96%2C12.59-3.39%2C0-6.2-1.16-8.06-2.1-1.53-.7-2-2.33-1.28-3.73l.7-1.28c.81-1.52%2C2.09-1.87%2C3.5-1.4%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M288.62%2C72.26c-8.14-2.82-15.17-5.25-15.17-11.14%2C0-5.42%2C4.23-8.53%2C11.58-8.53%2C6.89%2C0%2C12.18%2C2.43%2C15.7%2C4.03%2C1.34.61%2C2.55.92%2C3.61.92%2C1.98%2C0%2C3.45-1.05%2C4.55-3.2l1.57-2.83c1.75-3.66%2C1.04-6.39-2.14-8.12-4.55-2.49-11.82-5.8-22.33-5.8-8.5%2C0-16.17%2C2.16-21.56%2C6.08-5.82%2C4.21-8.9%2C10.3-8.9%2C17.62%2C0%2C16.03%2C14.01%2C20.98%2C25.26%2C24.94%2C8.07%2C2.85%2C15.03%2C5.31%2C15.03%2C11.1%2C0%2C5.46-4.55%2C8.85-11.89%2C8.85-7.8%2C0-13.4-2.97-17.48-5.13-.33-.17-.64-.34-.96-.5-1.61-.84-2.94-1.25-4.07-1.25-1.61%2C0-2.92.82-4.24%2C2.65l-1.91%2C2.86c-1.18%2C1.73-1.64%2C3.29-1.38%2C4.65.25%2C1.3%2C1.2%2C2.5%2C2.81%2C3.58%2C8.12%2C5.41%2C17.13%2C8.16%2C26.75%2C8.16%2C17.85%2C0%2C30.31-10.01%2C30.31-24.34%2C0-15.89-13.94-20.71-25.14-24.59%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M356.45%2C72.26c-8.12-2.82-15.15-5.25-15.15-11.14%2C0-5.42%2C4.21-8.53%2C11.57-8.53%2C6.87%2C0%2C12.18%2C2.43%2C15.7%2C4.03%2C1.34.61%2C2.55.92%2C3.61.92%2C1.98%2C0%2C3.46-1.05%2C4.55-3.2l1.57-2.83c1.76-3.66%2C1.04-6.39-2.14-8.12-4.55-2.49-11.81-5.8-22.33-5.8-8.5%2C0-16.17%2C2.16-21.56%2C6.08-5.82%2C4.21-8.9%2C10.3-8.9%2C17.62%2C0%2C16.03%2C14.01%2C20.98%2C25.27%2C24.94%2C8.07%2C2.85%2C15.03%2C5.31%2C15.03%2C11.1%2C0%2C5.46-4.55%2C8.85-11.89%2C8.85-7.8%2C0-13.39-2.97-17.48-5.13-.32-.17-.64-.34-.96-.5-1.61-.84-2.94-1.25-4.07-1.25-1.61%2C0-2.92.82-4.24%2C2.65l-1.91%2C2.86c-1.18%2C1.73-1.64%2C3.29-1.38%2C4.65.25%2C1.3%2C1.2%2C2.5%2C2.82%2C3.58%2C8.11%2C5.41%2C17.12%2C8.16%2C26.74%2C8.16%2C17.85%2C0%2C30.31-10.01%2C30.31-24.34%2C0-15.89-13.94-20.71-25.14-24.59%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M460.9%2C75.31v-.22c-.09-10.94-3.11-20.24-8.74-26.9-5.86-6.95-14.32-10.61-24.45-10.61-22.46%2C0-38.14%2C17.19-38.14%2C41.79%2C0%2C11.35%2C3.85%2C21.8%2C10.84%2C29.42%2C7.42%2C8.1%2C17.64%2C12.39%2C29.54%2C12.39s20.14-4.36%2C25.55-8.03c3.71-2.33%2C3.07-5.69%2C1.9-8.07l-1.8-3.19c-1.1-2.07-2.39-3.02-4.1-3.02-1%2C0-2.15.34-3.52%2C1.02-3.66%2C2.44-9.53%2C5.31-16.7%2C5.31-10.94%2C0-23.27-6.63-24.49-21.17l-.03-.42h48.12c3.59%2C0%2C6-3.23%2C6-6.25v-2.06ZM427.26%2C51.64c8.36%2C0%2C16.99%2C6.36%2C17.31%2C18.51v.28s-37.46%2C0-37.46%2C0l.06-.37c1.83-11.02%2C9.9-18.43%2C20.09-18.43%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M213.66%2C105.15C213.66%2C25.45%2C130.13%2C4.52%2C105.54.09c-.69-.12-1.21-.12-1.27%2C0h-.01.01c-.06.1.26.3%2C1.16.56%2C9.21%2C2.68%2C24.73%2C9.21%2C24.73%2C22.62C130.15%2C70.17%2C0%2C68.47%2C0%2C161.92c0%2C79.72%2C83.56%2C100.64%2C108.14%2C105.07%2C1.32.24%2C2.03.01.12-.55-9.21-2.68-24.75-9.2-24.75-22.63%2C0-46.9%2C130.16-45.21%2C130.16-138.66M10.26%2C161.92c0-21.65%2C7.52-38.72%2C23.66-53.72%2C14.67-13.64%2C34.62-23.53%2C52.22-32.26%2C27.92-13.83%2C54.28-26.9%2C54.28-52.69%2C0-2.47-.71-4.11-1.34-5.3%2C5.75%2C2.17%2C42.3%2C17.18%2C42.3%2C47.03%2C0%2C62.92-149.15%2C74.22-149.15%2C137.1%2C0%2C8.49%2C2.17%2C15.97%2C5.8%2C22.52-18.43-16.46-27.78-37.47-27.78-62.69%22%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%20%20%3C%2Fg%3E%0A%3C%2Fsvg%3E">
-          <img alt="" draggable="false" class="stage-element logo-act3" id="logo-act3" src="data:image/svg+xml;charset=utf-8,%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22UTF-8%22%3F%3E%0A%3Csvg%20id%3D%22Layer_2%22%20data-name%3D%22Layer%202%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20652.69%20267.08%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3Cstyle%3E%0A%20%20%20%20%20%20.cls-1%20%7B%0A%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%3C%2Fstyle%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Cg%20id%3D%22SSE_Airtricity_ID_Blue_RGB%22%20data-name%3D%22SSE%20Airtricity%20ID%20Blue%20RGB%22%3E%0A%20%20%20%20%3Cg%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M282.29%2C148.12c.47-1.63%2C1.64-2.33%2C3.16-2.33h3.85c1.53%2C0%2C2.7.7%2C3.17%2C2.33l28.29%2C76.23c.59%2C2.11-.23%2C3.38-2.34%2C3.38h-2.57c-1.65%2C0-2.81-.69-3.27-2.33l-8.78-23.77h-32.97l-8.66%2C23.77c-.46%2C1.64-1.63%2C2.33-3.27%2C2.33h-2.46c-2.23%2C0-3.04-1.27-2.45-3.38l28.29-76.23ZM301.48%2C194.63l-10.87-29.72c-1.3-3.85-3.04-10.73-3.04-10.73h-.23s-1.88%2C6.88-3.16%2C10.73l-10.99%2C29.72h28.3Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M329.61%2C152.9v-4.19c0-1.87.93-2.92%2C2.8-2.92h2.93c1.88%2C0%2C2.8%2C1.05%2C2.8%2C2.92v4.19c0%2C1.87-.92%2C2.8-2.8%2C2.8h-2.93c-1.87%2C0-2.8-.93-2.8-2.8M329.84%2C172.01c0-1.87%2C1.05-2.91%2C2.92-2.91h2.23c1.87%2C0%2C2.8%2C1.04%2C2.8%2C2.91v52.8c0%2C1.87-.92%2C2.92-2.8%2C2.92h-2.23c-1.87%2C0-2.92-1.05-2.92-2.92v-52.8Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M352.78%2C172.01c0-1.87%2C1.05-2.91%2C2.92-2.91h2.11c1.75%2C0%2C2.81%2C1.04%2C2.81%2C2.91v7.92c0%2C2.57-.46%2C4.67-.46%2C4.67h.23c2.8-8.51%2C9.59-15.85%2C18.94-15.85%2C2.1%2C0%2C3.04.93%2C3.04%2C2.79v2.1c0%2C1.86-1.28%2C2.92-3.27%2C2.92-12.4%2C0-18.37%2C14.1-18.37%2C26.34v21.91c0%2C1.87-.92%2C2.92-2.8%2C2.92h-2.23c-1.87%2C0-2.92-1.05-2.92-2.92v-52.8Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M395.29%2C176.21h-4.91c-1.87%2C0-2.8-.93-2.8-2.79v-.94c0-1.87.93-2.92%2C2.8-2.92h5.03v-13.75c0-1.87%2C1.06-2.91%2C2.92-2.91h2.11c1.87%2C0%2C2.79%2C1.04%2C2.79%2C2.91v13.75h11.94c1.86%2C0%2C2.92%2C1.05%2C2.92%2C2.92v.94c0%2C1.86-1.06%2C2.79-2.92%2C2.79h-11.94v29.37c0%2C13.53%2C8.31%2C15.16%2C12.88%2C15.39%2C2.34.23%2C3.15.93%2C3.15%2C2.91v1.52c0%2C1.87-.92%2C2.8-3.27%2C2.8-12.86%2C0-20.7-7.81-20.7-21.57v-30.42Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M427.43%2C172.01c0-1.87%2C1.05-2.91%2C2.92-2.91h2.11c1.75%2C0%2C2.81%2C1.04%2C2.81%2C2.91v7.92c0%2C2.57-.46%2C4.67-.46%2C4.67h.22c2.81-8.51%2C9.59-15.85%2C18.95-15.85%2C2.1%2C0%2C3.04.93%2C3.04%2C2.79v2.1c0%2C1.86-1.28%2C2.92-3.27%2C2.92-12.4%2C0-18.37%2C14.1-18.37%2C26.34v21.91c0%2C1.87-.92%2C2.92-2.8%2C2.92h-2.23c-1.87%2C0-2.92-1.05-2.92-2.92v-52.8Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M464.41%2C152.9v-4.19c0-1.87.93-2.92%2C2.8-2.92h2.93c1.88%2C0%2C2.8%2C1.05%2C2.8%2C2.92v4.19c0%2C1.87-.92%2C2.8-2.8%2C2.8h-2.93c-1.87%2C0-2.8-.93-2.8-2.8M464.64%2C172.01c0-1.87%2C1.05-2.91%2C2.92-2.91h2.23c1.87%2C0%2C2.8%2C1.04%2C2.8%2C2.91v52.8c0%2C1.87-.92%2C2.92-2.8%2C2.92h-2.23c-1.87%2C0-2.92-1.05-2.92-2.92v-52.8Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M514.75%2C167.7c10.06%2C0%2C16.61%2C4.31%2C19.53%2C6.65%2C1.4%2C1.05%2C1.52%2C2.44.35%2C3.96l-.82%2C1.28c-1.05%2C1.63-2.34%2C1.63-3.97.59-2.58-1.99-7.71-5.37-14.85-5.37-12.86%2C0-22.92%2C9.68-22.92%2C23.66s10.06%2C23.55%2C23.04%2C23.55c8.19%2C0%2C13.8-3.85%2C16.6-6.18%2C1.53-1.16%2C2.81-.93%2C3.87.7l.82%2C1.17c.92%2C1.51.57%2C2.8-.7%2C3.96-3.05%2C2.45-10.06%2C7.46-20.94%2C7.46-17.53%2C0-30.87-12.47-30.87-30.66s13.44-30.77%2C30.87-30.77%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M545.87%2C152.9v-4.19c0-1.87.93-2.92%2C2.8-2.92h2.93c1.88%2C0%2C2.8%2C1.05%2C2.8%2C2.92v4.19c0%2C1.87-.92%2C2.8-2.8%2C2.8h-2.93c-1.87%2C0-2.8-.93-2.8-2.8M546.1%2C172.01c0-1.87%2C1.05-2.91%2C2.92-2.91h2.23c1.88%2C0%2C2.8%2C1.04%2C2.8%2C2.91v52.8c0%2C1.87-.92%2C2.92-2.8%2C2.92h-2.23c-1.87%2C0-2.92-1.05-2.92-2.92v-52.8Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M570.6%2C176.21h-4.92c-1.87%2C0-2.8-.93-2.8-2.79v-.94c0-1.87.93-2.92%2C2.8-2.92h5.04v-13.75c0-1.87%2C1.06-2.91%2C2.92-2.91h2.11c1.87%2C0%2C2.79%2C1.04%2C2.79%2C2.91v13.75h11.94c1.86%2C0%2C2.92%2C1.05%2C2.92%2C2.92v.94c0%2C1.86-1.06%2C2.79-2.92%2C2.79h-11.94v29.37c0%2C13.53%2C8.31%2C15.16%2C12.88%2C15.39%2C2.34.23%2C3.15.93%2C3.15%2C2.91v1.52c0%2C1.87-.93%2C2.8-3.27%2C2.8-12.86%2C0-20.7-7.81-20.7-21.57v-30.42Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M602.64%2C243.71c1.28.58%2C3.04%2C1.51%2C5.15%2C1.51%2C5.25%2C0%2C8.77-4.54%2C10.99-9.67l3.5-8.28-23.14-54.78c-.82-1.98.11-3.38%2C2.22-3.38h2.69c1.74%2C0%2C2.69.7%2C3.27%2C2.21l16.49%2C40.57c1.04%2C2.91%2C2.09%2C6.17%2C2.09%2C6.17h.24s.81-3.26%2C1.99-6.17l16.14-40.45c.58-1.63%2C1.51-2.33%2C3.27-2.33h2.57c2.11%2C0%2C3.05%2C1.28%2C2.35%2C3.38l-27.71%2C67.14c-3.04%2C7.57-9.12%2C12.59-16.96%2C12.59-3.39%2C0-6.2-1.16-8.06-2.1-1.53-.7-2-2.33-1.28-3.73l.7-1.28c.81-1.52%2C2.09-1.87%2C3.5-1.4%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M288.62%2C72.26c-8.14-2.82-15.17-5.25-15.17-11.14%2C0-5.42%2C4.23-8.53%2C11.58-8.53%2C6.89%2C0%2C12.18%2C2.43%2C15.7%2C4.03%2C1.34.61%2C2.55.92%2C3.61.92%2C1.98%2C0%2C3.45-1.05%2C4.55-3.2l1.57-2.83c1.75-3.66%2C1.04-6.39-2.14-8.12-4.55-2.49-11.82-5.8-22.33-5.8-8.5%2C0-16.17%2C2.16-21.56%2C6.08-5.82%2C4.21-8.9%2C10.3-8.9%2C17.62%2C0%2C16.03%2C14.01%2C20.98%2C25.26%2C24.94%2C8.07%2C2.85%2C15.03%2C5.31%2C15.03%2C11.1%2C0%2C5.46-4.55%2C8.85-11.89%2C8.85-7.8%2C0-13.4-2.97-17.48-5.13-.33-.17-.64-.34-.96-.5-1.61-.84-2.94-1.25-4.07-1.25-1.61%2C0-2.92.82-4.24%2C2.65l-1.91%2C2.86c-1.18%2C1.73-1.64%2C3.29-1.38%2C4.65.25%2C1.3%2C1.2%2C2.5%2C2.81%2C3.58%2C8.12%2C5.41%2C17.13%2C8.16%2C26.75%2C8.16%2C17.85%2C0%2C30.31-10.01%2C30.31-24.34%2C0-15.89-13.94-20.71-25.14-24.59%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M356.45%2C72.26c-8.12-2.82-15.15-5.25-15.15-11.14%2C0-5.42%2C4.21-8.53%2C11.57-8.53%2C6.87%2C0%2C12.18%2C2.43%2C15.7%2C4.03%2C1.34.61%2C2.55.92%2C3.61.92%2C1.98%2C0%2C3.46-1.05%2C4.55-3.2l1.57-2.83c1.76-3.66%2C1.04-6.39-2.14-8.12-4.55-2.49-11.81-5.8-22.33-5.8-8.5%2C0-16.17%2C2.16-21.56%2C6.08-5.82%2C4.21-8.9%2C10.3-8.9%2C17.62%2C0%2C16.03%2C14.01%2C20.98%2C25.27%2C24.94%2C8.07%2C2.85%2C15.03%2C5.31%2C15.03%2C11.1%2C0%2C5.46-4.55%2C8.85-11.89%2C8.85-7.8%2C0-13.39-2.97-17.48-5.13-.32-.17-.64-.34-.96-.5-1.61-.84-2.94-1.25-4.07-1.25-1.61%2C0-2.92.82-4.24%2C2.65l-1.91%2C2.86c-1.18%2C1.73-1.64%2C3.29-1.38%2C4.65.25%2C1.3%2C1.2%2C2.5%2C2.82%2C3.58%2C8.11%2C5.41%2C17.12%2C8.16%2C26.74%2C8.16%2C17.85%2C0%2C30.31-10.01%2C30.31-24.34%2C0-15.89-13.94-20.71-25.14-24.59%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M460.9%2C75.31v-.22c-.09-10.94-3.11-20.24-8.74-26.9-5.86-6.95-14.32-10.61-24.45-10.61-22.46%2C0-38.14%2C17.19-38.14%2C41.79%2C0%2C11.35%2C3.85%2C21.8%2C10.84%2C29.42%2C7.42%2C8.1%2C17.64%2C12.39%2C29.54%2C12.39s20.14-4.36%2C25.55-8.03c3.71-2.33%2C3.07-5.69%2C1.9-8.07l-1.8-3.19c-1.1-2.07-2.39-3.02-4.1-3.02-1%2C0-2.15.34-3.52%2C1.02-3.66%2C2.44-9.53%2C5.31-16.7%2C5.31-10.94%2C0-23.27-6.63-24.49-21.17l-.03-.42h48.12c3.59%2C0%2C6-3.23%2C6-6.25v-2.06ZM427.26%2C51.64c8.36%2C0%2C16.99%2C6.36%2C17.31%2C18.51v.28s-37.46%2C0-37.46%2C0l.06-.37c1.83-11.02%2C9.9-18.43%2C20.09-18.43%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M213.66%2C105.15C213.66%2C25.45%2C130.13%2C4.52%2C105.54.09c-.69-.12-1.21-.12-1.27%2C0h-.01.01c-.06.1.26.3%2C1.16.56%2C9.21%2C2.68%2C24.73%2C9.21%2C24.73%2C22.62C130.15%2C70.17%2C0%2C68.47%2C0%2C161.92c0%2C79.72%2C83.56%2C100.64%2C108.14%2C105.07%2C1.32.24%2C2.03.01.12-.55-9.21-2.68-24.75-9.2-24.75-22.63%2C0-46.9%2C130.16-45.21%2C130.16-138.66M10.26%2C161.92c0-21.65%2C7.52-38.72%2C23.66-53.72%2C14.67-13.64%2C34.62-23.53%2C52.22-32.26%2C27.92-13.83%2C54.28-26.9%2C54.28-52.69%2C0-2.47-.71-4.11-1.34-5.3%2C5.75%2C2.17%2C42.3%2C17.18%2C42.3%2C47.03%2C0%2C62.92-149.15%2C74.22-149.15%2C137.1%2C0%2C8.49%2C2.17%2C15.97%2C5.8%2C22.52-18.43-16.46-27.78-37.47-27.78-62.69%22%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%20%20%3C%2Fg%3E%0A%3C%2Fsvg%3E">
+          <img alt="" draggable="false" class="stage-element logo-act3" id="logo-act3" crossorigin="anonymous" src="data:image/svg+xml;charset=utf-8,%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22UTF-8%22%3F%3E%0A%3Csvg%20id%3D%22Layer_2%22%20data-name%3D%22Layer%202%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20652.69%20267.08%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3Cstyle%3E%0A%20%20%20%20%20%20.cls-1%20%7B%0A%20%20%20%20%20%20%20%20fill%3A%20%23fff%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%3C%2Fstyle%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Cg%20id%3D%22SSE_Airtricity_ID_Blue_RGB%22%20data-name%3D%22SSE%20Airtricity%20ID%20Blue%20RGB%22%3E%0A%20%20%20%20%3Cg%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M282.29%2C148.12c.47-1.63%2C1.64-2.33%2C3.16-2.33h3.85c1.53%2C0%2C2.7.7%2C3.17%2C2.33l28.29%2C76.23c.59%2C2.11-.23%2C3.38-2.34%2C3.38h-2.57c-1.65%2C0-2.81-.69-3.27-2.33l-8.78-23.77h-32.97l-8.66%2C23.77c-.46%2C1.64-1.63%2C2.33-3.27%2C2.33h-2.46c-2.23%2C0-3.04-1.27-2.45-3.38l28.29-76.23ZM301.48%2C194.63l-10.87-29.72c-1.3-3.85-3.04-10.73-3.04-10.73h-.23s-1.88%2C6.88-3.16%2C10.73l-10.99%2C29.72h28.3Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M329.61%2C152.9v-4.19c0-1.87.93-2.92%2C2.8-2.92h2.93c1.88%2C0%2C2.8%2C1.05%2C2.8%2C2.92v4.19c0%2C1.87-.92%2C2.8-2.8%2C2.8h-2.93c-1.87%2C0-2.8-.93-2.8-2.8M329.84%2C172.01c0-1.87%2C1.05-2.91%2C2.92-2.91h2.23c1.87%2C0%2C2.8%2C1.04%2C2.8%2C2.91v52.8c0%2C1.87-.92%2C2.92-2.8%2C2.92h-2.23c-1.87%2C0-2.92-1.05-2.92-2.92v-52.8Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M352.78%2C172.01c0-1.87%2C1.05-2.91%2C2.92-2.91h2.11c1.75%2C0%2C2.81%2C1.04%2C2.81%2C2.91v7.92c0%2C2.57-.46%2C4.67-.46%2C4.67h.23c2.8-8.51%2C9.59-15.85%2C18.94-15.85%2C2.1%2C0%2C3.04.93%2C3.04%2C2.79v2.1c0%2C1.86-1.28%2C2.92-3.27%2C2.92-12.4%2C0-18.37%2C14.1-18.37%2C26.34v21.91c0%2C1.87-.92%2C2.92-2.8%2C2.92h-2.23c-1.87%2C0-2.92-1.05-2.92-2.92v-52.8Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M395.29%2C176.21h-4.91c-1.87%2C0-2.8-.93-2.8-2.79v-.94c0-1.87.93-2.92%2C2.8-2.92h5.03v-13.75c0-1.87%2C1.06-2.91%2C2.92-2.91h2.11c1.87%2C0%2C2.79%2C1.04%2C2.79%2C2.91v13.75h11.94c1.86%2C0%2C2.92%2C1.05%2C2.92%2C2.92v.94c0%2C1.86-1.06%2C2.79-2.92%2C2.79h-11.94v29.37c0%2C13.53%2C8.31%2C15.16%2C12.88%2C15.39%2C2.34.23%2C3.15.93%2C3.15%2C2.91v1.52c0%2C1.87-.92%2C2.8-3.27%2C2.8-12.86%2C0-20.7-7.81-20.7-21.57v-30.42Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M427.43%2C172.01c0-1.87%2C1.05-2.91%2C2.92-2.91h2.11c1.75%2C0%2C2.81%2C1.04%2C2.81%2C2.91v7.92c0%2C2.57-.46%2C4.67-.46%2C4.67h.22c2.81-8.51%2C9.59-15.85%2C18.95-15.85%2C2.1%2C0%2C3.04.93%2C3.04%2C2.79v2.1c0%2C1.86-1.28%2C2.92-3.27%2C2.92-12.4%2C0-18.37%2C14.1-18.37%2C26.34v21.91c0%2C1.87-.92%2C2.92-2.8%2C2.92h-2.23c-1.87%2C0-2.92-1.05-2.92-2.92v-52.8Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M464.41%2C152.9v-4.19c0-1.87.93-2.92%2C2.8-2.92h2.93c1.88%2C0%2C2.8%2C1.05%2C2.8%2C2.92v4.19c0%2C1.87-.92%2C2.8-2.8%2C2.8h-2.93c-1.87%2C0-2.8-.93-2.8-2.8M464.64%2C172.01c0-1.87%2C1.05-2.91%2C2.92-2.91h2.23c1.87%2C0%2C2.8%2C1.04%2C2.8%2C2.91v52.8c0%2C1.87-.92%2C2.92-2.8%2C2.92h-2.23c-1.87%2C0-2.92-1.05-2.92-2.92v-52.8Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M514.75%2C167.7c10.06%2C0%2C16.61%2C4.31%2C19.53%2C6.65%2C1.4%2C1.05%2C1.52%2C2.44.35%2C3.96l-.82%2C1.28c-1.05%2C1.63-2.34%2C1.63-3.97.59-2.58-1.99-7.71-5.37-14.85-5.37-12.86%2C0-22.92%2C9.68-22.92%2C23.66s10.06%2C23.55%2C23.04%2C23.55c8.19%2C0%2C13.8-3.85%2C16.6-6.18%2C1.53-1.16%2C2.81-.93%2C3.87.7l.82%2C1.17c.92%2C1.51.57%2C2.8-.7%2C3.96-3.05%2C2.45-10.06%2C7.46-20.94%2C7.46-17.53%2C0-30.87-12.47-30.87-30.66s13.44-30.77%2C30.87-30.77%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M545.87%2C152.9v-4.19c0-1.87.93-2.92%2C2.8-2.92h2.93c1.88%2C0%2C2.8%2C1.05%2C2.8%2C2.92v4.19c0%2C1.87-.92%2C2.8-2.8%2C2.8h-2.93c-1.87%2C0-2.8-.93-2.8-2.8M546.1%2C172.01c0-1.87%2C1.05-2.91%2C2.92-2.91h2.23c1.88%2C0%2C2.8%2C1.04%2C2.8%2C2.91v52.8c0%2C1.87-.92%2C2.92-2.8%2C2.92h-2.23c-1.87%2C0-2.92-1.05-2.92-2.92v-52.8Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M570.6%2C176.21h-4.92c-1.87%2C0-2.8-.93-2.8-2.79v-.94c0-1.87.93-2.92%2C2.8-2.92h5.04v-13.75c0-1.87%2C1.06-2.91%2C2.92-2.91h2.11c1.87%2C0%2C2.79%2C1.04%2C2.79%2C2.91v13.75h11.94c1.86%2C0%2C2.92%2C1.05%2C2.92%2C2.92v.94c0%2C1.86-1.06%2C2.79-2.92%2C2.79h-11.94v29.37c0%2C13.53%2C8.31%2C15.16%2C12.88%2C15.39%2C2.34.23%2C3.15.93%2C3.15%2C2.91v1.52c0%2C1.87-.93%2C2.8-3.27%2C2.8-12.86%2C0-20.7-7.81-20.7-21.57v-30.42Z%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M602.64%2C243.71c1.28.58%2C3.04%2C1.51%2C5.15%2C1.51%2C5.25%2C0%2C8.77-4.54%2C10.99-9.67l3.5-8.28-23.14-54.78c-.82-1.98.11-3.38%2C2.22-3.38h2.69c1.74%2C0%2C2.69.7%2C3.27%2C2.21l16.49%2C40.57c1.04%2C2.91%2C2.09%2C6.17%2C2.09%2C6.17h.24s.81-3.26%2C1.99-6.17l16.14-40.45c.58-1.63%2C1.51-2.33%2C3.27-2.33h2.57c2.11%2C0%2C3.05%2C1.28%2C2.35%2C3.38l-27.71%2C67.14c-3.04%2C7.57-9.12%2C12.59-16.96%2C12.59-3.39%2C0-6.2-1.16-8.06-2.1-1.53-.7-2-2.33-1.28-3.73l.7-1.28c.81-1.52%2C2.09-1.87%2C3.5-1.4%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M288.62%2C72.26c-8.14-2.82-15.17-5.25-15.17-11.14%2C0-5.42%2C4.23-8.53%2C11.58-8.53%2C6.89%2C0%2C12.18%2C2.43%2C15.7%2C4.03%2C1.34.61%2C2.55.92%2C3.61.92%2C1.98%2C0%2C3.45-1.05%2C4.55-3.2l1.57-2.83c1.75-3.66%2C1.04-6.39-2.14-8.12-4.55-2.49-11.82-5.8-22.33-5.8-8.5%2C0-16.17%2C2.16-21.56%2C6.08-5.82%2C4.21-8.9%2C10.3-8.9%2C17.62%2C0%2C16.03%2C14.01%2C20.98%2C25.26%2C24.94%2C8.07%2C2.85%2C15.03%2C5.31%2C15.03%2C11.1%2C0%2C5.46-4.55%2C8.85-11.89%2C8.85-7.8%2C0-13.4-2.97-17.48-5.13-.33-.17-.64-.34-.96-.5-1.61-.84-2.94-1.25-4.07-1.25-1.61%2C0-2.92.82-4.24%2C2.65l-1.91%2C2.86c-1.18%2C1.73-1.64%2C3.29-1.38%2C4.65.25%2C1.3%2C1.2%2C2.5%2C2.81%2C3.58%2C8.12%2C5.41%2C17.13%2C8.16%2C26.75%2C8.16%2C17.85%2C0%2C30.31-10.01%2C30.31-24.34%2C0-15.89-13.94-20.71-25.14-24.59%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M356.45%2C72.26c-8.12-2.82-15.15-5.25-15.15-11.14%2C0-5.42%2C4.21-8.53%2C11.57-8.53%2C6.87%2C0%2C12.18%2C2.43%2C15.7%2C4.03%2C1.34.61%2C2.55.92%2C3.61.92%2C1.98%2C0%2C3.46-1.05%2C4.55-3.2l1.57-2.83c1.76-3.66%2C1.04-6.39-2.14-8.12-4.55-2.49-11.81-5.8-22.33-5.8-8.5%2C0-16.17%2C2.16-21.56%2C6.08-5.82%2C4.21-8.9%2C10.3-8.9%2C17.62%2C0%2C16.03%2C14.01%2C20.98%2C25.27%2C24.94%2C8.07%2C2.85%2C15.03%2C5.31%2C15.03%2C11.1%2C0%2C5.46-4.55%2C8.85-11.89%2C8.85-7.8%2C0-13.39-2.97-17.48-5.13-.32-.17-.64-.34-.96-.5-1.61-.84-2.94-1.25-4.07-1.25-1.61%2C0-2.92.82-4.24%2C2.65l-1.91%2C2.86c-1.18%2C1.73-1.64%2C3.29-1.38%2C4.65.25%2C1.3%2C1.2%2C2.5%2C2.82%2C3.58%2C8.11%2C5.41%2C17.12%2C8.16%2C26.74%2C8.16%2C17.85%2C0%2C30.31-10.01%2C30.31-24.34%2C0-15.89-13.94-20.71-25.14-24.59%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M460.9%2C75.31v-.22c-.09-10.94-3.11-20.24-8.74-26.9-5.86-6.95-14.32-10.61-24.45-10.61-22.46%2C0-38.14%2C17.19-38.14%2C41.79%2C0%2C11.35%2C3.85%2C21.8%2C10.84%2C29.42%2C7.42%2C8.1%2C17.64%2C12.39%2C29.54%2C12.39s20.14-4.36%2C25.55-8.03c3.71-2.33%2C3.07-5.69%2C1.9-8.07l-1.8-3.19c-1.1-2.07-2.39-3.02-4.1-3.02-1%2C0-2.15.34-3.52%2C1.02-3.66%2C2.44-9.53%2C5.31-16.7%2C5.31-10.94%2C0-23.27-6.63-24.49-21.17l-.03-.42h48.12c3.59%2C0%2C6-3.23%2C6-6.25v-2.06ZM427.26%2C51.64c8.36%2C0%2C16.99%2C6.36%2C17.31%2C18.51v.28s-37.46%2C0-37.46%2C0l.06-.37c1.83-11.02%2C9.9-18.43%2C20.09-18.43%22%2F%3E%0A%20%20%20%20%20%20%3Cpath%20class%3D%22cls-1%22%20d%3D%22M213.66%2C105.15C213.66%2C25.45%2C130.13%2C4.52%2C105.54.09c-.69-.12-1.21-.12-1.27%2C0h-.01.01c-.06.1.26.3%2C1.16.56%2C9.21%2C2.68%2C24.73%2C9.21%2C24.73%2C22.62C130.15%2C70.17%2C0%2C68.47%2C0%2C161.92c0%2C79.72%2C83.56%2C100.64%2C108.14%2C105.07%2C1.32.24%2C2.03.01.12-.55-9.21-2.68-24.75-9.2-24.75-22.63%2C0-46.9%2C130.16-45.21%2C130.16-138.66M10.26%2C161.92c0-21.65%2C7.52-38.72%2C23.66-53.72%2C14.67-13.64%2C34.62-23.53%2C52.22-32.26%2C27.92-13.83%2C54.28-26.9%2C54.28-52.69%2C0-2.47-.71-4.11-1.34-5.3%2C5.75%2C2.17%2C42.3%2C17.18%2C42.3%2C47.03%2C0%2C62.92-149.15%2C74.22-149.15%2C137.1%2C0%2C8.49%2C2.17%2C15.97%2C5.8%2C22.52-18.43-16.46-27.78-37.47-27.78-62.69%22%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%20%20%3C%2Fg%3E%0A%3C%2Fsvg%3E">
           <div class="stage-element offer-slot-1" data-gwd-group="OfferSlot" data-offer-index="1" id="offer1">
             <p class="gwd-grp-offer offer-value" data-dco-field="offer1_value_text"></p>
             <p class="gwd-grp-offer offer-subline" data-dco-field="offer1_sub_text"></p>

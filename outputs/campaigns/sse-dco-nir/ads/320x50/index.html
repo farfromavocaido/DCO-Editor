@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=320, initial-scale=1.0">
     <title>SSE DCO 320x50</title>
     <link rel="preload" href="https://s0.2mdn.net/creatives/assets/5627648/Museo700-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="https://s0.2mdn.net/creatives/assets/5627648/Museo300-Regular.otf" as="font" type="font/otf" crossorigin>
     <script src="https://s0.2mdn.net/ads/studio/Enabler.js"></script>
     <script type="text/javascript">
       Enabler.setProfileId(10962603);
@@ -98,13 +99,8 @@
 
     <style>
 
-    @font-face {
-      font-family: "Museo";
-      src: local("☺"), url("https://s0.2mdn.net/creatives/assets/5627648/Museo700-Regular.otf") format("opentype");
-      font-weight: 100 900;
-      font-style: normal;
-      font-display: block;
-    }
+@font-face{font-family:"Museo";src:url("https://s0.2mdn.net/creatives/assets/5627648/Museo700-Regular.otf");font-weight:700;font-style:normal;font-display:block;}
+@font-face{font-family:"Museo";src:url("https://s0.2mdn.net/creatives/assets/5627648/Museo300-Regular.otf");font-weight:300;font-style:normal;font-display:block;}
 
     html,
     body,
@@ -163,75 +159,30 @@
       visibility: inherit;
       box-sizing: border-box;
     }
-
-    /* ── Shared typography ── */
-    .sse-text {
-      position: absolute;
-      font-family: Museo, Arial, sans-serif;
-      color: rgb(0, 41, 117);
-    }
-
-    .sse-text-heavy {
-      font-weight: 900;
-    }
-
-    .sse-text-bold {
-      font-weight: 700;
-    }
-
-    /* ── OfferSlot group plumbing ── */
-    [data-gwd-group="OfferSlot"] {
+[data-gwd-group="OfferSlot"] {
       width: 100%;
       height: 100%;
     }
 
     [data-gwd-group="OfferSlot"] .gwd-grp-offer {
       position: absolute;
-      font-family: Museo, Arial, sans-serif;
-      font-weight: 700;
-      color: rgb(0, 41, 117);
       visibility: inherit;
     }
 
-    [data-gwd-group="OfferSlot"] .offer-value .sym-pct {
-      font-size: 0.6em;
-      vertical-align: baseline;
-      position: relative;
-      /* Vertical offset computed at runtime from glyph metrics
-         (alignPercentSymbols) so the % bottom-aligns with the digits. */
-    }
-
-    /* ── T&C group plumbing ── */
-    [data-gwd-group="tc_prices"] .gwd-grp-tc.sse-text,
-    [data-gwd-group="tc_solo"] .gwd-grp-tc.sse-text {
-      position: absolute;
-      font-family: Museo, Arial, sans-serif;
-      color: rgb(0, 41, 117);
-    }
-
-    /* Feed text uses \n for forced breaks (e.g. two-line unit rate). */
-    .terms-prices,
-    .terms-solo,
-    .unit-rate-prices {
-      white-space: pre-line;
-    }
-
-    /* ── T&C wrappers (far-left tiny zone) ── */
     .tc-prices-group,
     .tc-solo-group {
       position: absolute;
     }
 
-    .roundel-frame-off #headline-act3 { visibility: hidden; }
 
-    /* Act 4 only: white over blue wave on 320×50 */
-    #headline-act4 {
-      color: rgb(255, 255, 255);
-      top: 9px;
+
+.offer-value .sym-pct {
+      font-size: 0.6em;
+      vertical-align: baseline;
+      position: relative;
     }
 
-
-.offer-value .offer-value-run {
+    .offer-value .offer-value-run {
       white-space: nowrap;
     }
 
@@ -286,10 +237,10 @@
 
 
     .roundel-frame {
-      left: 138px;
-      top: -17px;
-      width: 90px;
-      height: 90px;
+      left: 170px;
+      top: -15px;
+      width: 85px;
+      height: 85px;
       background-color: rgb(0, 41, 117);
       border-radius: 50%;
       overflow: hidden;
@@ -459,6 +410,11 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -475,6 +431,11 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -491,6 +452,11 @@
       display: flex;
       align-items: flex-end;
       justify-content: flex-start;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -522,6 +488,9 @@
       font-size: 16px;
       height: 34px;
       white-space: nowrap;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
     }
 
     [data-gwd-group="OfferSlot"] .offer-value {
@@ -537,6 +506,9 @@
       justify-content: flex-end;
       display: flex;
       align-items: flex-end;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
     }
 
     [data-gwd-group="OfferSlot"] .offer-subline {
@@ -552,6 +524,9 @@
       white-space: normal;
       text-align: left;
       text-transform: uppercase;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
     }
 
     .tc-prices-group {
@@ -696,7 +671,6 @@
 
     .tc-solo .tc-prices-group {
       visibility: hidden;
-      height: 46px;
     }
 
     .tc-prices .terms-solo {
@@ -705,7 +679,6 @@
 
     .tc-prices .tc-solo-group {
       visibility: hidden;
-      height: 46px;
     }
 
     .offers-1 .offer-slot-2 {
@@ -737,15 +710,15 @@
     }
 
     .offers-0 .roundel-value {
-      color: rgb(0, 41, 117);
+      color: rgb(255, 255, 255);
     }
 
     .offers-0 .roundel-copy {
-      color: rgb(0, 41, 117);
+      color: rgb(255, 255, 255);
     }
 
     .offers-0 .roundel-frame {
-      background-color: rgb(0, 229, 165);
+      background-color: rgb(0, 41, 117);
       left: 175px;
       top: -12px;
       width: 75px;
@@ -783,10 +756,10 @@
     }
 
     .roundel-split .roundel-copy {
-      left: 153px;
-      top: 8px;
-      width: 80px;
-      height: 10px;
+      left: 176px;
+      top: 7px;
+      width: 73px;
+      height: 11px;
       font-size: 12px;
       line-height: 1.05;
       white-space: nowrap;
@@ -795,8 +768,8 @@
     }
 
     .roundel-split .roundel-value {
-      left: 155px;
-      top: 17px;
+      left: 175px;
+      top: 19px;
       width: 76px;
       height: 30px;
       font-size: 28px;
@@ -810,9 +783,9 @@
 
     .offers-0 .sse-headline:not(#headline-act3):not(#headline-act4) {
       left: 8px;
-      top: 12px;
-      width: 125px;
-      height: 34px;
+      top: 8px;
+      width: 217px;
+      height: 33px;
       font-size: 14px;
       display: flex;
       align-items: center;
@@ -820,9 +793,9 @@
 
     .offers-0 #headline-act3 {
       left: 8px;
-      top: 12px;
-      width: 125px;
-      height: 34px;
+      top: 10px;
+      width: 158px;
+      height: 33px;
       font-size: 14px;
       display: flex;
       align-items: center;
@@ -870,34 +843,31 @@
     }
 
     .offers-0 .headline-scrim {
-      visibility: visible;
+      visibility: hidden;
     }
 
     .offers-0 .bg-blur {
       visibility: hidden;
     }
 
-    .offers-0 .logo-act1 {
+    .offers-0 .bg-image {
       visibility: hidden;
     }
 
+    .offers-0 .logo-act1 {
+      visibility: visible;
+    }
+
     .white-headlines .sse-headline:not(#headline-act3):not(#headline-act4) {
-      color: rgb(255, 255, 255);
-      top: 10px;
-      width: 217px;
-      height: 33px;
+      color: rgb(0, 41, 117);
     }
 
     .white-headlines #headline-act3 {
-      color: rgb(255, 255, 255);
-      top: 10px;
-      width: 158px;
-      height: 33px;
+      color: rgb(0, 41, 117);
     }
 
     .navy-headlines .sse-headline:not(#headline-act3):not(#headline-act4) {
       color: rgb(0, 41, 117);
-      height: 34px;
     }
 
     .navy-headlines #headline-act3 {
@@ -909,11 +879,13 @@
     }
 
     .offers-0 .terms-prices {
-      color: rgb(255, 255, 255);
+      color: rgb(0, 41, 117);
+      font-weight: 300;
     }
 
     .offers-0 .terms-solo {
-      color: rgb(255, 255, 255);
+      color: rgb(0, 41, 117);
+      font-weight: 300;
     }
 
     .white-headlines .unit-rate-prices {
@@ -925,7 +897,7 @@
     }
 
     .offers-0 #headline-act4 {
-      color: rgb(255, 255, 255);
+      color: rgb(0, 41, 117);
       left: 8px;
       top: 11px;
       display: flex;
@@ -939,11 +911,19 @@
       height: 90px;
     }
 
+    .offers-0 .bluewave {
+      visibility: hidden;
+    }
+
     .offers-0 .logo-act3 {
       left: 275px;
       top: 15px;
       width: 40px;
       height: 20px;
+    }
+
+    .offers-0 .logo-act3 {
+      visibility: hidden;
     }
 
     .offers-0.cta-rect .cta {
@@ -953,8 +933,8 @@
       height: 18px;
       font-size: 9px;
       border-radius: 4px;
-      background-color: rgb(0, 229, 165);
-      color: rgb(0, 41, 117);
+      background-color: rgb(0, 41, 117);
+      color: rgb(255, 255, 255);
     }
 
     .offers-0.cta-roundel .cta {
@@ -964,8 +944,8 @@
       height: 56px;
       font-size: 12px;
       border-radius: 50%;
-      background-color: rgb(0, 229, 165);
-      color: rgb(0, 41, 117);
+      background-color: rgb(0, 41, 117);
+      color: rgb(255, 255, 255);
     }
 
     .offers-0.tc-solo .terms-solo {
@@ -974,7 +954,6 @@
 
     .offers-0.tc-solo .tc-solo-group {
       visibility: hidden;
-      height: 46px;
     }
 
     .offers-0.tc-solo .terms-prices {
@@ -988,6 +967,233 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+    }
+
+    .offers-0.roundel-split .roundel-copy {
+      color: rgb(255, 255, 255);
+      left: 181px;
+      top: 7px;
+      width: 65px;
+      height: 11px;
+      font-size: 12px;
+      line-height: 1.05;
+      white-space: nowrap;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .offers-0.roundel-split .roundel-value {
+      color: rgb(255, 255, 255);
+      left: 175px;
+      top: 19px;
+      width: 76px;
+      height: 30px;
+      font-size: 28px;
+      line-height: 1;
+      white-space: nowrap;
+      display: flex;
+      align-items: flex-start;
+      text-align: center;
+      justify-content: center;
+    }
+
+    .offers-0.roundel-copy-only .roundel-copy {
+      color: rgb(255, 255, 255);
+      left: 176px;
+      top: 9px;
+      width: 73px;
+      height: 48px;
+      font-size: 10px;
+      line-height: 1.05;
+      white-space: normal;
+      text-align: center;
+      justify-content: center;
+      display: flex;
+      align-items: center;
+    }
+
+    .offers-0.roundel-copy-only .roundel-value {
+      color: rgb(255, 255, 255);
+    }
+
+    .roundel-frame-off #headline-act3 {
+      visibility: hidden;
+    }
+
+    #headline-act4 {
+      color: rgb(255, 255, 255);
+      top: 9px;
+    }
+
+    .offers-2 #roundel-frame#roundel-frame#roundel-frame#roundel-frame#roundel-frame {
+      left: 170px;
+      top: -15px;
+      width: 85px;
+      height: 85px;
+    }
+
+    .offers-2.roundel-split #roundel-copy#roundel-copy#roundel-copy#roundel-copy#roundel-copy {
+      left: 176px;
+      top: 7px;
+      width: 73px;
+      height: 11px;
+      font-size: 12px;
+      line-height: 1.05;
+    }
+
+    .offers-2.roundel-copy-only #roundel-copy#roundel-copy#roundel-copy#roundel-copy#roundel-copy {
+      left: 176px;
+      top: 9px;
+      width: 73px;
+      height: 48px;
+      font-size: 10px;
+      line-height: 1.05;
+    }
+
+    .offers-2.roundel-split #roundel-value#roundel-value#roundel-value#roundel-value#roundel-value {
+      left: 175px;
+      top: 19px;
+      width: 76px;
+      height: 30px;
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .offers-2.roundel-copy-only #roundel-value#roundel-value#roundel-value#roundel-value#roundel-value {
+      left: 130px;
+      top: 25px;
+      width: 50px;
+      height: 18px;
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .offers-3 #roundel-frame#roundel-frame#roundel-frame#roundel-frame#roundel-frame {
+      left: 170px;
+      top: -15px;
+      width: 85px;
+      height: 85px;
+    }
+
+    .offers-3.roundel-split #roundel-copy#roundel-copy#roundel-copy#roundel-copy#roundel-copy {
+      left: 176px;
+      top: 7px;
+      width: 73px;
+      height: 11px;
+      font-size: 12px;
+      line-height: 1.05;
+    }
+
+    .offers-3.roundel-copy-only #roundel-copy#roundel-copy#roundel-copy#roundel-copy#roundel-copy {
+      left: 176px;
+      top: 9px;
+      width: 73px;
+      height: 48px;
+      font-size: 10px;
+      line-height: 1.05;
+    }
+
+    .offers-3.roundel-split #roundel-value#roundel-value#roundel-value#roundel-value#roundel-value {
+      left: 175px;
+      top: 19px;
+      width: 76px;
+      height: 30px;
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .offers-3.roundel-copy-only #roundel-value#roundel-value#roundel-value#roundel-value#roundel-value {
+      left: 130px;
+      top: 25px;
+      width: 50px;
+      height: 18px;
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo #roundel-frame#roundel-frame#roundel-frame#roundel-frame#roundel-frame {
+      left: 175px;
+      top: -12px;
+      width: 75px;
+      height: 75px;
+      background-color: rgb(0, 41, 117);
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo #roundel-copy#roundel-copy#roundel-copy#roundel-copy#roundel-copy {
+      left: 176px;
+      top: 4px;
+      width: 73px;
+      height: 48px;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      line-height: 1.05;
+      color: rgb(255, 255, 255);
+      text-align: center;
+      white-space: normal;
+      justify-content: center;
+      display: flex;
+      align-items: center;
+    }
+
+    .cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo #roundel-value#roundel-value#roundel-value#roundel-value#roundel-value {
+      left: 130px;
+      top: 25px;
+      width: 50px;
+      height: 18px;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      line-height: 1;
+      color: rgb(255, 255, 255);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo #roundel-frame#roundel-frame#roundel-frame#roundel-frame#roundel-frame {
+      left: 175px;
+      top: -12px;
+      width: 75px;
+      height: 75px;
+      background-color: rgb(0, 41, 117);
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo #roundel-copy#roundel-copy#roundel-copy#roundel-copy#roundel-copy {
+      left: 181px;
+      top: 7px;
+      width: 65px;
+      height: 11px;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      font-size: 10px;
+      line-height: 1.05;
+      color: rgb(255, 255, 255);
+      text-align: center;
+      white-space: nowrap;
+      justify-content: center;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo #roundel-value#roundel-value#roundel-value#roundel-value#roundel-value {
+      left: 175px;
+      top: 19px;
+      width: 76px;
+      height: 30px;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      line-height: 1;
+      color: rgb(255, 255, 255);
+      text-align: center;
+      white-space: nowrap;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
     }
 
     @keyframes bg-blur-bg-blur-fade-frames-3 {
@@ -1706,10 +1912,10 @@
     }
 
     .roundel-frame {
-      left: 138px;
-      top: -17px;
-      width: 90px;
-      height: 90px;
+      left: 170px;
+      top: -15px;
+      width: 85px;
+      height: 85px;
       background-color: rgb(0, 41, 117);
       border-radius: 50%;
       overflow: hidden;
@@ -1879,6 +2085,11 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -1895,6 +2106,11 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -1911,6 +2127,11 @@
       display: flex;
       align-items: flex-end;
       justify-content: flex-start;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -2648,7 +2869,7 @@
       width: 486px;
       height: 90px;
       transform: translate3d(-50px, 0px, 0px);
-      opacity: 0;
+      opacity: 1;
       position: absolute;
       visibility: inherit;
     }
@@ -2665,10 +2886,10 @@
     }
 
     .roundel-frame {
-      left: 138px;
-      top: -17px;
-      width: 90px;
-      height: 90px;
+      left: 170px;
+      top: -15px;
+      width: 85px;
+      height: 85px;
       background-color: rgb(0, 41, 117);
       border-radius: 50%;
       overflow: hidden;
@@ -2836,6 +3057,11 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -2852,6 +3078,11 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -2868,6 +3099,11 @@
       display: flex;
       align-items: flex-end;
       justify-content: flex-start;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -2899,7 +3135,7 @@
       width: 486px;
       height: 90px;
       transform: translate3d(-50px, 0px, 0px);
-      opacity: 0;
+      opacity: 1;
       position: absolute;
       visibility: inherit;
     }
@@ -2921,10 +3157,10 @@
     }
 
     .roundel-frame {
-      left: 138px;
-      top: -17px;
-      width: 90px;
-      height: 90px;
+      left: 170px;
+      top: -15px;
+      width: 85px;
+      height: 85px;
       background-color: rgb(0, 41, 117);
       border-radius: 50%;
       overflow: hidden;
@@ -3092,6 +3328,11 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -3108,6 +3349,11 @@
       align-items: flex-end;
       justify-content: flex-start;
       text-align: left;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -3124,6 +3370,11 @@
       display: flex;
       align-items: flex-end;
       justify-content: flex-start;
+      font-family: Museo, Arial, sans-serif;
+      font-weight: 700;
+      color: rgb(0, 41, 117);
+      line-height: 1.3;
+      white-space: pre-line;
       transform: translate3d(0px, 0px, 0px);
       opacity: 0;
       position: absolute;
@@ -3164,25 +3415,11 @@
     @keyframes greenwave-greenwave-fade-offers-0-offers-0 {
       0% {
         transform: translate3d(-50px, 0px, 0px);
-        opacity: 0;
-        animation-timing-function: ease-out;
-      }
-      61.8% {
-        transform: translate3d(-50px, 0px, 0px);
-        opacity: 0;
-        animation-timing-function: ease-out;
-      }
-      65.1% {
-        transform: translate3d(-50px, 0px, 0px);
-        opacity: 1;
-      }
-      98% {
-        transform: translate3d(-50px, 0px, 0px);
         opacity: 1;
       }
       100% {
         transform: translate3d(-50px, 0px, 0px);
-        opacity: 0;
+        opacity: 1;
       }
     }
     .offers-0 .greenwave {
@@ -3798,25 +4035,11 @@
     @keyframes greenwave-greenwave-fade-offers-0-offers-0-frames-4 {
       0% {
         transform: translate3d(-50px, 0px, 0px);
-        opacity: 0;
-        animation-timing-function: ease-out;
-      }
-      72.7% {
-        transform: translate3d(-50px, 0px, 0px);
-        opacity: 0;
-        animation-timing-function: ease-out;
-      }
-      76% {
-        transform: translate3d(-50px, 0px, 0px);
-        opacity: 1;
-      }
-      98% {
-        transform: translate3d(-50px, 0px, 0px);
         opacity: 1;
       }
       100% {
         transform: translate3d(-50px, 0px, 0px);
-        opacity: 0;
+        opacity: 1;
       }
     }
     .offers-0.frames-4 .greenwave {
@@ -4435,12 +4658,32 @@
       animation: 15s linear 0s infinite normal forwards running headline-act4-headline-act4-slideInRight-offers-0-frames-4;
     }
 
+
+
+
     </style>
 
+    
+    <script type="application/json" id="sse-production-fit-rules">[{"cssClass":"sse-headline","shared":true,"wrap":true,"maxLines":2,"minFontSize":13,"allowShrink":true},{"cssClass":"roundel-copy","shared":false,"wrap":false,"minFontSize":6,"maxLines":1,"allowShrink":true,"scopes":{"roundel-copy-only":{"maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18},"offers-0.roundel-copy-only":{"maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18}},"excludeTargets":[{"selector":"#roundel-copy","scopes":["offers-2.roundel-split","offers-2.roundel-copy-only","offers-3.roundel-split","offers-3.roundel-copy-only","cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo","cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo"]}]},{"cssClass":"roundel-value","shared":false,"wrap":false,"minFontSize":16,"maxLines":1,"excludeTargets":[{"selector":"#roundel-value","scopes":["offers-2.roundel-split","offers-2.roundel-copy-only","offers-3.roundel-split","offers-3.roundel-copy-only","cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo","cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo"]}]},{"cssClass":"terms-prices","shared":false,"wrap":false,"minFontSize":4,"maxLines":1,"scopes":{"offers-0.tc-solo":{"maxLines":1,"allowShrink":true,"wrap":false,"minFontSize":5,"align":"bottom"}}},{"cssClass":"unit-rate-prices","shared":false,"wrap":false,"minFontSize":5,"maxLines":1,"allowShrink":true},{"cssClass":"terms-solo","shared":false,"wrap":false,"maxLines":2,"minFontSize":6},{"cssClass":"offer-value","shared":true,"wrap":false,"minFontSize":8,"minFontSizeRatio":0.5,"tracking":{"minEm":-0.05},"align":"bottom","scopes":{"offers-2":{"minFontSize":24}}},{"cssClass":"offer-subline","shared":true,"wrap":true,"minFontSize":6,"minFontSizeRatio":0.6,"maxLines":2,"allowShrink":true,"scopes":{"offers-2":{"maxLines":2,"allowShrink":true,"wrap":true},"offers-3":{"maxLines":2,"allowShrink":true,"wrap":true}}},{"cssClass":"roundel-copy","shared":false,"wrap":false,"minFontSize":6,"maxLines":1,"allowShrink":true,"scopes":{"roundel-copy-only":{"maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18},"offers-0.roundel-copy-only":{"maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18}},"selector":"#roundel-copy","targetId":"roundel-copy","targetOverrides":[{"scope":"offers-2.roundel-split","maxLines":1,"allowShrink":true,"wrap":false,"minFontSize":6},{"scope":"offers-2.roundel-copy-only","maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18},{"scope":"offers-3.roundel-split","maxLines":1,"allowShrink":true,"wrap":false,"minFontSize":6},{"scope":"offers-3.roundel-copy-only","maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18},{"scope":"cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo","maxLines":3,"allowShrink":true,"wrap":true,"disabled":false,"static":false,"shared":false,"sharedGroup":"","minFontSize":18,"minFontSizeRatio":0,"tracking":{"minEm":0},"align":"normal","frame":"","overflow":"clip"},{"scope":"cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo","maxLines":1,"allowShrink":true,"wrap":false,"disabled":false,"static":false,"shared":false,"sharedGroup":"","minFontSize":6,"minFontSizeRatio":0,"tracking":{"minEm":0},"align":"normal","frame":"","overflow":"clip"}]},{"cssClass":"roundel-value","shared":false,"wrap":false,"minFontSize":16,"maxLines":1,"selector":"#roundel-value","targetId":"roundel-value","targetOverrides":[{"scope":"offers-2.roundel-split","maxLines":1,"minFontSize":16},{"scope":"offers-2.roundel-copy-only","maxLines":1,"minFontSize":16},{"scope":"offers-3.roundel-split","maxLines":1,"minFontSize":16},{"scope":"offers-3.roundel-copy-only","maxLines":1,"minFontSize":16},{"scope":"cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo","maxLines":1,"allowShrink":true,"wrap":false,"disabled":false,"static":false,"shared":false,"sharedGroup":"","minFontSize":16,"minFontSizeRatio":0,"tracking":{"minEm":0},"align":"normal","frame":"","overflow":"clip"},{"scope":"cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo","maxLines":1,"allowShrink":true,"wrap":false,"disabled":false,"static":false,"shared":false,"sharedGroup":"","minFontSize":16,"minFontSizeRatio":0,"tracking":{"minEm":0},"align":"normal","frame":"","overflow":"clip"}]}]</script>
     <script>
       (function() {
         var root = null;
-        var textFitRules = [{"cssClass":"sse-headline","shared":true,"wrap":true,"maxLines":2,"minFontSize":13,"allowShrink":true},{"cssClass":"roundel-copy","shared":false,"wrap":false,"minFontSize":6,"maxLines":1,"allowShrink":true,"scopes":{"roundel-copy-only":{"maxLines":3,"allowShrink":true,"wrap":true,"minFontSize":18}}},{"cssClass":"roundel-value","shared":false,"wrap":false,"minFontSize":16,"maxLines":1},{"cssClass":"terms-prices","shared":false,"wrap":false,"minFontSize":4,"maxLines":1,"scopes":{"offers-0.tc-solo":{"maxLines":1,"allowShrink":true,"wrap":false,"minFontSize":5,"align":"bottom"}}},{"cssClass":"unit-rate-prices","shared":false,"wrap":false,"minFontSize":5,"maxLines":1,"allowShrink":true},{"cssClass":"terms-solo","shared":false,"wrap":false,"maxLines":2,"minFontSize":6},{"cssClass":"offer-value","shared":true,"wrap":false,"minFontSize":8,"minFontSizeRatio":0.5,"tracking":{"minEm":-0.05},"align":"bottom","scopes":{"offers-2":{"minFontSize":24}}},{"cssClass":"offer-subline","shared":true,"wrap":true,"minFontSize":6,"minFontSizeRatio":0.6,"maxLines":2,"allowShrink":true,"scopes":{"offers-2":{"maxLines":2,"allowShrink":true,"wrap":true},"offers-3":{"maxLines":2,"allowShrink":true,"wrap":true}}}];
+        
+        
+        var textFitRules = JSON.parse(document.getElementById('sse-production-fit-rules').textContent);
+        window.updateSseDcoFitRules = function(rules) { textFitRules = rules; };
+        var settlementGeneration = 0;
+        function settleRuntime() {
+          var generation = ++settlementGeneration;
+          window.__SSE_DCO_SETTLED__ = Promise.all([document.fonts && document.fonts.ready]).then(function() {
+            return new Promise(function(resolve) {
+              window.requestAnimationFrame(function() {
+                if (generation === settlementGeneration) {commitOfferLayout();}
+                window.requestAnimationFrame(resolve);
+              });
+            });
+          });
+        }
 
         function fieldValue(value) {
           if (value === undefined || value === null) return '';
@@ -4578,8 +4821,8 @@
           var enterDuration = Number(params.enter_duration_pct || 7);
           var fadePct = Number(params.fade_pct || 2);
           var settled = Math.min(end, start + enterDuration);
-          var enterDistance = Number(params.enter_distance_px || 320);
-          var exitDy = Number(params.exit_dy || 5);
+          var enterDistance = Number(params.enter_distance_px === undefined ? 320 : params.enter_distance_px);
+          var exitDy = Number(params.exit_dy === undefined ? 5 : params.exit_dy);
           return [
             { at: start, translate: [enterDistance, 0], opacity: 0 },
             { at: settled, translate: [0, 0], opacity: 1 },
@@ -4613,6 +4856,30 @@
         function __compileHeadlineClips(clips, beats) {
           if (!clips || !clips.length) {
             return [{ at: 0, translate: [0, 0], opacity: 0 }, { at: 100, translate: [0, 0], opacity: 0 }];
+          }
+          if (clips[0].preset === 'custom') {
+            var frames = [];
+            var translate = [0, 0];
+            var scale = 1;
+            var opacity = 1;
+            clips.forEach(function(clip) {
+              (clip.keyframes || []).forEach(function(frame) {
+                var next = {};
+                Object.keys(frame).forEach(function(key) { next[key] = frame[key]; });
+                next.at = __resolveBeat(frame.at, beats);
+                frames.push(next);
+              });
+            });
+            frames.sort(function(a,b) { return a.at - b.at; });
+            return frames.map(function(frame) {
+              if (frame.translate) translate = frame.translate;
+              if (frame.scale !== undefined) scale = frame.scale;
+              if (frame.opacity !== undefined) opacity = frame.opacity;
+              frame.translate = translate;
+              frame.scale = scale;
+              frame.opacity = opacity;
+              return frame;
+            });
           }
           if (clips[0].preset === 'fade') return __compileFade(clips[0], beats);
           return __compileSlideInRight(clips[0], beats);
@@ -4740,7 +5007,9 @@
           if (!data || data.include_heading4_enum === undefined || data.include_heading4_enum === null) return true;
           if (typeof data.include_heading4_enum === 'boolean') return data.include_heading4_enum;
           var normalized = String(data.include_heading4_enum).trim().toLowerCase();
-          if (normalized === 'false' || normalized === '0' || normalized === 'no' || normalized === 'off' || normalized === '') return false;
+          // Empty string is normalizeProfileRow/fieldValue(undefined) — treat as missing.
+          if (!normalized) return true;
+          if (normalized === 'false' || normalized === '0' || normalized === 'no' || normalized === 'off') return false;
           return true;
         }
 
@@ -4794,6 +5063,23 @@
                 if (!(heading4Enabled && headings[3])) {
                   window.hidden = true;
                   window.keyframes = [{ at: 0, translate: [0, 0], opacity: 0 }, { at: 100, translate: [0, 0], opacity: 0 }];
+                } else {
+                  // Match buildHeadlineMotionPlan: pin Act 4 to act4_in (not banner bn_cta_in).
+                  var act4Start = Number(
+                    beats.act4_in != null ? beats.act4_in
+                      : (beats.bn_cta_in != null ? beats.bn_cta_in
+                        : (beats.cta_in != null ? beats.cta_in : window.start))
+                  );
+                  var source = (window.clips && window.clips[0]) || {};
+                  var rebuilt = [{
+                    preset: source.preset || 'slideInRight',
+                    start: act4Start,
+                    end: window.end,
+                    params: source.params || {}
+                  }];
+                  window.start = act4Start;
+                  window.hidden = false;
+                  window.keyframes = __compileHeadlineClips(rebuilt, beats);
                 }
                 return;
               }
@@ -4905,7 +5191,49 @@
     return true;
   }
 
+  function isPolicyMemberVisible(element) {
+    // Visibility is inherited but a child may explicitly override hidden.
+    if (computedOf(element).visibility === 'hidden') return false;
+    var node = element;
+    while (node) {
+      if (computedOf(node).display === 'none') return false;
+      node = node.parentElement;
+    }
+    return true;
+  }
+
+  var fitStyleKeys = ['fontSize', 'letterSpacing', 'whiteSpace', 'overflow', 'textOverflow', 'maxHeight', 'transform', 'alignItems', 'height'];
+  var fitAttributeKeys = ['data-fit-clipped', 'data-fit-clip-reason', 'data-fit-status', 'data-fit-requested-size', 'data-fit-rendered-size'];
+
+  function cssStyleName(key) {
+    return key.replace(/[A-Z]/g, function (letter) { return '-' + letter.toLowerCase(); });
+  }
+
+  function rememberAuthoredFitStyles(element) {
+    if (element.__dcoFitAuthored) return;
+    var authored = { values: {}, priorities: {}, title: element.getAttribute('title') };
+    fitStyleKeys.forEach(function (key) {
+      authored.values[key] = element.style[key];
+      authored.priorities[key] = element.style.getPropertyPriority ? element.style.getPropertyPriority(cssStyleName(key)) : '';
+    });
+    element.__dcoFitAuthored = authored;
+  }
+
+  function restoreAuthoredFitStyles(element) {
+    var authored = element.__dcoFitAuthored;
+    if (!authored) return;
+    fitStyleKeys.forEach(function (key) {
+      if (element.style.setProperty) element.style.setProperty(cssStyleName(key), authored.values[key] || '', authored.priorities[key]);
+      else element.style[key] = authored.values[key];
+    });
+    fitAttributeKeys.forEach(function (key) { element.removeAttribute(key); });
+    if (authored.title === null) element.removeAttribute('title');
+    else element.setAttribute('title', authored.title);
+  }
+
   function resetStyles(element) {
+    rememberAuthoredFitStyles(element);
+    if (element.__dcoExplicitFitStyles) element.style.height = element.__dcoExplicitFitStyles.height;
     element.style.fontSize = '';
     element.style.letterSpacing = '';
     element.style.whiteSpace = '';
@@ -4981,8 +5309,32 @@
     return overflowsWidth(element) || tooTall(element, rule, cs, fontSize);
   }
 
+  function scopeTokensOnRoot(scope, className) {
+    var parts = String(scope || '').split('.');
+    var scopeActive = false;
+    var partIndex;
+    for (partIndex = 0; partIndex < parts.length; partIndex += 1) {
+      if (!parts[partIndex]) continue;
+      if (className.indexOf(' ' + parts[partIndex] + ' ') === -1) return false;
+      scopeActive = true;
+    }
+    return scopeActive;
+  }
+
+  function explicitPolicyRule(rule) {
+    if (!rule.frame || !rule.static) return rule;
+    var resolved = {};
+    for (var key in rule) resolved[key] = rule[key];
+    // A scoped legacy mode may arrive after the frame policy. Resolve the
+    // final merged policy so explicit sizing remains independent of overflow.
+    if (resolved.allowShrink === undefined) resolved.allowShrink = false;
+    if (!resolved.overflow) resolved.overflow = resolved.static === 'truncate' ? 'ellipsis' : 'clip';
+    delete resolved.static;
+    return resolved;
+  }
+
   function resolveRule(rule, root) {
-    if (!rule.scopes) return rule;
+    if (!rule.scopes && !rule.targetOverrides) return explicitPolicyRule(rule);
     var resolved = {};
     var key;
     for (key in rule) {
@@ -4991,7 +5343,7 @@
     var className = ' ' + String((root && root.className) || '') + ' ';
     var matchedScope = false;
     for (var scope in rule.scopes) {
-      if (className.indexOf(' ' + scope + ' ') === -1) continue;
+      if (!scopeTokensOnRoot(scope, className)) continue;
       matchedScope = true;
       var overrides = rule.scopes[scope];
       for (key in overrides) {
@@ -4999,8 +5351,25 @@
       }
     }
     // Host rules created only to carry variant fit must not run when idle.
-    if (rule.scopeOnly && !matchedScope) return null;
-    return resolved;
+    if (rule.targetOverrides) {
+      var targetActive = false;
+      rule.targetOverrides.forEach(function (override) {
+        if (override.scope && !scopeTokensOnRoot(override.scope, className)) return;
+        targetActive = true;
+        for (var property in override) if (property !== 'scope') resolved[property] = override[property];
+      });
+      if (!targetActive) return null;
+    } else if (rule.scopeOnly && !matchedScope) return null;
+    return explicitPolicyRule(resolved);
+  }
+
+  function excludedFromRule(element, rule, root) {
+    var className = ' ' + String((root && root.className) || '') + ' ';
+    return (rule.excludeTargets || []).some(function (target) {
+      return element.matches(target.selector) && target.scopes.some(function (scope) {
+        return !scope || scopeTokensOnRoot(scope, className);
+      });
+    });
   }
 
   function applyStatic(element, rule) {
@@ -5063,7 +5432,7 @@
     // Bottom-aligned flex boxes (align-items: flex-end) keep that alignment
     // when copy wraps: the last line stays on the baseline and earlier lines
     // stack upward. Do not flip to flex-start — that was fighting Text Y = Bottom.
-    if (rule.align === 'bottom' && size < fit.base) {
+    if (rule.align === 'bottom' && size < fit.base && !rule.anchor) {
       var delta = (fit.base - size) * fit.lineRatio;
       if (delta > 0.25) element.style.transform = 'translateY(' + delta.toFixed(2) + 'px)';
     }
@@ -5098,12 +5467,142 @@
     return clipped;
   }
 
+  // Explicit policy measures the entire browser-shaped text. It does not
+  // rewrite frame geometry or transform, and never treats clipping as a fit.
+  function measurePolicy(element, rule, size, minimum) {
+    var cs = computedOf(element);
+    var reasons = [];
+    var lines = 0;
+    var range = element.ownerDocument.createRange();
+    range.selectNodeContents(element);
+    var rects = Array.prototype.slice.call(range.getClientRects());
+    var frame = element.getBoundingClientRect();
+    var scaleX = element.offsetWidth ? frame.width / element.offsetWidth : 1;
+    var scaleY = element.offsetHeight ? frame.height / element.offsetHeight : 1;
+    if (!scaleX || !scaleY || !rects.length || !element.clientWidth) {
+      reasons.push('unmeasurable');
+    } else {
+      var tops = [];
+      var widthOverflow = overflowsWidth(element);
+      var heightOverflow = false;
+      var left = frame.left + (element.clientLeft + cssNumber(cs.paddingLeft)) * scaleX;
+      var right = frame.left + (element.clientLeft + element.clientWidth - cssNumber(cs.paddingRight)) * scaleX;
+      var top = frame.top + (element.clientTop + cssNumber(cs.paddingTop)) * scaleY;
+      var bottom = frame.top + (element.clientTop + element.clientHeight - cssNumber(cs.paddingBottom)) * scaleY;
+      rects.forEach(function (rect) {
+        if (!rect.width && !rect.height) return;
+        var center = (rect.top + rect.bottom) / 2;
+        if (!tops.some(function (value) { return Math.abs(value - center) < lineHeightPx(cs, size) * scaleY * 0.45; })) tops.push(center);
+        if (rect.left < left - 0.5 * scaleX || rect.right > right + 0.5 * scaleX) widthOverflow = true;
+        if (rect.top < top - 0.5 * scaleY || rect.bottom > bottom + 0.5 * scaleY) heightOverflow = true;
+      });
+      lines = tops.length;
+      if (widthOverflow) reasons.push('width');
+      if (rule.frame === 'fixed' && heightOverflow) reasons.push('height');
+      if (Number(rule.maxLines) > 0 && lines > Number(rule.maxLines)) reasons.push('max-lines');
+    }
+    if (size < minimum) reasons.push('minimum-size');
+    if (range.detach) range.detach();
+    return { reasons: reasons, lines: lines };
+  }
+
+  function fitPolicyMember(element, rule) {
+    rememberAuthoredFitStyles(element);
+    var keys = ['fontSize', 'letterSpacing', 'whiteSpace', 'overflow', 'textOverflow', 'height'];
+    // Preserve authored inline values, including font size. Repeated font-load
+    // fitting starts from authored styles rather than the previous fitted size.
+    if (!element.__dcoExplicitFitStyles) {
+      element.__dcoExplicitFitStyles = {};
+      keys.forEach(function (key) { element.__dcoExplicitFitStyles[key] = element.style[key]; });
+    }
+    keys.forEach(function (key) { element.style[key] = element.__dcoExplicitFitStyles[key]; });
+    var cs = computedOf(element);
+    var base = cssNumber(cs.fontSize, 1);
+    // A fixed font has one permitted size; dormant shrink floors do not apply.
+    var minimum = rule.allowShrink === false || rule.static
+      ? base
+      : Math.max(Number(rule.minFontSize) || 1, base * (Number(rule.minFontSizeRatio) || 0));
+    var floor = Math.min(base, minimum);
+    var size = base;
+    var trackingEm = 0;
+    element.style.whiteSpace = rule.wrap ? 'pre-line' : 'nowrap';
+    if (rule.frame === 'auto') element.style.height = 'auto';
+    element.style.overflow = 'visible';
+    element.style.textOverflow = 'clip';
+    if (rule.tracking) {
+      var minEm = Number(rule.tracking.minEm) || 0;
+      while (trackingEm > minEm && overflowsWidth(element)) {
+        trackingEm = Math.max(minEm, Number((trackingEm - 0.005).toFixed(3)));
+        element.style.letterSpacing = trackingEm + 'em';
+      }
+    }
+    var measurement = measurePolicy(element, rule, size, minimum);
+    if (rule.allowShrink !== false && !rule.static) {
+      while (size > floor && measurement.reasons.some(function (reason) { return reason !== 'minimum-size'; })) {
+        size = Math.max(floor, Number((size - 0.5).toFixed(3)));
+        element.style.fontSize = size + 'px';
+        measurement = measurePolicy(element, rule, size, minimum);
+      }
+    }
+    return { element: element, base: base, minimum: minimum, size: size, trackingEm: trackingEm };
+  }
+
+  function applyPolicy(root, rule) {
+    var elements = Array.prototype.slice.call(root.querySelectorAll(rule.selector || '.' + rule.cssClass)).filter(function (element) {
+      // Supported motion changes opacity, never visibility/display. Those
+      // authored CSS properties identify state-inactive text and wrappers.
+      return element.textContent && String(element.textContent).trim() && isPolicyMemberVisible(element) && !excludedFromRule(element, rule, root);
+    });
+    if (!elements.length) return undefined;
+    var fits = elements.map(function (element) { return fitPolicyMember(element, rule); });
+    var sharedSize = Math.min.apply(null, fits.map(function (fit) { return fit.size; }));
+    if (rule.shared) {
+      // Respect every member's floor. Conflicts are diagnosed below, not hidden
+      // by forcing one member below its minimum for another member's copy.
+      sharedSize = Math.min(Math.min.apply(null, fits.map(function (fit) { return fit.base; })),
+        Math.max(sharedSize, Math.max.apply(null, fits.map(function (fit) { return fit.minimum; }))));
+    }
+    var diagnostics = fits.map(function (fit) {
+      var size = rule.allowShrink === false ? fit.base : (rule.shared ? sharedSize : fit.size);
+      var element = fit.element;
+      element.style.fontSize = size + 'px';
+      var measurement = measurePolicy(element, rule, size, fit.minimum);
+      var overflow = rule.overflow || (rule.static === 'truncate' ? 'ellipsis' : 'clip');
+      element.style.overflow = overflow === 'visible' ? 'visible' : 'hidden';
+      element.style.textOverflow = overflow === 'ellipsis' ? 'ellipsis' : 'clip';
+      var failed = measurement.reasons.length > 0;
+      element.setAttribute('data-fit-status', failed ? 'failed' : 'fitted');
+      element.setAttribute('data-fit-requested-size', String(fit.base));
+      element.setAttribute('data-fit-rendered-size', String(size));
+      if (failed) {
+        element.setAttribute('data-fit-clipped', 'true');
+        element.setAttribute('data-fit-clip-reason', measurement.reasons.join(','));
+      } else {
+        element.removeAttribute('data-fit-clipped');
+        element.removeAttribute('data-fit-clip-reason');
+      }
+      fit.rule = rule;
+      fit.diagnostic = { targetId: element.id || null, requestedSize: fit.base, renderedSize: size, reasons: measurement.reasons, lines: measurement.lines };
+      return fit.diagnostic;
+    });
+    return {
+      size: Math.min.apply(null, diagnostics.map(function (item) { return item.renderedSize; })),
+      trackingEm: Math.min.apply(null, fits.map(function (fit) { return fit.trackingEm; })),
+      clipped: diagnostics.some(function (item) { return item.reasons.length > 0; }),
+      diagnostics: diagnostics,
+      members: fits,
+    };
+  }
+
   function applyRule(root, rule) {
     var resolved = resolveRule(rule, root);
+    if (resolved && resolved.disabled) return;
     if (!resolved) return undefined;
+    if (resolved.frame) return applyPolicy(root, resolved);
     var elements = [];
-    root.querySelectorAll('.' + resolved.cssClass).forEach(function (element) {
+    root.querySelectorAll(resolved.selector || '.' + resolved.cssClass).forEach(function (element) {
       if (!element.textContent || !String(element.textContent).trim()) return;
+      if (excludedFromRule(element, resolved, root)) return;
       if (!isVisible(element)) return;
       elements.push(element);
     });
@@ -5171,22 +5670,73 @@
   }
 
   function applyRules(root, rules) {
+    // A feed update can empty or hide a previously fitted node. Restore every
+    // candidate before membership checks, including now-inactive scoped rules,
+    // so prior rows cannot leave font sizes, clipping or transforms behind.
+    (rules || []).forEach(function (rule) {
+      root.querySelectorAll(rule.selector || '.' + rule.cssClass).forEach(restoreAuthoredFitStyles);
+    });
     var results = [];
+    var policyGroups = {};
     (rules || []).forEach(function (rule) {
       var result = applyRule(root, rule);
       if (result !== undefined) {
-        results.push({
+        (result.members || []).forEach(function (member) {
+          if (!member.rule.shared) return;
+          var key = member.rule.sharedGroup || member.rule.cssClass;
+          if (!policyGroups[key]) policyGroups[key] = [];
+          policyGroups[key].push(member);
+        });
+        var entry = {
           cssClass: rule.cssClass,
           size: result.size,
           trackingEm: Number(result.trackingEm) || 0,
           clipped: Boolean(result.clipped),
-        });
+        };
+        if (result.diagnostics) entry.diagnostics = result.diagnostics;
+        results.push(entry);
       }
+    });
+    // A local text policy does not detach a member from its fit relationship.
+    // Equalise across resolved target rules as well as within each selector.
+    Object.keys(policyGroups).forEach(function (key) {
+      var members = policyGroups[key];
+      if (members.length < 2) return;
+      var size = Math.min.apply(null, members.map(function (member) { return member.diagnostic.renderedSize; }));
+      var floor = Math.max.apply(null, members.map(function (member) { return member.minimum; }));
+      var ceiling = Math.min.apply(null, members.map(function (member) { return member.base; }));
+      size = Math.min(ceiling, Math.max(size, floor));
+      var renderedSizes = members.map(function (member) { return member.rule.allowShrink === false ? member.base : size; });
+      var conflict = renderedSizes.some(function (rendered) { return rendered !== renderedSizes[0]; });
+      members.forEach(function (member, index) {
+        var element = member.element;
+        var renderedSize = renderedSizes[index];
+        element.style.fontSize = renderedSize + 'px';
+        var measurement = measurePolicy(element, member.rule, renderedSize, member.minimum);
+        if (conflict) measurement.reasons.push('shared-size-conflict');
+        member.diagnostic.renderedSize = renderedSize;
+        member.diagnostic.reasons = measurement.reasons;
+        member.diagnostic.lines = measurement.lines;
+        element.setAttribute('data-fit-rendered-size', String(renderedSize));
+        element.setAttribute('data-fit-status', measurement.reasons.length ? 'failed' : 'fitted');
+        if (measurement.reasons.length) {
+          element.setAttribute('data-fit-clipped', 'true');
+          element.setAttribute('data-fit-clip-reason', measurement.reasons.join(','));
+        } else {
+          element.removeAttribute('data-fit-clipped');
+          element.removeAttribute('data-fit-clip-reason');
+        }
+      });
+    });
+    results.forEach(function (entry) {
+      if (!entry.diagnostics) return;
+      entry.size = Math.min.apply(null, entry.diagnostics.map(function (item) { return item.renderedSize; }));
+      entry.clipped = entry.diagnostics.some(function (item) { return item.reasons.length > 0; });
     });
     return results;
   }
 
-  return { applyRules: applyRules };
+  return { applyRules: applyRules, resolveRule: resolveRule };
 })(window);
 
         function fitBoundText() {
@@ -5196,9 +5746,12 @@
 
         function commitOfferLayout() {
           if (!root) return;
+          
           fitBoundText();
           alignOfferValueSymbols(root);
           layoutOffers(root);
+          
+          
         }
 
         // Cold CDN Museo must settle before the 15s clock runs. Pausing via
@@ -5291,11 +5844,35 @@
     return true;
   }
 
+  function layoutPropertyName(key) {
+    return key.replace(/[A-Z]/g, function(letter) { return '-' + letter.toLowerCase(); });
+  }
+
+  function writeLayoutStyle(element, key, value) {
+    var writes = element.__dcoOfferLayoutWrites || (element.__dcoOfferLayoutWrites = {});
+    var name = layoutPropertyName(key);
+    if (!writes[key]) writes[key] = {
+      authored: element.style[key],
+      priority: element.style.getPropertyPriority(name),
+    };
+    element.style[key] = value;
+    writes[key].last = element.style[key];
+    writes[key].lastPriority = element.style.getPropertyPriority(name);
+  }
+
   function clearLayoutStyles(element) {
-    if (!element || !element.style) return;
-    element.style.left = '';
-    element.style.top = '';
-    element.style.width = '';
+    if (!element || !element.style || !element.__dcoOfferLayoutWrites) return;
+    var writes = element.__dcoOfferLayoutWrites;
+    Object.keys(writes).forEach(function(key) {
+      var name = layoutPropertyName(key);
+      var write = writes[key];
+      // A new author/runtime write is not ours to remove. Restore only the
+      // exact value installed by the previous automatic layout pass.
+      if (element.style[key] === write.last && element.style.getPropertyPriority(name) === write.lastPriority) {
+        element.style.setProperty(name, write.authored, write.priority);
+      }
+    });
+    delete element.__dcoOfferLayoutWrites;
   }
 
   /** Map a client rect into ancestor-local px, correcting stage scale(). */
@@ -5507,9 +6084,9 @@
     // width changes. Do NOT rewrite top — authored Y (flex-end in a real
     // height box) owns baseline pairing, and rewriting top every fit pass
     // made inspector drags look broken.
-    subline.style.left = (ink.right + SIDE_BY_SIDE_GAP_PX) + 'px';
+    writeLayoutStyle(subline, 'left', (ink.right + SIDE_BY_SIDE_GAP_PX) + 'px');
     if (window.getComputedStyle(subline).display === 'flex') {
-      subline.style.alignItems = 'flex-end';
+      writeLayoutStyle(subline, 'alignItems', 'flex-end');
     }
   }
 
@@ -5519,7 +6096,6 @@
     if (!value || !subline) return;
     var run = value.querySelector('.offer-value-run') || value;
     if (isSideBySide(value, subline, slot)) {
-      subline.style.width = '';
       layoutSideBySide(slot, run, subline);
     }
   }
@@ -5747,13 +6323,13 @@
     var isImg = plus.tagName === 'IMG' || plus.tagName === 'img';
     if (isImg) {
       // Layout box ignores CSS animation transforms (unlike getBoundingClientRect).
-      plus.style.left = (x - pw / 2) + 'px';
-      plus.style.top = (alignY === 'top' ? y : (y - ph / 2)) + 'px';
+      writeLayoutStyle(plus, 'left', (x - pw / 2) + 'px');
+      writeLayoutStyle(plus, 'top', (alignY === 'top' ? y : (y - ph / 2)) + 'px');
       return;
     }
     var parent = plus.offsetParent || plus.parentElement;
-    plus.style.left = (x - pw / 2) + 'px';
-    plus.style.top = (y - ph / 2) + 'px';
+    writeLayoutStyle(plus, 'left', (x - pw / 2) + 'px');
+    writeLayoutStyle(plus, 'top', (y - ph / 2) + 'px');
     if (!parent) return;
     withNeutralMotion(plus, function() {
       var ink = textInk(plus, parent);
@@ -5762,11 +6338,11 @@
       var inkCy = (ink.top + ink.bottom) / 2;
       var curLeft = cssNumber(plus.style.left, 0);
       var curTop = cssNumber(plus.style.top, 0);
-      plus.style.left = (curLeft + (x - inkCx)) + 'px';
+      writeLayoutStyle(plus, 'left', (curLeft + (x - inkCx)) + 'px');
       if (alignY === 'top') {
-        plus.style.top = (curTop + (y - ink.top)) + 'px';
+        writeLayoutStyle(plus, 'top', (curTop + (y - ink.top)) + 'px');
       } else {
-        plus.style.top = (curTop + (y - inkCy)) + 'px';
+        writeLayoutStyle(plus, 'top', (curTop + (y - inkCy)) + 'px');
       }
     });
   }
@@ -5858,7 +6434,7 @@
 
     var cursor = blockLeft;
     for (var i = 0; i < clusters.length; i += 1) {
-      clusters[i].slot.style.left = (cursor - clusters[i].insetLeft) + 'px';
+      writeLayoutStyle(clusters[i].slot, 'left', (cursor - clusters[i].insetLeft) + 'px');
       cursor += clusters[i].width + gap;
     }
     clusters = remeasureSorted(slots, 'x');
@@ -5887,7 +6463,7 @@
 
     var cursor = blockTop;
     for (var i = 0; i < clusters.length; i += 1) {
-      clusters[i].slot.style.top = (cursor - clusters[i].insetTop) + 'px';
+      writeLayoutStyle(clusters[i].slot, 'top', (cursor - clusters[i].insetTop) + 'px');
       cursor += clusters[i].height + gap;
     }
     clusters = remeasureSorted(slots, 'y');
@@ -5948,7 +6524,7 @@
     var cursor = topBlockLeft;
     for (var t = 0; t < 2; t += 1) {
       var tr = topRow[t];
-      tr.slot.style.left = (cursor - tr.cluster.insetLeft) + 'px';
+      writeLayoutStyle(tr.slot, 'left', (cursor - tr.cluster.insetLeft) + 'px');
       cursor += tr.cluster.width + gap;
     }
 
@@ -5957,7 +6533,7 @@
     });
     var topCentroidX = (topRow[0].cluster.valueCenterX + topRow[1].cluster.valueCenterX) / 2;
     bottom = { slot: bottom.slot, box: boxOf(bottom.slot), cluster: clusterForSlot(bottom.slot) };
-    bottom.slot.style.left = (topCentroidX - bottom.cluster.width / 2 - bottom.cluster.insetLeft) + 'px';
+    writeLayoutStyle(bottom.slot, 'left', (topCentroidX - bottom.cluster.width / 2 - bottom.cluster.insetLeft) + 'px');
     bottom = { slot: bottom.slot, box: boxOf(bottom.slot), cluster: clusterForSlot(bottom.slot) };
 
     // MPU / 970×250: raise plus top to top-row subline caps.
@@ -5986,41 +6562,39 @@
     var plusLayout = resolvePlusLayoutMode(scope);
 
     var slotNodes = scope.querySelectorAll('[data-gwd-group="OfferSlot"]');
+    var plusCandidates = [];
+    for (var p = 1; p <= 2; p += 1) {
+      var plus = scope.querySelector
+        ? (scope.querySelector('#plus-' + p) || scope.querySelector('.plus-' + p))
+        : null;
+      if (!plus && scope.ownerDocument) plus = scope.ownerDocument.getElementById('plus-' + p);
+      plusCandidates.push(plus);
+    }
+
+    // Reset before eligibility checks: a row can hide every slot and plus.
+    // Previously those nodes retained another row's re-anchored positions.
+    Array.prototype.forEach.call(slotNodes, function(slot) {
+      clearLayoutStyles(slot);
+      clearLayoutStyles(slot.querySelector('.offer-subline'));
+    });
+    plusCandidates.forEach(clearLayoutStyles);
+
     var slots = [];
     Array.prototype.forEach.call(slotNodes, function(slot) {
-      if (!isVisible(slot)) return;
-      slots.push(slot);
+      if (isVisible(slot)) slots.push(slot);
     });
     if (!slots.length) return;
-
     slots.sort(function(a, b) {
       var ai = parseInt(a.getAttribute('data-offer-index') || '0', 10);
       var bi = parseInt(b.getAttribute('data-offer-index') || '0', 10);
       return ai - bi;
     });
-
-    var pluses = [];
-    for (var p = 1; p <= 2; p += 1) {
-      var plus = scope.querySelector
-        ? (scope.querySelector('#plus-' + p) || scope.querySelector('.plus-' + p))
-        : null;
-      if (!plus && scope.ownerDocument) {
-        plus = scope.ownerDocument.getElementById('plus-' + p);
-      }
-      pluses.push(plus && isVisible(plus) ? plus : null);
-    }
-
-    for (var i = 0; i < slots.length; i += 1) {
-      clearLayoutStyles(slots[i]);
-      var sub = slots[i].querySelector('.offer-subline');
-      if (sub) {
-        clearLayoutStyles(sub);
-        sub.style.alignItems = '';
-      }
-    }
-    for (var j = 0; j < pluses.length; j += 1) {
-      if (pluses[j]) clearLayoutStyles(pluses[j]);
-    }
+    var pluses = plusCandidates.map(function(plus) { return plus && isVisible(plus) ? plus : null; });
+    // Explicit per-state ownership supersedes the legacy campaign-level policy.
+    // Missing property keeps legacy paint, including its side-by-side pairing.
+    var arrangementModes = slots.map(function(slot) { return window.getComputedStyle(slot).getPropertyValue('--offer-layout-mode').trim(); });
+    if (arrangementModes.indexOf('manual') !== -1) return;
+    var explicitAutomatic = arrangementModes.indexOf('auto') !== -1;
 
     for (var s = 0; s < slots.length; s += 1) {
       layoutSlotChildren(slots[s]);
@@ -6028,7 +6602,7 @@
 
     // Manual: keep authored slot/plus CSS (inspector). Still cleared stale inline
     // above so a prior auto pass cannot stick after switching campaigns.
-    if (plusLayout === 'manual') return;
+    if (plusLayout === 'manual' && !explicitAutomatic) return;
 
     // Match export pre-motion rest: clear slot scrub/CSS motion for ink measure.
     // Fit translateY on .offer-value children is preserved (not on the slot).
@@ -6069,13 +6643,16 @@
           var size = root.getAttribute('data-size') || '';
           var url = backgroundImageUrlForSize(data, size);
           if (!url || url === '[object Object]') {
-            url = image.getAttribute('data-packaged-src') || image.getAttribute('src') || '';
+            url = image.getAttribute('data-packaged-src') || '';
           }
-          if (!url || url === '[object Object]') return;
+          // A row replaces the previous row. Agency blanks must not retain its photo.
           image.setAttribute('src', url);
         }
 
         function applyRuntimeState(row) {
+          
+          
+          window.__SSE_DCO_APPLIED_ROW__ = row;
           root = root || document.getElementById('page-content');
           if (!root) return;
           var data = normalizeProfileRow(row);
@@ -6123,6 +6700,7 @@
           commitOfferLayout();
           wireExit(data);
           startMotionWhenReady();
+          settleRuntime();
           window.__SSE_DCO_READY__ = true;
         }
 
@@ -6165,6 +6743,7 @@
         window.addEventListener('DOMContentLoaded', scheduleRuntimeBootstrap);
       })();
     </script>
+
 
   </head>
   <body>

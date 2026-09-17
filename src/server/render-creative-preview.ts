@@ -1,11 +1,11 @@
-import {campaignFontFaces,campaignFontAssetUrl} from '@/lib/campaign-fonts';
+import {campaignFontFaces} from '@/lib/campaign-fonts';
 import path from 'node:path';
 import {assertCampaignStateValid} from '@/lib/campaign-variants';
 import { CDN_FONT_URLS } from '@/lib/brand-font';
 import { readCreativeDocumentForCampaign } from '@/server/creative-document';
 import { renderStudioReadyHtml, renderWipHtml } from '@/server/creative-exporter';
 
-const previewFonts=(document:any)=>document.fonts===undefined?CDN_FONT_URLS:Object.fromEntries(campaignFontFaces(document).map(face=>[path.basename(face.asset),campaignFontAssetUrl(face)]));
+const previewFonts=(document:any)=>document.fonts===undefined?CDN_FONT_URLS:Object.fromEntries(campaignFontFaces(document).map(face=>[path.basename(face.asset),face.cdnUrl]));
 
 type PreviewOptions = {
   renderMode?: 'font' | 'outline';

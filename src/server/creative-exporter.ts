@@ -1583,7 +1583,7 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
     }
   }
   return `
-${localFontFaceCss(options)}
+${options.renderMode === 'outline' ? '' : localFontFaceCss(options)}
 ${options.renderMode === 'outline' ? '' : packagedFontIsolationCss()}
 ${options.renderMode === 'outline' ? outlinedTextCss : ''}
     html, body {

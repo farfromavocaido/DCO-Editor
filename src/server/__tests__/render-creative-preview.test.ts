@@ -8,7 +8,10 @@ import { POST } from '@/app/api/creative/[size]/view/route';
 test('preview is exactly production output with the supplied active feed row', async () => {
   const document = await readCreativeDocument() as Record<string, any>;
   const row = { ...document.feed.sampleRows[0], heading1_text: 'Production parity sample' };
-  const expected = renderWipHtml(await renderStudioReadyHtml(document, '300x250', {assetBasePath:'/', fontUrlMap:CDN_FONT_URLS}), row);
+  const fontUrlMap = document.fonts === undefined
+    ? CDN_FONT_URLS
+    : Object.fromEntries(document.fonts.map((face) => [face.asset.split('/').at(-1), face.cdnUrl]));
+  const expected = renderWipHtml(await renderStudioReadyHtml(document, '300x250', {assetBasePath:'/', fontUrlMap}), row);
   expect(await renderCreativePreviewHtml('300x250', {document, row})).toBe(expected);
 });
 

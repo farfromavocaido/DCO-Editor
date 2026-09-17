@@ -33,6 +33,11 @@ describe('campaign fonts', () => {
     const a = await outlineFittedText({ ...options, fontFace: regular }); const b = await outlineFittedText({ ...options, fontFace: bold });
     expect(a.svg).not.toBe(b.svg); expect(a.svg).toContain('<path');
   });
+  test('uses the first registered family face when legacy text omits a weight', async () => {
+    const regular = await face(300, 200); const bold = await face(700, 700);
+    const document = { fonts: [bold, regular] };
+    expect(resolveCampaignFontFace(document, { fontFamily: 'Test family' })).toEqual(bold);
+  });
   test('unavailable faces, invalid paths and missing files fail visibly; CSS descriptors remain authorable', async () => {
     const regular = await face(400, 200);
     expect(() => resolveCampaignFontFace({ fonts: [regular] }, { fontFamily: 'Missing', fontWeight: 400 })).toThrow(/unavailable/);

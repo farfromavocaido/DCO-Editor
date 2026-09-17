@@ -256,6 +256,8 @@ export function CreativeInspector() {
   }
 
   const componentLink = componentLinkForTarget(document, size, selectedTarget.id, activeScopes);
+  const actualGeometry=renderedGeometry(selectedTarget.id);
+  const motionOwner=motionGeometry(document,size,selectedTarget.id,activeScopes,playhead);
   const editComponentBounds = (field, raw) => {
     const value = Number(raw);
     const bounds = selectedTarget.bounds;
@@ -291,8 +293,6 @@ export function CreativeInspector() {
     );
   }
 
-  const actualGeometry=renderedGeometry(selectedTarget.id);
-  const motionOwner=motionGeometry(document,size,selectedTarget.id,activeScopes,playhead);
   const isGroupedSelection = selectedTarget.kind === 'group' || selectedTarget.kind === 'multi';
   const layoutOwner=field=>{
     const rule=(document.layoutRules||[]).find(rule=>rule.enabled&&rule.targets.some(member=>member.size===size&&member.targetId===selectedTarget.id)&&((rule.type==='conditional'&&Object.hasOwn({...rule.values,...rule.otherwise},field))||(rule.type==='distribute'&&rule.crossAlign&&rule.crossAlign!=='keep'&&['left','top'].includes(field))||(rule.type!=='conditional'&&(rule.axis==='x'?'left':'top')===field))&&layoutDiagnostics.some(d=>d.id===rule.id&&d.size===size&&d.targetId===selectedTarget.id&&d.status==='active'));

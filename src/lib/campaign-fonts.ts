@@ -45,7 +45,9 @@ export function resolveCampaignFontFace(document: { fonts?: unknown }, values: C
   if (document.fonts === undefined) return faces[0];
   const family = familyKey(values.fontFamily ?? faces[0]?.family);
   const familyFaces = faces.filter(item => familyKey(item.family) === family);
-  const weight = fontWeightNumber(values.fontWeight, familyFaces.length === 1 ? familyFaces[0].weight : 400);
+  // Existing creative layers may omit weight. Preserve their established face
+  // when a campaign later registers additional weights for that family.
+  const weight = fontWeightNumber(values.fontWeight, familyFaces[0]?.weight ?? 400);
   const style = String(values.fontStyle || 'normal');
   const face = faces.find(item => familyKey(item.family) === family && item.weight === weight && item.style === style)
     // A normal-weight browser run uses the sole registered face without synthesising bold.

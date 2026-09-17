@@ -48,6 +48,35 @@ test('seeds an offers-0 headline scrim gradient on every size', async () => {
   }
 });
 
+test('uses Museo 300 for every offers-0 terms line', async () => {
+  const document = await readCreativeDocument();
+  assert.deepEqual(document.fonts, [
+    {
+      id: 'museo-700-normal',
+      family: 'Museo',
+      weight: 700,
+      style: 'normal',
+      asset: 'fonts/Museo700-Regular.otf',
+      cdnUrl: 'https://s0.2mdn.net/creatives/assets/5627648/Museo700-Regular.otf',
+    },
+    {
+      id: 'museo-300-normal',
+      family: 'Museo',
+      weight: 300,
+      style: 'normal',
+      asset: 'fonts/Museo300-Regular.otf',
+      cdnUrl: 'https://s0.2mdn.net/creatives/assets/5627648/Museo300-Regular.otf',
+    },
+  ]);
+  for (const [size, sizeCreative] of Object.entries(document.sizes)) {
+    for (const layerId of ['terms-prices', 'terms-solo']) {
+      const rule = sizeCreative.variantRules.find((item) => item.id === `offers-0|${layerId}|color`);
+      assert.ok(rule, `${size} ${layerId}`);
+      assert.equal(rule.props.fontWeight, 300, `${size} ${layerId}`);
+    }
+  }
+});
+
 test('preserves 728x90 banner assets and partial bluewave treatment', async () => {
   const document = await readCreativeDocument();
   const size = document.sizes['728x90'];

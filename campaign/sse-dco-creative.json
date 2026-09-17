@@ -4,6 +4,24 @@
     "id": "sse-dco",
     "name": "SSE DCO"
   },
+  "fonts": [
+    {
+      "id": "museo-700-normal",
+      "family": "Museo",
+      "weight": 700,
+      "style": "normal",
+      "asset": "fonts/Museo700-Regular.otf",
+      "cdnUrl": "https://s0.2mdn.net/creatives/assets/5627648/Museo700-Regular.otf"
+    },
+    {
+      "id": "museo-300-normal",
+      "family": "Museo",
+      "weight": 300,
+      "style": "normal",
+      "asset": "fonts/Museo300-Regular.otf",
+      "cdnUrl": "https://s0.2mdn.net/creatives/assets/5627648/Museo300-Regular.otf"
+    }
+  ],
   "clock": {
     "durationS": 15,
     "loop": true,
@@ -449,7 +467,7 @@
         "cta_text": "Switch today",
         "include_roundel_frame_bool": true,
         "roundel_text_text": "Saving you up to",
-        "roundel_value_text": "99",
+        "roundel_value_text": "999",
         "background_image_url_160x600": {
           "Url": ""
         },
@@ -2205,7 +2223,7 @@
           },
           "props": {
             "left": 8,
-            "top": 10,
+            "top": 8,
             "width": 217,
             "height": 33,
             "fontSize": 14,
@@ -2467,7 +2485,8 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(0, 41, 117)",
+            "fontWeight": 300
           },
           "editable": true
         },
@@ -2479,7 +2498,8 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(0, 41, 117)"
+            "color": "rgb(0, 41, 117)",
+            "fontWeight": 300
           },
           "editable": true
         },
@@ -3029,6 +3049,187 @@
           "fit": {
             "minFontSize": 16,
             "maxLines": 1
+          }
+        },
+        {
+          "targetId": "roundel-frame",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "values": {
+            "left": 175,
+            "top": -12,
+            "width": 75,
+            "height": 75,
+            "backgroundColor": "rgb(0, 41, 117)",
+            "borderRadius": "50%",
+            "overflow": "hidden"
+          },
+          "fit": {}
+        },
+        {
+          "targetId": "roundel-copy",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "values": {
+            "left": 176,
+            "top": 4,
+            "width": 73,
+            "height": 48,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 12,
+            "lineHeight": 1.05,
+            "color": "rgb(255, 255, 255)",
+            "textAlign": "center",
+            "whiteSpace": "normal",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3,
+            "disabled": false,
+            "wrap": true,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
+          }
+        },
+        {
+          "targetId": "roundel-value",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "values": {
+            "left": 130,
+            "top": 25,
+            "width": 50,
+            "height": 18,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 15,
+            "lineHeight": 1,
+            "color": "rgb(255, 255, 255)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap"
+          },
+          "fit": {
+            "minFontSize": 16,
+            "maxLines": 1,
+            "disabled": false,
+            "mode": "shrink",
+            "wrap": false,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
+          }
+        },
+        {
+          "targetId": "roundel-frame",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "values": {
+            "left": 175,
+            "top": -12,
+            "width": 75,
+            "height": 75,
+            "backgroundColor": "rgb(0, 41, 117)",
+            "borderRadius": "50%",
+            "overflow": "hidden"
+          },
+          "fit": {}
+        },
+        {
+          "targetId": "roundel-copy",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "values": {
+            "left": 181,
+            "top": 7,
+            "width": 65,
+            "height": 11,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 10,
+            "lineHeight": 1.05,
+            "color": "rgb(255, 255, 255)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "flex-end"
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 6,
+            "maxLines": 1,
+            "disabled": false,
+            "wrap": false,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
+          }
+        },
+        {
+          "targetId": "roundel-value",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "values": {
+            "left": 175,
+            "top": 19,
+            "width": 76,
+            "height": 30,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 28,
+            "lineHeight": 1,
+            "color": "rgb(255, 255, 255)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-start",
+            "justifyContent": "center"
+          },
+          "fit": {
+            "minFontSize": 16,
+            "maxLines": 1,
+            "disabled": false,
+            "mode": "shrink",
+            "wrap": false,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
           }
         }
       ]
@@ -4540,8 +4741,8 @@
             "backgroundColor": "rgb(0, 229, 165)",
             "width": 150,
             "height": 150,
-            "left": 326,
-            "top": -25
+            "left": 334,
+            "top": -24
           },
           "editable": true
         },
@@ -4680,10 +4881,10 @@
           },
           "props": {
             "left": 19,
-            "top": 12,
+            "top": 13,
             "fontSize": 22,
-            "width": 351,
-            "height": 57,
+            "width": 302,
+            "height": 56,
             "display": "flex",
             "alignItems": "center"
           },
@@ -4736,10 +4937,10 @@
           },
           "props": {
             "left": 18,
-            "width": 205,
+            "width": 232,
             "textAlign": "left",
             "justifyContent": "flex-start",
-            "top": 11,
+            "top": 12,
             "display": "flex",
             "alignItems": "center",
             "height": 58
@@ -4927,7 +5128,8 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(255, 255, 255)",
+            "fontWeight": 300
           },
           "editable": true
         },
@@ -4939,7 +5141,8 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(255, 255, 255)",
+            "fontWeight": 300
           },
           "editable": true
         },
@@ -5154,8 +5357,8 @@
           },
           "props": {
             "color": "rgb(0, 41, 117)",
-            "left": 306,
-            "top": 17,
+            "left": 348,
+            "top": 15,
             "width": 120,
             "height": 64,
             "fontSize": 24,
@@ -5205,7 +5408,7 @@
           "layerId": "headline-act4",
           "cssClass": "sse-headline",
           "props": {
-            "top": 17
+            "top": 14
           },
           "editable": true
         }
@@ -5475,6 +5678,53 @@
             "minFontSize": 24,
             "maxLines": 1
           }
+        },
+        {
+          "targetId": "terms-prices",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "values": {
+            "fontSize": 8
+          },
+          "fit": {
+            "maxLines": 1,
+            "anchor": {
+              "edge": "end",
+              "position": 85.45000076293945,
+              "referenceHeight": 90
+            }
+          }
+        },
+        {
+          "targetId": "roundel-frame",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "values": {
+            "width": 135,
+            "height": 135
+          },
+          "fit": {}
+        },
+        {
+          "targetId": "terms-prices",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "values": {
+            "fontSize": 8
+          },
+          "fit": {
+            "maxLines": 1,
+            "anchor": {
+              "edge": "end",
+              "position": 85.45000076293945,
+              "referenceHeight": 90
+            }
+          }
+        },
+        {
+          "targetId": "roundel-copy",
+          "scope": "cta-rect.frames-4.offers-3.roundel-copy-only.roundel-frame-on.tc-prices",
+          "values": {
+            "top": 12
+          },
+          "fit": {}
         }
       ]
     },
@@ -7258,7 +7508,8 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(255, 255, 255)",
+            "fontWeight": 300
           },
           "editable": true
         },
@@ -7270,7 +7521,8 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(255, 255, 255)",
+            "fontWeight": 300
           },
           "editable": true
         },
@@ -7328,8 +7580,8 @@
             "offer_count_num": 0
           },
           "props": {
-            "left": 206,
-            "top": 208,
+            "left": 209,
+            "top": 205,
             "width": 83,
             "height": 36
           },
@@ -7485,10 +7737,10 @@
           },
           "props": {
             "color": "rgb(0, 41, 117)",
-            "left": 51,
-            "top": 117,
-            "width": 94,
-            "height": 51,
+            "left": 43,
+            "top": 113,
+            "width": 90,
+            "height": 55,
             "fontSize": 14,
             "lineHeight": 1.05,
             "whiteSpace": "normal",
@@ -7772,6 +8024,14 @@
             "minFontSize": 32,
             "maxLines": 1
           }
+        },
+        {
+          "targetId": "roundel-copy",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "values": {
+            "fontSize": 24
+          },
+          "fit": {}
         }
       ]
     },
@@ -8021,6 +8281,18 @@
                   ],
                   "scale": 1,
                   "opacity": 1
+                }
+              ],
+              "geometryEdits": [
+                {
+                  "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+                  "offset": {
+                    "top": -11,
+                    "left": -7,
+                    "width": 10,
+                    "height": 12
+                  },
+                  "frames": {}
                 }
               ]
             }
@@ -9518,7 +9790,8 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(255, 255, 255)",
+            "fontWeight": 300
           },
           "editable": true
         },
@@ -9530,7 +9803,8 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(255, 255, 255)",
+            "fontWeight": 300
           },
           "editable": true
         },
@@ -9587,7 +9861,7 @@
           },
           "props": {
             "left": 30,
-            "top": 533,
+            "top": 531,
             "width": 100,
             "height": 36
           },
@@ -9743,10 +10017,10 @@
           },
           "props": {
             "color": "rgb(0, 41, 117)",
-            "left": 26,
-            "top": 262,
-            "width": 108,
-            "height": 57,
+            "left": 30,
+            "top": 250,
+            "width": 100,
+            "height": 80,
             "fontSize": 16,
             "lineHeight": 1.05,
             "whiteSpace": "normal",
@@ -10043,6 +10317,199 @@
           "fit": {
             "minFontSize": 18,
             "maxLines": 1
+          }
+        },
+        {
+          "targetId": "terms-prices",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "values": {
+            "fontSize": 6,
+            "width": 140
+          },
+          "fit": {
+            "maxLines": 2,
+            "minFontSize": 5
+          }
+        },
+        {
+          "targetId": "roundel-frame",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "values": {
+            "left": 24,
+            "top": 230,
+            "width": 115,
+            "height": 115,
+            "backgroundColor": "rgb(0, 229, 165)",
+            "borderRadius": "50%",
+            "overflow": "hidden"
+          },
+          "fit": {}
+        },
+        {
+          "targetId": "roundel-copy",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "values": {
+            "left": 31,
+            "top": 249,
+            "width": 100,
+            "height": 80,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 22,
+            "lineHeight": 1.05,
+            "color": "rgb(0, 41, 117)",
+            "textAlign": "center",
+            "whiteSpace": "normal",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3,
+            "disabled": false,
+            "wrap": true,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
+          }
+        },
+        {
+          "targetId": "roundel-value",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "values": {
+            "left": 13,
+            "top": 281,
+            "width": 136,
+            "height": 60,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 38,
+            "lineHeight": 1,
+            "color": "rgb(0, 41, 117)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap"
+          },
+          "fit": {
+            "minFontSize": 18,
+            "maxLines": 1,
+            "disabled": false,
+            "mode": "shrink",
+            "wrap": false,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
+          }
+        },
+        {
+          "targetId": "roundel-frame",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "values": {
+            "left": 21,
+            "top": 232,
+            "width": 115,
+            "height": 115,
+            "backgroundColor": "rgb(0, 229, 165)",
+            "borderRadius": "50%",
+            "overflow": "hidden"
+          },
+          "fit": {}
+        },
+        {
+          "targetId": "roundel-copy",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "values": {
+            "left": 28,
+            "top": 252,
+            "width": 100,
+            "height": 24,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 16,
+            "lineHeight": 1.05,
+            "color": "rgb(0, 41, 117)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "flex-end"
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 12,
+            "maxLines": 1,
+            "disabled": false,
+            "wrap": false,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
+          }
+        },
+        {
+          "targetId": "roundel-value",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "values": {
+            "left": 18,
+            "top": 278,
+            "width": 118,
+            "height": 59,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 42,
+            "lineHeight": 1,
+            "color": "rgb(0, 41, 117)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-start",
+            "justifyContent": "center"
+          },
+          "fit": {
+            "minFontSize": 18,
+            "maxLines": 1,
+            "disabled": false,
+            "mode": "shrink",
+            "wrap": false,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
           }
         }
       ]
@@ -11822,7 +12289,8 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(255, 255, 255)",
+            "fontWeight": 300
           },
           "editable": true
         },
@@ -11834,7 +12302,8 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(255, 255, 255)",
+            "fontWeight": 300
           },
           "editable": true
         },
@@ -11970,9 +12439,9 @@
           },
           "props": {
             "left": 5,
-            "top": 518,
-            "width": 72,
-            "height": 74,
+            "top": 515,
+            "width": 68,
+            "height": 77,
             "fontSize": 8,
             "visibility": "visible",
             "display": "flex",
@@ -12344,6 +12813,14 @@
           },
           "fit": {
             "minFontSize": 38
+          }
+        },
+        {
+          "targetId": "terms-prices",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "values": {},
+          "fit": {
+            "maxLines": 10
           }
         }
       ]
@@ -13932,7 +14409,7 @@
           },
           "props": {
             "top": 80,
-            "width": 461,
+            "width": 436,
             "height": 90,
             "left": 20,
             "fontSize": 32,
@@ -14124,7 +14601,8 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(255, 255, 255)",
+            "fontWeight": 300
           },
           "editable": true
         },
@@ -14136,7 +14614,8 @@
             "offer_count_num": 0
           },
           "props": {
-            "color": "rgb(255, 255, 255)"
+            "color": "rgb(255, 255, 255)",
+            "fontWeight": 300
           },
           "editable": true
         },
@@ -14660,8 +15139,266 @@
             "maxLines": 1,
             "mode": "shrink"
           }
+        },
+        {
+          "targetId": "roundel-frame",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "values": {
+            "left": 510,
+            "top": 32,
+            "width": 175,
+            "height": 175,
+            "backgroundColor": "rgb(0, 229, 165)",
+            "borderRadius": "50%",
+            "overflow": "hidden"
+          },
+          "fit": {}
+        },
+        {
+          "targetId": "roundel-copy",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "values": {
+            "left": 528,
+            "top": 80,
+            "width": 138,
+            "height": 79,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 28,
+            "lineHeight": 1.05,
+            "color": "rgb(0, 41, 117)",
+            "textAlign": "center",
+            "whiteSpace": "normal",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "center"
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3,
+            "disabled": false,
+            "wrap": true,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
+          }
+        },
+        {
+          "targetId": "roundel-value",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "values": {
+            "left": 352,
+            "top": 119,
+            "width": 216,
+            "height": 76,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 62,
+            "lineHeight": 1,
+            "color": "rgb(0, 41, 117)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap"
+          },
+          "fit": {
+            "minFontSize": 42,
+            "maxLines": 1,
+            "mode": "shrink",
+            "disabled": false,
+            "wrap": false,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
+          }
+        },
+        {
+          "targetId": "roundel-frame",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "values": {
+            "left": 510,
+            "top": 29,
+            "width": 175,
+            "height": 175,
+            "backgroundColor": "rgb(0, 229, 165)",
+            "borderRadius": "50%",
+            "overflow": "hidden"
+          },
+          "fit": {}
+        },
+        {
+          "targetId": "roundel-copy",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "values": {
+            "left": 518,
+            "top": 66,
+            "width": 158,
+            "height": 29,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 24,
+            "lineHeight": 1.05,
+            "color": "rgb(0, 41, 117)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "justifyContent": "center",
+            "display": "flex",
+            "alignItems": "flex-end"
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 1,
+            "disabled": false,
+            "wrap": false,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
+          }
+        },
+        {
+          "targetId": "roundel-value",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "values": {
+            "left": 516,
+            "top": 98,
+            "width": 159,
+            "height": 68,
+            "fontFamily": "Museo, Arial, sans-serif",
+            "fontWeight": 700,
+            "fontSize": 64,
+            "lineHeight": 1,
+            "color": "rgb(0, 41, 117)",
+            "textAlign": "center",
+            "whiteSpace": "nowrap",
+            "display": "flex",
+            "alignItems": "flex-start",
+            "justifyContent": "center"
+          },
+          "fit": {
+            "minFontSize": 42,
+            "maxLines": 1,
+            "mode": "shrink",
+            "disabled": false,
+            "wrap": false,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
+          }
+        },
+        {
+          "targetId": "roundel-copy",
+          "scope": "cta-rect.frames-4.offers-3.roundel-frame-on.roundel-split.tc-prices",
+          "values": {
+            "top": 75,
+            "width": 146,
+            "height": 29,
+            "left": 387
+          },
+          "fit": {}
         }
       ]
     }
-  }
+  },
+  "layoutRules": [
+    {
+      "id": "f71df2cb-b4b3-4a1d-b62c-628c3ad43bbe",
+      "name": "Layout area 1",
+      "type": "distribute",
+      "enabled": true,
+      "targets": [
+        {
+          "size": "160x600",
+          "targetId": "logo-act3"
+        },
+        {
+          "size": "160x600",
+          "targetId": "terms-prices"
+        }
+      ],
+      "areas": {
+        "160x600": {
+          "left": 9.290312498807907,
+          "top": 532.724609375,
+          "width": 139.78265503048897,
+          "height": 62.19062519073486
+        }
+      },
+      "axis": "y",
+      "single": "center",
+      "crossAlign": "center",
+      "minGap": 0,
+      "overflow": "authored",
+      "when": [
+        "offers-0",
+        "tc-solo",
+        "cta-rect",
+        "roundel-frame-on",
+        "navy-headlines"
+      ],
+      "layoutAnimations": [
+        {
+          "id": "9e61921c-f1d8-41a2-a31b-b07197340051",
+          "enabled": true,
+          "kind": "enter",
+          "subjectId": "terms-prices",
+          "clipId": "terms-prices-fade-offers-0",
+          "segmentIndex": 0,
+          "start": "with",
+          "duration": "follow",
+          "durationS": 0.5,
+          "startS": 13.5,
+          "endS": 15,
+          "hidden": false
+        },
+        {
+          "id": "07171864-fb9b-4a6e-a99d-f07cd95b48a9",
+          "enabled": true,
+          "kind": "exit",
+          "subjectId": "terms-prices",
+          "clipId": "terms-prices-fade-offers-0",
+          "segmentIndex": 0,
+          "start": "with",
+          "duration": "follow",
+          "durationS": 0.5
+        }
+      ],
+      "startingArrangement": "present"
+    }
+  ]
 }

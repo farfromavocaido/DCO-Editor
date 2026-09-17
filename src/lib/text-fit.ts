@@ -285,7 +285,7 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
     // Bottom-aligned flex boxes (align-items: flex-end) keep that alignment
     // when copy wraps: the last line stays on the baseline and earlier lines
     // stack upward. Do not flip to flex-start — that was fighting Text Y = Bottom.
-    if (rule.align === 'bottom' && size < fit.base) {
+    if (rule.align === 'bottom' && size < fit.base && !rule.anchor) {
       var delta = (fit.base - size) * fit.lineRatio;
       if (delta > 0.25) element.style.transform = 'translateY(' + delta.toFixed(2) + 'px)';
     }

@@ -1,6 +1,8 @@
 // @ts-nocheck
 'use client';
 
+import {renderedGeometry} from '@/lib/text-anchor';
+import {motionGeometry,motionKeyframeAvailable} from '@/lib/motion-geometry';
 import { componentLinkForTarget } from '@/lib/creative-components';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -222,16 +224,18 @@ export function PreviewPane() {
 
     const state = useEditorStore.getState();
     const dragTargetIds = state.selectionDragTargetIds();
+    if(state.motionEditMode==='keyframe'&&dragTargetIds.some(id=>{const owner=motionGeometry(state.creativeDocument,size,id,activeScopes,state.percent);return ['left','top'].some(field=>owner?.fields.includes(field)&&!motionKeyframeAvailable(owner,field,state.percent));})){state.setStatus('Select a position keyframe in Motion before dragging','warn');return;}
     if(state.layoutRuleBlocksEdit(dragTargetIds,['left','top']))return;
     const dragTargets = dragTargetIds
       .map((targetId) => {
         const target = findCreativeTarget(state.creativeDocument, size, targetId, activeScopes);
         if (!target) return null;
+        const motion=motionGeometry(state.creativeDocument,size,targetId,activeScopes,state.percent);
         return {
           targetId,
           target,
-          startLeft: numberValue(target.values?.left, 0),
-          startTop: numberValue(target.values?.top, 0),
+          startLeft: numberValue(motion?.values.left ?? target.values?.left, 0),
+          startTop: numberValue(motion?.values.top ?? (target.fit?.anchor?renderedGeometry(targetId)?.top:undefined) ?? target.values?.top, 0),
           isNested: target.kind === 'nested',
           parentLayerId: target.parentLayerId || '',
           originLeft: numberValue(target.wrapperBounds?.left, 0),
@@ -258,7 +262,7 @@ export function PreviewPane() {
       let deltaLeft = Math.round(dx);
       let deltaTop = Math.round(dy);
 
-      if (primaryBounds && sizeCreative?.canvas && dragTargets.length === 1) {
+      if (primaryBounds && sizeCreative?.canvas && dragTargets.length === 1 && !motionGeometry(state.creativeDocument,size,primary.targetId,activeScopes,state.percent)) {
         const item = dragTargets[0];
         const parentTarget = item.isNested
           ? findCreativeTarget(document, size, item.parentLayerId, activeScopes)
@@ -504,7 +508,7 @@ export function PreviewPane() {
         for (const snapshot of scaleSnapshots) {
           for (const write of scaledFieldWritesForSnapshot(snapshot, result.scale, anchor)) {
             rememberWrite(snapshot.targetId, write.field, write.value);
-            updateTargetValue(snapshot.targetId, write.field, write.value, { record: false });
+            updateTargetValue(snapshot.targetId, write.field, write.value, { record: false, preserveAnchor:true });
           }
         }
         return;
@@ -515,7 +519,7 @@ export function PreviewPane() {
         const field = write.field;
         last[field] = write.value;
         rememberWrite(targetId, field, write.value);
-        updateTargetValue(targetId, field, write.value, { record: false });
+        updateTargetValue(targetId, field, write.value, { record: false, preserveAnchor:true });
       }
     };
 

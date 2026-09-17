@@ -1,4 +1,5 @@
 // @ts-nocheck
+import {validatePositionControls} from '@/lib/position-validation';
 import {validateLayoutRules} from '@/lib/layout-rules';
 import {validateCampaignFonts} from '@/lib/campaign-fonts';
 import fs from 'node:fs/promises';
@@ -49,6 +50,7 @@ export const validateCreativeDocument = (document: CreativeDocument) => {
     }
   }
   validateCampaignVariantModel(document);
+  validatePositionControls(document);
   validateLayoutRules(document);
   validateCampaignFonts(document);
   materializeCreativeOwnership(document);

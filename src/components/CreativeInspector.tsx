@@ -1,6 +1,9 @@
 // @ts-nocheck
 'use client';
 
+import {motionGeometry,editMotionGeometry} from '@/lib/motion-geometry';
+import {TextAnchorControls} from './TextAnchorControls';
+import {captureTextAnchor,renderedGeometry} from '@/lib/text-anchor';
 import {FontSelector} from './FontManager';
 import {SelectedLayoutRules} from './SelectedLayoutRules';
 import {LayoutRuleSourceBadge} from './LayoutRulesPanel';
@@ -14,7 +17,7 @@ import { CreativeOwnershipControls } from './CreativeOwnershipControls';
 import { useEffect, useMemo, useState } from 'react';
 
 import { animationFamilyForLayer, animationIntentDefinitions, timelineSpanForClip } from '@/lib/animation-intents';
-import { compileAnimationClips } from '@/lib/creative-compiler';
+import { compileAnimationClips,resolveTimeRef } from '@/lib/creative-compiler';
 import { componentLinkForTarget } from '@/lib/creative-components';
 import { ComponentLinkControls } from './ComponentLinkControls';
 import { currentSizeCreative, isHeadlineLayer, findCreativeTarget } from '@/lib/creative-model';
@@ -39,6 +42,7 @@ const fieldSourceLabel = (source) => {
   return 'Default';
 };
 
+const displayedGeometry = value => typeof value==='number' ? Number(value.toFixed(2)) : value;
 const boxFields = ['left', 'top', 'width', 'height'];
 const typeFields = ['fontSize', 'lineHeight', 'letterSpacing'];
 const reusableStyleFields = [
@@ -149,6 +153,8 @@ export function CreativeInspector() {
   const selectedTargetIds = useEditorStore((s) => s.selectedTargetIds);
   const isolationPath = useEditorStore((s) => s.isolationPath);
   const fitResults = useEditorStore((s) => s.fitResults);
+  const motionEditMode=useEditorStore(s=>s.motionEditMode||'path');
+  const playhead=useEditorStore(s=>s.percent);
   const layoutDiagnostics=useEditorStore(s=>s.layoutDiagnostics);
   const selectLayoutRule=useEditorStore(s=>s.selectLayoutRule);
   const fitDiagnostics = useEditorStore((s) => s.fitDiagnostics);
@@ -269,7 +275,7 @@ export function CreativeInspector() {
         <div className="inspector-scroll">
           {selectedTarget.kind === 'component' && <div className="inspector-grid">
             {boxFields.map(field => <FieldControl key={field} label={({left:'X',top:'Y',width:'Width',height:'Height'})[field]} type="number"
-              value={selectedTarget.values?.[field] ?? ''} onChange={value => editComponentBounds(field, value)} />)}
+              value={motionOwner?.values[field] ?? (selectedTarget.fit?.anchor?actualGeometry?.[field]:undefined) ?? selectedTarget.values?.[field] ?? ''} onChange={value => editComponentBounds(field, value)} />)}
           </div>}
           <SelectedLayoutRules key={selectedTarget.id} document={document} size={size} targetId={selectedTarget.id} targetIds={selectedTarget.kind==='component'?selectedTarget.parts.map(p=>p.targetId):[selectedTarget.id]} scopes={activeScopes}/>
           <ComponentLinkControls document={document} size={size} targetId={selectedTarget.id} scopes={activeScopes} />
@@ -285,6 +291,8 @@ export function CreativeInspector() {
     );
   }
 
+  const actualGeometry=renderedGeometry(selectedTarget.id);
+  const motionOwner=motionGeometry(document,size,selectedTarget.id,activeScopes,playhead);
   const isGroupedSelection = selectedTarget.kind === 'group' || selectedTarget.kind === 'multi';
   const layoutOwner=field=>{
     const rule=(document.layoutRules||[]).find(rule=>rule.enabled&&rule.targets.some(member=>member.size===size&&member.targetId===selectedTarget.id)&&((rule.type==='conditional'&&Object.hasOwn({...rule.values,...rule.otherwise},field))||(rule.type==='distribute'&&rule.crossAlign&&rule.crossAlign!=='keep'&&['left','top'].includes(field))||(rule.type!=='conditional'&&(rule.axis==='x'?'left':'top')===field))&&layoutDiagnostics.some(d=>d.id===rule.id&&d.size===size&&d.targetId===selectedTarget.id&&d.status==='active'));
@@ -308,17 +316,20 @@ export function CreativeInspector() {
     && selectedLayer.id !== 'cta';
   const activeFit = selectedTarget.fit || {};
   const effectiveFitRule = effectiveTextFitForTarget(document, size, selectedTarget.id, activeScopes);
+  const heightManaged=canTextFit&&!motionOwner?.fields.includes('height')&&(effectiveFitRule.frame==='auto'||!effectiveFitRule.frame&&effectiveFitRule.wrap&&Number(effectiveFitRule.maxLines)>0&&actualGeometry&&actualGeometry.height<Number(selectedTarget.values.height)-.5);
+  const motionFrameEditable=field=>motionOwner?.clips.some(c=>c.keyframes?.some(k=>k[field]!==undefined&&Math.abs(resolveTimeRef(k.at,activeBeats,document.clock.durationS)-playhead)<.01));
   const editVersion = (targetId, domain, patch) => {
     if (isGroupedSelection) {
       for (const [field,value] of Object.entries(patch)) (domain === 'fit' ? updateGroupedTargetFit : updateGroupedTargetValue)(targetId,field,value);
       return;
     }
     const state = useEditorStore.getState();
-    const next = editOwnershipVersion(state.creativeDocument,size,targetId,activeScopes,domain,patch);
+    let next=state.creativeDocument;
+    for(const [field,value] of Object.entries(patch)){try{if(domain==='values'&&field==='top'&&selectedTarget.fit?.anchor){const current=renderedGeometry(targetId)?.top??selectedTarget.values.top;next=editOwnershipVersion(next,size,targetId,activeScopes,'fit',{anchor:{...selectedTarget.fit.anchor,position:selectedTarget.fit.anchor.position+Number(value)-current}});}next=(domain==='values'?editMotionGeometry(next,size,targetId,activeScopes,state.percent,field,value,state.motionEditMode||'path'):null)||editOwnershipVersion(next,size,targetId,activeScopes,domain,{[field]:value});}catch(error){state.setStatus(error.message,'warn');return;}}
     state.applyCreativeOwnershipDocument(next, 'Updated this version');
   };
   const updateTargetValue = (targetId,field,value) => editVersion(targetId,'values',{[field]:value});
-  const applyFitUpdate = (field, value) => editVersion(selectedTarget.id,'fit',{[field]:value});
+  const applyFitUpdate = (field,value)=>{const patch={[field]:value};if(['maxLines','frame','wrap'].includes(field)&&!selectedTarget.fit?.anchor&&!layoutOwner('top')&&(selectedTarget.values?.alignItems==='flex-end'||selectedTarget.fit?.align==='bottom')){try{patch.anchor=captureTextAnchor(selectedTarget.id,'end');}catch(error){if(!error.message.includes('non-empty')){useEditorStore.getState().setStatus(error.message,'warn');return;}}}editVersion(selectedTarget.id,'fit',patch);};
   const fittedFontSize = fitResults.get(selectedTarget.id) ?? (activeCssClass ? fitResults.get(activeCssClass) : undefined);
   const fittedTracking = fitTrackings?.has?.(selectedTarget.id) ? fitTrackings.get(selectedTarget.id) : activeCssClass && fitTrackings?.has?.(activeCssClass)
     ? fitTrackings.get(activeCssClass)
@@ -375,10 +386,10 @@ export function CreativeInspector() {
             {boxFields.map((field) => (
               <div key={field}><FieldControl
                 label={({left:'X',top:'Y',width:'Width',height:'Height'})[field]}
-                type="text" disabled={Boolean(layoutOwner(field))}
-                value={layoutOwner(field)?.diagnostic?.after?.[field] ?? selectedTarget.values?.[field] ?? ''}
+                type="text" disabled={Boolean(layoutOwner(field))||(field==='height'&&heightManaged)||(motionEditMode==='keyframe'&&motionOwner?.fields.includes(field)&&!motionFrameEditable(field))}
+                value={displayedGeometry((actualGeometry?.layoutMotion?actualGeometry[field]:undefined) ?? (field==='height'&&heightManaged?actualGeometry?.height:undefined) ?? layoutOwner(field)?.diagnostic?.after?.[field] ?? motionOwner?.values[field] ?? (selectedTarget.fit?.anchor?actualGeometry?.[field]:undefined) ?? selectedTarget.values?.[field] ?? '')}
                 onChange={(value) => updateTargetValue(selectedTarget.id, field, value)}
-              />{layoutOwner(field)&&<LayoutRuleSourceBadge name={layoutOwner(field).rule.name} active linked={layoutOwner(field).rule.targets.length>1} onClick={()=>showRule(layoutOwner(field).rule.id)}/>}</div>
+              />{layoutOwner(field)&&<LayoutRuleSourceBadge name={layoutOwner(field).rule.name} active linked={layoutOwner(field).rule.targets.length>1} onClick={()=>showRule(layoutOwner(field).rule.id)}/>} {field==='height'&&heightManaged&&<span className="inspector-note" title="Choose Fixed frame in Text frame to edit height directly">Height follows text fitting</span>}{field==='top'&&selectedTarget.fit?.anchor&&!layoutOwner(field)&&<span className="inspector-note" title="Drag or edit Y to move the pinned edge; changing line count keeps it fixed">Pinned {({end:'bottom',start:'top',center:'centre'})[selectedTarget.fit.anchor.edge]}</span>}</div>
             ))}
           </div>
           ) : (
@@ -386,6 +397,7 @@ export function CreativeInspector() {
           )}
         </InspectorSection>
 
+        {motionOwner?.fields.some(field=>!layoutOwner(field))&&<div className="motion-position-source"><span title={motionOwner.clips.map(c=>c.label||c.id).join(', ')}>{motionOwner.fields.filter(field=>!layoutOwner(field)).map(field=>({left:'X',top:'Y',width:'Width',height:'Height'})[field]).join(' / ')} controlled by animation</span><select aria-label="Position editing mode" value={motionEditMode} onChange={e=>useEditorStore.setState({motionEditMode:e.target.value})}><option value="path">Move whole path · this version</option><option value="keyframe">Edit selected position keyframe</option></select></div>}
         {!isGroupedSelection ? <CreativeOwnershipControls key={`${size}/${selectedTarget.id}/${activeScopes.join(".")}`} document={document} size={size} target={selectedTarget} scopes={activeScopes} /> : null}
 
         <SelectedLayoutRules key={selectedTarget.id} document={document} size={size} targetId={selectedTarget.id} targetIds={isGroupedSelection?selectedTarget.members:[selectedTarget.id]} scopes={activeScopes}/>
@@ -523,6 +535,7 @@ export function CreativeInspector() {
                 />
               ) : null}
             </div>
+            {canTextFit&&<TextAnchorControls controlledBy={layoutOwner('top')?.rule.name} target={selectedTarget} canvasHeight={sizeCreative.canvas.height} onChange={applyFitUpdate}/>}
             {canTextFit ? <>
               <FieldControl
                 label="Minimum size (% of design)"

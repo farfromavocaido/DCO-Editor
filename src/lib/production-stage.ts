@@ -15,6 +15,7 @@ export function productionTargetId(id: string, child?: string) {
 
 export function seekProductionAnimations(doc: Document, percent: number, durationSeconds: number) {
   const milliseconds = Math.max(0, Math.min(100, percent)) * durationSeconds * 10;
+  if(doc.defaultView)(doc.defaultView as any).__DCO_SEEK_TIME__=milliseconds;
   for (const animation of doc.getAnimations()) {
     animation.pause();
     animation.currentTime = milliseconds;
@@ -119,6 +120,7 @@ export function withProductionRestPose<T>(stage: HTMLElement, capture: () => T):
     currentTime: animation.currentTime,
     playState: animation.playState,
   }));
+  doc.getAnimations().filter(animation=>String(animation.id||'').startsWith('dco-layout-')).forEach(animation=>{animation.pause();animation.currentTime=0;});
   const hiddenStyle = doc.querySelector<HTMLStyleElement>('style[data-editor-hidden-layers]');
   const hiddenRules = hiddenStyle?.textContent || '';
   if (hiddenStyle) hiddenStyle.textContent = '';
@@ -136,7 +138,7 @@ export function withProductionRestPose<T>(stage: HTMLElement, capture: () => T):
         && item.name === (animation as CSSAnimation).animationName);
       if (!previous) continue;
       animation.currentTime = previous.currentTime;
-      if (previous.playState === 'paused') animation.pause();
+      if (previous.playState === 'paused') animation.pause();else if(previous.playState==='running')animation.play();
     }
   }
 }

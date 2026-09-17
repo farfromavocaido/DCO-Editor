@@ -7,6 +7,7 @@ import { EditorIcon } from '@/components/EditorIcon';
 import { animationFamilyForLayer, timelineSpanForClip } from '@/lib/animation-intents';
 import { compileAnimationClips } from '@/lib/creative-compiler';
 import { currentSizeCreative } from '@/lib/creative-model';
+import {transitionCases} from '@/lib/layout-transitions';
 import { clipsForProfile } from '@/lib/headline-motion';
 import { activeOfferMemberIds } from '@/lib/offer-interaction-model';
 import {
@@ -519,6 +520,15 @@ export function TimelinePanel() {
             <div className="timeline-playhead" style={{ left: `${percent}%` }} />
           </div>
         </div>
+        {(document?.layoutRules||[]).filter(rule=>rule.type==='distribute'&&rule.enabled&&rule.transition&&rule.transition.enabled!==false&&rule.targets.some(t=>t.size===size)&&(rule.when||[]).every(s=>activeScopes.includes(s))).map(rule=>{
+          let timing,error='';try{timing=transitionCases(document,size,rule).find(t=>t.scopes.every(s=>activeScopes.includes(s)));}catch(cause){error=cause.message;}
+          if(!timing&&!error)return null;
+          const open=(at)=>{const target=rule.targets.find(t=>t.size===size&&t.targetId!==rule.transition.subjectId)||rule.targets[0];useEditorStore.getState().setCanvasSelection(target.targetId,[target.targetId]);useEditorStore.setState({layoutRulesOpen:true,selectedLayoutRuleId:rule.id});setPercent(at);};
+          return <div key={rule.id} className="timeline-row layout-motion-row"><div className="timeline-row-label"><span className="timeline-row-name">↳ {rule.name}</span></div><div className="timeline-track">
+            {error?<button className="timeline-layout-motion is-error" style={{left:0,width:'100%'}} title={error} onClick={()=>open(percent)}>Check layout timing</button>:<><button className="timeline-layout-motion" aria-label={`${rule.name}: layout move`} style={{left:`${timing.start}%`,width:`${Math.max(.4,timing.end-timing.start)}%`}} title={`Layout move ${(timing.start*durationS/100).toFixed(2)}–${(timing.end*durationS/100).toFixed(2)}s; follows the selected exit`} onClick={()=>open((timing.start+timing.end)/2)}>Move</button>
+            {timing.returnMode!=='none'&&<button className="timeline-layout-motion" aria-label={`${rule.name}: layout return`} style={{left:`${Math.min(99.6,timing.returnStart)}%`,width:`${Math.max(.4,timing.returnEnd-timing.returnStart)}%`}} title={timing.returnMode==='hidden'?'Reset while hidden':'Return to the opening layout'} onClick={()=>open(timing.returnStart)}>{timing.returnMode==='hidden'?'Reset':'Return'}</button>}</>}
+          </div></div>;
+        })}
         {entries.map((entry) => {
           if (entry.kind === 'offers-group') {
             return (

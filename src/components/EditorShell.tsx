@@ -88,12 +88,15 @@ export function EditorShell() {
         || active.isContentEditable
       );
       const modifier = event.metaKey || event.ctrlKey;
+      if (event.defaultPrevented || event.isComposing) return;
       if (modifier && event.key.toLowerCase() === 'z') {
+        if(isTextInput)return;
         event.preventDefault();
         if (event.shiftKey) redo();
         else undo();
         return;
       }
+      if(event.key==='Enter'&&isTextInput&&active.tagName==='INPUT'&&!active.closest('form')){event.preventDefault();(active as HTMLInputElement).blur();return;}
       if (!isArrow) return;
       if (isTextInput) return;
       if (!selectedTargetId && !selectedLayerId) return;
@@ -108,7 +111,7 @@ export function EditorShell() {
   }, [nudgeSelectedTarget, redo, selectedLayerId, selectedTargetId, undo]);
 
   return (
-    <main className="app-shell">
+    <main className="app-shell" onPointerDownCapture={event=>{const active=document.activeElement as HTMLElement|null,target=event.target as HTMLElement;if(active&&active.matches('input,textarea,select,[contenteditable=true]')&&active!==target&&!active.contains(target)&&!target.closest('label')?.contains(active))active.blur();}} onFocusCapture={event=>{const el=event.target as HTMLElement;if(el.matches('input:not([type=range]):not([type=checkbox]):not([type=radio]),textarea,[contenteditable=true]'))useEditorStore.getState().beginFieldEdit((el as HTMLInputElement).value ?? el.textContent);}} onBlurCapture={event=>useEditorStore.getState().finishFieldEdit((event.target as HTMLInputElement).value ?? event.target.textContent)}>
       <TopBar />
       <HtmlCodeInspector />
       <section

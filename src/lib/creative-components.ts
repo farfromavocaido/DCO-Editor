@@ -139,6 +139,7 @@ export const transferCreativeComponent = (document,{componentId,sourceSize,sourc
           maxFontSize:original.fit?.maxFontSize??0,minFontSizeRatio:effective.minFontSizeRatio??0,tracking:structuredClone(effective.tracking||{minEm:0}),
           align:effective.align||'normal',sharedGroup:effective.sharedGroup||'',frame:effective.frame||'',overflow:effective.overflow||'clip',
         };
+        if(fit.anchor)fit.anchor={...fit.anchor,position:top+(fit.anchor.position-sourceBox.top)*sy,referenceHeight:document.sizes[destination.size].canvas.height};
         for(const key of ['minFontSize','maxFontSize'])if(fit[key]!==undefined)fit[key]=scaledPixel(fit[key],uniform);
         localWrite(next,destination.size,destinationPart.targetId,to,values,['shape','image','gradient','blur','group'].includes(original.kind)?{}:fit);
       }

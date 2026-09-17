@@ -1,6 +1,8 @@
 // @ts-nocheck
 'use client';
 
+import {renderedGeometry} from '@/lib/text-anchor';
+import {motionGeometry,editMotionGeometry} from '@/lib/motion-geometry';
 import { campaignScopes, campaignVariantModel, campaignRowForScopes, resolveCampaignRow, isGenericCampaign } from '@/lib/campaign-variants';
 
 import { create } from 'zustand';
@@ -495,7 +497,15 @@ export const useEditorStore = create<any>((set, get) => ({
     return clips.find((clip) => clip.id === state.selectedClipId) || clips[0] || null;
   },
 
+  beginFieldEdit: (initialValue) => {const s=get();if(!s.fieldEdit)set({fieldEdit:{campaignId:s.activeCampaignId,size:s.size,initialValue,creativeDocument:s.creativeDocument,feedDraft:s.feedDraft,controls:Object.fromEntries(['offerCount','tcMode','ctaShape','includeRoundelFrame','frameCount','roundelMode','navyHeadlines'].map(key=>[key,s[key]])),creativeDirty:s.creativeDirty,saveFeedDisabled:s.saveFeedDisabled}});},
+  finishFieldEdit: (finalValue) => {
+    const s=get(),before=s.fieldEdit;if(!before)return;set({fieldEdit:null});if(before.campaignId!==s.activeCampaignId||before.size!==s.size)return;
+    if(before.initialValue!==undefined&&finalValue===before.initialValue){set({creativeDocument:before.creativeDocument,feedDraft:before.feedDraft,...before.controls,creativeDirty:before.creativeDirty,saveFeedDisabled:before.saveFeedDisabled});return;}
+    const after={creativeDocument:s.creativeDocument,feedDraft:s.feedDraft,controls:Object.fromEntries(Object.keys(before.controls).map(key=>[key,s[key]]))};
+    if(JSON.stringify(before.creativeDocument)!==JSON.stringify(after.creativeDocument)||JSON.stringify(before.feedDraft.rows)!==JSON.stringify(after.feedDraft.rows))get().pushHistory([{kind:'fieldEdit',before,after}]);
+  },
   pushHistory: (changes) => {
+    if(get().fieldEdit)return;
     const realChanges = changes.filter((change) => change.before !== change.after);
     if (!realChanges.length) return;
     const state = get();
@@ -557,6 +567,7 @@ export const useEditorStore = create<any>((set, get) => ({
   },
 
   applyHistoryChange: (change, value) => {
+    if(change.kind==='fieldEdit'){set({creativeDocument:value.creativeDocument,...value.controls,creativeDirty:true,feedDraft:{...value.feedDraft,dirty:true},saveFeedDisabled:false});return;}
     if (change.kind === 'creativeCanvasGroup') {
       set({ ...value, selectedTargetIds: [...value.selectedTargetIds], isolationPath: [...value.isolationPath], creativeDirty: true, lastSelectionClickKey: '' });
       return;
@@ -1116,14 +1127,19 @@ export const useEditorStore = create<any>((set, get) => ({
     get().pushHistory([{ kind: 'creativeLayerMetadata', size: state.size, layerId, field, before: previous, after: value }]);
   },
 
-  applyCreativeTargetValue: (size, targetId, activeScopes, field, value) => {
+  applyCreativeTargetValue: (size, targetId, activeScopes, field, value, options={}) => {
     const state = get();
     if (!state.creativeDocument) return;
+    let motion;try{motion=editMotionGeometry(state.creativeDocument,size,targetId,activeScopes,state.percent,field,value,state.motionEditMode||'path');}catch(error){get().setStatus(error.message,'warn');return;}
+    if(motion){set({creativeDocument:motion,creativeDirty:true});return;}
     const selectedGroup = findCanvasGroup(state.creativeDocument, size, state.selectedTargetId);
     const selectedComponent = findCreativeComponent(state.creativeDocument, size, state.selectedTargetId);
+    const currentTarget=findCreativeTarget(state.creativeDocument,size,targetId,activeScopes);
+    let source=state.creativeDocument;
+    if(field==='top'&&currentTarget?.fit?.anchor&&!options.preserveAnchor){const actual=renderedGeometry(targetId)?.top??currentTarget.values.top;source=setCreativeOwnershipField(source,size,targetId,activeScopes,'fit','anchor',{...currentTarget.fit.anchor,position:currentTarget.fit.anchor.position+Number(value)-actual});}
     const next = isGenericCampaign(state.creativeDocument) || selectedGroup?.members.includes(targetId) || selectedComponent?.parts.some((part) => part.targetId === targetId)
-      ? setCreativeOwnershipField(state.creativeDocument, size, targetId, activeScopes, 'values', field, value, 'local')
-      : updateCreativeTargetDocumentValue(state.creativeDocument, size, targetId, activeScopes, field, value);
+      ? setCreativeOwnershipField(source, size, targetId, activeScopes, 'values', field, value, 'local')
+      : updateCreativeTargetDocumentValue(source, size, targetId, activeScopes, field, value);
     set({ creativeDocument: next, creativeDirty: true });
     get().setStatus('Unsaved creative changes', 'warn');
   },
@@ -1135,7 +1151,7 @@ export const useEditorStore = create<any>((set, get) => ({
     get().selectLayoutRule(owner.id);get().setStatus(`“${owner.name}” controls this placement. Edit the rule, or disable or freeze it to place manually.`,'warn');return true;
   },
 
-  updateCreativeTargetValue: (targetId, field, value, { record = true, before = undefined } = {}) => {
+  updateCreativeTargetValue: (targetId, field, value, { record = true, before = undefined, preserveAnchor=false } = {}) => {
     if(get().layoutRuleBlocksEdit([targetId],[field]))return;
     const state = get();
     const size = state.size;
@@ -1144,7 +1160,7 @@ export const useEditorStore = create<any>((set, get) => ({
     if (!target) return;
     const nextValue = value === '' ? '' : typeof value === 'boolean' ? value : Number.isFinite(Number(value)) ? Number(value) : value;
     const previous = before ?? target.values?.[field];
-    get().applyCreativeTargetValue(size, targetId, activeScopes, field, nextValue);
+    get().applyCreativeTargetValue(size, targetId, activeScopes, field, nextValue,{preserveAnchor});
     if (record) {
       get().pushHistory([{ kind: 'creativeDocument', before: state.creativeDocument, after: get().creativeDocument }]);
     }
@@ -1248,14 +1264,14 @@ export const useEditorStore = create<any>((set, get) => ({
       const target = findCreativeTarget(state.creativeDocument, state.size, targetId, activeScopes);
       if (!target) continue;
       if (dx) {
-        const before = Number(target.values?.left || 0);
+        const before = Number(motionGeometry(state.creativeDocument,state.size,targetId,activeScopes,state.percent)?.values.left ?? target.values?.left ?? 0);
         const after = before + dx;
         get().applyCreativeTargetValue(state.size, targetId, activeScopes, 'left', after);
         changes.push({ kind: 'creativeTarget', size: state.size, targetId, activeScopes, field: 'left', before, after });
       }
       if (dy) {
         const fresh = findCreativeTarget(get().creativeDocument, state.size, targetId, activeScopes);
-        const before = Number(fresh?.values?.top || target.values?.top || 0);
+        const before = Number(motionGeometry(get().creativeDocument,state.size,targetId,activeScopes,state.percent)?.values.top ?? fresh?.values?.top ?? target.values?.top ?? 0);
         const after = before + dy;
         get().applyCreativeTargetValue(state.size, targetId, activeScopes, 'top', after);
         changes.push({ kind: 'creativeTarget', size: state.size, targetId, activeScopes, field: 'top', before, after });
@@ -1308,7 +1324,7 @@ export const useEditorStore = create<any>((set, get) => ({
         const target = findCreativeTarget(state.creativeDocument, state.size, targetId, activeScopes);
         if (!target) continue;
         if (dx) {
-          const before = Number(target.values?.left || 0);
+          const before = Number(motionGeometry(state.creativeDocument,state.size,targetId,activeScopes,state.percent)?.values.left ?? target.values?.left ?? 0);
           const after = before + dx;
           get().applyCreativeTargetValue(state.size, targetId, activeScopes, 'left', after);
           changes.push({
@@ -1323,7 +1339,7 @@ export const useEditorStore = create<any>((set, get) => ({
         }
         if (dy) {
           const fresh = findCreativeTarget(get().creativeDocument, state.size, targetId, activeScopes);
-          const before = Number(fresh?.values?.top || target.values?.top || 0);
+          const before = Number(motionGeometry(get().creativeDocument,state.size,targetId,activeScopes,state.percent)?.values.top ?? fresh?.values?.top ?? target.values?.top ?? 0);
           const after = before + dy;
           get().applyCreativeTargetValue(state.size, targetId, activeScopes, 'top', after);
           changes.push({
@@ -1440,7 +1456,7 @@ export const useEditorStore = create<any>((set, get) => ({
       const target = findCreativeTarget(state.creativeDocument, state.size, update.targetId, activeScopes);
       if (!target) continue;
       if (axis === 'h') {
-        const before = Number(target.values?.left || 0);
+        const before = Number(motionGeometry(state.creativeDocument,state.size,targetId,activeScopes,state.percent)?.values.left ?? target.values?.left ?? 0);
         get().applyCreativeTargetValue(state.size, update.targetId, activeScopes, 'left', update.left);
         changes.push({
           kind: 'creativeTarget',

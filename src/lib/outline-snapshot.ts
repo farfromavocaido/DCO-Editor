@@ -54,6 +54,7 @@ export type PositionSnapshot = {
 
 export type SizePresentationSnapshot = {
   size: string;
+  layoutTransitions?: any[];
   texts: Record<string, TextPresentationSnapshot>;
   positions: Record<string, PositionSnapshot>;
   /** Targets excluded by CSS visibility/display, independent of animation opacity. */
@@ -479,5 +480,6 @@ export const capturePresentationSnapshot = (
     if (sub) recordOfferTextGeometry(sub, `${normalizedSlot}::offer-subline`, false);
   });
 
-  return { size, texts, positions, hiddenTargets: [...hiddenTargets] };
+  const view=(stage as HTMLElement).ownerDocument.defaultView as any;
+  return { size, texts, positions, hiddenTargets: [...hiddenTargets], ...(view?.__DCO_LAYOUT_TRANSITIONS__?.length?{layoutTransitions:structuredClone(view.__DCO_LAYOUT_TRANSITIONS__)}:{}) };
 };

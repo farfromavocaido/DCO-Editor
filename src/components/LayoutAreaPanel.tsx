@@ -1,5 +1,6 @@
 // @ts-nocheck
 'use client';
+import {LayoutTransitionControls} from './LayoutTransitionControls';
 import {useEffect,useState} from 'react';
 import {useEditorStore,selectPreviewFeedRow} from '@/store/editor-store';
 import {getProductionStage,withProductionRestPose,unionProductionBounds,seekProductionAnimations} from '@/lib/production-stage';
@@ -63,6 +64,7 @@ export function LayoutAreaPanel({document,size,targetIds,scopes,diagnostics,onCh
  {targetIds.length>1&&timing&&targetIds.every(id=>timing.ids.includes(id))&&<span className={styles.note} title="These items do not appear together in the animation. Layout uses their resting artwork so spacing does not jump during fades. The timeline is showing the first item.">Different animation times ⓘ</span>}
  {rules.map(rule=><article key={rule.id} className={styles.rule}>
   <div className={styles.ruleHeader}><button className={styles.ruleTitle} onClick={()=>{revealLayoutTargets(rule.targets.filter(t=>t.size===size).map(t=>t.targetId));onSelectRule?.(rule.id);}}>{rule.name}</button><span className={styles.status}>{!rule.enabled?'Disabled':diagnostics.some(d=>d.id===rule.id&&d.status==='active')?'Automatic':'Inactive'}</span></div>
+  {rule.transition&&<span className={styles.note}>{rule.transition.enabled===false?'Exit transition disabled':'Linked to an exit animation'}</span>}
   <span>{rule.targets.filter(t=>t.size===size).map(t=>name(t.targetId)).join(' + ')}</span>
   <span className={styles.note} title={scopeLabel(rule.when)}>{rule.when?.length?'Limited to chosen campaign settings':'All versions in this size'}</span><span className={styles.note}>{rule.axis==='y'?'Spread top to bottom':'Spread left to right'} · One item: {rule.single==='center'?'centre':rule.single==='start'?'start':'end'}</span>
   {diagnostics.filter(d=>d.id===rule.id&&d.message).slice(0,1).map(d=><p className={styles.error} key={d.targetId}>{d.message}</p>)}
@@ -80,6 +82,7 @@ export function LayoutAreaPanel({document,size,targetIds,scopes,diagnostics,onCh
  <span className={styles.note} title="Only visible ink is distributed. Empty text and state-hidden elements leave the layout. Animation fades do not alter it.">Visible artwork only · skip empty items</span>
  <label className={styles.field}>When one item remains<select aria-label="Single item placement" value={draft.single} onChange={e=>patch({single:e.target.value})}><option value="center">Centre {draft.axis==='y'?'vertically':'horizontally'}</option><option value="start">At the {draft.axis==='y'?'top':'left'}</option><option value="end">At the {draft.axis==='y'?'bottom':'right'}</option></select></label>
  <details><summary title="Drag the purple outline or its corner on the canvas. The area stays this size when content disappears.">Layout area</summary><div className={styles.grid}>{['left','top','width','height'].map(key=><label className={styles.field} key={key}>{({left:'X',top:'Y',width:'Width',height:'Height'})[key]}<input aria-label={`Layout area ${key}`} type="number" step="any" value={Math.round(area[key]*10)/10} onChange={e=>useEditorStore.setState({layoutAreaDraft:{ruleId:draft.id,size,area:{...area,[key]:Number(e.target.value)}}})}/></label>)}</div></details>
+ <LayoutTransitionControls {...{document,size,draft,patch,scopes}}/>
  <details><summary>Spacing limits & name</summary><label className={styles.field}>Name<input value={draft.name} onChange={e=>patch({name:e.target.value})}/></label><label className={styles.field}>Minimum gap (px)<input aria-label="Minimum gap" type="number" min="0" value={draft.minGap} onChange={e=>patch({minGap:Number(e.target.value)})}/></label>
  <label className={styles.field}>If there isn’t enough room<select aria-label="Layout overflow" value={draft.overflow} onChange={e=>patch({overflow:e.target.value})}><option value="authored">Keep original positions and flag it</option><option value="extend">Keep minimum gap; extend beyond area</option></select></label></details>
  <div className={styles.actions}><button className={styles.primary} type="submit">Apply layout</button><button type="button" onClick={clear}>Cancel</button></div>

@@ -792,7 +792,7 @@ test('exports the shared text-fit engine and fits after binding offer texts', as
   );
   assert.match(
     html,
-    /function commitOfferLayout\(\) \{\s*if \(!root\) return;\s*fitBoundText\(\);\s*alignOfferValueSymbols\(root\);\s*layoutOffers\(root\);/,
+    /function commitOfferLayout\(\) \{\s*if \(!root\) return;\s*(?:responsiveLayout\.reset\(\);\s*)?fitBoundText\(\);\s*alignOfferValueSymbols\(root\);\s*layoutOffers\(root\);/,
     'symbols + layout run inside the shared layout commit',
   );
   assert.match(html, /var layoutOffers =/);

@@ -1,5 +1,7 @@
 // @ts-nocheck
+import {validatePositionControls} from '@/lib/position-validation';
 import {layoutRulesForSize} from '@/lib/layout-rules';
+import {layoutAnimationSource} from '@/lib/layout-transitions';
 import {responsiveLayoutSource} from '@/lib/responsive-layout';
 import {campaignFontFaces,campaignFontFaceCss,campaignFontAssetUrl} from '@/lib/campaign-fonts';
 import {campaignFontAssets,validateCampaignFontFiles,verifyCampaignFontCdn} from './campaign-fonts';
@@ -1123,6 +1125,7 @@ const runtimeScript = (
   options: RenderOptions = {},
   headlineRuntime: { layers?: Array<Record<string, unknown>>; beatsProfiles?: Record<string, Record<string, number>>; durationS?: number; loop?: boolean; motionContext?: MotionContext } = {},
 ) => {
+  const usesLayout=Boolean(options.layoutRules?.length)||JSON.stringify(fitRules).includes('"anchor":');
   const includePreviewBridge = options.includePreviewBridge !== false;
   const previewRowFallback = includePreviewBridge
     ? `
@@ -1138,22 +1141,22 @@ const runtimeScript = (
         });`
     : '';
   return `
-    ${options.layoutRules?.length ? `<script type="application/json" id="dco-layout-rules">${JSON.stringify(options.layoutRules).replace(/</g,'\\u003c')}</script>` : ''}
+    ${usesLayout ? `<script type="application/json" id="dco-layout-rules">${JSON.stringify(options.layoutRules||[]).replace(/</g,'\\u003c')}</script>` : ''}
     <script type="application/json" id="sse-production-fit-rules">${JSON.stringify(fitRules).replace(/</g, '\\u003c')}</script>
     <script>
       (function() {
         var root = null;
         ${options.campaignDocument?.campaignState ? `var evaluateConditions=${evaluateConditions.toString()};var campaignConstraints=${JSON.stringify(campaignVariantModel(options.campaignDocument).constraints||[]).replace(/</g,'\\u003c')};` : ''}
-        ${options.layoutRules?.length ? `var responsiveLayout = ${responsiveLayoutSource()}(window);var layoutRules=JSON.parse(document.getElementById('dco-layout-rules').textContent);window.updateSseDcoLayoutRules=function(next){layoutRules=next;};` : ''}
+        ${usesLayout ? `var responsiveLayout = ${responsiveLayoutSource()}(window);var layoutRules=JSON.parse(document.getElementById('dco-layout-rules').textContent);window.updateSseDcoLayoutRules=function(next){layoutRules=next;};` : ''}
         var textFitRules = JSON.parse(document.getElementById('sse-production-fit-rules').textContent);
         window.updateSseDcoFitRules = function(rules) { textFitRules = rules; };
         var settlementGeneration = 0;
         function settleRuntime() {
           var generation = ++settlementGeneration;
-          window.__SSE_DCO_SETTLED__ = Promise.all([document.fonts && document.fonts.ready${options.layoutRules?.length ? `,...Array.from(document.images).map(function(img){return img.complete?Promise.resolve():new Promise(function(resolve){img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true});});})` : ''}]).then(function() {
+          window.__SSE_DCO_SETTLED__ = Promise.all([document.fonts && document.fonts.ready${usesLayout ? `,...Array.from(document.images).map(function(img){return img.complete?Promise.resolve():new Promise(function(resolve){img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true});});})` : ''}]).then(function() {
             return new Promise(function(resolve) {
               window.requestAnimationFrame(function() {
-                if (generation === settlementGeneration) {commitOfferLayout();${options.layoutRules?.length ? 'releaseMotionClock();' : ''}}
+                if (generation === settlementGeneration) {commitOfferLayout();${usesLayout ? 'releaseMotionClock();' : ''}}
                 window.requestAnimationFrame(resolve);
               });
             });
@@ -1292,11 +1295,12 @@ const runtimeScript = (
 
         function commitOfferLayout() {
           if (!root) return;
-          ${options.layoutRules?.length ? 'responsiveLayout.reset();' : ''}
+          ${usesLayout ? 'responsiveLayout.reset();' : ''}
           fitBoundText();
           alignOfferValueSymbols(root);
           layoutOffers(root);
-          ${options.layoutRules?.length ? 'responsiveLayout.run(root,layoutRules,function(){fitBoundText();alignOfferValueSymbols(root);layoutOffers(root);});' : ''}
+          ${usesLayout ? "responsiveLayout.anchorText(root,textFitRules,textFitEngine.resolveRule);" : ""}
+          ${usesLayout ? 'responsiveLayout.run(root,layoutRules,function(){fitBoundText();alignOfferValueSymbols(root);layoutOffers(root);responsiveLayout.anchorText(root,textFitRules,textFitEngine.resolveRule);});' : ''}
         }
 
         // Cold CDN Museo must settle before the 15s clock runs. Pausing via
@@ -1418,7 +1422,7 @@ const runtimeScript = (
           // still holds the clock until startMotionWhenReady releases it.
           commitOfferLayout();
           wireExit(data);
-          ${options.layoutRules?.length ? '' : 'startMotionWhenReady();'}
+          ${usesLayout ? '' : 'startMotionWhenReady();'}
           settleRuntime();
           window.__SSE_DCO_READY__ = true;
         }
@@ -1560,6 +1564,11 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
       }))
       .filter(Boolean))
     .join('\n\n');
+  const geometryMotionCss=sizeCreative.layers.flatMap(layer=>[...new Set((layer.clips||[]).flatMap(c=>(c.geometryEdits||[]).map(e=>e.scope)))].flatMap((scope,index)=>{
+    const tokens=String(scope||'').split('.').filter(Boolean);
+    const cases=isGenericCampaign(document)?[tokens]:['frames-3','frames-4'].flatMap(profile=>[0,1,2,3].filter(n=>!tokens.some(s=>s.startsWith('offers-'))||tokens.includes(`offers-${n}`)).filter(()=>!tokens.some(s=>s.startsWith('frames-'))||tokens.includes(profile)).map(n=>[...new Set([...tokens,profile,`offers-${n}`])]));
+    return cases.map((scopes,n)=>animationCssForLayer(layer,beatsForScopes(document,scopes),duration,{loop,motionContext,profile:scopes.includes('frames-4')?'frames-4':'frames-3',activeScopes:scopes,suffix:`geometry-${index}-${n}`,selectorPrefix:`.stage${scopes.map(s=>'.'+s).join('')} `}));
+  })).join('\n');
   // Font mode creates this override after applying the actual feed copy. Outline
   // has no live feed runtime, so compile the same plan for its fixed effective row.
   let fixedHeadlineMotionCss = '';
@@ -1643,6 +1652,7 @@ ${profileAnimationCss}
 ${offers0StaticCss}
 
 ${offers0AnimationCss}
+${geometryMotionCss}
 
 ${fixedHeadlineMotionCss}
 `;
@@ -1711,6 +1721,7 @@ export const renderStudioReadyHtml = async (
   options: RenderOptions = {},
 ) => {
   validateCampaignVariantModel(document);
+  validatePositionControls(document);
   if(document.fonts!==undefined)await validateCampaignFontFiles(document);
   options={...options,campaignDocument:document,layoutRules:layoutRulesForSize(document,size)};
   document = materializeCreativeOwnership(document);
@@ -1792,6 +1803,7 @@ ${enablerTag}    <style>
 ${cssForSize(document, size, resolvedOptions)}
     </style>
 ${scripts}
+${renderMode==='outline'&&resolvedOptions.presentationSnapshot?.layoutTransitions?.length?`<script>(function(){var plans=${JSON.stringify(resolvedOptions.presentationSnapshot.layoutTransitions).replace(/</g,'\\u003c')};window.__DCO_LAYOUT_TRANSITIONS__=plans;function start(){(${layoutAnimationSource()})(window)(plans);}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();})();</script>`:''}
 ${renderMode === 'outline' ? '' : previewValidatorTag(resolvedOptions)}
   </head>
   <body>

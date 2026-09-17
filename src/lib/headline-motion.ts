@@ -1,4 +1,5 @@
 // @ts-nocheck
+import {resolveClipGeometry} from './clip-geometry';
 import { resolveClipMotionUnits, type MotionContext } from './motion-units';
 
 import { layerAnimationShorthand } from '@/lib/animation-css';
@@ -50,7 +51,7 @@ export const clipsForProfile = (
     if (!scopes?.length) return true;
     if (!activeScopes?.length) return false;
     return scopes.some((scope) => activeScopes.includes(scope));
-  })
+  }).map(clip=>resolveClipGeometry(clip,activeScopes||[]))
 );
 
 export const skippedHeadlineActs = (

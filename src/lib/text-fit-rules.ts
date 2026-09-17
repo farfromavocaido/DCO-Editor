@@ -92,6 +92,7 @@ export const normalizeFitConfig = (fit = {}): Record<string, any> => {
   if (fit.minFontSize !== undefined) normalized.minFontSize = Number(fit.minFontSize);
   if (fit.minFontSizeRatio !== undefined) normalized.minFontSizeRatio = Number(fit.minFontSizeRatio);
   if (fit.tracking !== undefined) normalized.tracking = fit.tracking;
+  if (fit.anchor !== undefined) normalized.anchor=fit.anchor;
   if (fit.align !== undefined) normalized.align = fit.align;
   if (fit.frame === '') normalized.frame = '';
   if (fit.frame === 'fixed' || fit.frame === 'auto') {

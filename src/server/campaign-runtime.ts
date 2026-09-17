@@ -4,8 +4,8 @@ import { textFitEngineSource } from '@/lib/text-fit';
 import { campaignVariantModel, campaignStateRuntimeSource } from '@/lib/campaign-variants';
 const json = value => JSON.stringify(value).replace(/</g, '\\u003c');
 /** Generic campaigns use the production DOM/CSS and the same browser fit engine. */
-export const campaignRuntimeScript = (document, fitRules, options = {}) => `
-${options.layoutRules?.length ? `<script type="application/json" id="dco-layout-rules">${json(options.layoutRules)}</script>` : ''}
+export const campaignRuntimeScript = (document, fitRules, options = {}) => {const usesLayout=Boolean(options.layoutRules?.length)||JSON.stringify(fitRules).includes('"anchor":');return `
+${usesLayout ? `<script type="application/json" id="dco-layout-rules">${json(options.layoutRules||[])}</script>` : ''}
 <script type="application/json" id="sse-production-fit-rules">${json(fitRules)}</script>
 <script>(function(){
   var stateModel = ${json(campaignVariantModel(document))};
@@ -18,9 +18,9 @@ ${options.layoutRules?.length ? `<script type="application/json" id="dco-layout-
   var root, currentRow = initialRow, generation = 0;
   var rules = JSON.parse(document.getElementById('sse-production-fit-rules').textContent);
   var engine = ${textFitEngineSource()}(window);
-  ${options.layoutRules?.length ? `var responsiveLayout=${responsiveLayoutSource()}(window);var layoutRules=JSON.parse(document.getElementById('dco-layout-rules').textContent);window.updateSseDcoLayoutRules=function(next){layoutRules=next;};` : ''}
+  ${usesLayout ? `var responsiveLayout=${responsiveLayoutSource()}(window);var layoutRules=JSON.parse(document.getElementById('dco-layout-rules').textContent);window.updateSseDcoLayoutRules=function(next){layoutRules=next;};` : ''}
   window.updateSseDcoFitRules = function(next){rules=next;};
-  function fit(){if(root){${options.layoutRules?.length ? 'responsiveLayout.reset();' : ''}engine.applyRules(root,rules);${options.layoutRules?.length ? 'responsiveLayout.run(root,layoutRules,function(){engine.applyRules(root,rules);});' : ''}}}
+  function fit(){if(root){${usesLayout ? 'responsiveLayout.reset();' : ''}engine.applyRules(root,rules);${usesLayout ? 'responsiveLayout.anchorText(root,rules,engine.resolveRule);responsiveLayout.run(root,layoutRules,function(){engine.applyRules(root,rules);responsiveLayout.anchorText(root,rules,engine.resolveRule);});' : ''}}}
   function apply(row){
     root = document.getElementById('page-content'); if(!root) return;
     currentRow = resolveCampaignState(stateModel,row || {}); window.__SSE_DCO_APPLIED_ROW__ = currentRow;
@@ -38,7 +38,7 @@ ${options.layoutRules?.length ? `<script type="application/json" id="dco-layout-
       if(el.tagName==='IMG') {var mapped=assetUrls[value.replace(/^\\/+/, '')];if(mapped)value=mapped;else if(value && assetBase && !/^(?:[a-z]+:|\\/)/i.test(value))value=assetBase.replace(/\\/?$/, '/')+value;el.setAttribute('src',value);} else el.textContent=value.replace(/<br\\s*\\/?>/gi,'\\n');
     });
     fit(); var run = ++generation;
-    window.__SSE_DCO_SETTLED__ = Promise.all([document.fonts && document.fonts.ready${options.layoutRules?.length ? `,...Array.from(document.images).map(function(img){return img.complete?Promise.resolve():new Promise(function(resolve){img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true});});})` : ''}]).then(function(){return new Promise(function(resolve){
+    window.__SSE_DCO_SETTLED__ = Promise.all([document.fonts && document.fonts.ready${usesLayout ? `,...Array.from(document.images).map(function(img){return img.complete?Promise.resolve():new Promise(function(resolve){img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true});});})` : ''}]).then(function(){return new Promise(function(resolve){
       requestAnimationFrame(function(){if(run===generation){fit();root.classList.add('motion-ready');}requestAnimationFrame(resolve);});
     });});
     window.__SSE_DCO_READY__ = true;
@@ -58,7 +58,7 @@ ${options.layoutRules?.length ? `<script type="application/json" id="dco-layout-
   }
   function start(){${options.includePreviewBridge !== false ? 'boot();return;' : ''}if(typeof Enabler!=='undefined'&&Enabler.isInitialized&&!Enabler.isInitialized()&&typeof studio!=='undefined'){Enabler.addEventListener(studio.events.StudioEvent.INIT,boot);}else boot();}
   document.addEventListener('DOMContentLoaded',start);
-})();</script>`;
+})();</script>`;};
 
 /** Authored Studio profiles remain data; a local demo needs no production profile ID. */
 export const campaignStudioDynamicContentScript = document => {

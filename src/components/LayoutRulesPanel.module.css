@@ -39,3 +39,4 @@
 .memberList li { display:flex;align-items:center;gap:5px; }.memberList li span { flex:1; }.memberList button { padding:3px 8px; }
 .panel details > summary { cursor:pointer;color:var(--muted);font-size:12px;padding:6px 0; }
 .panel textarea { width:100%;box-sizing:border-box;resize:vertical;min-height:64px;font:inherit;color:var(--ink);background:var(--panel-alt);border:1px solid var(--line-strong);border-radius:5px;padding:6px; }
+.transition[open] { border-top:1px solid var(--line);padding-top:8px; }.transition[open] > :not(summary) { margin-top:9px; }

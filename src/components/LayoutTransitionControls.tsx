@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client';
 import {useState} from 'react';
-import {exitSegments,layoutAnimations,layoutSequenceCases} from '@/lib/layout-transitions';
+import {exitSegments,layoutAnimations,layoutSequenceCases,layoutEasings} from '@/lib/layout-transitions';
 import {useEditorStore} from '@/store/editor-store';
 import styles from './LayoutRulesPanel.module.css';
 
@@ -32,10 +32,12 @@ export function LayoutTransitionControls({document,size,draft,patch,scopes}){
      <label className={styles.field}>Move other items<select value={a.start} onChange={e=>update(a.id,{start:e.target.value})}><option value="before">Before it</option><option value="with">During it</option><option value="after">After it</option></select></label>
      <label className={styles.field}>Duration<select value={a.duration} onChange={e=>update(a.id,{duration:e.target.value,durationS:a.durationS||.5})}><option value="follow">Follow the linked animation</option><option value="custom">Set duration</option></select></label>
      {a.duration==='custom'&&<label className={styles.field}>Seconds<input type="number" min=".01" step=".05" value={a.durationS} onChange={e=>update(a.id,{durationS:Number(e.target.value)})}/></label>}
+     <div className={styles.grid}>{[['startOffsetMs','Start offset'],['endOffsetMs','End offset']].map(([key,label])=><label className={styles.field} key={key} title="Negative = earlier; positive = later. Zero keeps the selected timing.">{label} (ms)<input type="number" step="100" value={a[key]??0} onChange={e=>update(a.id,{[key]:Number(e.target.value)})}/></label>)}</div>
     </>:<>
      <label className={styles.field}>Return style<select value={a.hidden?'hidden':'animate'} onChange={e=>update(a.id,{hidden:e.target.value==='hidden'})}><option value="animate">Animate back</option><option value="hidden">Reset while hidden</option></select></label>
      <div className={styles.grid}><label className={styles.field}>{a.hidden?'Reset at':'Start'} (seconds)<input type="number" min="0" max={duration} step=".05" value={a.startS} onChange={e=>update(a.id,{startS:Number(e.target.value)})}/></label>{!a.hidden&&<label className={styles.field}>End (seconds)<input type="number" min="0" max={duration} step=".05" value={a.endS} onChange={e=>update(a.id,{endS:Number(e.target.value)})}/></label>}</div>
     </>}
+    {!a.hidden&&<label className={styles.field}>Easing<select value={a.easing||'ease-in-out'} onChange={e=>update(a.id,{easing:e.target.value})}>{Object.keys(layoutEasings).map(key=><option value={key} key={key}>{({'ease-in-out':'Ease in-out (original)',linear:'Linear','quad-in':'Quad · in','quad-out':'Quad · out','quad-in-out':'Quad · in-out','cubic-in':'Cubic · in','cubic-out':'Cubic · out','cubic-in-out':'Cubic · in-out'})[key]}</option>)}</select></label>}
     <div className={styles.actions}><button type="button" onClick={()=>{const id=crypto.randomUUID();write([...entries,{...a,id,enabled:false}]);setExpanded(id);}} title="Creates a disabled copy so you can choose its timing">Duplicate</button><button type="button" onClick={()=>write(entries.filter(e=>e.id!==a.id))}>Remove</button></div>
    </div>}
   </article>;

@@ -30,3 +30,10 @@ test('entrance can happen before or after the selected segment',()=>{
  for(const [start,expected] of [['before',[0,10]],['after',[20,30]]]){const t=layoutSequenceCases(noLoop,'300x250',{...rule,layoutAnimations:[{...entry,start}]})[0];expect([t.events[0].start,t.events[0].end]).toEqual(expected);}
  expect(exitSegments(doc,'300x250','legal','fade',[])).toEqual([{start:50,end:60}]);
 });
+test('zero-default offsets preserve timing; independent offsets extend the linked motion and carry easing',()=>{
+ const entry={...rule.layoutAnimations[0],startOffsetMs:-200,endOffsetMs:300,easing:'cubic-out'};
+ const t=layoutSequenceCases(doc,'300x250',{...rule,layoutAnimations:[entry]})[0];expect([t.events[0].start,t.events[0].end]).toEqual([8,23]);
+ const p=layoutSequencePlans(rule,t,members).find(p=>p.targetId==='mark');expect(p.keyframes[1].easing).toBe('cubic-bezier(0.215,0.61,0.355,1)');
+ const zero=layoutSequenceCases(doc,'300x250',{...rule,layoutAnimations:[{...entry,startOffsetMs:0,endOffsetMs:0}]})[0];expect([zero.events[0].start,zero.events[0].end]).toEqual([10,20]);
+ expect(()=>validateLayoutTransition(doc,{...rule,layoutAnimations:[{...entry,easing:'invalid'}]})).toThrow(/easing/);
+});

@@ -3,6 +3,11 @@ import {compileAnimationClips,frameAtPercent} from './creative-compiler';
 import {clipsForProfile} from './headline-motion';
 import {beatsForScopes,activeFrameScope} from './timing-profiles';
 import {isGenericCampaign,campaignVariantModel} from './campaign-variants';
+export const layoutEasings={
+ 'ease-in-out':'ease-in-out',linear:'linear',
+ 'quad-in':'cubic-bezier(0.55,0.085,0.68,0.53)', 'quad-out':'cubic-bezier(0.25,0.46,0.45,0.94)', 'quad-in-out':'cubic-bezier(0.455,0.03,0.515,0.955)',
+ 'cubic-in':'cubic-bezier(0.55,0.055,0.675,0.19)', 'cubic-out':'cubic-bezier(0.215,0.61,0.355,1)', 'cubic-in-out':'cubic-bezier(0.645,0.045,0.355,1)'
+};
 export function exitSegments(document,size,targetId,clipId,scopes,kind="exit"){
  const layer=document.sizes[size].layers.find(l=>l.id===targetId.split('::')[0]);const clip=clipsForProfile(layer?.clips||[],activeFrameScope(scopes),scopes).find(c=>c.id===clipId);if(!clip)return [];
  const frames=compileAnimationClips([clip],beatsForScopes(document,scopes),{canvas:document.sizes[size].canvas,parent:document.sizes[size].canvas,durationS:document.clock.durationS}),out=[];
@@ -58,11 +63,11 @@ export function layoutSequenceCases(document,size,rule){
  const duration=Number(document.clock.durationS),entries=layoutAnimations(rule).filter(a=>a.enabled!==false);
  return sequenceScopes(document,rule).map(scopes=>{
   const events=entries.flatMap(a=>{
-   if(a.kind==='return')return [{...a,start:a.startS/duration*100,end:(a.hidden?a.startS:a.endS)/duration*100}];
+   if(a.kind==='return')return [{...a,easingCss:layoutEasings[a.easing||'ease-in-out'],start:a.startS/duration*100,end:(a.hidden?a.startS:a.endS)/duration*100}];
    const segment=exitSegments(document,size,a.subjectId,a.clipId,scopes,a.kind)[a.segmentIndex||0];if(!segment)return [];
    const span=a.duration==='follow'?segment.end-segment.start:Number(a.durationS)/duration*100;
    const start=a.start==='after'?segment.end:a.start==='before'?segment.start-span:segment.start;
-   return [{...a,start,end:start+span}];
+   return [{...a,easingCss:layoutEasings[a.easing||'ease-in-out'],start:start+(a.startOffsetMs||0)/duration/10,end:start+span+(a.endOffsetMs||0)/duration/10}];
   }).sort((a,b)=>a.start-b.start);
   for(let i=0;i<events.length;i++){const e=events[i];if(!Number.isFinite(e.start)||!Number.isFinite(e.end)||e.start<0||e.end>100||e.end<e.start||!e.hidden&&e.end===e.start)throw new Error('Each layout animation must fit inside the ad');if(i&&e.start<events[i-1].end-1e-7)throw new Error('Layout animations overlap. Adjust their timing so each move finishes before the next begins');}
   const initialAbsent=rule.startingArrangement==='present'?[...new Set(events.filter(e=>e.kind!=='return').map(e=>e.subjectId))].filter(id=>events.find(e=>e.subjectId===id)?.kind==='enter'):[];
@@ -78,6 +83,8 @@ function validateLayoutSequence(document,rule){
  if(!Array.isArray(rule.layoutAnimations)||rule.startingArrangement!==undefined&&!['all','present'].includes(rule.startingArrangement))throw new Error('Choose a starting arrangement and animation list');
  if(!rule.enabled)return;
  const ids=new Set();for(const a of rule.layoutAnimations){if(!a.id||ids.has(a.id))throw new Error('Layout animations need unique IDs');ids.add(a.id);if(a.enabled===false)continue;
+  if(a.easing!==undefined&&!Object.hasOwn(layoutEasings,a.easing))throw new Error('Choose a supported easing');
+  if(['startOffsetMs','endOffsetMs'].some(k=>a[k]!==undefined&&!Number.isFinite(a[k])))throw new Error('Timing offsets must be finite milliseconds');
   if(rule.type!=='distribute'||!['enter','exit','return'].includes(a.kind))throw new Error('Choose entrance, exit or return');
   if(a.kind!=='return'&&(!['before','with','after'].includes(a.start)||!['follow','custom'].includes(a.duration)||a.duration==='custom'&&(!Number.isFinite(a.durationS)||a.durationS<=0)||!Number.isInteger(a.segmentIndex)||a.segmentIndex<0))throw new Error('Choose an animation segment and timing');
   for(const size of new Set(rule.targets.map(m=>m.size))){
@@ -107,7 +114,7 @@ export function layoutSequencePlans(rule, timing, members){
   if(e.kind==='return'){absent.clear();timing.initialAbsent.forEach(id=>absent.add(id));}
   else if(e.kind==='enter')absent.delete(e.subjectId);else absent.add(e.subjectId);
   const next=e.kind==='return'?{...initial}:positions(absent,current);
-  members.forEach(m=>{frames[m.id].push({offset:e.start/100,value:current[m.id],easing:e.hidden?'steps(1,end)':'ease-in-out'},{offset:e.end/100,value:next[m.id]});});current=next;
+  members.forEach(m=>{frames[m.id].push({offset:e.start/100,value:current[m.id],easing:e.hidden?'steps(1,end)':e.easingCss||'ease-in-out'},{offset:e.end/100,value:next[m.id]});});current=next;
  }
  return members.flatMap(m=>{
   const values=frames[m.id];values.push({offset:1,value:current[m.id]});

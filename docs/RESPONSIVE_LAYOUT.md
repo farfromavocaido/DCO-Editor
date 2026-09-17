@@ -81,3 +81,7 @@ Existing single exit/return configurations are displayed as list entries without
 Choosing a new entrance selects **Before linked entrances → Make room as items enter**. **Leave space ready — no rearranging** deliberately reserves that space from the start. Save errors appear beside Apply and are brought into view.
 
 Layout-area edits remain provisional when you click away. Deselecting hides the area outline but retains the draft and last valid preview. **Resume layout edit · not applied** restores the controls. **Apply layout** commits; **Cancel** discards. Validation messages appear on Apply, not while a configuration is incomplete. Drafts are session-only and cleared when changing campaign.
+
+Linked layout animations expose start/end offsets in milliseconds (100ms steps), both defaulting to zero. Negative starts move earlier; positive ends finish later. Offsets apply to the selected before/during/after timing and duration; changing the linked clip still updates that timing. The existing ease-in-out remains the default, with Linear and Quad/Cubic In, Out and In-out options. The resolved curve and timing are part of the shared production motion plan.
+
+Linked Properties also identifies inherited X/Y sources shared by multiple elements. **Make position independent** keeps the current position in local overrides for the current version; **Use shared position again** removes those local position exceptions and adopts the current shared values. Other properties and peer elements are unchanged.

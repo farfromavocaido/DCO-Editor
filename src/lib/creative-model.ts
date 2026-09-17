@@ -453,7 +453,11 @@ const findCreativeTargetLegacy = (
 
 /** Resolve each field independently; a later unrelated rule is not its owner. */
 export const findCreativeTarget = (document: any, size: string, targetId: string, activeScopes: string[] = []): any => {
-  document = materializeCreativeOwnership(document);
+  return findMaterializedCreativeTarget(materializeCreativeOwnership(document),size,targetId,activeScopes);
+};
+
+/** Read-only resolver for callers inspecting multiple targets in one compiled document. */
+export const findMaterializedCreativeTarget = (document: any,size: string,targetId: string,activeScopes: string[] = []): any => {
   const target = findCreativeTargetLegacy(document, size, targetId, activeScopes);
   if (!target) return null;
   const sizeCreative = currentSizeCreative(document, size);

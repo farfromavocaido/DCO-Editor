@@ -22,3 +22,12 @@ test('reconnection remains available when every member has a local position',()=
  const sharing=inheritedPositionSharing(d,'728x90','headline-act3',['offers-3']);expect(sharing).toHaveLength(2);expect(sharing.every(p=>p.independent&&p.members.every(m=>m.independent))).toBe(true);
  expect(inheritedPositionSharing(setInheritedPositionIndependent(d,'728x90','headline-act3',['offers-3'],false),'728x90','headline-act3',['offers-3']).every(p=>!p.independent)).toBe(true);
 });
+test('cached inspection is read-only and updates with a new document snapshot',()=>{
+ const d=fixture(),before=JSON.stringify(d),scopes=['offers-3'];
+ const first=inheritedPositionSharing(d,'728x90','headline-act3',scopes);
+ expect(inheritedPositionSharing(d,'728x90','headline-act3',scopes)).toEqual(first);
+ expect(JSON.stringify(d)).toBe(before);
+ const next=setInheritedPositionIndependent(d,'728x90','headline-act3',scopes,true);
+ expect(inheritedPositionSharing(next,'728x90','headline-act3',scopes).every(p=>p.independent)).toBe(true);
+ expect(inheritedPositionSharing(d,'728x90','headline-act3',scopes).every(p=>!p.independent)).toBe(true);
+});

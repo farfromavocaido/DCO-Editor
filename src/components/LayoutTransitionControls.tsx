@@ -1,26 +1,45 @@
 // @ts-nocheck
 'use client';
-import {exitSegments,transitionCases} from '@/lib/layout-transitions';
+import {useState} from 'react';
+import {exitSegments,layoutAnimations,layoutSequenceCases} from '@/lib/layout-transitions';
+import {useEditorStore} from '@/store/editor-store';
 import styles from './LayoutRulesPanel.module.css';
+
 export function LayoutTransitionControls({document,size,draft,patch,scopes}){
- const t=draft.transition,duration=Number(document.clock.durationS),items=draft.targets.filter(m=>m.size===size),layer=t&&document.sizes[size].layers.find(l=>l.id===t.subjectId?.split('::')[0]);
- const exits=t?.clipId?exitSegments(document,size,t.subjectId,t.clipId,scopes):[];
- const update=change=>patch({transition:{...t,...change}});
- let timing,error='';if(t?.clipId)try{timing=transitionCases(document,size,draft).find(c=>c.scopes.every(s=>scopes.includes(s)));}catch(e){error=e.message;}
- return <details className={styles.transition}><summary>Animate layout after an exit</summary>
- <label className={styles.checkbox}><input aria-label="Enable layout transition" type="checkbox" checked={Boolean(t&&t.enabled!==false)} onChange={e=>patch({transition:e.target.checked?(t?{...t,enabled:true}:{enabled:true,subjectId:items.at(-1)?.targetId,clipId:'',exitIndex:0,start:'with',duration:'follow',return:{mode:document.clock.loop?'animate':'none',startS:duration*.9,endS:duration}}):{...t,enabled:false}})}/>Link to a particular exit</label>
- {t&&t.enabled!==false&&<>
- <label className={styles.field}>Item leaving<select aria-label="Exiting layout item" value={t.subjectId} onChange={e=>update({subjectId:e.target.value,clipId:'',exitIndex:0})}>{items.map(m=><option key={m.targetId} value={m.targetId}>{document.sizes[size].layers.find(l=>l.id===m.targetId.split('::')[0])?.label||m.targetId}</option>)}</select></label>
- <label className={styles.field}>Exit animation<select aria-label="Layout exit animation" value={t.clipId} onChange={e=>update({clipId:e.target.value,exitIndex:0})}><option value="">Choose an animation…</option>{(layer?.clips||[]).filter(c=>exitSegments(document,size,t.subjectId,c.id,scopes).length).map(c=><option key={c.id} value={c.id}>{c.label||c.id}</option>)}</select></label>
- {exits.length>0&&<label className={styles.field}>Exit segment<select aria-label="Layout exit segment" value={t.exitIndex} onChange={e=>update({exitIndex:Number(e.target.value)})}>{exits.map((e,i)=><option key={i} value={i}>{(e.start*duration/100).toFixed(2)}–{(e.end*duration/100).toFixed(2)} seconds</option>)}</select></label>}
- <label className={styles.field}>Move remaining items<select aria-label="Layout transition start" value={t.start} onChange={e=>update({start:e.target.value})}><option value="with">During that exit</option><option value="after">After that exit</option></select></label>
- <label className={styles.field}>Duration<select aria-label="Layout transition duration" value={t.duration} onChange={e=>update({duration:e.target.value,durationS:t.durationS||.5})}><option value="follow">Follow the exit’s duration</option><option value="custom">Set duration</option></select></label>
- {t.duration==='custom'&&<label className={styles.field}>Seconds<input aria-label="Layout transition seconds" type="number" min="0.01" step="0.05" value={t.durationS} onChange={e=>update({durationS:Number(e.target.value)})}/></label>}
- <label className={styles.field}>Return to the starting layout<select aria-label="Layout return mode" value={t.return.mode} onChange={e=>update({return:{...t.return,mode:e.target.value,startS:e.target.value==='hidden'?duration:e.target.value==='animate'&&t.return.mode==='hidden'?Math.max(duration*.9,(timing?.end||0)*duration/100):t.return.startS}})}><option value="animate">Animate back before the end</option><option value="hidden">Reset while remaining items are hidden</option>{!document.clock.loop&&<option value="none">Stay in the new layout (no loop)</option>}</select></label>
- {t.return.mode!=='none'&&<div className={styles.grid}><label className={styles.field}>{t.return.mode==='hidden'?'Reset at (seconds)':'Return starts (seconds)'}<input aria-label="Layout return start" type="number" min="0" max={duration} step=".05" value={t.return.startS} onChange={e=>update({return:{...t.return,startS:Number(e.target.value)}})}/></label>{t.return.mode==='animate'&&<label className={styles.field}>Ends (seconds)<input aria-label="Layout return end" type="number" min="0" max={duration} step=".05" value={t.return.endS} onChange={e=>update({return:{...t.return,endS:Number(e.target.value)}})}/></label>}</div>}
- {timing&&<span className={styles.note}>Move {(timing.start*duration/100).toFixed(2)}–{(timing.end*duration/100).toFixed(2)}s · positions follow the fitted artwork</span>}
- <span className={styles.note} title="Space is reserved before the entrance. Empty or state-hidden items do not trigger a movement. Scrubbing and playback use the same timeline.">No opening movement · no movement when already alone</span>
+ const [expanded,setExpanded]=useState(null);
+ const entries=layoutAnimations(draft),duration=Number(document.clock.durationS),items=draft.targets.filter(m=>m.size===size);
+ const name=id=>document.sizes[size].layers.find(l=>l.id===id?.split('::')[0])?.label||id;
+ const write=next=>patch({transition:undefined,layoutAnimations:next});
+ const update=(id,values)=>write(entries.map(a=>a.id===id?{...a,...values}:a));
+ let error='',events=[];
+ try{events=layoutSequenceCases(document,size,draft).find(c=>c.scopes.every(s=>scopes.includes(s)))?.events||[];}catch(e){error=e.message;}
+ const ordered=[...entries].sort((a,b)=>(events.find(e=>e.id===a.id)?.start??Infinity)-(events.find(e=>e.id===b.id)?.start??Infinity));
+ const add=()=>{const id=crypto.randomUUID();write([...entries,{id,enabled:true,kind:'exit',subjectId:items.at(-1)?.targetId,clipId:'',segmentIndex:0,start:'with',duration:'follow',durationS:.5}]);setExpanded(id);};
+ return <details className={styles.transition} open><summary>Layout animations {entries.length?`(${entries.length})`:''}</summary>
+ <label className={styles.field}>Starting arrangement<select value={draft.startingArrangement||'all'} onChange={e=>patch({startingArrangement:e.target.value,transition:undefined,layoutAnimations:entries})} title="Initially present leaves room-making until the first linked entrance. Other items keep their space through their own fades."><option value="all">Reserve space for all items</option><option value="present">Only items initially present</option></select></label>
+ {ordered.map(a=>{
+  const layer=document.sizes[size].layers.find(l=>l.id===a.subjectId?.split('::')[0]),segments=a.kind==='return'?[]:exitSegments(document,size,a.subjectId||'',a.clipId,scopes,a.kind),timing=events.find(e=>e.id===a.id);
+  const label=a.kind==='return'?(a.hidden?'Reset to starting layout':'Return to starting layout'):`${name(a.subjectId)} ${a.kind==='enter'?'enters':'exits'}`;
+  return <article className={styles.animationCard} key={a.id}>
+   <div className={styles.animationHeader}><input type="checkbox" aria-label={`Enable ${label}`} checked={a.enabled!==false} onChange={e=>update(a.id,{enabled:e.target.checked})}/><button type="button" className={styles.animationTitle} aria-expanded={expanded===a.id} onClick={()=>setExpanded(expanded===a.id?null:a.id)}>{label}<small>{a.enabled===false?'Disabled':timing?`${(timing.start*duration/100).toFixed(2)}–${(timing.end*duration/100).toFixed(2)}s`:'Choose timing'}</small></button><button type="button" title="Preview halfway through this move" aria-label={`Preview ${label}`} disabled={!timing||Boolean(error)||a.enabled===false} onClick={()=>useEditorStore.getState().setPercent((timing.start+timing.end)/2)}>▶</button></div>
+   {expanded===a.id&&<div className={styles.animationFields}>
+    <label className={styles.field}>Change<select value={a.kind} onChange={e=>update(a.id,{kind:e.target.value,clipId:'',segmentIndex:0,startS:duration*.9,endS:duration,hidden:false})}><option value="enter">Make room on entrance</option><option value="exit">Rearrange on exit</option><option value="return">Return to starting layout</option></select></label>
+    {a.kind!=='return'?<>
+     <label className={styles.field}>Linked item<select value={a.subjectId} onChange={e=>update(a.id,{subjectId:e.target.value,clipId:'',segmentIndex:0})}>{items.map(m=><option key={m.targetId} value={m.targetId}>{name(m.targetId)}</option>)}</select></label>
+     <label className={styles.field}>Animation<select value={a.clipId} onChange={e=>update(a.id,{clipId:e.target.value,segmentIndex:0})}><option value="">Choose an animation…</option>{(layer?.clips||[]).filter(c=>exitSegments(document,size,a.subjectId,c.id,scopes,a.kind).length).map(c=><option key={c.id} value={c.id}>{c.label||c.id}</option>)}</select></label>
+     {segments.length>0&&<label className={styles.field}>{a.kind==='enter'?'Entrance':'Exit'} segment<select value={a.segmentIndex} onChange={e=>update(a.id,{segmentIndex:Number(e.target.value)})}>{segments.map((s,i)=><option key={i} value={i}>{(s.start*duration/100).toFixed(2)}–{(s.end*duration/100).toFixed(2)} seconds</option>)}</select></label>}
+     <label className={styles.field}>Move other items<select value={a.start} onChange={e=>update(a.id,{start:e.target.value})}><option value="before">Before it</option><option value="with">During it</option><option value="after">After it</option></select></label>
+     <label className={styles.field}>Duration<select value={a.duration} onChange={e=>update(a.id,{duration:e.target.value,durationS:a.durationS||.5})}><option value="follow">Follow the linked animation</option><option value="custom">Set duration</option></select></label>
+     {a.duration==='custom'&&<label className={styles.field}>Seconds<input type="number" min=".01" step=".05" value={a.durationS} onChange={e=>update(a.id,{durationS:Number(e.target.value)})}/></label>}
+    </>:<>
+     <label className={styles.field}>Return style<select value={a.hidden?'hidden':'animate'} onChange={e=>update(a.id,{hidden:e.target.value==='hidden'})}><option value="animate">Animate back</option><option value="hidden">Reset while hidden</option></select></label>
+     <div className={styles.grid}><label className={styles.field}>{a.hidden?'Reset at':'Start'} (seconds)<input type="number" min="0" max={duration} step=".05" value={a.startS} onChange={e=>update(a.id,{startS:Number(e.target.value)})}/></label>{!a.hidden&&<label className={styles.field}>End (seconds)<input type="number" min="0" max={duration} step=".05" value={a.endS} onChange={e=>update(a.id,{endS:Number(e.target.value)})}/></label>}</div>
+    </>}
+    <div className={styles.actions}><button type="button" onClick={()=>{const id=crypto.randomUUID();write([...entries,{...a,id,enabled:false}]);setExpanded(id);}} title="Creates a disabled copy so you can choose its timing">Duplicate</button><button type="button" onClick={()=>write(entries.filter(e=>e.id!==a.id))}>Remove</button></div>
+   </div>}
+  </article>;
+ })}
+ <button type="button" className={styles.primary} onClick={add}>+ Add animation</button>
  {error&&<p role="alert" className={styles.error}>{error}</p>}
- </>}
  </details>;
 }

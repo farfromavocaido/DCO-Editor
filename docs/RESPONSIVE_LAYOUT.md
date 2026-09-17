@@ -69,3 +69,11 @@ Absolute geometry in a motion path is shown as animation-controlled in the inspe
 **Pin text** fixes a visible top edge, centre or bottom edge. A bottom pin exposes an inset from the ad’s bottom. Changing max lines, wrapping or frame policy on existing bottom-aligned text captures its current ink bottom first, preserving the approved placement while the box changes. Loading a campaign does not seed anchors. Height controlled by fitting is labelled rather than presented as an independently editable dimension.
 
 Text fields retain native undo/redo while focused. Enter (ordinary inputs) or leaving the field commits one editor-history transaction. Canvas undo can then undo that completed field edit. Preview-only inputs do not create campaign history.
+
+### Layout animation list
+
+Edit a layout area → **Layout animations** → **+ Add animation**. Entries link to a particular entrance or exit segment, or return to the starting layout at specified times. Entrance/exit moves can happen before, during or after the segment, following its duration or using a custom duration. The list and timeline show these changes together; each entry can be previewed, disabled, duplicated or removed. Duplicates start disabled to avoid accidental overlap.
+
+**Starting arrangement** reserves space for all items by default. **Only items initially present** excludes items whose first enabled linked event is an entrance, then makes room during that event. Empty or state-hidden artwork remains excluded. Destinations use fitted ink, not fixed movement distances. Overlapping moves and a mismatched loop ending are flagged. A return targets the chosen starting arrangement, which may itself exclude entering items.
+
+Existing single exit/return configurations are displayed as list entries without rewriting campaign data. Editing the list adopts the sequence format for that area. The sequence creates native motion plans in the shared production layout runtime; outline snapshots retain those same plans.

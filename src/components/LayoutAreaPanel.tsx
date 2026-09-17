@@ -1,5 +1,6 @@
 // @ts-nocheck
 'use client';
+import {layoutAnimations} from '@/lib/layout-transitions';
 import {LayoutTransitionControls} from './LayoutTransitionControls';
 import {useEffect,useState} from 'react';
 import {useEditorStore,selectPreviewFeedRow} from '@/store/editor-store';
@@ -64,7 +65,7 @@ export function LayoutAreaPanel({document,size,targetIds,scopes,diagnostics,onCh
  {targetIds.length>1&&timing&&targetIds.every(id=>timing.ids.includes(id))&&<span className={styles.note} title="These items do not appear together in the animation. Layout uses their resting artwork so spacing does not jump during fades. The timeline is showing the first item.">Different animation times ⓘ</span>}
  {rules.map(rule=><article key={rule.id} className={styles.rule}>
   <div className={styles.ruleHeader}><button className={styles.ruleTitle} onClick={()=>{revealLayoutTargets(rule.targets.filter(t=>t.size===size).map(t=>t.targetId));onSelectRule?.(rule.id);}}>{rule.name}</button><span className={styles.status}>{!rule.enabled?'Disabled':diagnostics.some(d=>d.id===rule.id&&d.status==='active')?'Automatic':'Inactive'}</span></div>
-  {rule.transition&&<span className={styles.note}>{rule.transition.enabled===false?'Exit transition disabled':'Linked to an exit animation'}</span>}
+  {layoutAnimations(rule).length>0&&<span className={styles.note}>{layoutAnimations(rule).filter(a=>a.enabled!==false).length} layout animations enabled</span>}
   <span>{rule.targets.filter(t=>t.size===size).map(t=>name(t.targetId)).join(' + ')}</span>
   <span className={styles.note} title={scopeLabel(rule.when)}>{rule.when?.length?'Limited to chosen campaign settings':'All versions in this size'}</span><span className={styles.note}>{rule.axis==='y'?'Spread top to bottom':'Spread left to right'} · One item: {rule.single==='center'?'centre':rule.single==='start'?'start':'end'}</span>
   {diagnostics.filter(d=>d.id===rule.id&&d.message).slice(0,1).map(d=><p className={styles.error} key={d.targetId}>{d.message}</p>)}

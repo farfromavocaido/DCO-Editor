@@ -1,5 +1,5 @@
 // @ts-nocheck
-import {layoutAnimationSource} from './layout-transitions';
+import {layoutAnimationSource,layoutSequencePlans} from './layout-transitions';
 /** One runtime body for previews, QA and delivery. Measures ink, never line-box spacing. */
 const SOURCE=String.raw`(function(win){
  var doc=win.document,writes=new Map(),imageCache=new WeakMap(),ctx=doc.createElement('canvas').getContext('2d'),diagnostics=[];
@@ -112,7 +112,9 @@ const SOURCE=String.raw`(function(win){
      survivors.forEach(x=>{solo.set(x.item.targetId,x.item.before[rule.axis==='x'?'left':'top']+soloCursor-edge(x.paint,'start',rule.axis));soloCursor+=(rule.axis==='x'?x.paint.width:x.paint.height)+soloGap;});
     }
     visible.forEach(function(x){var key=rule.axis==='x'?'left':'top';write(x.el,key,(x.item.before[key]+cursor-edge(x.paint,'start',rule.axis))+'px');if(rule.crossAlign&&rule.crossAlign!=='keep'){var cross=rule.axis==='x'?'y':'x',crossKey=cross==='x'?'left':'top',crossStart=cross==='x'?origin.left+rule.area.left:origin.top+rule.area.top,crossLength=cross==='x'?rule.area.width:rule.area.height,fraction=rule.crossAlign==='end'?1:rule.crossAlign==='center'?.5:0;write(x.el,crossKey,(x.item.before[crossKey]+crossStart+crossLength*fraction-edge(x.paint,rule.crossAlign,cross))+'px');}x.item.after=authored(x.el);x.item.targetInk=local(ink(x.el),root);cursor+=(rule.axis==='x'?x.paint.width:x.paint.height)+gap;});
-    if(subject&&timing)survivors.forEach(function(x){var field=rule.axis==='x'?'left':'top',delta=solo.get(x.item.targetId)-x.item.after[field];if(Math.abs(delta)<.001)return;var translated=rule.axis==='x'?delta+'px 0px':'0px '+delta+'px';var keyframes=[{offset:0,translate:'0px 0px'},{offset:timing.start/100,translate:'0px 0px',easing:'ease-in-out'},{offset:timing.end/100,translate:translated}];if(timing.returnMode!=='none'){keyframes.push({offset:timing.returnStart/100,translate:translated,easing:timing.returnMode==='hidden'?'steps(1,end)':'ease-in-out'});keyframes.push({offset:timing.returnEnd/100,translate:'0px 0px'});}keyframes.push({offset:1,translate:timing.returnMode==='none'?translated:'0px 0px'});motionPlans.push({id:rule.id,targetId:x.item.targetId,keyframes,durationMs:timing.durationMs,loop:timing.loop});x.item.transition={start:timing.start,end:timing.end,returnStart:timing.returnStart,returnEnd:timing.returnEnd};});
+    if(!rule.sequenceCases&&subject&&timing)survivors.forEach(function(x){var field=rule.axis==='x'?'left':'top',delta=solo.get(x.item.targetId)-x.item.after[field];if(Math.abs(delta)<.001)return;var translated=rule.axis==='x'?delta+'px 0px':'0px '+delta+'px';var keyframes=[{offset:0,translate:'0px 0px'},{offset:timing.start/100,translate:'0px 0px',easing:'ease-in-out'},{offset:timing.end/100,translate:translated}];if(timing.returnMode!=='none'){keyframes.push({offset:timing.returnStart/100,translate:translated,easing:timing.returnMode==='hidden'?'steps(1,end)':'ease-in-out'});keyframes.push({offset:timing.returnEnd/100,translate:'0px 0px'});}keyframes.push({offset:1,translate:timing.returnMode==='none'?translated:'0px 0px'});motionPlans.push({id:rule.id,targetId:x.item.targetId,keyframes,durationMs:timing.durationMs,loop:timing.loop});x.item.transition={start:timing.start,end:timing.end,returnStart:timing.returnStart,returnEnd:timing.returnEnd};});
+    var sequence=(rule.sequenceCases||[]).find(t=>t.scopes.every(scope=>root.classList.contains(scope)));
+    if(sequence){var areaStart=rule.axis==='x'?origin.left+rule.area.left:origin.top+rule.area.top;var members=visible.map(x=>({id:x.item.targetId,extent:rule.axis==='x'?x.paint.width:x.paint.height,fullStart:edge(x.paint,'start',rule.axis)+(x.item.after[rule.axis==='x'?'left':'top']-x.item.before[rule.axis==='x'?'left':'top'])-areaStart}));motionPlans.push.apply(motionPlans,SEQUENCE_PLANS(rule,sequence,members));}
    }else{
     var target=element(rule.targetId),item=diagnostic(rule,rule.targetId,'active');item.before=target?authored(target):null;
     if(rule.type==='conditional'){
@@ -141,5 +143,5 @@ const SOURCE=String.raw`(function(win){
  }
  return {reset:reset,run:run,anchorText:anchorText,ink:ink,facts:facts,element:element,getDiagnostics:function(){return diagnostics;}};
 })`;
-export const responsiveLayoutSource=()=>SOURCE.replace('INSTALL_MOTION',layoutAnimationSource());
+export const responsiveLayoutSource=()=>SOURCE.replace('INSTALL_MOTION',layoutAnimationSource()).replace('SEQUENCE_PLANS','('+layoutSequencePlans.toString()+')');
 export const createResponsiveLayoutRuntime=new Function(`return ${responsiveLayoutSource()}`)();

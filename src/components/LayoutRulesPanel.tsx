@@ -57,7 +57,7 @@ export function LayoutRulesPanel({ document, size, targetId, scopes, diagnostics
     return dimension ? `${dimension.label}: ${dimension.options.find(option => option.scope === scope)?.label}` : scope;
   }).join(' + ') || 'All campaign states';
   return <div className={styles.panel}>
-    <p className={styles.note}>Place this element for a campaign state, or keep its visible ink a fixed distance from another element or the canvas.</p>
+
     {applicable.map(rule => {
       const diagnostic = diagnosticFor(rule);
       const status = statusFor(rule);
@@ -102,8 +102,8 @@ export function LayoutRulesPanel({ document, size, targetId, scopes, diagnostics
         {draft.reference?.targetId !== 'canvas' && <><label className={styles.field}><span>If the reference is absent</span><select aria-label="If the reference is absent" value={draft.onMissing || 'authored'} onChange={event => patch({ onMissing: event.target.value as Rule['onMissing'] })}><option value="authored">Keep authored position</option><option value="canvas">Use a canvas edge</option></select></label>{draft.onMissing === 'canvas' && <div className={styles.grid}><label className={styles.field}><span>Canvas edge</span><select aria-label="Canvas edge" value={draft.fallbackEdge || 'start'} onChange={event => patch({ fallbackEdge: event.target.value as Edge })}>{(['start', 'center', 'end'] as Edge[]).map(edge => <option key={edge} value={edge}>{edgeLabel(edge, draft.axis)}</option>)}</select></label><label className={styles.field}><span>Fallback gap (same units)</span><input type="number" step="any" value={draft.fallbackGap ?? 0} onChange={event => patch({ fallbackGap: Number(event.target.value) })} /></label></div>}</>}
       </fieldset>}
       <label className={styles.checkbox}><input type="checkbox" checked={draft.enabled} onChange={event => patch({ enabled: event.target.checked })} />Enabled</label>
-      <p className={styles.note}>Draft changes appear in the production preview after Apply rule.</p>
-      <div className={styles.actions}><button className={styles.primary} type="submit">Apply rule</button><button type="button" onClick={() => { setDraft(null); setError(''); }}>Cancel</button></div>
+
+      <div className={styles.actions}><button className={styles.primary} type="submit" title="Update the production preview with this rule">Apply rule</button><button type="button" onClick={() => { setDraft(null); setError(''); }}>Cancel</button></div>
     </form>}
     {error && <p role="alert" className={styles.error}>{error}</p>}
   </div>;

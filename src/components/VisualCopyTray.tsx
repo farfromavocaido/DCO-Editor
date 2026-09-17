@@ -35,13 +35,13 @@ export function VisualCopyTray({document,size,target,scopes,operation,onCancel,o
   const [placements,setPlacements]=useState({});
   const [arrangement,setArrangement]=useState('');
   const [sourceMember,setSourceMember]=useState({size,targetId:target.id,scope:[...scopes].sort().join('.')});
-  const [picks,setPicks]=useState({});
+  const [picks,setPicks]=useState(()=>operation==='from'?{[memberKey({size,scope:scopes.join('.')})]:{size,targetId:target.id,scope:scopes.join('.'),row}}:{});
   const [fields,setFields]=useState([]);
   const [filterSize,setFilterSize]=useState(isComponent?'*':size);
   const [filters,setFilters]=useState(Object.fromEntries(editable.map((d,i)=>[d.id,i===0&&!isComponent?'*':String(d.options.find(o=>scopes.includes(o.scope))?.value ?? d.defaultValue)])));
   const [filterOpen,setFilterOpen]=useState(false);
   const [showSelected,setShowSelected]=useState(false);
-  const [sourcePicking,setSourcePicking]=useState(false);
+  const [sourcePicking,setSourcePicking]=useState(operation==='from');
   const [mode,setMode]=useState(operation==='link'?'link':'copy');
   const [name,setName]=useState('');
   const [keepGeometry,setKeepGeometry]=useState(true);
@@ -85,7 +85,7 @@ export function VisualCopyTray({document,size,target,scopes,operation,onCancel,o
   const choose=member=>{
     setError('');
     const key=memberKey(member);
-    if(sourcePicking){setSourceMember({size:member.size,targetId:target.id,scope:member.scope});setPicks(old=>Object.fromEntries(Object.entries(old).filter(([id])=>id!==key)));setSourcePicking(false);return;}
+    if(sourcePicking){setSourceMember({size:member.size,targetId:target.id,scope:member.scope});setPicks(old=>Object.fromEntries(Object.entries(old).filter(([id])=>id!==key)));setSourcePicking(false);if(operation==='from')setShowSelected(true);return;}
     if(key===sourceKey)return;
     setPicks(old=>old[key]?Object.fromEntries(Object.entries(old).filter(([id])=>id!==key)):{...old,[key]:member});
   };
@@ -121,10 +121,10 @@ export function VisualCopyTray({document,size,target,scopes,operation,onCancel,o
     if(event.key==='Escape'){event.stopPropagation();inspect?closeInspect():onCancel();}
     if(event.key==='Tab'){const items=[...dialog.current.querySelectorAll('button:not(:disabled),input,select,summary,[tabindex="0"]')].filter(el=>el.getClientRects().length && !el.closest('[inert]'));const first=items[0],last=items.at(-1);if(event.shiftKey&&window.document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&window.document.activeElement===last){event.preventDefault();first?.focus();}}
   }}><section className="visual-copy-tray" role="dialog" aria-modal="true" aria-label="Copy appearance" ref={dialog} tabIndex={-1}>
-    <header><div><h2>{target.label || target.id}</h2><span>Use this appearance in…</span></div><button aria-label="Close appearance tray" onClick={onCancel}>×</button></header>
+    <header><div><h2>{target.label || target.id}</h2><span>{operation==='from'?'Choose an appearance for this version':'Use this appearance in…'}</span></div><button aria-label="Close appearance tray" onClick={onCancel}>×</button></header>
     <div className="visual-copy-workspace" inert={inspect?true:undefined}>
-      <aside className="visual-copy-source"><div className="visual-copy-section-title"><strong>Source</strong><button aria-pressed={sourcePicking} onClick={()=>setSourcePicking(!sourcePicking)}>{sourcePicking?'Cancel source selection':'Change source'}</button></div>
-        {preview(document,{...sourceMember,row:sourceState.row},'Source ad',true,true)}
+      <aside className="visual-copy-source"><div className="visual-copy-section-title"><strong>{operation==='from'&&sourcePicking?'Current destination':'Source'}</strong><button aria-pressed={sourcePicking} onClick={()=>setSourcePicking(!sourcePicking)}>{sourcePicking?'Cancel source selection':'Change source'}</button></div>
+        {preview(document,{...sourceMember,row:sourceState.row},operation==='from'&&sourcePicking?'Destination ad':'Source ad',true,true)}
         <strong>{sourceMember.size.replace('x',' × ')}</strong><p>{describe(model,sourceMember.scope)}</p>{sourceState.synthesized&&<small>Uses current sample copy.</small>}
         <label className="visual-copy-time">Animation time <input aria-label="Comparison timeline" type="range" min="0" max="100" value={percent} onChange={event=>setPercent(Number(event.target.value))}/><span>{(percent/100*Number(document.clock?.durationS||15)).toFixed(1)}s</span></label>
       </aside>
@@ -142,8 +142,8 @@ export function VisualCopyTray({document,size,target,scopes,operation,onCancel,o
         <div className="visual-copy-grid">{visible.map(member=>{
           const key=memberKey(member),isSource=key===sourceKey,isPicked=!!picks[key],proposed=isPicked&&after&&proposal.document;
           return <article key={key} className={`visual-copy-card ${isPicked?'is-picked':''} ${isSource?'is-source':''}`}>
-            <button className="visual-copy-card-select" aria-label={`${sourcePicking?'Use as source':'Select'} ${member.size} ${describe(model,member.scope)}`} aria-pressed={isPicked} disabled={isSource&&!sourcePicking} onClick={()=>choose(member)}>
-              <span className="visual-copy-card-state">{isSource?'Source':isPicked?(proposed?'Selected · After':'Selected · Before'):'Select ad'}</span>
+            <button className="visual-copy-card-select" aria-label={`${sourcePicking?'Use as source':'Select'} ${member.size} ${describe(model,member.scope)}`} aria-pressed={isPicked} disabled={isSource&&(!sourcePicking||operation==='from')} onClick={()=>choose(member)}>
+              <span className="visual-copy-card-state">{isSource?(operation==='from'&&sourcePicking?'Destination':'Source'):isPicked?(proposed?'Selected · After':'Selected · Before'):'Select ad'}</span>
               {preview(proposed||document,member,`${member.size} · ${describe(model,member.scope)}`)}
               <strong title={describe(model,member.scope)}>{cardTitle(member)}</strong><span>{cardCaption(member)}</span>{member.synthesized&&<small>Current sample copy</small>}
             </button><button className="visual-copy-enlarge" onClick={()=>setInspect(member)} aria-label={`Compare ${member.size} ${describe(model,member.scope)}`}>Compare larger ↗</button>

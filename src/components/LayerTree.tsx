@@ -3,7 +3,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import {feedFieldForEditableTarget} from '@/lib/preview-utils';
 import { EditorIcon } from '@/components/EditorIcon';
+import {CreativeContextMenu} from './CreativeContextMenu';
 import { FontManager } from './FontManager';
 import { CampaignStateController } from './CampaignStateController';
 import { SampleFeedPanel } from '@/components/SampleFeedPanel';
@@ -251,13 +253,13 @@ export function LayerTree() {
   const openMenu = (event, layer, target = null) => {
     event.preventDefault();
     event.stopPropagation();
-    if (target) selectTarget(target.id);
-    else selectLayer(layer.id);
+    if(!selectedTargetIds.includes(target?.id||layer.id)){if (target) selectTarget(target.id);else selectLayer(layer.id);}
     setMenu({
       x: event.clientX,
       y: event.clientY,
       layerId: layer.id,
       title: target?.label || layer.label || layer.id,
+      editField:feedFieldForEditableTarget(layer,target?.id||layer.id),
       locked: lockedLayerIds.has(String(layer.id)),
       hidden: hiddenLayerIds.has(String(layer.id)),
       choices: menuChoicesForTarget(target?.id || layer.id).slice(0, 4),
@@ -267,9 +269,7 @@ export function LayerTree() {
   const openTargetMenu = (event, targetId, title) => {
     event.preventDefault();
     event.stopPropagation();
-    if (targetId === OFFERS_BLOCK_ID) selectOffersBlock();
-    else if (layerById.has(targetId)) selectLayer(targetId);
-    else selectTarget(targetId);
+    if(!selectedTargetIds.includes(targetId)){if (targetId === OFFERS_BLOCK_ID) selectOffersBlock();else if (layerById.has(targetId)) selectLayer(targetId);else selectTarget(targetId);}
     setMenu({
       x: event.clientX,
       y: event.clientY,
@@ -617,7 +617,7 @@ export function LayerTree() {
                 <button type="button" disabled={selectedTargetIds.length < 2} onClick={() => { try { groupTargets(canvasGroupName); setGroupError(''); } catch (error) { setGroupError(error.message); } }}>Group selected items</button>
                 <button type="button" disabled={!selectedTargetIds.some((id) => String(id).startsWith('canvas-group:'))} onClick={ungroupTargets}>Ungroup selected groups</button>
                 {groupError ? <p role="alert">{groupError}</p> : null}
-                {(sizeCreative?.canvasGroups || []).map((group) => <div key={group.id}>
+                {(sizeCreative?.canvasGroups || []).map((group) => <div key={group.id} onContextMenu={event=>openTargetMenu(event,group.id,group.name)}>
                   <button type="button" className={`layer-row-main ${(selectedTargetId === group.id || selectedTargetIds.includes(group.id)) ? 'is-selected' : ''}`} onClick={(event) => handleTreeTargetClick(event,group.id,() => setCanvasSelection(group.id,[group.id]))}><EditorIcon name="group" /> {group.name} · {group.members.length} items</button>
                   <div className="layer-child-list">{group.members.map((member) => <button key={member} type="button" className="layer-row-main" onClick={(event) => handleTreeTargetClick(event,member,() => setCanvasSelection(member,[member],[group.id]))}>{findCreativeTarget(document,size,member,activeScopes)?.label || member}</button>)}</div>
                 </div>)}
@@ -638,28 +638,7 @@ export function LayerTree() {
         ) : null}
       </section>
 
-      {menu ? (
-        <div className="canvas-menu layer-menu" style={{ left: menu.x, top: menu.y }}>
-          <strong>{menu.title}</strong>
-          {menu.choices.map((choice) => (
-            <button key={choice.id} type="button" onClick={() => { choice.select(); setMenu(null); }}>{choice.label}</button>
-          ))}
-          <button type="button" onClick={() => { duplicateLayer(menu.layerId); setMenu(null); }}>Duplicate layer</button>
-          <button type="button" onClick={() => { deleteLayer(menu.layerId); setMenu(null); }}>Delete layer</button>
-          <button type="button" onClick={() => { toggleLayerLock(menu.layerId); setMenu(null); }}>
-            {menu.locked ? 'Unlock layer' : 'Lock layer'}
-          </button>
-          <button type="button" onClick={() => { toggleLayerVisibility(menu.layerId); setMenu(null); }}>
-            {menu.hidden ? 'Show layer' : 'Hide layer'}
-          </button>
-          <button type="button" onClick={() => { moveLayerZ(menu.layerId, 1); setMenu(null); }}>Bring forward</button>
-          <button type="button" onClick={() => { moveLayerZ(menu.layerId, -1); setMenu(null); }}>Send backward</button>
-          <button type="button" onClick={() => { addShapeLayer(); setMenu(null); }}>Add rectangle</button>
-          <button type="button" onClick={() => { addAnimationIntent(menu.layerId, 'fadeIn'); setMenu(null); }}>Fade in at playhead</button>
-          <button type="button" onClick={() => { addAnimationIntent(menu.layerId, 'fadeOut'); setMenu(null); }}>Fade out at playhead</button>
-          <button type="button" onClick={() => { copySelectedClipToAnimationFamily(); setMenu(null); }}>Apply motion to family</button>
-        </div>
-      ) : null}
+      {menu && <CreativeContextMenu menu={menu} onClose={()=>setMenu(null)}/>}
     </aside>
   );
 }

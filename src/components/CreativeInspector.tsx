@@ -367,7 +367,7 @@ export function CreativeInspector() {
           open={openSections.has('layout')}
           onToggle={() => toggleSection('layout')}
         >
-          <p className="inspector-note">{isGroupedSelection ? layoutNote : "Changes apply to this format and the current feed conditions."}</p>
+          <span className="inspector-help" tabIndex={0} aria-label="Editing scope" title={isGroupedSelection ? layoutNote : "Changes apply to this format and the current feed conditions."}>ⓘ</span>
           <OfferArrangementControls document={document} size={size} target={selectedTarget} scopes={activeScopes} />
           {!isGroupedSelection ? (
           <div className="inspector-grid">

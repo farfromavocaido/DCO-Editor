@@ -15,16 +15,12 @@ export function OfferArrangementControls({document,size,target,scopes}:Props) {
   if(!related) return null;
   const mode=offerArrangementMode(document,size,scopes);
   return <div className="offer-arrangement-controls">
-    <label className="inspector-field"><span>Active offer arrangement · this preview state</span>
-      <select aria-label="Active offer arrangement" value={mode} disabled={busy||renderMode!=='font'} onChange={async event=>{
+    <label className="inspector-field"><span title="Automatic adjusts offer spacing and plus/text positions. Manual keeps the current layout for this version. Switching back restores the arrangement from before the manual session.">Offer layout</span>
+      <select aria-label="Active offer arrangement" title="Automatic adjusts spacing. Manual lets you position the offers yourself. Applies to this version." value={mode} disabled={busy||renderMode!=='font'} onChange={async event=>{
         setBusy(true);setError('');
         try{await setArrangement(event.target.value);}catch(cause){setError(cause instanceof Error?cause.message:String(cause));}finally{setBusy(false);}
       }}><option value="auto">Automatic</option><option value="manual">Manual</option></select>
     </label>
-    <p className="inspector-note">{mode==='manual'
-      ? 'You own slot, plus and subline positions for this preview state. Automatic spacing and subline positioning are off.'
-      : 'Automatic layout can adjust offer spacing, plus positions and side-by-side subline X. Choose Manual to preserve the current arrangement and move these items.'}</p>
-    <p className="inspector-note">Applies to the whole active offer arrangement. Other preview states are unchanged. Returning to Automatic restores the authored arrangement before this manual session.</p>
     {renderMode!=='font'?<button type="button" onClick={()=>setRenderMode('font')}>Switch to Dynamic text to measure arrangement</button>:null}
     {busy?<p role="status">Measuring the production arrangement…</p>:null}
     {error?<p role="alert">{error}</p>:null}

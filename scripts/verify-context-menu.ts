@@ -1,0 +1,32 @@
+import fs from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import {chromium} from 'playwright';
+const origin=process.argv[2]||'http://localhost:5198';
+async function main(){const source=await fs.readFile('campaign/sse-dco-creative.json','utf8'),browser=await chromium.launch();try{
+ const fixture=JSON.parse(source);fixture.sizes['300x600'].localOverrides=[...(fixture.sizes['300x600'].localOverrides||[]),{targetId:'bg-image',scope:'offers-2',values:{top:37},fit:{}}];
+ const page=await browser.newPage({viewport:{width:1650,height:1100}}),errors:string[]=[];let payload:any;page.on('pageerror',e=>errors.push(e.message));page.on('console',message=>{if(message.type()==='error'&&!message.text().includes('net::ERR'))errors.push(message.text());});
+ await page.route(url=>url.pathname==='/api/creative',r=>r.fulfill({contentType:'application/json',body:JSON.stringify(fixture)}));
+ await page.route(url=>/\/api\/creative\/[^/]+\/view/.test(url.pathname),r=>{payload=r.request().postDataJSON();return r.continue();});
+ await page.goto(origin);const ready=async()=>{await page.waitForTimeout(120);await page.locator('[data-production-frame][data-ready="true"]').waitFor({timeout:45000});};await ready();
+ await page.locator('[data-section="layers"] .sidebar-section-toggle').click();
+ const row=(id:string)=>page.locator(`[data-section="layers"] [data-layer-id="${id}"]`).first();
+ const menu=()=>page.getByRole('menu',{name:'Element actions',exact:true});
+ await row('bg-image').click({button:'right'});assert.equal(await menu().getByRole('menuitem',{name:'Paste properties',exact:true}).isDisabled(),true);
+ await menu().getByRole('menuitem',{name:'Actions',exact:true}).hover();await page.getByRole('menu',{name:'Actions',exact:true}).getByRole('menuitem',{name:'Duplicate',exact:true}).waitFor();await page.keyboard.press('Escape');assert.equal(await menu().count(),0);
+ await row('bg-image').click({button:'right'});await menu().getByRole('menuitem',{name:'Copy properties',exact:true}).click();
+ await row('logo-act1').click({button:'right'});assert.equal(await menu().getByRole('menuitem',{name:'Paste properties',exact:true}).isEnabled(),true);const before=JSON.stringify(payload.document);
+ await menu().getByRole('menuitem',{name:'Paste properties',exact:true}).click();await ready();assert.notEqual(JSON.stringify(payload.document),before);assert.deepEqual(payload.document.feed,JSON.parse(before).feed);
+ await page.keyboard.press('Meta+z');await ready();assert.equal(JSON.stringify(payload.document),before);
+ await row('bg-image').locator('.layer-row-main').click();await row('bg-blur').locator('.layer-row-main').click({modifiers:['Meta']});await row('bg-image').click({button:'right'});
+ await menu().getByRole('menuitem',{name:'Group selection',exact:true}).click();await ready();assert.equal(payload.document.sizes[payload.size||'300x600']?.canvasGroups?.at(-1)?.members.length||payload.document.sizes['300x600'].canvasGroups.at(-1).members.length,2);
+ const group=page.getByRole('button',{name:/Canvas group · 2 items/});await group.click({button:'right'});await menu().getByRole('menuitem',{name:'Ungroup',exact:true}).click();await ready();assert.equal(await group.count(),0);
+ await row('bg-image').locator('.layer-row-main').click();await row('bg-image').click({button:'right'});await menu().getByRole('menuitem',{name:'Copy from…',exact:true}).click();
+ const tray=page.getByRole('dialog',{name:'Copy appearance'});await tray.waitFor();await tray.getByRole('button',{name:'Position',exact:true}).click();
+ const candidate=tray.getByRole('button',{name:/Use as source .*Offers: 2/}).first();await candidate.click();assert.equal(await tray.locator('.visual-copy-card.is-picked').count(),1);await tray.locator('.visual-copy-primary').click();await ready();
+ const frame=await (await page.locator('[data-production-frame]').elementHandle())!.contentFrame();assert.equal(await frame!.locator('#bg-image').evaluate(e=>getComputedStyle(e).top),'37px','Copy from writes the chosen source into the current version');
+ await row('bg-image').click({button:'right'});await menu().getByRole('menuitem',{name:'Copy to…',exact:true}).click();await tray.waitFor();await tray.getByRole('button',{name:'Close appearance tray'}).click();
+ assert.equal(await page.getByText('Changes apply to this format and the current feed conditions.',{exact:true}).count(),0);
+ await row('bg-image').click({button:'right'});await page.screenshot({path:'output/rules/context-menu-final.png'});await page.keyboard.press('Escape');assert.deepEqual(errors,[]);assert.equal(await fs.readFile('campaign/sse-dco-creative.json','utf8'),source);
+ console.log('PASS shared menu, submenu/Escape, property copy/paste/undo, multi-selection grouping/ungrouping, Copy from/to visual trays; campaign unchanged');
+ }finally{await browser.close();}}
+main().catch(e=>{console.error(e);process.exitCode=1;});

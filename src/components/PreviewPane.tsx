@@ -5,6 +5,7 @@ import { componentLinkForTarget } from '@/lib/creative-components';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import {CreativeContextMenu,CreativeTransferLauncher} from './CreativeContextMenu';
 import {RuleConnectors} from './RuleConnectors';
 import {validateLayoutRules} from '@/lib/layout-rules';
 import { ComponentNavigation } from './ComponentNavigation';
@@ -617,8 +618,7 @@ export function PreviewPane() {
   const openLayerMenu = (event: React.MouseEvent, layer: Record<string, unknown>, targetId = layer.id) => {
     event.preventDefault();
     event.stopPropagation();
-    if (targetId === OFFERS_BLOCK_ID) selectOffersBlock();
-    else selectTarget(targetId);
+    if(!useEditorStore.getState().selectedTargetIds.includes(targetId)){if (targetId === OFFERS_BLOCK_ID) selectOffersBlock();else selectTarget(targetId);}
     setContextMenu({
       x: event.clientX,
       y: event.clientY,
@@ -778,38 +778,8 @@ export function PreviewPane() {
           </div>
         </ViewportRulersFrame>
       </div>
-      {contextMenu ? (
-        <div className="canvas-menu" style={{ left: contextMenu.x, top: contextMenu.y }}>
-          <strong>{contextMenu.layerLabel}</strong>
-          {contextMenu.choices.map((choice) => (
-            <button key={choice.id} type="button" onClick={() => { choice.select(); setContextMenu(null); }}>{choice.label}</button>
-          ))}
-          {contextMenu.editField ? (
-            <button
-              type="button"
-              onClick={() => {
-                requestEditFeedField(contextMenu.editField);
-                setContextMenu(null);
-              }}
-            >
-              Edit text
-            </button>
-          ) : null}
-          <button type="button" onClick={() => { duplicateLayer(contextMenu.layerId); setContextMenu(null); }}>Duplicate layer</button>
-          <button type="button" onClick={() => { deleteLayer(contextMenu.layerId); setContextMenu(null); }}>Delete layer</button>
-          <button type="button" onClick={() => { toggleLayerLock(contextMenu.layerId); setContextMenu(null); }}>
-            {contextMenu.locked ? 'Unlock layer' : 'Lock layer'}
-          </button>
-          <button type="button" onClick={() => { toggleLayerVisibility(contextMenu.layerId); setContextMenu(null); }}>
-            {contextMenu.hidden ? 'Show layer' : 'Hide layer'}
-          </button>
-          <button type="button" onClick={() => { moveLayerZ(contextMenu.layerId, 1); setContextMenu(null); }}>Bring forward</button>
-          <button type="button" onClick={() => { moveLayerZ(contextMenu.layerId, -1); setContextMenu(null); }}>Send backward</button>
-          <button type="button" onClick={() => { addShapeLayer(); setContextMenu(null); }}>Add rectangle</button>
-          <button type="button" onClick={() => { addAnimationIntent(contextMenu.layerId, 'fadeIn'); setContextMenu(null); }}>Fade in here</button>
-          <button type="button" onClick={() => { addAnimationIntent(contextMenu.layerId, 'fadeOut'); setContextMenu(null); }}>Fade out here</button>
-        </div>
-      ) : null}
+      <CreativeTransferLauncher/>
+      {contextMenu && <CreativeContextMenu menu={contextMenu} onClose={()=>setContextMenu(null)}/>}
     </section>
   );
 }

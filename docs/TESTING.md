@@ -56,3 +56,5 @@ Do not disable a failing behavioural test simply because the art changed. First 
 - Outline test fixtures supply all their registered fonts, rather than depending on a particular weight remaining the only one.
 
 This is not a Google Ads certification suite. Platform upload validation and a review of the actual published campaign remain separate release checks. The default suite does protect the rendering and export behaviour used to produce those files.
+
+For font-to-outline ink comparisons, use an explicit CSS-pixel error budget: live Canvas text metrics and SVG path bounds can differ by a fraction of a pixel across operating systems. The pinned-text contract allows at most 1 CSS pixel between representations, while checking live anchoring and a requested 20px displacement in both representations to within 0.05px. Do not weaken the displacement check to accommodate a rendering-platform difference.

@@ -46,10 +46,32 @@ test('a hidden end reset keeps the return invisible and the loop start pose stab
  const d=fixture();d.sizes['300x250'].layers[0].clips=[{id:'mark-exit',preset:'custom',keyframes:[{at:0,opacity:1},{at:90,opacity:1},{at:95,opacity:0},{at:100,opacity:0}]}];d.layoutRules=[area()];d.layoutRules[0].transition.return={mode:'hidden',startS:9.5};validateLayoutRules(d);
  const p=await pageFor(renderWipHtml(await renderStudioReadyHtml(d,'300x250',fontOptions),d.feed.sampleRows[0]));for(const [at,y]of [[65,120],[94,120],[95,40],[100,40],[0,40]]){await p.evaluate(`(${seekProductionAnimations.toString()})(document,${at},10)`);expect(await p.locator('#mark').evaluate(e=>e.getBoundingClientRect().top)).toBeCloseTo(y,1);if(at===95)expect(await p.locator('#mark').evaluate(e=>getComputedStyle(e).opacity)).toBe('0');}await p.close();
 });
-test('pinned text keeps its ink bottom in outlined output',async()=>{
- const d=fixture();d.sizes['300x250'].layers[1].fit={mode:'shrink',maxLines:6,minFontSize:10,align:'bottom',anchor:{edge:'end',position:230}};d.feed.sampleRows[0].copy='First legal line\nSecond legal line\nThird legal line';
- const html=renderWipHtml(await renderStudioReadyHtml(d,'300x250',fontOptions),d.feed.sampleRows[0]),snapshot=await captureProductionPresentation(html,'300x250'),p=await pageFor(await renderStudioReadyHtml(d,'300x250',{...fontOptions,renderMode:'outline',presentationSnapshot:snapshot}));
- await p.evaluate(`(${seekProductionAnimations.toString()})(document,35,10)`);const bottom=await p.evaluate(source=>new Function('return '+source)()(window).ink(document.getElementById('legal')).bottom,responsiveLayoutSource());expect(bottom).toBeCloseTo(230,0);await p.close();
+test('pinned text preserves its anchor and displacement in outlined output',async()=>{
+ const measurements=[];
+ for(const anchor of [210,230]){
+  const d=fixture();d.sizes['300x250'].layers[1].fit={mode:'shrink',maxLines:6,minFontSize:10,align:'bottom',anchor:{edge:'end',position:anchor}};d.feed.sampleRows[0].copy='First legal line\nSecond legal line\nThird legal line';
+  const html=renderWipHtml(await renderStudioReadyHtml(d,'300x250',fontOptions),d.feed.sampleRows[0]);
+  const fontPage=await pageFor(html);
+  const readBottom=async page=>{await page.evaluate(`(${seekProductionAnimations.toString()})(document,35,10)`);return page.evaluate(source=>new Function('return '+source)()(window).ink(document.getElementById('legal')).bottom,responsiveLayoutSource());};
+  try{
+   const fontBottom=await readBottom(fontPage);
+   expect(Math.abs(fontBottom-anchor),'live text must obey the authored anchor').toBeLessThan(.05);
+   const snapshot=await captureProductionPresentation(html,'300x250');
+   const outlinePage=await pageFor(await renderStudioReadyHtml(d,'300x250',{...fontOptions,renderMode:'outline',presentationSnapshot:snapshot}));
+   try{
+    const outlineBottom=await readBottom(outlinePage);
+    // Canvas text metrics and SVG vector bounds use different glyph metrics.
+    // Allow one CSS pixel between representations, not an arbitrary decimal
+    // precision threshold (toBeCloseTo(...,0) was only half a pixel).
+    expect(Math.abs(outlineBottom-fontBottom),'font/outline ink parity (CSS pixels)').toBeLessThanOrEqual(1);
+    measurements.push({fontBottom,outlineBottom});
+   }finally{await outlinePage.close();}
+  }finally{await fontPage.close();}
+ }
+ // A loose absolute bound alone could conceal broken anchoring. Both output
+ // types must follow the requested 20px movement to subpixel precision.
+ expect(measurements[1].fontBottom-measurements[0].fontBottom).toBeCloseTo(20,1);
+ expect(measurements[1].outlineBottom-measurements[0].outlineBottom).toBeCloseTo(20,1);
 });
 test('playing layout motion shares the CSS animation clock',async()=>{
  const d=fixture();d.layoutRules=[area()];const p=await pageFor(renderWipHtml(await renderStudioReadyHtml(d,'300x250',fontOptions),d.feed.sampleRows[0]));await p.waitForTimeout(100);const clocks=await p.evaluate(()=>{const animations=document.getAnimations(),layout=animations.find(a=>a.id.startsWith('dco-layout-')),css=animations.find(a=>a.animationName);return {layout:layout?.startTime,css:css?.startTime};});expect(clocks.layout).toBeTypeOf('number');expect(clocks.layout).toBeCloseTo(clocks.css,1);await p.close();

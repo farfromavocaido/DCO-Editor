@@ -3948,3 +3948,9 @@ select {
 .component-layout-toggle { display:flex;gap:2px;margin-left:7px; }.component-layout-toggle button { cursor:pointer; }
 .component-layout-toggle button[aria-pressed=true] { background:#174d44;border-color:#2b9e86;color:#9aefdc; }
 .component-layout-value { width:90px; }
+.campaign-settings-panel { padding:12px; }.campaign-settings-panel > summary { cursor:pointer;font-size:13px;font-weight:600; }
+.campaign-state-controller { font-size:12px; padding:10px 0; }.campaign-state-controller p { color:#9dafba;line-height:1.4;font-size:11px; }.campaign-state-controller details { border-top:1px solid #334653;padding:8px 0; }.campaign-state-controller label { display:block;margin:7px 0; }.campaign-state-controller input:not([type=checkbox]),.campaign-state-controller select { display:block;width:100%;padding:5px;box-sizing:border-box; }.campaign-state-controller fieldset { margin:10px 0;padding:8px;border:1px solid #334653;border-radius:5px; }.campaign-state-option,.campaign-state-condition { padding:6px;border-bottom:1px solid #334653; }.campaign-state-actions { display:flex;gap:6px;margin-top:12px; }
+.campaign-settings-panel { display:block;flex:0 0 auto;padding:0;min-height:40px;overflow:auto;overscroll-behavior:contain; }
+.campaign-settings-panel[open] { flex:0 1 auto;max-height:60%; }
+.campaign-settings-panel > summary { position:sticky;top:0;z-index:1;padding:12px;background:var(--surface-muted); }
+.campaign-settings-panel > .campaign-state-controller { padding:12px; }

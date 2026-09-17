@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { isGenericCampaign, campaignVariantModel } from '@/lib/campaign-variants';
+import { isGenericCampaign, campaignVariantModel, resolveCampaignRow, assertCampaignStateValid } from '@/lib/campaign-variants';
 import { backgroundImageFieldDefinitions } from '@/lib/feed-background';
 import { remapStudioRowToCanonical } from '@/lib/feed-field-map';
 import { sizeTextFieldDefinitions } from '@/lib/feed-size-text';
@@ -96,11 +96,11 @@ export const validateFeedRows = (rows: Record<string, unknown>[], document?: Rec
     for (const field of document.feed?.fields || []) {
       if (row[field.name] !== undefined) out[field.name] = coerceField(field, row[field.name]);
     }
-    for (const d of campaignVariantModel(document).dimensions) {
+    for (const d of campaignVariantModel(document).dimensions.filter(d=>!d.derived)) {
       out[d.field] = out[d.field] ?? d.defaultValue;
       if (!d.options.some(o => o.value === out[d.field])) throw new Error(`Invalid value for variant field ${d.field}`);
     }
-    return out;
+    const resolved=resolveCampaignRow(document,out);assertCampaignStateValid(document,resolved);return resolved;
   }
   const remapped = remapStudioRowToCanonical(row);
   const out: Record<string, unknown> = {};

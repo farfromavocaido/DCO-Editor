@@ -1,5 +1,6 @@
 'use client';
 
+import { useEditorStore } from '@/store/editor-store';
 import { useEffect, useRef, useState } from 'react';
 import {
   beginProductionStage, createRenderGeneration, failProductionStage, publishProductionStage,
@@ -64,12 +65,14 @@ export function ProductionCreativeStage(props: Props) {
     const measured = readProductionTargets(stage, current.layerIds).filter(target => !current.hiddenLayerIds.has(target.id.split('::')[0]));
     setTargets(measured);
     current.onTargets(measured);
+    useEditorStore.getState().setLayoutDiagnostics((doc.defaultView as any)?.__DCO_LAYOUT_DIAGNOSTICS__ || []);
   };
 
   useEffect(() => {
     const generation = requests.current.next();
     const controller = new AbortController();
     beginProductionStage(size);
+    useEditorStore.getState().setLayoutDiagnostics([]);
     setSettling(true);
     setError('');
     setPending(null);

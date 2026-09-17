@@ -17,6 +17,9 @@ export type TextPresentationSnapshot = {
    */
   lines?: string[];
   fontSize: number;
+  fontFamily?: string;
+  fontWeight?: string;
+  fontStyle?: string;
   /** Final letter-spacing in em of the host font-size (0 when normal). */
   letterSpacingEm: number;
   /** text-fit `align: 'bottom'` translateY in px. */
@@ -333,6 +336,7 @@ export const capturePresentationSnapshot = (
       text,
       ...(lines.length ? { lines } : {}),
       fontSize,
+      fontFamily: style.fontFamily, fontWeight: style.fontWeight, fontStyle: style.fontStyle,
       letterSpacingEm: letterSpacingToEm(style.letterSpacing, fontSize),
       alignOffsetY: parseTranslateY(element.style.transform || style.transform || ''),
       scaleOfferSymbols: element.classList.contains('offer-value') || undefined,
@@ -360,6 +364,7 @@ export const capturePresentationSnapshot = (
         text: normalizeCapturedText(value.textContent),
         ...(lines.length ? { lines } : {}),
         fontSize,
+      fontFamily: style.fontFamily, fontWeight: style.fontWeight, fontStyle: style.fontStyle,
         letterSpacingEm: letterSpacingToEm(style.letterSpacing, fontSize),
         alignOffsetY: parseTranslateY(value.style.transform || style.transform || ''),
         scaleOfferSymbols: true,
@@ -376,6 +381,7 @@ export const capturePresentationSnapshot = (
         text: normalizeCapturedText(sub.textContent),
         ...(lines.length ? { lines } : {}),
         fontSize,
+      fontFamily: style.fontFamily, fontWeight: style.fontWeight, fontStyle: style.fontStyle,
         letterSpacingEm: letterSpacingToEm(style.letterSpacing, fontSize),
         alignOffsetY: parseTranslateY(sub.style.transform || style.transform || ''),
       };
@@ -433,6 +439,9 @@ export const capturePresentationSnapshot = (
     pos.inkBottom = Number(box.bottom.toFixed(2));
   };
 
+  // General responsive rules may position any painted layer, not just offers.
+  textNodes.forEach(node=>recordPosition(node as HTMLElement,textKeyForElement(node as HTMLElement)));
+  stage.querySelectorAll('[id]').forEach(node=>{const element=node as HTMLElement;if(element.id!=='clickbox')recordPosition(element,element.id);});
   const positionSelectors = [
     '#plus-1',
     '#plus-2',

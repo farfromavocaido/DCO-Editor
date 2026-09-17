@@ -5,6 +5,8 @@ import { componentLinkForTarget } from '@/lib/creative-components';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import {RuleConnectors} from './RuleConnectors';
+import {validateLayoutRules} from '@/lib/layout-rules';
 import { ComponentNavigation } from './ComponentNavigation';
 import { ProductionCreativeStage } from '@/components/ProductionCreativeStage';
 import { getProductionStage, productionTargetClipped, unionProductionBounds, type ProductionTarget } from '@/lib/production-stage';
@@ -115,6 +117,8 @@ export function PreviewPane() {
   const frameCount = useEditorStore((s) => s.frameCount);
   const roundelMode = useEditorStore((s) => s.roundelMode);
   const row = useEditorStore(selectPreviewFeedRow);
+  const layoutDiagnostics=useEditorStore(s=>s.layoutDiagnostics);
+  const selectedLayoutRuleId=useEditorStore(s=>s.selectedLayoutRuleId);
   const previewRenderMode = useEditorStore(s => s.previewRenderMode);
   const setPreviewRenderMode = useEditorStore(s => s.setPreviewRenderMode);
   const canvasZoom = useEditorStore((s) => s.canvasZoom);
@@ -212,6 +216,7 @@ export function PreviewPane() {
 
     const state = useEditorStore.getState();
     const dragTargetIds = state.selectionDragTargetIds();
+    if(state.layoutRuleBlocksEdit(dragTargetIds,['left','top']))return;
     const dragTargets = dragTargetIds
       .map((targetId) => {
         const target = findCreativeTarget(state.creativeDocument, size, targetId, activeScopes);
@@ -344,6 +349,7 @@ export function PreviewPane() {
     const memberIds = selectedTarget.id === OFFERS_BLOCK_ID
       ? scaleTargetIdsForOfferGroup(offerCount, document, size, activeScopes)
       : filterManipulationTargetIds(selectedTarget.members || [], document, size, activeScopes);
+    if(useEditorStore.getState().layoutRuleBlocksEdit(memberIds,['left','top','width','height']))return;
     const snapshots = buildGroupScaleSnapshots(document, size, memberIds, activeScopes);
     if (!snapshots.length) return;
     const beforeDocument = useEditorStore.getState().creativeDocument;
@@ -432,6 +438,7 @@ export function PreviewPane() {
       : (selectedTarget?.id && !String(selectedTarget.id).startsWith('group:') ? selectedTarget.id : selectedTargetId);
     const target = targetId ? findCreativeTarget(document, size, targetId, activeScopes) : null;
     if (event.button !== 0 || !target) return;
+    if(useEditorStore.getState().layoutRuleBlocksEdit([targetId],['left','top','width','height']))return;
     const beforeDocument = useEditorStore.getState().creativeDocument;
     const ghostStart = unionProductionBounds(productionTargets.filter(item => item.id === targetId));
     event.preventDefault();
@@ -721,6 +728,13 @@ export function PreviewPane() {
                 if (layer) openLayerMenu(event, layer, targetId);
               }}
             />
+            <RuleConnectors scaledParent width={sizeCreative.canvas.width} height={sizeCreative.canvas.height} zoom={scale} diagnostics={layoutDiagnostics.filter(item=>item.size===size&&item.targetId===(selectedTarget?.id||selectedTargetId))} selectedRuleId={selectedLayoutRuleId} onSelectRule={id=>useEditorStore.getState().selectLayoutRule(id)} onGapChange={(id,pixels)=>{
+              const diagnostic=layoutDiagnostics.find(item=>item.id===id&&item.size===size&&item.targetId===(selectedTarget?.id||selectedTargetId)&&item.status==='active');
+              if(!diagnostic)return;
+              const next={...document,layoutRules:document.layoutRules.map(rule=>rule.id===id?{...rule,[diagnostic.usingFallback?'fallbackGap':'gap']:pixels/(diagnostic.gapScale||1)}:rule)};
+              validateLayoutRules(next);useEditorStore.getState().applyCreativeOwnershipDocument(next,'Updated responsive gap');
+            }}/>
+
             {showSelectionChrome ? (
               <div
                 className={`selection-box selection-scope-${selectionBox.scope} selection-kind-${selectionKind}`}

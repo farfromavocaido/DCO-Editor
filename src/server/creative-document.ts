@@ -1,4 +1,6 @@
 // @ts-nocheck
+import {validateLayoutRules} from '@/lib/layout-rules';
+import {validateCampaignFonts} from '@/lib/campaign-fonts';
 import fs from 'node:fs/promises';
 import { validateCampaignVariantModel } from '@/lib/campaign-variants';
 import path from 'node:path';
@@ -47,6 +49,8 @@ export const validateCreativeDocument = (document: CreativeDocument) => {
     }
   }
   validateCampaignVariantModel(document);
+  validateLayoutRules(document);
+  validateCampaignFonts(document);
   materializeCreativeOwnership(document);
   validateCanvasGroups(document);
   validateCreativeComponents(document);

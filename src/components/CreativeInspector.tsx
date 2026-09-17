@@ -1,6 +1,9 @@
 // @ts-nocheck
 'use client';
 
+import {FontSelector} from './FontManager';
+import {SelectedLayoutRules} from './SelectedLayoutRules';
+import {LayoutRuleSourceBadge} from './LayoutRulesPanel';
 import { editOwnershipVersion } from '@/lib/ownership-ui';
 import { effectiveTextFitForTarget } from '@/lib/text-fit-rules';
 import { TextFitPolicyControls } from './TextFitPolicyControls';
@@ -146,6 +149,8 @@ export function CreativeInspector() {
   const selectedTargetIds = useEditorStore((s) => s.selectedTargetIds);
   const isolationPath = useEditorStore((s) => s.isolationPath);
   const fitResults = useEditorStore((s) => s.fitResults);
+  const layoutDiagnostics=useEditorStore(s=>s.layoutDiagnostics);
+  const selectLayoutRule=useEditorStore(s=>s.selectLayoutRule);
   const fitDiagnostics = useEditorStore((s) => s.fitDiagnostics);
   const fitTrackings = useEditorStore((s) => s.fitTrackings);
   const resizeMode = useEditorStore((s) => s.resizeMode);
@@ -280,6 +285,12 @@ export function CreativeInspector() {
   }
 
   const isGroupedSelection = selectedTarget.kind === 'group' || selectedTarget.kind === 'multi';
+  const layoutOwner=field=>{
+    const rule=(document.layoutRules||[]).find(rule=>rule.enabled&&rule.targets.some(member=>member.size===size&&member.targetId===selectedTarget.id)&&((rule.type==='conditional'&&Object.hasOwn(rule.values||{},field))||(rule.type==='spacing'&&(rule.axis==='x'?'left':'top')===field))&&layoutDiagnostics.some(d=>d.id===rule.id&&d.size===size&&d.targetId===selectedTarget.id&&d.status==='active'));
+    return rule?{rule,diagnostic:layoutDiagnostics.find(d=>d.id===rule.id&&d.size===size&&d.targetId===selectedTarget.id&&d.status==='active')}:null;
+  };
+  const showRule=id=>{selectLayoutRule(id);setTimeout(()=>{const details=window.document.querySelector('.inspector-scroll .selected-layout-rules');if(details){details.open=true;details.scrollIntoView({block:'nearest'});}},0);};
+
   const isGradientSelection = selectedLayer.kind === 'gradient' && !isGroupedSelection;
   const isBlurSelection = selectedLayer.kind === 'blur' && !isGroupedSelection;
   const isHeadlineSelection = isHeadlineLayer(selectedLayer) && !isGroupedSelection;
@@ -361,13 +372,12 @@ export function CreativeInspector() {
           {!isGroupedSelection ? (
           <div className="inspector-grid">
             {boxFields.map((field) => (
-              <FieldControl
-                key={field}
+              <div key={field}><FieldControl
                 label={({left:'X',top:'Y',width:'Width',height:'Height'})[field]}
-                type="text"
-                value={selectedTarget.values?.[field] ?? ''}
+                type="text" disabled={Boolean(layoutOwner(field))}
+                value={layoutOwner(field)?.diagnostic?.after?.[field] ?? selectedTarget.values?.[field] ?? ''}
                 onChange={(value) => updateTargetValue(selectedTarget.id, field, value)}
-              />
+              />{layoutOwner(field)&&<LayoutRuleSourceBadge name={layoutOwner(field).rule.name} active linked={layoutOwner(field).rule.targets.length>1} onClick={()=>showRule(layoutOwner(field).rule.id)}/>}</div>
             ))}
           </div>
           ) : (
@@ -376,6 +386,8 @@ export function CreativeInspector() {
         </InspectorSection>
 
         {!isGroupedSelection ? <CreativeOwnershipControls key={`${size}/${selectedTarget.id}/${activeScopes.join(".")}`} document={document} size={size} target={selectedTarget} scopes={activeScopes} /> : null}
+
+        {!isGroupedSelection && <SelectedLayoutRules document={document} size={size} targetId={selectedTarget.id} scopes={activeScopes}/>}
 
         {isHeadlineSelection ? (
           <InspectorSection
@@ -467,6 +479,7 @@ export function CreativeInspector() {
             open={openSections.has('type')}
             onToggle={() => toggleSection('type')}
           >
+            <FontSelector document={document} value={selectedTarget.values} onChange={patch=>editVersion(selectedTarget.id,'values',patch)}/>
             <ButtonGroupControl
               label="Handles"
               value={resizeMode}

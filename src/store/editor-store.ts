@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client';
 
-import { campaignScopes, campaignVariantModel, campaignRowForScopes, isGenericCampaign } from '@/lib/campaign-variants';
+import { campaignScopes, campaignVariantModel, campaignRowForScopes, resolveCampaignRow, isGenericCampaign } from '@/lib/campaign-variants';
 
 import { create } from 'zustand';
 import { setCreativeOwnershipField } from '@/lib/creative-ownership';
@@ -154,8 +154,10 @@ export const selectSelectedFeedRow = (state) => {
 const previewRowCache = new WeakMap();
 export const selectPreviewFeedRow = (state) => {
   const row = selectSelectedFeedRow(state);
-  if (isGenericCampaign(state.creativeDocument)) return row;
-  const defaults = controlsFromFeedRow(row);
+  if (isGenericCampaign(state.creativeDocument)) {
+    const key=JSON.stringify(state.creativeDocument.variantModel);let entries=previewRowCache.get(row);if(!entries){entries=new Map();previewRowCache.set(row,entries);}if(!entries.has(key)){const resolved=resolveCampaignRow(state.creativeDocument,row);entries.set(key,Object.keys(resolved).length===Object.keys(row).length&&Object.keys(resolved).every(k=>JSON.stringify(resolved[k])===JSON.stringify(row[k]))?row:resolved);}return entries.get(key);
+  }
+  const defaults = controlsFromFeedRow(resolveCampaignRow(state.creativeDocument,row));
   const controls = {
     offerCount: state.offerCount ?? defaults.offerCount,
     tcMode: state.tcMode ?? defaults.tcMode,
@@ -266,6 +268,10 @@ export const useEditorStore = create<any>((set, get) => ({
   activeCampaignId: 'sse-dco',
   campaignLoadGeneration: 0,
   creativeDocument: null,
+  layoutDiagnostics: [],
+  selectedLayoutRuleId: null,
+  setLayoutDiagnostics: (layoutDiagnostics) => set({layoutDiagnostics}),
+  selectLayoutRule: (selectedLayoutRuleId) => set({selectedLayoutRuleId}),
   creativeDirty: false,
   selectedLayerId: '',
   selectedTargetId: '',
@@ -332,7 +338,7 @@ export const useEditorStore = create<any>((set, get) => ({
       set({offerCount:0, tcMode:'tcs_only', ctaShape:'rectangle', includeRoundelFrame:false, frameCount:0, roundelMode:'copy-only', navyHeadlines:false});
       return;
     }
-    const controls = controlsFromFeedRow(row || selectSelectedFeedRow(get()));
+    const controls = controlsFromFeedRow(resolveCampaignRow(get().creativeDocument,row || selectSelectedFeedRow(get())));
     set({
       offerCount: controls.offerCount,
       tcMode: controls.tcMode,
@@ -545,6 +551,7 @@ export const useEditorStore = create<any>((set, get) => ({
   applyCreativeOwnershipDocument: (next, message = 'Updated explicit sharing') => {
     const before = get().creativeDocument;
     set({ creativeDocument: next, creativeDirty: true });
+    if(before?.campaignState!==next?.campaignState || before?.variantModel!==next?.variantModel)get().syncControlsFromFeedRow();
     get().setStatus(message, 'warn');
     get().pushHistory([{ kind: 'creativeDocument', before, after: next }]);
   },
@@ -1121,7 +1128,15 @@ export const useEditorStore = create<any>((set, get) => ({
     get().setStatus('Unsaved creative changes', 'warn');
   },
 
+  layoutRuleBlocksEdit: (targetIds, fields) => {
+    const state=get();
+    const owner=(state.creativeDocument?.layoutRules||[]).find(rule=>state.layoutDiagnostics.some(d=>d.id===rule.id&&d.size===state.size&&d.status==='active'&&targetIds.some(id=>d.targetId===id||d.targetId.startsWith(id+'::')))&&fields.some(field=>rule.type==='spacing'?(rule.axis==='x'?'left':'top')===field:Object.hasOwn(rule.values||{},field)));
+    if(!owner)return false;
+    get().selectLayoutRule(owner.id);get().setStatus(`“${owner.name}” controls this placement. Edit the rule, or disable or freeze it to place manually.`,'warn');return true;
+  },
+
   updateCreativeTargetValue: (targetId, field, value, { record = true, before = undefined } = {}) => {
+    if(get().layoutRuleBlocksEdit([targetId],[field]))return;
     const state = get();
     const size = state.size;
     const activeScopes = state.activeScopes();
@@ -1642,7 +1657,7 @@ export const useEditorStore = create<any>((set, get) => ({
         selectedIndex: Math.min(state.feedDraft.selectedIndex || 0, Math.max(0, (payload.rows || []).length - 1)),
       }),
       creativeDocument,
-      creativeDirty: false,
+      creativeDirty: state.creativeDirty,
       saveFeedDisabled: true,
     });
     get().syncControlsFromFeedRow();
@@ -2167,8 +2182,8 @@ export const useEditorStore = create<any>((set, get) => ({
       method: 'POST',
       body: JSON.stringify(document),
     });
-    set({ creativeDocument: payload, creativeDirty: false });
-    get().setStatus('Saved creative document');
+    if(get().creativeDocument===state.creativeDocument && get().feedDraft.rows===state.feedDraft.rows){set({ creativeDocument: payload, creativeDirty: false,saveFeedDisabled:true,feedDraft:{...get().feedDraft,dirty:false} });get().setStatus('Saved creative document');}
+    else get().setStatus('Saved previous revision; newer edits remain unsaved','warn');
   },
 
   updateSelectedFeedField: (fieldName, value) => {

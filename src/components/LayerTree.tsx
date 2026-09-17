@@ -4,6 +4,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { EditorIcon } from '@/components/EditorIcon';
+import { FontManager } from './FontManager';
+import { CampaignStateController } from './CampaignStateController';
 import { SampleFeedPanel } from '@/components/SampleFeedPanel';
 import { editableTargetsForLayer, groupedCreativeLayers, currentSizeCreative, findCreativeTarget, targetIdForLayerChild } from '@/lib/creative-model';
 import { creativeComponents } from '@/lib/creative-components';
@@ -554,6 +556,10 @@ export function LayerTree() {
         ) : null}
       </section>
 
+      {document && <>
+        <details className="sidebar-section campaign-settings-panel"><summary>Fonts</summary><FontManager document={document} campaignId={document.campaign.id} onChange={fonts=>useEditorStore.getState().applyCreativeOwnershipDocument({...document,fonts},'Updated campaign fonts')}/></details>
+        <details className="sidebar-section campaign-settings-panel"><summary>Campaign states</summary><CampaignStateController key={document.campaign.id} document={document}/></details>
+      </>}
       <section className={`sidebar-section ${layersOpen ? 'is-open' : 'is-collapsed'}`} data-section="layers">
         <div className="sidebar-section-head">
           <button

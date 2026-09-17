@@ -1,4 +1,8 @@
 // @ts-nocheck
+import {layoutRulesForSize} from '@/lib/layout-rules';
+import {responsiveLayoutSource} from '@/lib/responsive-layout';
+import {campaignFontFaces,campaignFontFaceCss,campaignFontAssetUrl} from '@/lib/campaign-fonts';
+import {campaignFontAssets,validateCampaignFontFiles,verifyCampaignFontCdn} from './campaign-fonts';
 import { readFileSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -37,7 +41,7 @@ import {
   type DcoMarketId,
 } from '@/lib/dco-markets';
 import { studioToCanonicalFieldMap } from '@/lib/feed-field-map';
-import { campaignScopes, isGenericCampaign, validateCampaignVariantModel } from '@/lib/campaign-variants';
+import { campaignScopes, campaignVariantModel, evaluateConditions, isGenericCampaign, validateCampaignVariantModel } from '@/lib/campaign-variants';
 import { campaignRuntimeScript, campaignStudioDynamicContentScript } from './campaign-runtime';
 import { activeScopesFromControls, clampOfferCount, controlsFromFeedRow } from '@/lib/feed-model';
 import {
@@ -104,6 +108,8 @@ type RenderOptions = {
   assetUrlMap?: Record<string, string>;
   fontBasePath?: string;
   fontUrlMap?: Record<string, string>;
+  campaignDocument?: any;
+  layoutRules?: any[];
   includePackagedBackground?: boolean;
   includePreviewBridge?: boolean;
   includeStudioDynamicContent?: boolean;
@@ -383,12 +389,22 @@ const assetSrc = (src: unknown, options: RenderOptions = {}) => {
   return `${options.assetBasePath.replace(/\/?$/, '/')}${value.replace(/^\/+/, '')}`;
 };
 
+const campaignCdnFontUrls = async (document) => {
+  if(document.fonts===undefined)return CDN_FONT_URLS;
+  const faces=campaignFontFaces(document);
+  // Delivery must use the same bytes as the editor and fixed-copy outliner.
+  await Promise.all(faces.map(verifyCampaignFontCdn));
+  return Object.fromEntries(faces.map(face=>[path.basename(face.asset),face.cdnUrl]));
+};
+const packagedCampaignFonts = async (document) => document.fonts===undefined ? CLIENT_FONT_FILES : (await campaignFontAssets(document)).map(({filename,sourcePath})=>({filename,resolveSourcePath:async()=>sourcePath}));
+
 const fontUrl = (filename: string, options: RenderOptions = {}) => (
   options.fontUrlMap?.[filename]
     || `${String(options.fontBasePath || '').replace(/\/?$/, '/')}${filename}`
 );
 
 const localFontFaceCss = (options: RenderOptions = {}) => {
+  if(options.campaignDocument?.fonts!==undefined)return campaignFontFaceCss(options.campaignDocument,face=>fontUrl(path.basename(face.asset),options));
   if (!options.fontBasePath && !options.fontUrlMap) return '';
   // Museo ships as a single 700 face. Ads must request 700 so this descriptor
   // matches the file (no 400/900 range that implies other weights exist).
@@ -404,7 +420,8 @@ const localFontFaceCss = (options: RenderOptions = {}) => {
 const packagedFontPreloadTags = (options: RenderOptions = {}) => {
   if (!options.fontBasePath && !options.fontUrlMap) return '';
   const seen = new Set<string>();
-  return CLIENT_FONT_FILES
+  const files=options.campaignDocument?.fonts!==undefined?campaignFontFaces(options.campaignDocument).map(face=>({filename:path.basename(face.asset)})):CLIENT_FONT_FILES;
+  return files
     .map((font) => fontUrl(font.filename, options))
     .filter((url) => {
       if (seen.has(url)) return false;
@@ -882,6 +899,8 @@ const renderOutlinedLayer = async (
   return `          <div class="${className}" id="${escapeAttr(layer.id)}"${layerIdAttr}${positionAttr}>${svg}</div>`;
 };
 
+const inkImageAttributes = (targetId: string, options: RenderOptions) => options.layoutRules?.some(rule=>rule.enabled && rule.type==='spacing' && [rule.targetId,rule.reference?.targetId].includes(targetId)) ? ' crossorigin="anonymous"' : '';
+
 const renderLayer = (layer: Record<string, unknown>, options: RenderOptions = {}, generic = false) => {
   const cssClass = !generic && isHeadlineLayer(layer)
     ? HEADLINE_CSS_CLASS
@@ -889,7 +908,7 @@ const renderLayer = (layer: Record<string, unknown>, options: RenderOptions = {}
   if (!generic && layer.id === 'terms-solo') return '';
   if (!generic && layer.id.startsWith('offer-slot-')) return renderOfferSlot(layer);
   if (layer.kind === 'image') {
-    return `          <img alt="" draggable="false" class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}" src="${escapeAttr(assetSrc(layer.asset, options))}"${generic && layer.binding?.field ? ` data-dco-field="${escapeAttr(layer.binding.field)}"` : ''}>`;
+    return `          <img alt="" draggable="false" class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}"${inkImageAttributes(String(layer.id),options)} src="${escapeAttr(assetSrc(layer.asset, options))}"${generic && layer.binding?.field ? ` data-dco-field="${escapeAttr(layer.binding.field)}"` : ''}>`;
   }
   if (isGradientLayer(layer) || isBlurLayer(layer)) {
     return `          <div class="stage-element ${cssClass}" id="${escapeAttr(layer.id)}" data-layer-id="${escapeAttr(layer.id)}"></div>`;
@@ -943,8 +962,8 @@ const renderOutlinedTermsWrappers = async (
     activeScopes,
     snapshot: options.presentationSnapshot,
   });
-  return `          <div class="stage-static tc-solo-group" data-gwd-group="tc_solo" id="TC_Solo">
-            <div class="gwd-grp-tc sse-text sse-bottom-line outlined-text ${solo?.base?.cssClass || 'terms-solo'}">${svg}</div>
+  return `          <div class="stage-static tc-solo-group" data-gwd-group="tc_solo" id="TC_Solo"${positionStyleAttr(options.presentationSnapshot,'TC_Solo')}>
+            <div class="gwd-grp-tc sse-text sse-bottom-line outlined-text ${solo?.base?.cssClass || 'terms-solo'}"${positionStyleAttr(options.presentationSnapshot,'terms-solo')}>${svg}</div>
           </div>`;
 };
 
@@ -1119,19 +1138,22 @@ const runtimeScript = (
         });`
     : '';
   return `
+    ${options.layoutRules?.length ? `<script type="application/json" id="dco-layout-rules">${JSON.stringify(options.layoutRules).replace(/</g,'\\u003c')}</script>` : ''}
     <script type="application/json" id="sse-production-fit-rules">${JSON.stringify(fitRules).replace(/</g, '\\u003c')}</script>
     <script>
       (function() {
         var root = null;
+        ${options.campaignDocument?.campaignState ? `var evaluateConditions=${evaluateConditions.toString()};var campaignConstraints=${JSON.stringify(campaignVariantModel(options.campaignDocument).constraints||[]).replace(/</g,'\\u003c')};` : ''}
+        ${options.layoutRules?.length ? `var responsiveLayout = ${responsiveLayoutSource()}(window);var layoutRules=JSON.parse(document.getElementById('dco-layout-rules').textContent);window.updateSseDcoLayoutRules=function(next){layoutRules=next;};` : ''}
         var textFitRules = JSON.parse(document.getElementById('sse-production-fit-rules').textContent);
         window.updateSseDcoFitRules = function(rules) { textFitRules = rules; };
         var settlementGeneration = 0;
         function settleRuntime() {
           var generation = ++settlementGeneration;
-          window.__SSE_DCO_SETTLED__ = Promise.resolve(document.fonts && document.fonts.ready).then(function() {
+          window.__SSE_DCO_SETTLED__ = Promise.all([document.fonts && document.fonts.ready${options.layoutRules?.length ? `,...Array.from(document.images).map(function(img){return img.complete?Promise.resolve():new Promise(function(resolve){img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true});});})` : ''}]).then(function() {
             return new Promise(function(resolve) {
               window.requestAnimationFrame(function() {
-                if (generation === settlementGeneration) commitOfferLayout();
+                if (generation === settlementGeneration) {commitOfferLayout();${options.layoutRules?.length ? 'releaseMotionClock();' : ''}}
                 window.requestAnimationFrame(resolve);
               });
             });
@@ -1270,9 +1292,11 @@ const runtimeScript = (
 
         function commitOfferLayout() {
           if (!root) return;
+          ${options.layoutRules?.length ? 'responsiveLayout.reset();' : ''}
           fitBoundText();
           alignOfferValueSymbols(root);
           layoutOffers(root);
+          ${options.layoutRules?.length ? 'responsiveLayout.run(root,layoutRules);' : ''}
         }
 
         // Cold CDN Museo must settle before the 15s clock runs. Pausing via
@@ -1345,6 +1369,8 @@ const runtimeScript = (
         }
 
         function applyRuntimeState(row) {
+          ${options.campaignDocument?.campaignState ? `row=Object.assign({},${JSON.stringify(Object.fromEntries(campaignVariantModel(options.campaignDocument).dimensions.filter(d=>!d.derived).map(d=>[d.field,d.defaultValue])))},row);` : ''}
+          ${options.campaignDocument?.campaignState ? `campaignConstraints.forEach(function(rule){if(evaluateConditions(row,rule.when)&&!evaluateConditions(row,rule.require))throw new Error(rule.message||'This campaign state is not allowed');});` : ''}
           window.__SSE_DCO_APPLIED_ROW__ = row;
           root = root || document.getElementById('page-content');
           if (!root) return;
@@ -1392,7 +1418,7 @@ const runtimeScript = (
           // still holds the clock until startMotionWhenReady releases it.
           commitOfferLayout();
           wireExit(data);
-          startMotionWhenReady();
+          ${options.layoutRules?.length ? '' : 'startMotionWhenReady();'}
           settleRuntime();
           window.__SSE_DCO_READY__ = true;
         }
@@ -1660,7 +1686,7 @@ const renderBody = async (document: Record<string, unknown>, size: string, optio
       ? ''
       : ` data-packaged-src="${escapeAttr(background)}"`;
     return `      <main id="page-content" class="stage page-content ${stateClass}" data-size="${escapeAttr(size)}"${plusLayoutAttr}>
-          <img alt="" draggable="false" class="stage-element bg-image" id="bg-image" src="${escapeAttr(background)}"${packagedSrcAttr}>
+          <img alt="" draggable="false" class="stage-element bg-image" id="bg-image" src="${escapeAttr(background)}"${packagedSrcAttr}${positionStyleAttr(options.presentationSnapshot,'bg-image')}>
 ${layers}
 ${terms}
           <a id="clickbox" href="javascript:void(0)" aria-label="Click through"></a>
@@ -1672,7 +1698,7 @@ ${terms}
     .filter(Boolean)
     .join('\n');
   return `      <main id="page-content" class="stage page-content ${stateClass}" data-size="${escapeAttr(size)}"${plusLayoutAttr} data-dco-state="offer_count_num,tc_type_enum,cta_type_enum,include_roundel_frame_bool,roundel_value_text">
-          <img alt="" draggable="false" class="stage-element bg-image" id="bg-image" src="${escapeAttr(background)}" data-packaged-src="${escapeAttr(background)}" data-dco-field="${escapeAttr(backgroundImageFieldName(size))}">
+          <img alt="" draggable="false" class="stage-element bg-image" id="bg-image"${inkImageAttributes('bg-image',options)} src="${escapeAttr(background)}" data-packaged-src="${escapeAttr(background)}" data-dco-field="${escapeAttr(backgroundImageFieldName(size))}">
 ${layers}
 ${renderTermsWrappers(sizeCreative)}
           <a id="clickbox" href="javascript:void(0)" aria-label="Click through"></a>
@@ -1685,6 +1711,8 @@ export const renderStudioReadyHtml = async (
   options: RenderOptions = {},
 ) => {
   validateCampaignVariantModel(document);
+  if(document.fonts!==undefined)await validateCampaignFontFiles(document);
+  options={...options,campaignDocument:document,layoutRules:layoutRulesForSize(document,size)};
   document = materializeCreativeOwnership(document);
   if (options.renderMode === 'outline' && !options.presentationSnapshot) {
     const { captureProductionPresentation } = await import('./production-snapshot');
@@ -3744,7 +3772,7 @@ export const buildClientPreviewPackageEntries = async (document: Record<string, 
     : useCdnAssets
       ? CDN_ASSET_URLS
       : undefined;
-  const fontUrlMap = renderMode === 'outline' ? undefined : (useCdnAssets ? CDN_FONT_URLS : undefined);
+  const fontUrlMap = renderMode === 'outline' ? undefined : (useCdnAssets ? await campaignCdnFontUrls(document) : undefined);
   const entries: PackageEntry[] = [];
   const sizes = Object.keys(document.sizes || {});
   for (const size of sizes) {
@@ -3783,7 +3811,7 @@ export const buildClientPreviewPackageEntries = async (document: Record<string, 
   }
 
   if (renderMode === 'font') {
-    for (const font of CLIENT_FONT_FILES) {
+    for (const font of await packagedCampaignFonts(document)) {
       if (fontUrlMap?.[font.filename]) continue;
       entries.push({
         path: `ads/assets/fonts/${font.filename}`,
@@ -3834,7 +3862,7 @@ export const buildBasePackageEntries = async (document: Record<string, unknown>,
       : undefined;
   const fontUrlMap = renderMode === 'outline'
     ? undefined
-    : (useCdnFont ? CDN_FONT_URLS : undefined);
+    : (useCdnFont ? await campaignCdnFontUrls(document) : undefined);
   const entries: PackageEntry[] = [];
   const sizes = Object.keys(document.sizes || {});
   // Canonical (embed): `{size}.html` + `assets/` at zip root.
@@ -3901,7 +3929,7 @@ export const buildBasePackageEntries = async (document: Record<string, unknown>,
   }
 
   if (renderMode === 'font') {
-    for (const font of CLIENT_FONT_FILES) {
+    for (const font of await packagedCampaignFonts(document)) {
       if (fontUrlMap?.[font.filename]) continue;
       entries.push({
         path: useEmbedAssets

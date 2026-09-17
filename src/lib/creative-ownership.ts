@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { getLayoutRules, validateLayoutRules } from './layout-rules';
 import { materializeComponentLinks } from './creative-components';
 import { campaignConditionFamilies } from './campaign-variants';
 import { excludedHeadlineLayerIdsForVariantRule, selectorForVariantRule } from './creative-css';
@@ -83,7 +84,7 @@ export const sharedCreativeFieldReach = (document, source) => {
 /** Pure, idempotent compatibility compiler. Authored definitions are never rewritten. */
 export const materializeCreativeOwnership = (document: any): any => {
   document = materializeComponentLinks(document);
-  if (!document?.sharedDefinitions?.length && !Object.values(document?.sizes || {}).some((size) => size.localOverrides?.length || size.variantRules?.some((rule) => rule.ownershipGenerated))) return document;
+  if (!getLayoutRules(document).length && !document?.sharedDefinitions?.length && !Object.values(document?.sizes || {}).some((size) => size.localOverrides?.length || size.variantRules?.some((rule) => rule.ownershipGenerated))) return document;
   const next = clone(document);
   const ids = new Set();
   const assignments = [];
@@ -104,6 +105,7 @@ export const materializeCreativeOwnership = (document: any): any => {
       }
     }
   }
+  validateLayoutRules(next);
   for (const [size, creative] of Object.entries(next.sizes || {})) {
     creative.variantRules = (creative.variantRules || []).filter((rule) => !rule.ownershipGenerated);
     const priority = Math.floor(Math.max(0, ...creative.variantRules.map(ownershipRuleSpecificity)) / 1000) + 2;
@@ -119,6 +121,10 @@ export const materializeCreativeOwnership = (document: any): any => {
           Object.fromEntries(Object.keys(definitionFields(definition, size, domain, member)).map((field) => [field, sharedFieldSource(definition, member, domain, field)])),
         ])),
       });
+    }
+    for (const rule of getLayoutRules(next).filter(rule=>rule.type==='conditional'&&rule.enabled)) for(const member of rule.targets.filter(member=>member.size===size)) {
+      creative.variantRules.push({id:`layout:${rule.id}:${member.targetId}`, ...targetIdentity(next,size,member.targetId),scope:[...new Set([...String(member.scope||'').split('.').filter(Boolean),...(rule.when||[])])].join('.'),props:rule.values,ownershipGenerated:true,ownershipPriority:priority+(creative.localOverrides||[]).filter(local=>local.detached).length+2,
+        ownershipSource:{kind:'layoutRule',ruleId:rule.id,name:rule.name,member}});
     }
     const detachedCount = (creative.localOverrides || []).filter((local) => local.detached).length;
     let detachedPriority = detachedCount;

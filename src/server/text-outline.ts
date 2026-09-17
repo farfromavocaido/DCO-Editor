@@ -3,6 +3,8 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 
 import { MUSEO_FONT_FILENAME } from '@/lib/brand-font';
+import type { CampaignFontFace } from '@/lib/campaign-fonts';
+import { loadCampaignFont } from './campaign-fonts';
 import { parseOfferValueParts } from '@/lib/offer-value-symbols';
 import { projectRoot } from './paths';
 
@@ -38,6 +40,7 @@ type GlyphRun = {
 };
 
 export type OutlineFitOptions = {
+  fontFace?: CampaignFontFace;
   text: string;
   fontSize: number;
   width: number;
@@ -356,7 +359,7 @@ const buildPathForLines = (
 
 /** Fit text into a box using Museo metrics, then emit an inline SVG of glyph outlines. */
 export const outlineFittedText = async (options: OutlineFitOptions): Promise<OutlinedText> => {
-  const font = await loadMuseoFont();
+  const font: Font = options.fontFace ? await loadCampaignFont(options.fontFace) as unknown as Font : await loadMuseoFont();
   const text = String(options.text ?? '');
   const width = Math.max(1, Number(options.width) || 1);
   const lockMetrics = Boolean(options.lockMetrics);

@@ -1,3 +1,4 @@
+import { resolveCampaignFontFace } from '@/lib/campaign-fonts';
 /**
  * Resolve outline bake inputs from an editor presentation snapshot when
  * present; otherwise approximate the same pipeline with Museo metrics
@@ -258,6 +259,7 @@ const targetBakeOptions = ({
     }
     return {
       text: snap.text || text,
+      fontFace: document.fonts === undefined ? undefined : resolveCampaignFontFace(document, {...values,...(snap.fontFamily ? {fontFamily:snap.fontFamily,fontWeight:snap.fontWeight,fontStyle:snap.fontStyle} : {})}),
       fontSize: Number(snap.fontSize),
       width,
       height,
@@ -302,6 +304,7 @@ const targetBakeOptions = ({
   return {
     text,
     fontSize,
+    fontFace: document.fonts === undefined ? undefined : resolveCampaignFontFace(document, values),
     width,
     height,
     color,

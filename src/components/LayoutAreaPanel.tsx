@@ -2,7 +2,7 @@
 'use client';
 import {layoutAnimations} from '@/lib/layout-transitions';
 import {LayoutTransitionControls} from './LayoutTransitionControls';
-import {useEffect,useState} from 'react';
+import {useEffect,useState,useRef} from 'react';
 import {useEditorStore,selectPreviewFeedRow} from '@/store/editor-store';
 import {getProductionStage,withProductionRestPose,unionProductionBounds,seekProductionAnimations} from '@/lib/production-stage';
 import {createResponsiveLayoutRuntime} from '@/lib/responsive-layout';
@@ -28,6 +28,8 @@ export function captureLayoutSelection(ids){
 }
 export function LayoutAreaPanel({document,size,targetIds,scopes,diagnostics,onChange,onSelectRule}){
  const [draft,setDraft]=useState(null),[error,setError]=useState('');
+ const errorRef=useRef(null);
+ const showSaveError=message=>{setError(message);requestAnimationFrame(()=>{errorRef.current?.scrollIntoView({block:'nearest'});errorRef.current?.focus({preventScroll:true});});};
  const timing=useEditorStore(s=>s.layoutTimingNotice);
  const row=useEditorStore(selectPreviewFeedRow);
  const areaDraft=useEditorStore(s=>s.layoutAreaDraft);
@@ -42,7 +44,7 @@ export function LayoutAreaPanel({document,size,targetIds,scopes,diagnostics,onCh
   const sorted=[...measured].sort((a,b)=>(a.ink?.top??Infinity)-(b.ink?.top??Infinity));
   edit({id:crypto.randomUUID(),name:`Layout area ${1+(document.layoutRules||[]).filter(r=>r.type==='distribute').length}`,type:'distribute',enabled:true,targets:sorted.map(x=>({size,targetId:x.id})),areas:{[size]:{...bounds,width:Math.max(1,bounds.width),height:Math.max(1,bounds.height)}},axis:'y',single:'center',crossAlign:'center',minGap:0,overflow:'authored',when:currentVersion});
  }catch(e){setError(e.message);}};
- const publish=next=>{try{onChange({...document,layoutRules:next});setError('');return true;}catch(e){setError(e.message);return false;}};
+ const publish=next=>{try{const nextDocument={...document,layoutRules:next};validateLayoutRules(nextDocument);onChange(nextDocument);setError('');return true;}catch(e){showSaveError(e.message||'Unable to apply this layout. Check its settings.');return false;}};
  const detach=rule=>{try{
   let next=structuredClone(document);const removed=rule.targets.filter(t=>t.size===size&&targetIds.includes(t.targetId));
   next.layoutRules=next.layoutRules.flatMap(r=>{if(r.id!==rule.id)return[r];const targets=r.targets.filter(t=>!removed.some(m=>m.size===t.size&&m.targetId===t.targetId));return targets.length?[{...r,targets}]:[];});
@@ -72,7 +74,7 @@ export function LayoutAreaPanel({document,size,targetIds,scopes,diagnostics,onCh
   <div className={styles.actions}><button onClick={()=>edit(rule)}>Edit area</button><button onClick={()=>publish((document.layoutRules||[]).map(r=>r.id===rule.id?{...r,enabled:!r.enabled}:r))}>{rule.enabled?'Disable':'Enable'}</button><button title="Remove selected items from this layout, keeping their current positions" onClick={()=>detach(rule)}>Detach selected</button><button title="Remove this layout; restore the elements’ original positions" onClick={()=>publish(document.layoutRules.filter(r=>r.id!==rule.id))}>Remove layout</button></div>
  </article>)}
  {!draft&&<button className={styles.primary} disabled={alreadyArranged} title={alreadyArranged?"Edit the existing area, or detach these items before creating another layout":"Arrange the selected artwork inside a fixed area"} onClick={create}>{targetIds.length>1?'Arrange selected items…':'Create layout area…'}</button>}
- {draft&&<form className={styles.draft} onSubmit={e=>{e.preventDefault();const rule={...draft,areas:{...draft.areas,[size]:area}};const all=document.layoutRules||[];if(publish(all.some(r=>r.id===rule.id)?all.map(r=>r.id===rule.id?rule:r):[...all,rule])){clear();onSelectRule?.(rule.id);}}}>
+ {draft&&<form className={styles.draft} onInvalidCapture={e=>{e.preventDefault();const input=e.target;const label=input.labels?.[0]?.textContent?.trim()||'Field';showSaveError(`${label}: ${input.validationMessage}`);}} onSubmit={e=>{e.preventDefault();const rule={...draft,areas:{...draft.areas,[size]:area}};const all=document.layoutRules||[];if(publish(all.some(r=>r.id===rule.id)?all.map(r=>r.id===rule.id?rule:r):[...all,rule])){clear();onSelectRule?.(rule.id);}}}>
  <strong>Arrange in an area</strong>
  <label className={styles.field}>Applies to<select aria-label="Layout versions" value={!draft.when?.length?'all':[...draft.when].sort().join('.')===[...currentVersion].sort().join('.')?'current':'stored'} onChange={e=>patch({when:e.target.value==='current'?currentVersion:e.target.value==='all'?[]:draft.when})}><option value="stored">Keep existing version limits</option><option value="current">This campaign version</option><option value="all">All versions in this size</option></select></label>
  
@@ -86,7 +88,8 @@ export function LayoutAreaPanel({document,size,targetIds,scopes,diagnostics,onCh
  <LayoutTransitionControls {...{document,size,draft,patch,scopes}}/>
  <details><summary>Spacing limits & name</summary><label className={styles.field}>Name<input value={draft.name} onChange={e=>patch({name:e.target.value})}/></label><label className={styles.field}>Minimum gap (px)<input aria-label="Minimum gap" type="number" min="0" value={draft.minGap} onChange={e=>patch({minGap:Number(e.target.value)})}/></label>
  <label className={styles.field}>If there isn’t enough room<select aria-label="Layout overflow" value={draft.overflow} onChange={e=>patch({overflow:e.target.value})}><option value="authored">Keep original positions and flag it</option><option value="extend">Keep minimum gap; extend beyond area</option></select></label></details>
+ <div ref={errorRef} tabIndex={-1}>{error&&<p role="alert" className={styles.error}>Cannot apply layout: {error}</p>}</div>
  <div className={styles.actions}><button className={styles.primary} type="submit">Apply layout</button><button type="button" onClick={clear}>Cancel</button></div>
- </form>}{error&&<p role="alert" className={styles.error}>{error}</p>}
+ </form>}{!draft&&error&&<p ref={errorRef} tabIndex={-1} role="alert" className={styles.error}>{error}</p>}
  </div>;
 }

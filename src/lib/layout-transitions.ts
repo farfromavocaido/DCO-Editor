@@ -32,7 +32,6 @@ export function validateLayoutTransition(document,rule){
  if(rule.layoutAnimations!==undefined){validateLayoutSequence(document,rule);return;}
  const t=rule.transition;if(!t||t.enabled===false||!rule.enabled)return;
  if(rule.type!=='distribute'||!['with','after'].includes(t.start)||!['follow','custom'].includes(t.duration)||t.duration==='custom'&&(!Number.isFinite(t.durationS)||t.durationS<=0)||!Number.isInteger(t.exitIndex)||t.exitIndex<0||!['animate','hidden','none'].includes(t.return?.mode))throw new Error('Choose an exit, transition timing and return behaviour');
- if(document.clock.loop&&t.return.mode==='none')throw new Error('A looping ad needs an animated return or a hidden reset');
  for(const size of new Set(rule.targets.map(t=>t.size))){if(!rule.targets.some(m=>m.size===size&&m.targetId===t.subjectId))throw new Error('The exiting element must belong to this layout area');const layer=document.sizes[size].layers.find(l=>l.id===t.subjectId.split('::')[0]);if(!layer?.clips?.some(c=>c.id===t.clipId))throw new Error('Choose an animation on the exiting element');if(!transitionCases(document,size,rule).length)throw new Error('That animation has no active exit for this layout version');}
 }
 export const layoutAnimationSource=()=>`(function(win){return function(plans){
@@ -67,9 +66,6 @@ export function layoutSequenceCases(document,size,rule){
   }).sort((a,b)=>a.start-b.start);
   for(let i=0;i<events.length;i++){const e=events[i];if(!Number.isFinite(e.start)||!Number.isFinite(e.end)||e.start<0||e.end>100||e.end<e.start||!e.hidden&&e.end===e.start)throw new Error('Each layout animation must fit inside the ad');if(i&&e.start<events[i-1].end-1e-7)throw new Error('Layout animations overlap. Adjust their timing so each move finishes before the next begins');}
   const initialAbsent=rule.startingArrangement==='present'?[...new Set(events.filter(e=>e.kind!=='return').map(e=>e.subjectId))].filter(id=>events.find(e=>e.subjectId===id)?.kind==='enter'):[];
-  const absent=new Set(initialAbsent);
-  events.forEach(e=>{if(e.kind==='return'){absent.clear();initialAbsent.forEach(id=>absent.add(id));}else if(e.kind==='enter')absent.delete(e.subjectId);else absent.add(e.subjectId);});
-  if(document.clock.loop&&events.length&&(absent.size!==initialAbsent.length||initialAbsent.some(id=>!absent.has(id))))throw new Error('Add a return to the starting layout before the loop ends');
   for(const e of events.filter(e=>e.hidden))for(const member of rule.targets.filter(m=>m.size===size)){
    const layer=document.sizes[size].layers.find(l=>l.id===member.targetId.split('::')[0]),clips=clipsForProfile(layer?.clips||[],activeFrameScope(scopes),scopes),frames=compileAnimationClips(clips,beatsForScopes(document,scopes),{canvas:document.sizes[size].canvas,durationS:duration});
    const next=events.find(n=>n.start>e.start),until=next?.start??100;

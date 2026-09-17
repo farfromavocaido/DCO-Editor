@@ -18,8 +18,10 @@ test('legacy conversion retains exit and explicit return timings',()=>{
  const legacy=transitionCases(doc,'300x250',old)[0],next=layoutSequenceCases(doc,'300x250',{...old,layoutAnimations:entries})[0];expect(next.events.map(e=>[e.start,e.end])).toEqual([[legacy.start,legacy.end],[legacy.returnStart,legacy.returnEnd]]);
  const p=layoutSequencePlans(rule,next,members).find(p=>p.targetId==='mark');expect(p.keyframes.at(-1).translate).toBe('0px 0px');
 });
-test('overlaps and missing loop returns are flagged, disabled entries ignored',()=>{
- const out=rule.layoutAnimations[1];expect(()=>layoutSequenceCases(doc,'300x250',{...rule,startingArrangement:'all',layoutAnimations:[out]})).toThrow(/return/);
+test('returns are optional, overlaps are flagged, disabled entries ignored',()=>{
+ const out=rule.layoutAnimations[1],exitOnly={...rule,startingArrangement:'all',layoutAnimations:[out]};
+ validateLayoutTransition(doc,exitOnly);const timing=layoutSequenceCases(doc,'300x250',exitOnly)[0];expect(layoutSequencePlans(exitOnly,timing,members).find(p=>p.targetId==='mark').keyframes.at(-1).translate).toBe('0px 80px');
+ const entryOnly={...rule,layoutAnimations:[rule.layoutAnimations[0]]};validateLayoutTransition(doc,entryOnly);const entryTiming=layoutSequenceCases(doc,'300x250',entryOnly)[0];const plan=layoutSequencePlans(entryOnly,entryTiming,members).find(p=>p.targetId==='mark');expect(plan.keyframes[0].translate).toBe('0px 80px');expect(plan.keyframes.at(-1).translate).toBe('0px 0px');
  expect(()=>layoutSequenceCases(doc,'300x250',{...rule,layoutAnimations:[...rule.layoutAnimations,{...out,id:'overlap'}]})).toThrow(/overlap/);
  expect(()=>validateLayoutTransition(doc,{...rule,layoutAnimations:[...rule.layoutAnimations,{id:'draft',enabled:false}]})).not.toThrow();
 });

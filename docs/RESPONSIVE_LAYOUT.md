@@ -58,7 +58,7 @@ Edit an area and expand **Animate layout after an exit**. Choose the item leavin
 
 Space is reserved before entrances. Animation opacity alone does not change membership. An initially empty or state-hidden subject produces no layout animation. Distances come from the two resolved ink layouts, rather than a stored pixel move.
 
-Choose **Animate back before the end**, or **Reset while remaining items are hidden**. Hidden resets are validated against the remaining items’ animation opacity through the reset interval. Looping ads require a return; a one-shot ad may stay in the new arrangement. Disabling the link retains its settings.
+Choose **Animate back before the end**, or **Reset while remaining items are hidden**. Hidden resets are validated against the remaining items’ animation opacity through the reset interval. A return is optional, including for looping ads; without one the arrangement holds until playback restarts. Disabling the link retains its settings.
 
 The linked motion is a native timeline animation on a separate translation channel, so it composes with existing opacity/transform animation. Scrubbing, playback and looping use that same animation. Fixed-copy snapshots retain the measured motion plan and outlined exports replay it without remeasuring SVG text.
 
@@ -74,6 +74,8 @@ Text fields retain native undo/redo while focused. Enter (ordinary inputs) or le
 
 Edit a layout area → **Layout animations** → **+ Add animation**. Entries link to a particular entrance or exit segment, or return to the starting layout at specified times. Entrance/exit moves can happen before, during or after the segment, following its duration or using a custom duration. The list and timeline show these changes together; each entry can be previewed, disabled, duplicated or removed. Duplicates start disabled to avoid accidental overlap.
 
-**Starting arrangement** reserves space for all items by default. **Only items initially present** excludes items whose first enabled linked event is an entrance, then makes room during that event. Empty or state-hidden artwork remains excluded. Destinations use fitted ink, not fixed movement distances. Overlapping moves and a mismatched loop ending are flagged. A return targets the chosen starting arrangement, which may itself exclude entering items.
+**Before linked entrances → Make room as items enter** excludes items whose first enabled linked event is an entrance, then makes room during that event. New entrance entries select this automatically. **Leave space ready — no rearranging** keeps that space reserved from the outset. Empty or state-hidden artwork remains excluded. Destinations use fitted ink, not fixed movement distances. Overlapping moves are flagged. Returns are optional: without one, the final layout holds to the end, then restarts at the opening arrangement on the next loop. A return targets the chosen starting arrangement, which may itself exclude entering items.
 
 Existing single exit/return configurations are displayed as list entries without rewriting campaign data. Editing the list adopts the sequence format for that area. The sequence creates native motion plans in the shared production layout runtime; outline snapshots retain those same plans.
+
+Choosing a new entrance selects **Before linked entrances → Make room as items enter**. **Leave space ready — no rearranging** deliberately reserves that space from the start. Save errors appear beside Apply and are brought into view.

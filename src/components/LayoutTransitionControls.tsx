@@ -10,13 +10,13 @@ export function LayoutTransitionControls({document,size,draft,patch,scopes}){
  const entries=layoutAnimations(draft),duration=Number(document.clock.durationS),items=draft.targets.filter(m=>m.size===size);
  const name=id=>document.sizes[size].layers.find(l=>l.id===id?.split('::')[0])?.label||id;
  const write=next=>patch({transition:undefined,layoutAnimations:next});
- const update=(id,values)=>write(entries.map(a=>a.id===id?{...a,...values}:a));
+ const update=(id,values)=>patch({transition:undefined,layoutAnimations:entries.map(a=>a.id===id?{...a,...values}:a),...(values.kind==='enter'?{startingArrangement:'present'}:{})});
  let error='',events=[];
  try{events=layoutSequenceCases(document,size,draft).find(c=>c.scopes.every(s=>scopes.includes(s)))?.events||[];}catch(e){error=e.message;}
  const ordered=[...entries].sort((a,b)=>(events.find(e=>e.id===a.id)?.start??Infinity)-(events.find(e=>e.id===b.id)?.start??Infinity));
  const add=()=>{const id=crypto.randomUUID();write([...entries,{id,enabled:true,kind:'exit',subjectId:items.at(-1)?.targetId,clipId:'',segmentIndex:0,start:'with',duration:'follow',durationS:.5}]);setExpanded(id);};
  return <details className={styles.transition} open><summary>Layout animations {entries.length?`(${entries.length})`:''}</summary>
- <label className={styles.field}>Starting arrangement<select value={draft.startingArrangement||'all'} onChange={e=>patch({startingArrangement:e.target.value,transition:undefined,layoutAnimations:entries})} title="Initially present leaves room-making until the first linked entrance. Other items keep their space through their own fades."><option value="all">Reserve space for all items</option><option value="present">Only items initially present</option></select></label>
+ {entries.some(a=>a.kind==='enter'&&a.enabled!==false)&&<label className={styles.field}>Before linked entrances<select value={draft.startingArrangement||'all'} onChange={e=>patch({startingArrangement:e.target.value,transition:undefined,layoutAnimations:entries})} title="This controls the other items’ positions before a linked entrance. It does not change the entering item’s own fade or movement."><option value="all">Leave space ready — no rearranging</option><option value="present">Make room as items enter</option></select></label>}
  {ordered.map(a=>{
   const layer=document.sizes[size].layers.find(l=>l.id===a.subjectId?.split('::')[0]),segments=a.kind==='return'?[]:exitSegments(document,size,a.subjectId||'',a.clipId,scopes,a.kind),timing=events.find(e=>e.id===a.id);
   const label=a.kind==='return'?(a.hidden?'Reset to starting layout':'Return to starting layout'):`${name(a.subjectId)} ${a.kind==='enter'?'enters':'exits'}`;
@@ -24,6 +24,7 @@ export function LayoutTransitionControls({document,size,draft,patch,scopes}){
    <div className={styles.animationHeader}><input type="checkbox" aria-label={`Enable ${label}`} checked={a.enabled!==false} onChange={e=>update(a.id,{enabled:e.target.checked})}/><button type="button" className={styles.animationTitle} aria-expanded={expanded===a.id} onClick={()=>setExpanded(expanded===a.id?null:a.id)}>{label}<small>{a.enabled===false?'Disabled':timing?`${(timing.start*duration/100).toFixed(2)}–${(timing.end*duration/100).toFixed(2)}s`:'Choose timing'}</small></button><button type="button" title="Preview halfway through this move" aria-label={`Preview ${label}`} disabled={!timing||Boolean(error)||a.enabled===false} onClick={()=>useEditorStore.getState().setPercent((timing.start+timing.end)/2)}>▶</button></div>
    {expanded===a.id&&<div className={styles.animationFields}>
     <label className={styles.field}>Change<select value={a.kind} onChange={e=>update(a.id,{kind:e.target.value,clipId:'',segmentIndex:0,startS:duration*.9,endS:duration,hidden:false})}><option value="enter">Make room on entrance</option><option value="exit">Rearrange on exit</option><option value="return">Return to starting layout</option></select></label>
+    {a.kind==='enter'&&draft.startingArrangement!=='present'&&<button type="button" title="Space is already reserved, so this entrance may not move the other items." onClick={()=>patch({startingArrangement:'present',transition:undefined,layoutAnimations:entries})}>Enable room-making on entrance</button>}
     {a.kind!=='return'?<>
      <label className={styles.field}>Linked item<select value={a.subjectId} onChange={e=>update(a.id,{subjectId:e.target.value,clipId:'',segmentIndex:0})}>{items.map(m=><option key={m.targetId} value={m.targetId}>{name(m.targetId)}</option>)}</select></label>
      <label className={styles.field}>Animation<select value={a.clipId} onChange={e=>update(a.id,{clipId:e.target.value,segmentIndex:0})}><option value="">Choose an animation…</option>{(layer?.clips||[]).filter(c=>exitSegments(document,size,a.subjectId,c.id,scopes,a.kind).length).map(c=><option key={c.id} value={c.id}>{c.label||c.id}</option>)}</select></label>
@@ -40,6 +41,7 @@ export function LayoutTransitionControls({document,size,draft,patch,scopes}){
   </article>;
  })}
  <button type="button" className={styles.primary} onClick={add}>+ Add animation</button>
+ <span className={styles.note} title="Without a return, the final arrangement holds until the ad ends. A looping ad restarts in its opening arrangement.">Return is optional ⓘ</span>
  {error&&<p role="alert" className={styles.error}>{error}</p>}
  </details>;
 }

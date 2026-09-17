@@ -6,6 +6,7 @@ import path from 'node:path';
 export default defineConfig({
   test: {
     environment: 'node',
+    env: { DCO_TEST_LIVE_CAMPAIGN: '1' },
     setupFiles: ['src/test/isolated-storage.ts'],
     include: ['src/**/*.creative.test.ts'],
   },

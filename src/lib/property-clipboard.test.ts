@@ -1,7 +1,7 @@
 import {expect,test} from 'vitest';
 import {captureProperties,pasteProperties} from './property-clipboard';
 import {findCreativeTarget} from './creative-model';
-import demo from '../../campaign/product-demo-creative.json';
+import demo from '../test/fixtures/campaign/product-demo-creative.json';
 test('property clipboard freezes appearance and fitting without copy, animation or live links',()=>{
  const source:any={id:'source',kind:'text',values:{left:14,fontFamily:'Example',fontWeight:700,text:'Do not copy',cssClass:'private'},fit:{mode:'shrink',maxLines:2},clips:[{id:'motion'}]};
  const clipboard=captureProperties(source)!;source.values.left=99;expect(clipboard.values).toEqual({left:14,fontFamily:'Example',fontWeight:700});expect(clipboard.fit.maxLines).toBe(2);

@@ -1,7 +1,5 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import path from 'node:path';
 
 import {
   addCreativeShapeLayer,
@@ -30,10 +28,7 @@ import {
   updateCreativeTargetValue,
 } from './creative-model';
 
-const loadPersistedCreative = () => JSON.parse(fs.readFileSync(
-  path.resolve(process.cwd(), 'campaign/sse-dco-creative.json'),
-  'utf8',
-));
+
 
 const document = {
   version: 1,

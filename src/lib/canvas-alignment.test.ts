@@ -1,7 +1,5 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import path from 'node:path';
 
 import {
   alignmentGuidesForMode,
@@ -15,10 +13,7 @@ import {
 } from '@/lib/canvas-alignment';
 import { findCreativeTarget } from '@/lib/creative-model';
 
-const loadPersistedCreative = () => JSON.parse(fs.readFileSync(
-  path.resolve(process.cwd(), 'campaign/sse-dco-creative.json'),
-  'utf8',
-));
+
 
 const assertClose = (actual: number, expected: number, tolerance: number, message: string) => {
   assert.ok(
@@ -138,19 +133,10 @@ test('logicalOfferBlockBounds uses only visible offer members', () => {
   });
 });
 
-test('728x90 offers-3 subline chrome uses authored height, not maxLines budget', () => {
-  const doc = loadPersistedCreative();
-  const scopes = ['offers-3', 'tc-prices'];
-  const subline = getTargetCanvasBounds(doc, '728x90', 'offer-slot-1::offer-subline', scopes);
-  const authored = doc.sizes['728x90'].variantRules.find(
-    (rule) => rule.scope === 'offers-3' && rule.cssClass === 'offer-subline',
-  )?.props;
-
-  assert.ok(subline, 'offers-3 subline target is missing');
-  assert.equal(authored?.height, 11);
-  assert.equal(authored?.top, 40);
-  assert.equal(subline.height, 11, 'selection chrome must match authored height');
-  assert.equal(subline.localTop, 40, 'selection chrome must not shift top for maxLines');
+for (const [height,top,maxLines] of [[11,40,2],[29,7,6],[18,-4,1]]) test(`subline chrome respects authored box (${height}, ${top}, ${maxLines})`,()=>{
+ const doc={sizes:{'300x250':{canvas:{width:300,height:250},layers:[{id:'offer-slot-1',kind:'group',base:{left:0,top:0,width:200,height:100},clips:[]}],classRules:[{cssClass:'offer-subline',properties:{left:0,top,width:100,height},fit:{maxLines}}]}}};
+ const bounds=getTargetCanvasBounds(doc,'300x250','offer-slot-1::offer-subline',[]);
+ assert.equal(bounds.height,height);assert.equal(bounds.localTop,top);
 });
 
 test('headline bounds use shared geometry and permit a local act override', () => {

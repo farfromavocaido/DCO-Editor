@@ -1,0 +1,528 @@
+{
+  "version": 1,
+  "campaign": {
+    "id": "product-demo",
+    "name": "Product / Language / Theme"
+  },
+  "clock": {
+    "durationS": 8,
+    "loop": false,
+    "beats": {
+      "start": 0,
+      "end": 100
+    }
+  },
+  "variantModel": {
+    "exitField": "destination",
+    "dimensions": [
+      {
+        "id": "product",
+        "label": "Product",
+        "field": "product",
+        "defaultValue": "lamp",
+        "options": [
+          {
+            "value": "lamp",
+            "label": "Lamp",
+            "scope": "product-lamp"
+          },
+          {
+            "value": "chair",
+            "label": "Chair",
+            "scope": "product-chair"
+          }
+        ]
+      },
+      {
+        "id": "language",
+        "label": "Language",
+        "field": "language",
+        "defaultValue": "en",
+        "options": [
+          {
+            "value": "en",
+            "label": "English",
+            "scope": "language-en"
+          },
+          {
+            "value": "ga",
+            "label": "Gaeilge",
+            "scope": "language-ga"
+          }
+        ]
+      },
+      {
+        "id": "theme",
+        "label": "Theme",
+        "field": "theme",
+        "defaultValue": "light",
+        "options": [
+          {
+            "value": "light",
+            "label": "Light",
+            "scope": "theme-light"
+          },
+          {
+            "value": "dark",
+            "label": "Dark",
+            "scope": "theme-dark"
+          }
+        ]
+      }
+    ]
+  },
+  "feed": {
+    "profileName": "Product Demo",
+    "studioProfileElement": "ProductDemo",
+    "fields": [
+      {
+        "name": "product",
+        "label": "Product",
+        "type": "enum",
+        "group": "Variables",
+        "options": [
+          "lamp",
+          "chair"
+        ]
+      },
+      {
+        "name": "language",
+        "label": "Language",
+        "type": "enum",
+        "group": "Variables",
+        "options": [
+          "en",
+          "ga"
+        ]
+      },
+      {
+        "name": "theme",
+        "label": "Theme",
+        "type": "enum",
+        "group": "Variables",
+        "options": [
+          "light",
+          "dark"
+        ]
+      },
+      {
+        "name": "title",
+        "label": "Title",
+        "type": "string",
+        "group": "Copy"
+      },
+      {
+        "name": "description",
+        "label": "Description",
+        "type": "string",
+        "group": "Copy"
+      },
+      {
+        "name": "action",
+        "label": "Button",
+        "type": "string",
+        "group": "Copy"
+      },
+      {
+        "name": "destination",
+        "label": "Destination",
+        "type": "url",
+        "group": "Copy"
+      }
+    ],
+    "sampleRows": [
+      {
+        "product": "lamp",
+        "language": "en",
+        "theme": "light",
+        "title": "Light your space",
+        "description": "Designed for everyday living.",
+        "action": "Explore",
+        "destination": {
+          "Url": "https://example.com/en/lamp"
+        },
+        "Default": true
+      },
+      {
+        "product": "lamp",
+        "language": "en",
+        "theme": "dark",
+        "title": "Light your space",
+        "description": "Designed for everyday living.",
+        "action": "Explore",
+        "destination": {
+          "Url": "https://example.com/en/lamp"
+        },
+        "Default": false
+      },
+      {
+        "product": "lamp",
+        "language": "ga",
+        "theme": "light",
+        "title": "Solas do do sp\u00e1s",
+        "description": "Deartha don ghn\u00e1thshaol.",
+        "action": "F\u00e9ach anois",
+        "destination": {
+          "Url": "https://example.com/ga/lamp"
+        },
+        "Default": false
+      },
+      {
+        "product": "lamp",
+        "language": "ga",
+        "theme": "dark",
+        "title": "Solas do do sp\u00e1s",
+        "description": "Deartha don ghn\u00e1thshaol.",
+        "action": "F\u00e9ach anois",
+        "destination": {
+          "Url": "https://example.com/ga/lamp"
+        },
+        "Default": false
+      },
+      {
+        "product": "chair",
+        "language": "en",
+        "theme": "light",
+        "title": "Make room for comfort",
+        "description": "Designed for everyday living.",
+        "action": "Explore",
+        "destination": {
+          "Url": "https://example.com/en/chair"
+        },
+        "Default": false
+      },
+      {
+        "product": "chair",
+        "language": "en",
+        "theme": "dark",
+        "title": "Make room for comfort",
+        "description": "Designed for everyday living.",
+        "action": "Explore",
+        "destination": {
+          "Url": "https://example.com/en/chair"
+        },
+        "Default": false
+      },
+      {
+        "product": "chair",
+        "language": "ga",
+        "theme": "light",
+        "title": "Sp\u00e1s don chompord",
+        "description": "Deartha don ghn\u00e1thshaol.",
+        "action": "F\u00e9ach anois",
+        "destination": {
+          "Url": "https://example.com/ga/chair"
+        },
+        "Default": false
+      },
+      {
+        "product": "chair",
+        "language": "ga",
+        "theme": "dark",
+        "title": "Sp\u00e1s don chompord",
+        "description": "Deartha don ghn\u00e1thshaol.",
+        "action": "F\u00e9ach anois",
+        "destination": {
+          "Url": "https://example.com/ga/chair"
+        },
+        "Default": false
+      }
+    ]
+  },
+  "sizes": {
+    "300x250": {
+      "canvas": {
+        "width": 300,
+        "height": 250
+      },
+      "assets": {},
+      "layers": [
+        {
+          "id": "surface",
+          "kind": "shape",
+          "base": {
+            "left": 0,
+            "top": 0,
+            "width": 300,
+            "height": 250,
+            "backgroundColor": "#f1eee6",
+            "cssClass": "surface"
+          },
+          "clips": []
+        },
+        {
+          "id": "product-mark",
+          "kind": "shape",
+          "base": {
+            "left": 24,
+            "top": 22,
+            "width": 42,
+            "height": 42,
+            "backgroundColor": "#b76e42",
+            "borderRadius": "21px",
+            "cssClass": "product-mark"
+          },
+          "clips": []
+        },
+        {
+          "id": "title",
+          "kind": "text",
+          "base": {
+            "left": 24,
+            "top": 82,
+            "width": 252,
+            "height": 86,
+            "fontSize": 32,
+            "fontFamily": "Museo",
+            "color": "#24352d",
+            "cssClass": "title",
+            "fontWeight": 700
+          },
+          "clips": [],
+          "binding": {
+            "field": "title"
+          },
+          "fit": {
+            "frame": "fixed",
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 12
+          }
+        },
+        {
+          "id": "description",
+          "kind": "text",
+          "base": {
+            "left": 24,
+            "top": 170,
+            "width": 252,
+            "height": 30,
+            "fontSize": 14,
+            "fontFamily": "Museo",
+            "color": "#24352d",
+            "cssClass": "description",
+            "fontWeight": 700
+          },
+          "clips": [],
+          "binding": {
+            "field": "description"
+          },
+          "fit": {
+            "frame": "fixed",
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 12
+          }
+        },
+        {
+          "id": "action",
+          "kind": "text",
+          "base": {
+            "left": 24,
+            "top": 207,
+            "width": 252,
+            "height": 26,
+            "fontSize": 18,
+            "fontFamily": "Museo",
+            "color": "#b76e42",
+            "cssClass": "action",
+            "fontWeight": 700
+          },
+          "clips": [],
+          "binding": {
+            "field": "action"
+          },
+          "fit": {
+            "frame": "fixed",
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 12
+          }
+        }
+      ],
+      "classRules": [],
+      "variantRules": [
+        {
+          "id": "dark-bg",
+          "scope": "theme-dark",
+          "layerId": "surface",
+          "props": {
+            "backgroundColor": "#24352d"
+          }
+        },
+        {
+          "id": "dark-title",
+          "scope": "theme-dark",
+          "layerId": "title",
+          "props": {
+            "color": "#f1eee6"
+          }
+        },
+        {
+          "id": "dark-description",
+          "scope": "theme-dark",
+          "layerId": "description",
+          "props": {
+            "color": "#f1eee6"
+          }
+        },
+        {
+          "id": "chair-mark",
+          "scope": "product-chair",
+          "layerId": "product-mark",
+          "props": {
+            "borderRadius": 4,
+            "backgroundColor": "#709388"
+          }
+        }
+      ]
+    },
+    "320x480": {
+      "canvas": {
+        "width": 320,
+        "height": 480
+      },
+      "assets": {},
+      "layers": [
+        {
+          "id": "surface",
+          "kind": "shape",
+          "base": {
+            "left": 0,
+            "top": 0,
+            "width": 320,
+            "height": 480,
+            "backgroundColor": "#f1eee6",
+            "cssClass": "surface"
+          },
+          "clips": []
+        },
+        {
+          "id": "product-mark",
+          "kind": "shape",
+          "base": {
+            "left": 24,
+            "top": 22,
+            "width": 42,
+            "height": 42,
+            "backgroundColor": "#b76e42",
+            "borderRadius": "21px",
+            "cssClass": "product-mark"
+          },
+          "clips": []
+        },
+        {
+          "id": "title",
+          "kind": "text",
+          "base": {
+            "left": 24,
+            "top": 82,
+            "width": 272,
+            "height": 86,
+            "fontSize": 32,
+            "fontFamily": "Museo",
+            "color": "#24352d",
+            "cssClass": "title",
+            "fontWeight": 700
+          },
+          "clips": [],
+          "binding": {
+            "field": "title"
+          },
+          "fit": {
+            "frame": "fixed",
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 12
+          }
+        },
+        {
+          "id": "description",
+          "kind": "text",
+          "base": {
+            "left": 24,
+            "top": 400,
+            "width": 272,
+            "height": 30,
+            "fontSize": 14,
+            "fontFamily": "Museo",
+            "color": "#24352d",
+            "cssClass": "description",
+            "fontWeight": 700
+          },
+          "clips": [],
+          "binding": {
+            "field": "description"
+          },
+          "fit": {
+            "frame": "fixed",
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 12
+          }
+        },
+        {
+          "id": "action",
+          "kind": "text",
+          "base": {
+            "left": 24,
+            "top": 437,
+            "width": 272,
+            "height": 26,
+            "fontSize": 18,
+            "fontFamily": "Museo",
+            "color": "#b76e42",
+            "cssClass": "action",
+            "fontWeight": 700
+          },
+          "clips": [],
+          "binding": {
+            "field": "action"
+          },
+          "fit": {
+            "frame": "fixed",
+            "mode": "shrink",
+            "maxLines": 2,
+            "minFontSize": 12
+          }
+        }
+      ],
+      "classRules": [],
+      "variantRules": [
+        {
+          "id": "dark-bg",
+          "scope": "theme-dark",
+          "layerId": "surface",
+          "props": {
+            "backgroundColor": "#24352d"
+          }
+        },
+        {
+          "id": "dark-title",
+          "scope": "theme-dark",
+          "layerId": "title",
+          "props": {
+            "color": "#f1eee6"
+          }
+        },
+        {
+          "id": "dark-description",
+          "scope": "theme-dark",
+          "layerId": "description",
+          "props": {
+            "color": "#f1eee6"
+          }
+        },
+        {
+          "id": "chair-mark",
+          "scope": "product-chair",
+          "layerId": "product-mark",
+          "props": {
+            "borderRadius": 4,
+            "backgroundColor": "#709388"
+          }
+        }
+      ]
+    }
+  }
+}

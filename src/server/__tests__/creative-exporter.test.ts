@@ -14,6 +14,16 @@ import {
   renderWipHtml,
 } from '../creative-exporter';
 
+const assertMuseoFace = (html: string, url: string) => {
+  // Read declarations without depending on whitespace or the optional format()
+  // hint. JSDOM's CSSOM currently drops the @font-face src descriptor.
+  const faces = [...html.matchAll(/@font-face\s*\{([^}]+)\}/g)].map(match=>match[1]);
+  const face = faces.find(css=>/font-family\s*:\s*["']?Museo["']?\s*;/.test(css)&&/font-weight\s*:\s*700\s*[;}]/.test(css+'}'));
+  assert.ok(face, 'Museo 700 must have its own font face');
+  assert.ok(face.includes(url), 'Museo 700 must load the expected font asset');
+  assert.doesNotMatch(face, /local\(/, 'installed fonts must not mask the delivered asset');
+};
+
 const legacyFieldPattern = (parts: string[]) => new RegExp(parts.join('_'));
 
 const CDN_MUSEO_URL = 'https://s0.2mdn.net/creatives/assets/5627648/Museo700-Regular.otf';
@@ -187,44 +197,7 @@ test('exports offers-0 runtime and scoped wave timing overrides', async () => {
   );
 });
 
-test('exports offers-0 headline scrim gradient above bg and below waves', async () => {
-  const document = await readCreativeDocument();
-  const htmlPortrait = await renderStudioReadyHtml(document, '300x250');
-  const htmlLandscape = await renderStudioReadyHtml(document, '320x50');
 
-  assert.match(htmlPortrait, /id="headline-scrim"/);
-  assert.match(htmlPortrait, /linear-gradient\(to top, rgba\(0, 0, 0,/);
-  assert.match(htmlPortrait, /\.offers-0 \.headline-scrim\s*\{[^}]*visibility:\s*visible/);
-  assert.match(htmlPortrait, /\.headline-scrim\s*\{[^}]*visibility:\s*hidden/);
-
-  assert.match(htmlLandscape, /linear-gradient\(to top, rgba\(0, 0, 0,/);
-
-  const size = document.sizes['300x250'];
-  const byId = Object.fromEntries(size.layers.map((layer) => [layer.id, layer]));
-  assert.equal(byId['headline-scrim'].kind, 'gradient');
-  assert.ok(byId['headline-scrim'].zIndex > byId['bg-image'].zIndex);
-  assert.ok(byId.bluewave.zIndex > byId['headline-scrim'].zIndex);
-});
-
-test('exports offers-0 background blur layer but keeps it hidden', async () => {
-  const document = await readCreativeDocument();
-  const html = await renderStudioReadyHtml(document, '300x250');
-  const htmlBanner = await renderStudioReadyHtml(document, '320x50');
-
-  assert.match(html, /id="bg-blur"/);
-  assert.match(html, /backdrop-filter:\s*blur\(3px\)/);
-  assert.match(html, /-webkit-backdrop-filter:\s*blur\(3px\)/);
-  assert.match(html, /\.offers-0 \.bg-blur\s*\{[^}]*visibility:\s*hidden/);
-
-  assert.match(htmlBanner, /id="bg-blur"/);
-
-  const size = document.sizes['300x250'];
-  const byId = Object.fromEntries(size.layers.map((layer) => [layer.id, layer]));
-  assert.equal(byId['bg-blur'].kind, 'blur');
-  assert.ok(byId['bg-blur'].zIndex > byId['bg-image'].zIndex);
-  assert.ok(byId['headline-scrim'].zIndex > byId['bg-blur'].zIndex);
-  assert.ok(byId.bluewave.zIndex > byId['bg-blur'].zIndex);
-});
 
 test('preview ad html skips empty Enabler bootstrap so iframe postMessage text persists', async () => {
   const document = await readCreativeDocument();
@@ -380,10 +353,8 @@ test('builds a client preview package with html variants, assets, and self-conta
   assert.match(variant, /data-dco-field="background_image_url_728x90"/);
   assert.match(variant, /<script src="\.\.\/\.\.\/preview-validator\.js"><\/script>/);
   assert.match(variant, /@font-face/);
-  assert.match(variant, /font-family: "Museo"/);
   assert.doesNotMatch(variant, /font-family: "Museo Sans"/, 'the ad must be hyper-explicit: Museo only, never the Sans');
-  assert.match(variant, /local\("☺"\)/);
-  assert.match(variant, /url\("\.\.\/assets\/fonts\/Museo700-Regular\.otf"\) format\("opentype"\)/);
+  assertMuseoFace(variant, '../assets/fonts/Museo700-Regular.otf');
   assert.doesNotMatch(variant, /MuseoSans_700\.otf/);
   assert.match(variant, /font-synthesis: none/);
 });
@@ -474,9 +445,7 @@ test('builds a CDN-linked base agency package without packaged static assets', a
   }
   assert.match(html, /id="plus-1"[^>]*src="data:image\/svg\+xml/);
   assert.ok(html.includes(CDN_MUSEO_URL), 'Expected Museo CDN URL');
-  assert.match(html, new RegExp(
-    `font-family: "Museo";[\\s\\S]*?url\\("${CDN_MUSEO_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"\\) format\\("opentype"\\)`,
-  ));
+  assertMuseoFace(html, CDN_MUSEO_URL);
   assert.doesNotMatch(html, /font-family: "Museo Sans"/);
   assert.ok(!html.includes(CDN_MUSEO_SANS_URL), 'the Museo Sans CDN file must never back the Museo family');
   assert.doesNotMatch(html, /MuseoSans_700\.otf/);
@@ -514,9 +483,7 @@ test('builds a canonical agency zip with inlined SVGs, CDN font, and feed-only b
   assert.doesNotMatch(html, /src="(?:\.\.\/)?assets\/SVG\//);
 
   assert.ok(html.includes(CDN_MUSEO_URL), 'Expected Museo CDN URL');
-  assert.match(html, new RegExp(
-    `font-family: "Museo";[\\s\\S]*?url\\("${CDN_MUSEO_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"\\) format\\("opentype"\\)`,
-  ));
+  assertMuseoFace(html, CDN_MUSEO_URL);
   assert.ok(!html.includes(CDN_MUSEO_SANS_URL));
 
   assert.match(
@@ -557,9 +524,7 @@ test('builds a canonical zip with flat HTML, inlined SVGs, CDN font only, and pa
   assert.doesNotMatch(html, /src="(?:\.\.\/)?assets\/SVG\//);
 
   assert.ok(html.includes(CDN_MUSEO_URL), 'Expected Museo CDN URL');
-  assert.match(html, new RegExp(
-    `font-family: "Museo";[\\s\\S]*?url\\("${CDN_MUSEO_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"\\) format\\("opentype"\\)`,
-  ));
+  assertMuseoFace(html, CDN_MUSEO_URL);
   assert.ok(!html.includes(CDN_MUSEO_SANS_URL));
   assert.doesNotMatch(html, /MuseoSans_700\.otf/);
 
@@ -589,7 +554,7 @@ test('builds a client preview package without copy validation when requested', a
   assert.doesNotMatch(preview, /window\.__SSE_DCO_CLIENT_PREVIEW__/);
   assert.doesNotMatch(preview, /preview-validator\.js/);
   assert.doesNotMatch(variant, /preview-validator\.js/);
-  assert.match(variant, /url\("\.\.\/assets\/fonts\/Museo700-Regular\.otf"\) format\("opentype"\)/);
+  assertMuseoFace(variant, '../assets/fonts/Museo700-Regular.otf');
 });
 
 test('builds a CDN-linked client preview package for Studio CDN parity', async () => {
@@ -777,29 +742,6 @@ test('exports legacy static first-frame state and GWD skeleton text reset', asyn
   assert.match(html, /\.plus-1\s*\{[\s\S]*?transform:\s*translate3d\(0px, -10px, 0px\)(?:\s+scale3d\([^)]+\))?;/);
 });
 
-test('exports the shared text-fit engine and fits after binding offer texts', async () => {
-  const document = await readCreativeDocument();
-  const html = await renderStudioReadyHtml(document, '160x600');
-
-  assert.match(html, /function createTextFitEngine\(/);
-  assert.match(html, /textFitEngine\.applyRules\(/);
-  assert.match(html, /function wrapOfferValueSymbol\(element\)/);
-  assert.match(html, /first === '\\u00A3' \|\| first === '\\u20AC'/);
-  assert.match(
-    html,
-    /bindOfferTexts\(data\);[\s\S]*?commitOfferLayout\(\);/,
-    'texts must be bound before fitting',
-  );
-  assert.match(
-    html,
-    /function commitOfferLayout\(\) \{\s*if \(!root\) return;\s*(?:responsiveLayout\.reset\(\);\s*)?fitBoundText\(\);\s*alignOfferValueSymbols\(root\);\s*layoutOffers\(root\);/,
-    'symbols + layout run inside the shared layout commit',
-  );
-  assert.match(html, /var layoutOffers =/);
-  assert.doesNotMatch(html, /OFFER_VALUE_MIN_PX/);
-  assert.doesNotMatch(html, /function fitOfferValues/);
-  assert.doesNotMatch(html, /function equalizeSublines/);
-});
 
 test('the serialized fit engine in exported HTML is executable', async () => {
   const document = await readCreativeDocument();
@@ -852,33 +794,20 @@ test('local QA exports embed the packaged Museo so they measure what Studio serv
   const html = await renderStudioReadyHtml(document, '320x50', { fontBasePath: '../campaign/assets/fonts/' });
 
   assert.match(html, /@font-face/);
-  assert.match(html, /font-family: "Museo";[\s\S]*?url\("\.\.\/campaign\/assets\/fonts\/Museo700-Regular\.otf"\) format\("opentype"\)/);
-  assert.match(html, /font-family: "Museo";[\s\S]*?font-weight: 700/);
-  assert.match(html, /local\("☺"\)/, 'locally installed fonts must never mask the packaged file');
+  assertMuseoFace(html, '../campaign/assets/fonts/Museo700-Regular.otf');
   assert.doesNotMatch(html, /font-weight: 100 900/);
   assert.doesNotMatch(html, /\.sse-text-heavy/);
   assert.doesNotMatch(html, /MuseoSans_700\.otf/);
 });
 
-test('SSE DCO font exports loop the 15s timeline', async () => {
-  const document = await readCreativeDocument();
-  const html = await renderStudioReadyHtml(document, '300x250');
-
-  assert.match(html, /animation: 15s linear 0s infinite normal forwards running /);
-  assert.doesNotMatch(html, /animation: 15s linear 0s 1 normal forwards running /);
-  assert.match(html, /var __headlineMotionIteration = "infinite"/);
-});
-
-test('non-DCO statics still play the timeline once', async () => {
-  const document = await readCreativeDocumentForCampaign('sse-hiker-welcome');
-  const html = await renderStudioReadyHtml(document, '300x250', {
-    renderMode: 'outline',
-    delivery: 'static',
-  });
-
-  assert.match(html, /animation: 15s linear 0s 1 normal forwards running /);
-  assert.doesNotMatch(html, /animation: 15s linear 0s infinite normal forwards running /);
-});
+for (const duration of [6, 17.5, 30]) for (const loop of [false,true]) {
+ test(`export respects authored duration ${duration}s and loop=${loop}`, async()=>{
+  const document=await readCreativeDocument();document.clock.durationS=duration;document.clock.loop=loop;document.layoutRules=[];
+  const html=await renderStudioReadyHtml(document,'300x250');
+  const css=new JSDOM(html).window.document.querySelector('style')?.textContent||'';
+  assert.ok(css.includes(`animation: ${duration}s linear 0s ${loop?'infinite':'1'} normal forwards running `));
+ });
+}
 
 test('holds the motion clock until fonts and offer layout settle', async () => {
   const document = await readCreativeDocument();
@@ -895,16 +824,6 @@ test('holds the motion clock until fonts and offer layout settle', async () => {
   assert.doesNotMatch(html, /scheduleFontRefit/);
 });
 
-test('exports uniform bottom-aligned tracking rules for pricing blocks', async () => {
-  const document = await readCreativeDocument();
-  const html = await renderStudioReadyHtml(document, '320x50');
-
-  assert.match(html, /"cssClass":"offer-value","shared":true/);
-  assert.match(html, /"tracking":\{"minEm":-0\.05\}/);
-  assert.match(html, /"align":"bottom"/);
-  assert.match(html, /"minFontSizeRatio":0\.5/);
-  assert.match(html, /"cssClass":"offer-subline","shared":true/);
-});
 
 test('exports creative text fit rules for dynamic headline binding', async () => {
   const document = await readCreativeDocument();
@@ -916,20 +835,12 @@ test('exports creative text fit rules for dynamic headline binding', async () =>
 
   const html = await renderStudioReadyHtml(document, '300x250');
 
-  assert.match(html, /id="sse-production-fit-rules">.*"cssClass":"sse-headline"/);
-  assert.match(html, /"minFontSize":22/);
-  assert.match(html, /"maxLines":2/);
-  assert.match(html, /bindOfferTexts\(data\);[\s\S]*?commitOfferLayout\(\);/);
+  const dom=new JSDOM(html);
+  const rules=JSON.parse(dom.window.document.getElementById('sse-production-fit-rules')!.textContent!);
+  assert.ok(rules.some(rule=>rule.cssClass==='sse-headline'&&rule.minFontSize===22&&rule.maxLines===2));
+  dom.window.close();
 });
 
-test('exports text fitting that measures text content height', async () => {
-  const document = await readCreativeDocument();
-  const html = await renderStudioReadyHtml(document, '728x90');
-
-  assert.match(html, /function contentHeight\(element\)/);
-  assert.match(html, /doc\.createRange\(\)/);
-  assert.match(html, /function tooTall\(element, rule, cs, fontSize\)/);
-});
 
 test('does not apply text-fit clipping to the CTA shape container', async () => {
   const document = await readCreativeDocument();

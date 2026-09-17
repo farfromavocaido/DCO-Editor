@@ -27,7 +27,7 @@ describe('effective ownership', () => {
   expect(findCreativeTarget(next, '300x250', 'terms', scopes).values.width).toBe(88);
  });
  it('validates without adding, removing, or changing authored rules', () => {
-  const doc = JSON.parse(fs.readFileSync('campaign/sse-dco-creative.json', 'utf8'));
+  const doc = JSON.parse(fs.readFileSync('src/test/fixtures/campaign/sse-dco-creative.json', 'utf8'));
   doc.sizes['300x250'].variantRules.push({id:'custom-roundel',scope:'offers-2',layerId:'roundel-copy',props:{left:27}});
   const before = structuredClone(doc);
   validateCreativeDocument(doc);

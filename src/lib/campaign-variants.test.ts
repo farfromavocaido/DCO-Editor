@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import demo from '../../campaign/product-demo-creative.json';
-import sse from '../../campaign/sse-dco-creative.json';
+import demo from '../test/fixtures/campaign/product-demo-creative.json';
+import sse from '../test/fixtures/campaign/sse-dco-creative.json';
 import { campaignScopes, campaignConditionFamilies, campaignHeaderDimensions, campaignHeaderOrder, campaignRowForScopes, campaignVersionLabel, validateCampaignVariantModel, resolveCampaignRow, evaluateConditions, campaignStateRuntimeSource, validateCampaignStateEdit } from './campaign-variants';
 import { controlsFromFeedRow, activeScopesFromControls } from './feed-model';
 import { validateFeedRows } from '../server/feed-schema';

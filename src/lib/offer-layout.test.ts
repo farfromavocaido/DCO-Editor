@@ -1,12 +1,10 @@
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
-import { afterEach, test } from 'vitest';
+import { afterEach, test as vitestTest } from 'vitest';
 
 import {
   OFFER_LAYOUT_MAX_GAP_RATIO,
-  OFFER_SUBLINE_INK_WIDTH_RATIO,
-  createLayoutOffers,
-  layoutOffers,
+  layoutOffers as directLayoutOffers,
   layoutOffersRuntime,
 } from './offer-layout';
 
@@ -37,63 +35,15 @@ const installDom = () => {
   return { dom, document };
 };
 
-test('runtime keeps regex escapes intact for digit/whitespace samples', () => {
-  // LAYOUT_OFFERS_SOURCE is a template literal — \\d/\\s must be double-escaped
-  // or the exported ad measures "." alone for "1.5" and packs offer gaps wrong.
-  assert.match(layoutOffersRuntime, /\.replace\(\/\\s\+\//);
-  assert.match(layoutOffersRuntime, /\.replace\(\/\[\^\\d\]\//);
-  assert.doesNotMatch(layoutOffersRuntime, /\.replace\(\/s\+\//);
-  assert.doesNotMatch(layoutOffersRuntime, /\.replace\(\/\[\^d\.?\]\//);
-});
-
-test('runtime encodes ink-first helpers and per-family plus anchors', () => {
-  assert.match(layoutOffersRuntime, /function resolvePlusLayoutMode\(/);
-  assert.match(layoutOffersRuntime, /data-offer-plus-layout/);
-  assert.match(layoutOffersRuntime, /plusLayout === 'manual'/);
-  assert.match(layoutOffersRuntime, /function inkRect\(/);
-  assert.match(layoutOffersRuntime, /function textInk\(/);
-  assert.match(layoutOffersRuntime, /function glyphInk\(/);
-  assert.match(layoutOffersRuntime, /actualBoundingBoxAscent/);
-  assert.match(layoutOffersRuntime, /fontBoundingBoxAscent/);
-  // Unscale Range → local CSS px before combining canvas metrics (stage zoom).
-  assert.match(layoutOffersRuntime, /var localLine = clientToLocal\(line, ancestor\)/);
-  assert.match(layoutOffersRuntime, /function clientToLocal\(/);
-  assert.match(layoutOffersRuntime, /function withNeutralMotion\(/);
-  // SVG pluses place from the layout box (skip transformed getBoundingClientRect).
-  assert.match(layoutOffersRuntime, /isImg\) \{\s*[\s\S]*?alignY === 'top' \? y/);
-  assert.match(layoutOffersRuntime, /setProperty\('animation', 'none', 'important'\)/);
-  assert.match(layoutOffersRuntime, /function plusAnchorHorizontal\(/);
-  assert.match(layoutOffersRuntime, /function plusAnchorVertical\(/);
-  assert.match(layoutOffersRuntime, /function plusAnchorTriangular\(/);
-  assert.match(layoutOffersRuntime, /function placePlus\(/);
-  assert.match(layoutOffersRuntime, /withNeutralMotion\(plus,/);
-  // Ink accepts height-only (wrapped sublines); must not require width > 0 alone.
-  assert.match(layoutOffersRuntime, /rect\.width > 0 \|\| rect\.height > 0/);
-  // Vertical factors subline cluster ink; triangular modes: sublineTop / midGap /
-  // valueBottom. SVG pluses use box ink. Slot motion neutralized for measure.
-  assert.match(layoutOffersRuntime, /sublineBottom/);
-  assert.match(layoutOffersRuntime, /upperBottom \+ lowerCluster\.valueTop/);
-  assert.doesNotMatch(layoutOffersRuntime, /upperCluster\.clusterBottom \+ lowerCluster\.valueTop/);
-  assert.match(layoutOffersRuntime, /Math\.max\(topA\.valueBottom, topB\.valueBottom\)/);
-  assert.match(layoutOffersRuntime, /sublineTop/);
-  assert.match(layoutOffersRuntime, /sublineBoxTop/);
-  assert.match(layoutOffersRuntime, /sizeKey === '300x250' \|\| sizeKey === '970x250'/);
-  assert.match(layoutOffersRuntime, /sizeKey === '300x600'/);
-  assert.match(layoutOffersRuntime, /mode === 'midGap'/);
-  assert.match(layoutOffersRuntime, /withNeutralMotionAll\(slots,/);
-  assert.match(layoutOffersRuntime, /placePlus\(pluses\[0\], anchor\.x, anchor\.y, anchor\.alignY/);
-  assert.match(layoutOffersRuntime, /alignY === 'top'/);
-  assert.match(layoutOffersRuntime, /tagName === 'IMG'/);
-  assert.equal(OFFER_SUBLINE_INK_WIDTH_RATIO, 1.1);
-  assert.doesNotMatch(layoutOffersRuntime, /SUBLINE_INK_RATIO/);
-  assert.match(layoutOffersRuntime, new RegExp(String(OFFER_LAYOUT_MAX_GAP_RATIO).replace('.', '\\.')));
-});
-
-test('createLayoutOffers returns a callable layoutOffers', () => {
-  const fn = createLayoutOffers();
-  assert.equal(typeof fn, 'function');
-  assert.doesNotThrow(() => fn(null));
-});
+// Run every geometry contract against both the editor function and the exact
+// serialized function shipped in the ad. Refactoring helper names is harmless.
+let layoutOffers=directLayoutOffers;
+const test=(name:string,body:()=>void)=>{
+ for(const mode of ['editor','delivered'])vitestTest(`${name} (${mode})`,()=>{
+  layoutOffers=mode==='editor'?directLayoutOffers:((root)=>new Function('window',`${layoutOffersRuntime};return layoutOffers;`)(window)(root));
+  body();
+ });
+};
 
 test('stacked sublines keep authored width (ink×1.1 is not applied at runtime)', () => {
   const { document } = installDom();

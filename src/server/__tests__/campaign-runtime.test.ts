@@ -2,7 +2,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
-import demo from '../../../campaign/product-demo-creative.json';
+import demo from '../../test/fixtures/campaign/product-demo-creative.json';
 import { renderStudioReadyHtml } from '../creative-exporter';
 
 test('generic production runtime binds arbitrary copy, switches scopes and updates exit URL',async()=>{

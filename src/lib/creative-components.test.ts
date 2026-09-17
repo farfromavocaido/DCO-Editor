@@ -87,7 +87,7 @@ describe('reusable components',()=>{
   expect(findCreativeTarget(resized,'300x600','label',['b','copy']).values.fontSize).toBe(60);
  });
  it('transforms parent and nested parts independently of declaration order',()=>{
-  const doc=JSON.parse(fs.readFileSync('campaign/sse-dco-creative.json','utf8'));
+  const doc=JSON.parse(fs.readFileSync('src/test/fixtures/campaign/sse-dco-creative.json','utf8'));
   const parts=[{role:'value',targetId:'offer-slot-1::offer-value'},{role:'frame',targetId:'offer-slot-1'}];
   doc.componentDefinitions=[{id:'component:offer',name:'Offer',resize:'proportional',frameTargetId:'offer-slot-1',parts}];
   const args={componentId:'component:offer',sourceSize:'300x250',sourceScopes:['offers-1'],destinations:[{size:'300x600',scope:'offers-1'}],placements:{'300x600/offers-1':{left:60,top:100,width:180,height:90}}};
@@ -131,13 +131,13 @@ describe('reusable components',()=>{
   expect(()=>createComponentLink(doc,{...link,id:'cycle',source:link.destinations[0],destinations:[link.source]})).toThrow();
  });
  it('keeps a component with no source text fitting inactive at the destination',()=>{
-  const doc=JSON.parse(fs.readFileSync('campaign/sse-dco-creative.json','utf8'));
+  const doc=JSON.parse(fs.readFileSync('src/test/fixtures/campaign/sse-dco-creative.json','utf8'));
   expect(effectiveTextFitForTarget(doc,'300x250','cta',['offers-1','cta-roundel'])).toEqual({});
   const next=transferCreativeComponent(doc,{componentId:'component:cta',sourceSize:'300x250',sourceScopes:['offers-1','cta-roundel'],destinations:[{size:'300x600',scope:'offers-1.cta-roundel'}]});
   expect(effectiveTextFitForTarget(next,'300x600','cta',['offers-1','cta-roundel']).disabled).toBe(true);
  });
  it('transfers SSE MPU split and copy-only without touching other offer counts or source JSON',()=>{
-  const doc=JSON.parse(fs.readFileSync('campaign/sse-dco-creative.json','utf8'));
+  const doc=JSON.parse(fs.readFileSync('src/test/fixtures/campaign/sse-dco-creative.json','utf8'));
   const next=transferCreativeComponent(doc,{componentId:'component:roundel',sourceSize:'300x250',sourceScopes:['offers-1','roundel-split','roundel-frame-on'],destinations:[{size:'300x600',scope:'offers-1.roundel-frame-on.roundel-split'}],sizing:'destination'});
   expect(next.sizes['300x250']).toEqual(doc.sizes['300x250']);
   for(const state of ['roundel-split','roundel-copy-only']) {

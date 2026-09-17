@@ -17,7 +17,7 @@ import {
 import { activeFrameScope, beatsForScopes } from './timing-profiles';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const creativePath = path.resolve(here, '../../campaign/sse-dco-creative.json');
+const creativePath = path.resolve(here, '../test/fixtures/campaign/sse-dco-creative.json');
 const document = JSON.parse(fs.readFileSync(creativePath, 'utf8')) as Record<string, unknown>;
 
 const longRow = (overrides: Record<string, unknown> = {}) => ({

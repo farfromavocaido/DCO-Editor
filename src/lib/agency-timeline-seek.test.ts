@@ -6,14 +6,13 @@ import {
   seekAgencyTimeline,
 } from './agency-timeline-seek';
 
-test('evaluate source seeks page-content animations like qa capture', () => {
-  const source = agencyTimelineSeekEvaluateSource(4250);
-  assert.match(source, /getElementById\('page-content'\)/);
-  assert.match(source, /getAnimations/);
-  assert.match(source, /subtree:\s*true/);
-  assert.match(source, /currentTime = t/);
-  assert.match(source, /4250/);
-  assert.match(source, /motion-ready/);
+test('serialized QA seek pauses the same animations at the requested time',()=>{
+ for(const time of [0,1375,18000]){
+  let paused=false;const animation={currentTime:-1,pause(){paused=true;}};
+  const root={classList:{contains:()=>true},getAnimations:()=>[animation]};
+  const run=new Function('document',`return ${agencyTimelineSeekEvaluateSource(time)}`);
+  assert.equal(run({getElementById:()=>root}),1);assert.equal(animation.currentTime,time);assert.equal(paused,true);
+ }
 });
 
 test('seekAgencyTimeline pauses animations and sets currentTime', () => {

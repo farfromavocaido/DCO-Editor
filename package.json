@@ -16,7 +16,9 @@
     "qa:dco:holds": "tsx --tsconfig tsconfig.json scripts/qa-dco/hold-samples.ts",
     "qa:dco:settled": "tsx --tsconfig tsconfig.json scripts/qa-dco/settled-sheets.ts",
     "setup:browser": "playwright install chromium",
-    "test:parity": "tsx --tsconfig tsconfig.json scripts/verify-editor-parity.ts"
+    "test:parity": "tsx --tsconfig tsconfig.json scripts/verify-editor-parity.ts",
+    "test:unit": "vitest run --config vitest.unit.config.ts",
+    "test:browser": "vitest run --config vitest.browser.config.ts"
   },
   "dependencies": {
     "js-beautify": "^1.15.4",

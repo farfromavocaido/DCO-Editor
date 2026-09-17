@@ -127,6 +127,7 @@ export function PreviewPane() {
   const layoutRow=useMemo(()=>{const base=layoutPreview?.size===size?layoutPreview.row:row;return layoutPreviewCopy?.size===size?{...base,...layoutPreviewCopy.values}:base;},[row,layoutPreview,layoutPreviewCopy,size]);
   const layoutDiagnostics=useEditorStore(s=>s.layoutDiagnostics);
   const selectedLayoutRuleId=useEditorStore(s=>s.selectedLayoutRuleId);
+  const pendingLayoutEdit=useEditorStore(s=>s.layoutAreaEdit);
   const previewRenderMode = useEditorStore(s => s.previewRenderMode);
   const setPreviewRenderMode = useEditorStore(s => s.setPreviewRenderMode);
   const canvasZoom = useEditorStore((s) => s.canvasZoom);
@@ -703,7 +704,8 @@ export function PreviewPane() {
           <span className="zoom-readout">{zoomLabel(canvasZoom)}</span>
         </div>
       </div>
-      <div className="preview-viewport">
+      {pendingLayoutEdit?.size===size&&<button type="button" className="layout-draft-resume" title="Your changes are held in a draft until you Apply or Cancel" onClick={()=>{const ids=pendingLayoutEdit.rule.targets.filter(t=>t.size===size).map(t=>t.targetId);useEditorStore.getState().setCanvasSelection(ids[0],ids);useEditorStore.setState({selectedLayoutRuleId:pendingLayoutEdit.rule.id,layoutRulesOpen:true});}}>Resume layout edit · not applied</button>}
+      <div className="preview-viewport" onPointerDownCapture={event=>{if(!(event.target as Element).closest('.layout-area-outline'))useEditorStore.getState().selectLayoutRule(null);}}>
         <ViewportRulersFrame
           canvas={sizeCreative.canvas}
           scale={scale}

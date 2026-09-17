@@ -79,3 +79,5 @@ Edit a layout area → **Layout animations** → **+ Add animation**. Entries li
 Existing single exit/return configurations are displayed as list entries without rewriting campaign data. Editing the list adopts the sequence format for that area. The sequence creates native motion plans in the shared production layout runtime; outline snapshots retain those same plans.
 
 Choosing a new entrance selects **Before linked entrances → Make room as items enter**. **Leave space ready — no rearranging** deliberately reserves that space from the start. Save errors appear beside Apply and are brought into view.
+
+Layout-area edits remain provisional when you click away. Deselecting hides the area outline but retains the draft and last valid preview. **Resume layout edit · not applied** restores the controls. **Apply layout** commits; **Cancel** discards. Validation messages appear on Apply, not while a configuration is incomplete. Drafts are session-only and cleared when changing campaign.

@@ -27,19 +27,21 @@ export function captureLayoutSelection(ids){
  return withProductionRestPose(stage,()=>{const runtime=createResponsiveLayoutRuntime(stage.ownerDocument.defaultView),origin=stage.getBoundingClientRect();return ids.map(id=>{const el=runtime.element(id),ink=el&&runtime.ink(el);return {id,ink:ink?{left:ink.left-origin.left,top:ink.top-origin.top,width:ink.width,height:ink.height}:null};});});
 }
 export function LayoutAreaPanel({document,size,targetIds,scopes,diagnostics,onChange,onSelectRule}){
- const [draft,setDraft]=useState(null),[error,setError]=useState('');
+ const campaignId=useEditorStore(s=>s.activeCampaignId);
+ const [draft,setLocalDraft]=useState(()=>{const saved=useEditorStore.getState().layoutAreaEdit;return saved?.campaignId===useEditorStore.getState().activeCampaignId&&saved.size===size&&saved.rule.targets.some(t=>t.size===size&&targetIds.includes(t.targetId))?saved.rule:null;}),[error,setError]=useState('');
+ const setDraft=rule=>{setLocalDraft(rule);setError('');useEditorStore.setState({layoutAreaEdit:rule?{campaignId,size,rule}:null});};
  const errorRef=useRef(null);
  const showSaveError=message=>{setError(message);requestAnimationFrame(()=>{errorRef.current?.scrollIntoView({block:'nearest'});errorRef.current?.focus({preventScroll:true});});};
  const timing=useEditorStore(s=>s.layoutTimingNotice);
  const row=useEditorStore(selectPreviewFeedRow);
  const areaDraft=useEditorStore(s=>s.layoutAreaDraft);
- useEffect(()=>()=>{if(useEditorStore.getState().layoutAreaDraft?.ruleId===draft?.id)useEditorStore.setState({layoutAreaDraft:null});},[draft?.id]);
+
  const currentVersion=campaignVariantModel(document).dimensions.filter(d=>!d.derived).flatMap(d=>d.options.filter(o=>scopes.includes(o.scope)).map(o=>o.scope));
  const scopeLabel=when=>(when||[]).map(scope=>{const dimension=campaignVariantModel(document).dimensions.find(d=>d.options.some(o=>o.scope===scope));return dimension?`${dimension.label}: ${dimension.options.find(o=>o.scope===scope).label}`:scope;}).join(' · ');
  const name=id=>findCreativeTarget(document,size,id,[])?.label||id;
  const rules=(document.layoutRules||[]).filter(r=>r.type==='distribute'&&r.targets.some(t=>t.size===size&&targetIds.includes(t.targetId)));
- const clear=()=>{setDraft(null);useEditorStore.setState({layoutAreaDraft:null});};
- const edit=rule=>{revealLayoutTargets(rule.targets.filter(t=>t.size===size).map(t=>t.targetId));setDraft(structuredClone(rule));useEditorStore.setState({layoutAreaDraft:{ruleId:rule.id,size,area:rule.areas[size]}});onSelectRule?.(rule.id);setError('');};
+ const clear=()=>{setDraft(null);useEditorStore.setState({layoutAreaDraft:null,layoutPreview:null,selectedLayoutRuleId:null});};
+ const edit=rule=>{const pending=useEditorStore.getState().layoutAreaEdit;if(pending&&pending.rule.id!==rule.id){showSaveError('Resume your pending layout edit and Apply or Cancel it first.');return;}rule=pending?.rule||rule;revealLayoutTargets(rule.targets.filter(t=>t.size===size).map(t=>t.targetId));setDraft(structuredClone(rule));useEditorStore.setState({layoutAreaDraft:{ruleId:rule.id,size,area:pending&&useEditorStore.getState().layoutAreaDraft?.ruleId===rule.id?useEditorStore.getState().layoutAreaDraft.area:rule.areas[size]}});onSelectRule?.(rule.id);setError('');};
  const create=()=>{try{const measured=captureLayoutSelection(targetIds),bounds=unionProductionBounds(measured.map(x=>x.ink).filter(Boolean));if(!bounds)throw new Error('Select at least one element with visible artwork');
   const sorted=[...measured].sort((a,b)=>(a.ink?.top??Infinity)-(b.ink?.top??Infinity));
   edit({id:crypto.randomUUID(),name:`Layout area ${1+(document.layoutRules||[]).filter(r=>r.type==='distribute').length}`,type:'distribute',enabled:true,targets:sorted.map(x=>({size,targetId:x.id})),areas:{[size]:{...bounds,width:Math.max(1,bounds.width),height:Math.max(1,bounds.height)}},axis:'y',single:'center',crossAlign:'center',minGap:0,overflow:'authored',when:currentVersion});
@@ -57,8 +59,8 @@ export function LayoutAreaPanel({document,size,targetIds,scopes,diagnostics,onCh
  useEffect(()=>{
   if(!draft)return;const rule={...draft,areas:{...draft.areas,[size]:area}};const all=document.layoutRules||[];
   const next={...document,layoutRules:all.some(r=>r.id===rule.id)?all.map(r=>r.id===rule.id?rule:r):[...all,rule]};
-  try{validateLayoutRules(next);setError('');useEditorStore.setState({layoutPreview:{kind:'area',ruleId:rule.id,size,document:next,row}});}catch(e){setError(e.message);}
-  return()=>{if(useEditorStore.getState().layoutPreview?.ruleId===rule.id)useEditorStore.setState({layoutPreview:null});};
+  setError('');
+  try{validateLayoutRules(next);useEditorStore.setState({layoutPreview:{kind:'area',ruleId:rule.id,size,document:next,row}});}catch{ /* Keep the last valid preview while the draft is incomplete. Apply reports errors. */ }
  },[JSON.stringify(draft),JSON.stringify(area),document,size,row]);
  const alreadyArranged=rules.some(r=>r.enabled&&(r.when||[]).every(scope=>scopes.includes(scope)));
 

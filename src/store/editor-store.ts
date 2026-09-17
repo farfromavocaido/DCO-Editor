@@ -434,6 +434,7 @@ export const useEditorStore = create<any>((set, get) => ({
     });
     set({
       ...next,
+      selectedLayoutRuleId: null,
       lastSelectionClickKey: '',
     });
   },
@@ -726,6 +727,7 @@ export const useEditorStore = create<any>((set, get) => ({
 
   clearCanvasSelection: () => {
     set({
+      selectedLayoutRuleId: null,
       selectedLayerId: '',
       selectedTargetId: '',
       selectedTargetIds: [],
@@ -925,6 +927,7 @@ export const useEditorStore = create<any>((set, get) => ({
     }
     const generation = state.campaignLoadGeneration + 1;
     set({
+      layoutAreaEdit:null,layoutAreaDraft:null,layoutPreview:null,selectedLayoutRuleId:null,
       activeCampaignId: campaignId,
       campaignLoadGeneration: generation,
       creativeDirty: false,

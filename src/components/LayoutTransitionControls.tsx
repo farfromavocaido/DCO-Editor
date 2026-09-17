@@ -42,6 +42,6 @@ export function LayoutTransitionControls({document,size,draft,patch,scopes}){
  })}
  <button type="button" className={styles.primary} onClick={add}>+ Add animation</button>
  <span className={styles.note} title="Without a return, the final arrangement holds until the ad ends. A looping ad restarts in its opening arrangement.">Return is optional ⓘ</span>
- {error&&<p role="alert" className={styles.error}>{error}</p>}
+
  </details>;
 }

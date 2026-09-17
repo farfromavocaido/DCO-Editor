@@ -79,3 +79,10 @@ it('component bounds updates and keyboard nudges transform hidden arrangements w
   for (const arrangement of ['split', 'copy-only']) expect(findCreativeTarget(next, 'square', 'copy', ['version-b', arrangement]).values).toEqual(findCreativeTarget(doc, 'square', 'copy', ['version-b', arrangement]).values);
   expect(useEditorStore.getState().history).toHaveLength(2);
 });
+
+it('single-offer feed reconciliation preserves component isolation', () => {
+  useEditorStore.setState({offerCount:1,selectedTargetId:'copy',selectedTargetIds:['copy'],selectedLayerId:'copy',isolationPath:['component:badge'],isolatedGroupId:'component:badge'});
+  useEditorStore.getState().reconcileOfferSelection();
+  expect(useEditorStore.getState().selectedTargetId).toBe('copy');
+  expect(useEditorStore.getState().isolationPath).toEqual(['component:badge']);
+});

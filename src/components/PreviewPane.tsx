@@ -5,6 +5,7 @@ import { componentLinkForTarget } from '@/lib/creative-components';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { ComponentNavigation } from './ComponentNavigation';
 import { ProductionCreativeStage } from '@/components/ProductionCreativeStage';
 import { getProductionStage, productionTargetClipped, unionProductionBounds, type ProductionTarget } from '@/lib/production-stage';
 import {
@@ -180,6 +181,8 @@ export function PreviewPane() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      const active=window.document.activeElement;
+      if (event.key === 'Enter' && active?.matches('input,textarea,select,[contenteditable="true"]')) return;
       if (event.key === 'Enter' && selectedTargetId) {
         event.preventDefault();
         drillIntoCanvasTarget();
@@ -641,6 +644,7 @@ export function PreviewPane() {
             <option value="outline">Fixed text as outlines</option>
           </select>
 
+          <ComponentNavigation />
           {offersBlockIsolated ? (
             <div className="isolation-crumb" aria-label="Offers editing path">
               <button type="button" className="isolation-crumb-link" onClick={() => selectOffersBlock()}>

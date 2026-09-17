@@ -833,7 +833,7 @@ export const useEditorStore = create<any>((set, get) => ({
       if (
         state.selectedTargetId === OFFERS_BLOCK_ID
         || state.isolatedGroupId === OFFERS_BLOCK_ID
-        || state.isolationPath?.length
+        || state.isolationPath?.includes(OFFERS_BLOCK_ID)
         || state.selectedTargetIds.includes(OFFERS_BLOCK_ID)
       ) {
         get().clearCanvasSelection();

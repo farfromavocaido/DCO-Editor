@@ -3942,3 +3942,9 @@ select {
 .component-transfer-options > span { color:#637c8a;font-size:11px; }.component-transfer-options label { display:flex;align-items:center;gap:6px; }
 .component-placement-fields { display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:12px;background:#fff;border-top:1px solid #d5e0e4; }
 .component-placement-fields > span { width:100%;text-align:center;font-size:11px;color:#637c8a; }.component-placement-fields label { display:flex;gap:5px;align-items:center; }.component-placement-fields input { width:75px; }
+.component-navigation { display:flex;align-items:center;gap:5px;font-size:11px; }
+.component-navigation button,.component-navigation select,.component-layout-value { border:1px solid #354651;border-radius:5px;background:#1b2833;color:#dde6eb;padding:4px 7px;font:inherit; }
+.component-navigation .component-parent { color:#8ce4d3;font-weight:600;cursor:pointer; }
+.component-layout-toggle { display:flex;gap:2px;margin-left:7px; }.component-layout-toggle button { cursor:pointer; }
+.component-layout-toggle button[aria-pressed=true] { background:#174d44;border-color:#2b9e86;color:#9aefdc; }
+.component-layout-value { width:90px; }

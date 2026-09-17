@@ -18,3 +18,11 @@ it('requires an explicit absence policy and real targets in every linked format'
 it('allows opposite relationships in mutually exclusive states',()=>{
  const d=fixture();d.layoutRules=[{...spacing('one','title','mark'),when:['a']},{...spacing('two','mark','title'),when:['b']}];expect(()=>validateLayoutRules(d)).not.toThrow();
 });
+it('rejects measurement feedback and overlapping area ownership',()=>{
+ const d=fixture();d.layoutRules=[{id:'loop',name:'Loop',type:'conditional',enabled:true,targets:[{size:'300x250',targetId:'title'}],condition:{targetId:'title',test:'lines-at-least',value:2},values:{width:100}}];expect(()=>validateLayoutRules(d)).toThrow(/own measurement/);
+ d.layoutRules[0].condition.test='has-text';expect(()=>validateLayoutRules(d)).not.toThrow();
+ d.layoutRules=[{id:'area',name:'Area',type:'distribute',enabled:true,targets:[{size:'300x250',targetId:'title'},{size:'300x250',targetId:'mark'}],areas:{'300x250':{left:0,top:0,width:100,height:100}},axis:'y',single:'center',minGap:0,overflow:'authored'},spacing('gap','title','canvas')];expect(()=>validateLayoutRules(d)).toThrow(/Conflicting/);
+});
+it('a condition can keep the original true placement and supply only an otherwise placement',()=>{
+ const d=fixture();d.layoutRules=[{id:'fallback',name:'Otherwise',type:'conditional',enabled:true,targets:[{size:'300x250',targetId:'mark'}],condition:{targetId:'title',test:'has-text'},values:{},otherwise:{top:40}}];expect(()=>validateLayoutRules(d)).not.toThrow();
+});

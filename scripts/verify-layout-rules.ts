@@ -24,7 +24,7 @@ async function main(){
   await states.locator('details[open]').getByLabel('Name',{exact:true}).fill('Offer options');await states.getByRole('button',{name:'Apply states',exact:true}).click();await ready();assert.equal(payload.document.campaignState.dimensions.find((d:any)=>d.id==='offerCount').label,'Offer options');
   await page.locator('summary').filter({hasText:/^Campaign states$/}).click();
   const rules=page.locator('.selected-layout-rules');await rules.locator('summary').click();
-  await rules.getByRole('button',{name:'+ Conditional placement',exact:true}).click();
+  await rules.getByRole('button',{name:'+ Conditional placement',exact:true}).click();await rules.getByLabel('Condition source').selectOption('campaign');await rules.getByText('Limit to campaign versions',{exact:true}).click();
   await rules.getByLabel('Name',{exact:true}).fill('Photo width when single offer');await rules.getByLabel('Offer options',{exact:true}).selectOption('offers-1');await rules.getByLabel('Width (px)',{exact:true}).fill('240');await rules.getByRole('button',{name:'Apply rule',exact:true}).click();await ready();
   const article=rules.locator('article').filter({hasText:'Photo width when single offer'});await article.getByText('Active',{exact:true}).waitFor();
   assert.equal(await (await frame()).locator('#bg-image').evaluate(e=>getComputedStyle(e).width),'240px');
@@ -32,7 +32,7 @@ async function main(){
   await article.getByRole('button',{name:'Enable',exact:true}).click();await ready();
   await page.getByRole('button',{name:'Dual offers',exact:true}).click();await ready();await article.getByText('Enabled · inactive',{exact:true}).waitFor();assert.equal(await (await frame()).locator('#bg-image').evaluate(e=>getComputedStyle(e).width),'300px');
   await page.getByRole('button',{name:'Single offer',exact:true}).click();await ready();
-  await rules.getByRole('button',{name:'+ Responsive spacing',exact:true}).click();await rules.getByLabel('Name',{exact:true}).fill('Photo top spacing');await rules.getByLabel('Gap',{exact:true}).fill('10');await rules.getByRole('button',{name:'Apply rule',exact:true}).click();await ready();
+  await rules.getByRole('button',{name:'+ Keep a gap',exact:true}).click();await rules.getByLabel('Name',{exact:true}).fill('Photo top spacing');await rules.getByLabel('Gap',{exact:true}).fill('10');await rules.getByRole('button',{name:'Apply rule',exact:true}).click();await ready();
   const spacing=rules.locator('article').filter({hasText:'Photo top spacing'});await spacing.getByText('Active',{exact:true}).waitFor();
   assert.equal(await (await frame()).locator('#bg-image').evaluate(e=>getComputedStyle(e).top),'10px');
   await page.getByRole('slider',{name:'bg-image gap',exact:true}).press('ArrowDown');await ready();assert.equal(await (await frame()).locator('#bg-image').evaluate(e=>getComputedStyle(e).top),'11px');

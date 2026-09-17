@@ -1130,7 +1130,7 @@ export const useEditorStore = create<any>((set, get) => ({
 
   layoutRuleBlocksEdit: (targetIds, fields) => {
     const state=get();
-    const owner=(state.creativeDocument?.layoutRules||[]).find(rule=>state.layoutDiagnostics.some(d=>d.id===rule.id&&d.size===state.size&&d.status==='active'&&targetIds.some(id=>d.targetId===id||d.targetId.startsWith(id+'::')))&&fields.some(field=>rule.type==='spacing'?(rule.axis==='x'?'left':'top')===field:Object.hasOwn(rule.values||{},field)));
+    const owner=(state.creativeDocument?.layoutRules||[]).find(rule=>state.layoutDiagnostics.some(d=>d.id===rule.id&&d.size===state.size&&d.status==='active'&&targetIds.some(id=>d.targetId===id||d.targetId.startsWith(id+'::')))&&fields.some(field=>rule.type==='distribute'&&rule.crossAlign&&rule.crossAlign!=='keep'?['left','top'].includes(field):rule.type!=='conditional'?(rule.axis==='x'?'left':'top')===field:Object.hasOwn({...rule.values,...rule.otherwise},field)));
     if(!owner)return false;
     get().selectLayoutRule(owner.id);get().setStatus(`“${owner.name}” controls this placement. Edit the rule, or disable or freeze it to place manually.`,'warn');return true;
   },
@@ -1675,6 +1675,7 @@ export const useEditorStore = create<any>((set, get) => ({
    * presentation metrics for outline bake (Animate-style snapshot).
    */
   captureOutlineSnapshotsForAllSizes: async () => {
+    if(get().layoutPreview||get().layoutPreviewCopy)throw new Error('End the layout preview before exporting; preview copy is not campaign copy.');
     const state = get();
     const source = outlineSnapshotSource(state);
     const stageSource = { document: state.creativeDocument, row: selectPreviewFeedRow(state) };
@@ -1728,6 +1729,7 @@ export const useEditorStore = create<any>((set, get) => ({
    * DCO uses the unsaved editor document when that campaign is active, otherwise disk.
    */
   exportForPreview: async () => {
+    if(get().layoutPreview||get().layoutPreviewCopy)throw new Error('End the layout preview before exporting; preview copy is not campaign copy.');
     const original = {
       activeCampaignId: get().activeCampaignId,
       size: get().size,
@@ -1883,6 +1885,7 @@ export const useEditorStore = create<any>((set, get) => ({
   },
 
   prepareExportPreview: async (renderMode = 'font') => {
+    if(get().layoutPreview||get().layoutPreviewCopy)throw new Error('End the layout preview before exporting; preview copy is not campaign copy.');
     const mode = renderMode === 'outline' ? 'outline' : 'font';
     const state = get();
     const source = outlineSnapshotSource({ ...state, previewRenderMode: mode });

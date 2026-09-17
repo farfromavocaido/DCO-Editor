@@ -34,3 +34,8 @@
 .sourceBadge { border: 1px solid var(--line); color: var(--muted); background: var(--surface-muted); font: inherit; font-size: 10px; border-radius: 4px; padding: 3px 5px; cursor: pointer; }
 .sourceBadge[data-active='true'] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
 .sourceBadge:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.panel button[aria-pressed=true] { background:var(--accent-soft);border-color:var(--accent);color:var(--accent); }
+.memberList { list-style:none;padding:0;margin:0;display:grid;gap:5px; }
+.memberList li { display:flex;align-items:center;gap:5px; }.memberList li span { flex:1; }.memberList button { padding:3px 8px; }
+.panel details > summary { cursor:pointer;color:var(--muted);font-size:12px;padding:6px 0; }
+.panel textarea { width:100%;box-sizing:border-box;resize:vertical;min-height:64px;font:inherit;color:var(--ink);background:var(--panel-alt);border:1px solid var(--line-strong);border-radius:5px;padding:6px; }

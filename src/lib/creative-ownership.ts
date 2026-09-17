@@ -122,7 +122,7 @@ export const materializeCreativeOwnership = (document: any): any => {
         ])),
       });
     }
-    for (const rule of getLayoutRules(next).filter(rule=>rule.type==='conditional'&&rule.enabled)) for(const member of rule.targets.filter(member=>member.size===size)) {
+    for (const rule of getLayoutRules(next).filter(rule=>rule.type==='conditional'&&rule.enabled&&!rule.condition)) for(const member of rule.targets.filter(member=>member.size===size)) {
       creative.variantRules.push({id:`layout:${rule.id}:${member.targetId}`, ...targetIdentity(next,size,member.targetId),scope:[...new Set([...String(member.scope||'').split('.').filter(Boolean),...(rule.when||[])])].join('.'),props:rule.values,ownershipGenerated:true,ownershipPriority:priority+(creative.localOverrides||[]).filter(local=>local.detached).length+2,
         ownershipSource:{kind:'layoutRule',ruleId:rule.id,name:rule.name,member}});
     }

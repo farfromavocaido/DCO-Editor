@@ -42,7 +42,7 @@ export function CreativeContextMenu({menu,onClose}){
  {sub('Select',(menu.choices||[]).map(choice=><span key={choice.id}>{item(choice.label,choice.select)}</span>))}
  <div role="separator"/>
  {sub('Actions',<>{menu.editField&&item('Edit text',()=>state.requestEditFeedField(menu.editField))}{item('Duplicate',()=>state.duplicateLayer(menu.layerId),!layer)}{item('Delete',()=>state.deleteLayer(menu.layerId),!layer)}{item(menu.locked?'Unlock':'Lock',()=>state.toggleLayerLock(menu.layerId),!layer)}{item(menu.hidden?'Show':'Hide',()=>state.toggleLayerVisibility(menu.layerId),!layer)}{item('Add rectangle',()=>state.addShapeLayer())}</>)}
- {sub('Arrange',<>{item('Bring forward',()=>state.moveLayerZ(menu.layerId,1),!layer)}{item('Send backward',()=>state.moveLayerZ(menu.layerId,-1),!layer)}</>)}
+ {sub('Arrange',<>{item('Responsive layout…',()=>{requestAnimationFrame(()=>{const panel=window.document.querySelector('.selected-layout-rules');if(panel){panel.open=true;panel.scrollIntoView({block:'nearest'});panel.querySelector('button')?.focus();}});})}{item('Bring forward',()=>state.moveLayerZ(menu.layerId,1),!layer)}{item('Send backward',()=>state.moveLayerZ(menu.layerId,-1),!layer)}</>)}
  {sub('Animations',<>{item('Fade in here',()=>state.addAnimationIntent(menu.layerId,'fadeIn'),!layer)}{item('Fade out here',()=>state.addAnimationIntent(menu.layerId,'fadeOut'),!layer)}{item('Apply motion to family',()=>state.copySelectedClipToAnimationFamily(),!state.creativeDocument?.sizes?.[state.size]?.layers?.find(l=>l.id===menu.layerId)?.clips?.some(c=>c.id===state.selectedClipId))}</>)}
  </div>,window.document.body);
 }

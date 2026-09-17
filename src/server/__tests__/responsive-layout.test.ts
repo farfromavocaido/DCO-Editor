@@ -73,3 +73,41 @@ test('SSE background and legal-wrapper placements survive outline delivery',asyn
   }
  }finally{await browser.close();}
 },30000);
+
+test('distribution uses persistent area edges, skips empty copy, centres one item and flags insufficient space',async()=>{
+ const d=fixture();d.layoutRules=[{id:'area',name:'Layout area',type:'distribute',enabled:true,targets:[{size:'300x250',targetId:'icon'},{size:'300x250',targetId:'legal'}],areas:{'300x250':{left:20,top:80,width:220,height:150}},axis:'y',single:'center',crossAlign:'center',minGap:8,overflow:'authored'}];
+ const font=await fs.readFile(`${projectRoot}/assets/fonts/Museo700-Regular.otf`),options={fontUrlMap:{'Museo700-Regular.otf':`data:font/otf;base64,${font.toString('base64')}`}};
+ const html=renderWipHtml(await renderStudioReadyHtml(d,'300x250',options),d.feed.sampleRows[0]);
+ const browser=await chromium.launch();try{const p=await browser.newPage();await p.route('https://s0.2mdn.net/**',r=>r.abort());await p.setContent(html);const settle=()=>p.evaluate(`(${waitForProductionDocument.toString()})(document)`);await settle();
+ const diagnostics=()=>p.evaluate(()=>(window as any).__DCO_LAYOUT_DIAGNOSTICS__);
+ let rows=await diagnostics();expect(rows.find((r:any)=>r.targetId==='icon').targetInk.top).toBeCloseTo(80,1);expect(rows.find((r:any)=>r.targetId==='icon').targetInk.left+rows.find((r:any)=>r.targetId==='icon').targetInk.width/2).toBeCloseTo(130,1);expect(rows.find((r:any)=>r.targetId==='legal').targetInk.bottom).toBeCloseTo(230,1);
+ await p.evaluate(row=>(window as any).applySseDcoRuntimeState(row),{...d.feed.sampleRows[0],legal:''});await settle();rows=await diagnostics();expect(rows.find((r:any)=>r.targetId==='icon').targetInk.top).toBeCloseTo(135,1);expect(rows.find((r:any)=>r.targetId==='legal').status).toBe('inactive');
+ await p.evaluate(()=>{const w=window as any;const rules=JSON.parse(document.getElementById('dco-layout-rules')!.textContent!);rules[0].area.height=10;w.updateSseDcoLayoutRules(rules);w.applySseDcoRuntimeState(w.__SSE_DCO_APPLIED_ROW__);});await settle();rows=await diagnostics();expect(rows.find((r:any)=>r.targetId==='icon').status).toBe('error');expect(await p.locator('#icon').evaluate(e=>getComputedStyle(e).top)).toBe('50px');
+ }finally{await browser.close();}
+ const snapshot=await captureProductionPresentation(html,'300x250');expect(snapshot.positions.icon.top).toBeCloseTo(50,1);const outline=await renderStudioReadyHtml(d,'300x250',{...options,renderMode:'outline',presentationSnapshot:snapshot});expect(outline).toContain('top:50px');
+},30000);
+
+test('element conditions use actual text and fitted lines, switch both ways, and preserve outline placement',async()=>{
+ const d=fixture();d.layoutRules=[{id:'condition',name:'Follow legal content',type:'conditional',enabled:true,targets:[{size:'300x250',targetId:'icon'}],condition:{targetId:'legal',test:'lines-at-least',value:2},values:{top:30},otherwise:{top:110}}];
+ const font=await fs.readFile(`${projectRoot}/assets/fonts/Museo700-Regular.otf`),options={fontUrlMap:{'Museo700-Regular.otf':`data:font/otf;base64,${font.toString('base64')}`}};
+ const html=renderWipHtml(await renderStudioReadyHtml(d,'300x250',options),d.feed.sampleRows[0]);const browser=await chromium.launch();try{const p=await browser.newPage();await p.route('https://s0.2mdn.net/**',r=>r.abort());await p.setContent(html);const settle=()=>p.evaluate(`(${waitForProductionDocument.toString()})(document)`);await settle();expect(await p.locator('#icon').evaluate(e=>getComputedStyle(e).top)).toBe('110px');
+ await p.evaluate(row=>(window as any).applySseDcoRuntimeState(row),{...d.feed.sampleRows[0],legal:'First line\nSecond line'});await settle();let diagnostic=await p.evaluate(()=>(window as any).__DCO_LAYOUT_DIAGNOSTICS__[0]);expect(diagnostic.facts.lines).toBe(2);expect(diagnostic.branch).toBe('when');expect(await p.locator('#icon').evaluate(e=>getComputedStyle(e).top)).toBe('30px');
+ await p.evaluate(row=>(window as any).applySseDcoRuntimeState(row),{...d.feed.sampleRows[0],legal:''});await settle();expect(await p.locator('#icon').evaluate(e=>getComputedStyle(e).top)).toBe('110px');
+ }finally{await browser.close();}
+ const snapshot=await captureProductionPresentation(html,'300x250');expect(snapshot.positions.icon.top).toBe(110);const outline=await renderStudioReadyHtml(d,'300x250',{...options,renderMode:'outline',presentationSnapshot:snapshot});expect(outline).toContain('top:110px');
+},30000);
+
+test('content-dependent dimensions refit before downstream line-count conditions and area spacing',async()=>{
+ const d=fixture();d.feed.sampleRows[0].legal='Longer legal copy wraps across several fitted lines.';
+ const target=(targetId:string)=>[{size:'300x250',targetId}];
+ d.layoutRules=[{id:'width',name:'Width',type:'conditional',enabled:true,targets:target('legal'),condition:{targetId:'icon',test:'shown'},values:{width:80},otherwise:{width:220}},
+ {id:'height',name:'Height',type:'conditional',enabled:true,targets:target('legal'),condition:{targetId:'icon',test:'shown'},values:{height:90}},
+ {id:'lines',name:'Lines',type:'conditional',enabled:true,targets:target('icon'),condition:{targetId:'legal',test:'lines-at-least',value:2},values:{left:100},otherwise:{left:40}},
+ {id:'area',name:'Area',type:'distribute',enabled:true,targets:[...target('icon'),...target('legal')],areas:{'300x250':{left:0,top:20,width:300,height:220}},axis:'y',single:'center',minGap:0,overflow:'authored'}];
+ const font=await fs.readFile(`${projectRoot}/assets/fonts/Museo700-Regular.otf`),options={fontUrlMap:{'Museo700-Regular.otf':`data:font/otf;base64,${font.toString('base64')}`}};
+ const html=renderWipHtml(await renderStudioReadyHtml(d,'300x250',options),d.feed.sampleRows[0]),browser=await chromium.launch();try{const p=await browser.newPage();await p.route('https://s0.2mdn.net/**',r=>r.abort());await p.setContent(html);await p.evaluate(`(${waitForProductionDocument.toString()})(document)`);
+ const measured=await p.locator('#legal').evaluate(e=>({width:getComputedStyle(e).width,height:getComputedStyle(e).height}));expect(measured).toEqual({width:'80px',height:'90px'});
+ const diagnostics=await p.evaluate(()=>(window as any).__DCO_LAYOUT_DIAGNOSTICS__);expect(diagnostics.every((d:any)=>d.status==='active')).toBe(true);expect(diagnostics.find((d:any)=>d.id==='lines').facts.lines).toBeGreaterThanOrEqual(2);expect(await p.locator('#icon').evaluate(e=>getComputedStyle(e).left)).toBe('100px');expect(diagnostics.find((d:any)=>d.id==='area'&&d.targetId==='legal').targetInk.bottom).toBeCloseTo(240,1);
+ }finally{await browser.close();}
+ const snapshot=await captureProductionPresentation(html,'300x250');expect(snapshot.positions.legal.width).toBe(80);const outline=await renderStudioReadyHtml(d,'300x250',{...options,renderMode:'outline',presentationSnapshot:snapshot});expect(outline).toContain('width:80px');
+},30000);

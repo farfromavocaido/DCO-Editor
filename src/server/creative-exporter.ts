@@ -899,7 +899,7 @@ const renderOutlinedLayer = async (
   return `          <div class="${className}" id="${escapeAttr(layer.id)}"${layerIdAttr}${positionAttr}>${svg}</div>`;
 };
 
-const inkImageAttributes = (targetId: string, options: RenderOptions) => options.layoutRules?.some(rule=>rule.enabled && rule.type==='spacing' && [rule.targetId,rule.reference?.targetId].includes(targetId)) ? ' crossorigin="anonymous"' : '';
+const inkImageAttributes = (targetId: string, options: RenderOptions) => options.layoutRules?.some(rule=>rule.enabled && (rule.type!=='conditional' && [rule.targetId,rule.reference?.targetId,...(rule.members||[])].includes(targetId) || rule.condition?.targetId===targetId)) ? ' crossorigin="anonymous"' : '';
 
 const renderLayer = (layer: Record<string, unknown>, options: RenderOptions = {}, generic = false) => {
   const cssClass = !generic && isHeadlineLayer(layer)
@@ -1296,7 +1296,7 @@ const runtimeScript = (
           fitBoundText();
           alignOfferValueSymbols(root);
           layoutOffers(root);
-          ${options.layoutRules?.length ? 'responsiveLayout.run(root,layoutRules);' : ''}
+          ${options.layoutRules?.length ? 'responsiveLayout.run(root,layoutRules,function(){fitBoundText();alignOfferValueSymbols(root);layoutOffers(root);});' : ''}
         }
 
         // Cold CDN Museo must settle before the 15s clock runs. Pausing via

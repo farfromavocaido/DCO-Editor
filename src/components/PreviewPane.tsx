@@ -6,6 +6,8 @@ import { componentLinkForTarget } from '@/lib/creative-components';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {CreativeContextMenu,CreativeTransferLauncher} from './CreativeContextMenu';
+import {PlacementPreviewOverlay} from './PlacementPreviewOverlay';
+import {LayoutAreaOverlay} from './LayoutAreaOverlay';
 import {RuleConnectors} from './RuleConnectors';
 import {validateLayoutRules} from '@/lib/layout-rules';
 import { ComponentNavigation } from './ComponentNavigation';
@@ -118,6 +120,9 @@ export function PreviewPane() {
   const frameCount = useEditorStore((s) => s.frameCount);
   const roundelMode = useEditorStore((s) => s.roundelMode);
   const row = useEditorStore(selectPreviewFeedRow);
+  const layoutPreview=useEditorStore(s=>s.layoutPreview);
+  const layoutPreviewCopy=useEditorStore(s=>s.layoutPreviewCopy);
+  const layoutRow=useMemo(()=>{const base=layoutPreview?.size===size?layoutPreview.row:row;return layoutPreviewCopy?.size===size?{...base,...layoutPreviewCopy.values}:base;},[row,layoutPreview,layoutPreviewCopy,size]);
   const layoutDiagnostics=useEditorStore(s=>s.layoutDiagnostics);
   const selectedLayoutRuleId=useEditorStore(s=>s.selectedLayoutRuleId);
   const previewRenderMode = useEditorStore(s => s.previewRenderMode);
@@ -718,7 +723,7 @@ export function PreviewPane() {
                 onPointerDown={() => setContextMenu(null)}
               >
             <ProductionCreativeStage
-              document={document} row={row} size={size} percent={percent} renderMode={previewRenderMode}
+              document={layoutPreview?.size===size?layoutPreview.document:document} row={layoutRow} size={size} percent={percent} renderMode={previewRenderMode}
               layerIds={productionLayerIds} hiddenLayerIds={hiddenLayerIds}
               onTargets={receiveProductionTargets}
               onPointerDown={startSelectionDrag}
@@ -728,6 +733,8 @@ export function PreviewPane() {
                 if (layer) openLayerMenu(event, layer, targetId);
               }}
             />
+            <PlacementPreviewOverlay targets={productionTargets} size={size} scale={scale}/>
+            <LayoutAreaOverlay document={document} size={size} scale={scale}/>
             <RuleConnectors scaledParent width={sizeCreative.canvas.width} height={sizeCreative.canvas.height} zoom={scale} diagnostics={layoutDiagnostics.filter(item=>item.size===size&&item.targetId===(selectedTarget?.id||selectedTargetId))} selectedRuleId={selectedLayoutRuleId} onSelectRule={id=>useEditorStore.getState().selectLayoutRule(id)} onGapChange={(id,pixels)=>{
               const diagnostic=layoutDiagnostics.find(item=>item.id===id&&item.size===size&&item.targetId===(selectedTarget?.id||selectedTargetId)&&item.status==='active');
               if(!diagnostic)return;

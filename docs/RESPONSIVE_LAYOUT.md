@@ -1,34 +1,53 @@
-# Campaign fonts, states and layout rules
+# Campaign fonts, states and responsive layout
 
 These controls are opt-in authored data. Opening, validating or saving a campaign does not create rules or migrate its artwork.
 
-## Fonts
+## Arrange selected items in an area
 
-The sidebar Fonts panel registers local OTF, TTF or WOFF faces and their CDN URLs. The local file supplies editor text and fixed-copy outlines. CDN delivery verifies that its hosted file has identical bytes before packaging. Upload metadata supplies defaults; authored CSS family/weight/style mappings remain configurable. Existing documents without a registry retain their existing Museo mapping. WOFF2 is not yet supported by the outliner.
+Select two or more elements, open **Layout rules → Arrange selected items**, or use **right-click → Arrange → Responsive layout**.
 
-## Campaign states
+- Choose vertical or horizontal distribution, alignment and the item order. Alignment uses Left/Centre/Right or Top/Centre/Bottom; Keep existing positions is also available.
+- Changes preview live before Apply. Drag the purple area label to move its boundary; drag its corner to resize it. Exact coordinates are available under Layout area.
+- Choose where one remaining item sits; the default is the centre.
+- Empty text and state-hidden artwork are left out. Text glyphs and image alpha supply the ink bounds.
+- The area retains its dimensions when items disappear. Animation opacity does not change layout.
+- Minimum spacing and behaviour when there is insufficient room are under Spacing limits & name. The default restores original positions and reports the problem; extending beyond the area is an explicit alternative.
+- New areas default to the current campaign version. “All versions in this size” is an explicit choice. Existing version limits remain intact when editing from a different version.
 
-The sidebar Campaign states panel configures labels, choices, defaults, header visibility, availability and valid combinations. Generic campaigns can add dimensions and derive a value from other fields (first matching rule wins). Conditions combine with AND. Derived dependencies are resolved before scopes and text bindings, in the editor and dynamic runtime.
+Select an individual member to see its controlling area. **Detach selected** keeps its current position while freeing it from the layout. **Disable** or **Remove layout** reveals the underlying authored arrangement.
 
-SSE retains its existing serving adapter: labels, defaults, visibility and availability are editable; its field mappings and derived equations remain intact. New campaigns use the declarative variant model. Removing a state referenced by artwork or feed data is rejected rather than silently stripping its styling.
+When entering layout editing, the timeline seeks a useful visible frame. If selected items never appear together, “Different animation times” explains that limitation rather than pretending their animations overlap.
 
-## Layout rules
+## Conditional placements
 
-Select an element, then expand Layout rules in the inspector:
+Select an element, choose **Conditional placement**, and select what it responds to:
 
-- **Conditional placement** supplies explicit geometry, alignment or visibility while chosen campaign states match. Blank fields retain their authored values.
-- **Responsive spacing** keeps an element's ink edge a signed distance from another element's ink edge, or a canvas edge. This works for arbitrary concrete elements, including nested offer text. It does not require a predefined footer, logo or roundel component.
+- Another element has text or is empty. Whitespace-only text is empty.
+- Another element is shown or hidden. This checks visible artwork independently of an animation fade.
+- Its fitted line count is equal to, above or below a threshold.
+- Its rendered ink height exceeds a threshold.
+- Existing campaign choices remain available as a separate condition source or version restriction.
 
-Pixels are absolute. `em` follows the target's computed font size. Percentages follow the canvas width for horizontal spacing, or height for vertical spacing. Fallback gaps use the same units. Text ink is measured after wrapping/fitting; bitmap and SVG image transparency is excluded. Cross-origin images need readable pixel data (same-origin, embedded, or CORS-enabled). Measurement failures appear on the rule; they do not silently substitute the image frame for its ink.
+Define placement A and its Otherwise placement B. Blank fields retain the original values. “Use current position” captures X/Y; “Preview & place on canvas” provides a draggable placement handle without committing those changes. Text-presence previews use temporary populated/empty copy. Other condition previews show the chosen placement; use real sample text to verify fitted-line thresholds.
 
-The designer chooses what happens when reference ink is absent: retain the authored placement or use a specified canvas edge. A feed/state-hidden element is absent; an animation fade does not change layout. Layout is measured in its resting state before animation.
+The published rule reports its measured content/line count and active placement. Cyclic measurement dependencies and conflicting property owners are rejected. A condition cannot resize its own text based on the line count produced by that resize.
 
-An active rule owns its affected position fields. Their source badge opens the rule. Disabled rules and enabled-but-inactive conditions are distinguishable. Only the selected spacing rule displays an on-canvas ruler; drag its gap or use arrow keys (Shift: 10 px).
+## Test copy without changing the campaign
 
-Copy creates an independent rule. Link adds an element/format to the same rule. Unlink retains a local rule. Freeze records the active measured position as an authored value and removes this element's membership. Disabling/deleting a rule reveals the underlying authored placement. Conflicting property owners and circular references are rejected.
+**Try different content** previews arbitrary sample text or empty copy through the production renderer. **Restore actual copy** leaves the campaign and feed untouched. End these temporary previews before exporting; exports never silently capture test copy or draft placements.
+
+## Keep a gap
+
+The separate **Keep a gap** tool positions one element relative to another visible edge or canvas edge. It retains pixels, text-size multiples and percentages of the ad dimension. Choose an explicit fallback if the reference is absent. This is distinct from distributing several items inside an area.
 
 ## Rendering contract
 
-Conditional values enter the normal CSS/fit resolution. The shared production runtime then fits text, performs existing offer layout, and applies ink spacing. Editor and QA use that renderer. Dynamic files include the same rule evaluator and recompute after feed changes. Fixed-copy outlines use current browser snapshots, including arbitrary element positions and the effective font face. The editor's rulers and controls never enter delivered artwork.
+Campaign-state conditions enter normal CSS resolution. Element conditions evaluate actual content and fitted browser measurements; changes to frame dimensions trigger fitting again before dependent conditions and distribution. Editor, QA and dynamic HTML share this production runtime. Fixed-copy outlines capture its resolved positions and dimensions, including backgrounds and legal wrappers. Rulers, editable boundaries and temporary text previews are editor-only controls.
 
-Existing campaigns with no rules keep their existing layout path. Creative approval checks remain separate from engine correctness tests.
+Cross-origin images used for ink measurements request anonymous CORS. Same-origin, embedded or CORS-enabled image files are required for readable transparency. Measurement errors are shown rather than substituting a frame for actual ink.
+
+## Fonts and campaign states
+
+Fonts registers local OTF, TTF or WOFF faces and corresponding CDN URLs. Local files supply preview and outlines; CDN delivery verifies identical bytes before packaging. Internal metadata supplies defaults without overriding authored CSS mappings. WOFF2 outlining is not supported. Documents without a registry retain the existing Museo mapping.
+
+Campaign states controls labels, choices, defaults, header visibility, availability and valid combinations. Generic campaigns support arbitrary and derived dimensions. SSE retains its established serving mappings. Removing states still referenced by artwork or feed data is rejected.

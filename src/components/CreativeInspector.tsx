@@ -271,6 +271,7 @@ export function CreativeInspector() {
             {boxFields.map(field => <FieldControl key={field} label={({left:'X',top:'Y',width:'Width',height:'Height'})[field]} type="number"
               value={selectedTarget.values?.[field] ?? ''} onChange={value => editComponentBounds(field, value)} />)}
           </div>}
+          <SelectedLayoutRules key={selectedTarget.id} document={document} size={size} targetId={selectedTarget.id} targetIds={selectedTarget.kind==='component'?selectedTarget.parts.map(p=>p.targetId):[selectedTarget.id]} scopes={activeScopes}/>
           <ComponentLinkControls document={document} size={size} targetId={selectedTarget.id} scopes={activeScopes} />
           {selectedTarget.kind === 'component' && <CreativeOwnershipControls key={`${size}/${selectedTarget.id}/${activeScopes.join('.')}`} document={document} size={size} target={selectedTarget} scopes={activeScopes} />}
           {selectedTarget.kind === 'component' && <InspectorSection id="component-parts" title="Parts" open={true} onToggle={() => {}}>
@@ -286,7 +287,7 @@ export function CreativeInspector() {
 
   const isGroupedSelection = selectedTarget.kind === 'group' || selectedTarget.kind === 'multi';
   const layoutOwner=field=>{
-    const rule=(document.layoutRules||[]).find(rule=>rule.enabled&&rule.targets.some(member=>member.size===size&&member.targetId===selectedTarget.id)&&((rule.type==='conditional'&&Object.hasOwn(rule.values||{},field))||(rule.type==='spacing'&&(rule.axis==='x'?'left':'top')===field))&&layoutDiagnostics.some(d=>d.id===rule.id&&d.size===size&&d.targetId===selectedTarget.id&&d.status==='active'));
+    const rule=(document.layoutRules||[]).find(rule=>rule.enabled&&rule.targets.some(member=>member.size===size&&member.targetId===selectedTarget.id)&&((rule.type==='conditional'&&Object.hasOwn({...rule.values,...rule.otherwise},field))||(rule.type==='distribute'&&rule.crossAlign&&rule.crossAlign!=='keep'&&['left','top'].includes(field))||(rule.type!=='conditional'&&(rule.axis==='x'?'left':'top')===field))&&layoutDiagnostics.some(d=>d.id===rule.id&&d.size===size&&d.targetId===selectedTarget.id&&d.status==='active'));
     return rule?{rule,diagnostic:layoutDiagnostics.find(d=>d.id===rule.id&&d.size===size&&d.targetId===selectedTarget.id&&d.status==='active')}:null;
   };
   const showRule=id=>{selectLayoutRule(id);setTimeout(()=>{const details=window.document.querySelector('.inspector-scroll .selected-layout-rules');if(details){details.open=true;details.scrollIntoView({block:'nearest'});}},0);};
@@ -381,13 +382,13 @@ export function CreativeInspector() {
             ))}
           </div>
           ) : (
-            <p className="inspector-note">This is the logical edit box for the active offer format. Drag or align it as one unit; double-click to edit inside.</p>
+            <span className="inspector-note">{selectedTarget.members?.length || 1} selected items</span>
           )}
         </InspectorSection>
 
         {!isGroupedSelection ? <CreativeOwnershipControls key={`${size}/${selectedTarget.id}/${activeScopes.join(".")}`} document={document} size={size} target={selectedTarget} scopes={activeScopes} /> : null}
 
-        {!isGroupedSelection && <SelectedLayoutRules document={document} size={size} targetId={selectedTarget.id} scopes={activeScopes}/>}
+        <SelectedLayoutRules key={selectedTarget.id} document={document} size={size} targetId={selectedTarget.id} targetIds={isGroupedSelection?selectedTarget.members:[selectedTarget.id]} scopes={activeScopes}/>
 
         {isHeadlineSelection ? (
           <InspectorSection

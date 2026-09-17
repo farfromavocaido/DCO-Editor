@@ -211,8 +211,9 @@ const targetBakeOptions = ({
     ...fallbackFit,
   });
   const baseFontSize = pxNumber(values.fontSize, 12);
-  const width = Math.max(1, pxNumber(values.width, 40));
-  const height = Math.max(1, pxNumber(values.height, baseFontSize * 1.2));
+  const measuredPosition=positionSnapshotForTarget(snapshot,targetId);
+  const width = Math.max(1, pxNumber(measuredPosition?.width ?? values.width, 40));
+  const height = Math.max(1, pxNumber(measuredPosition?.height ?? values.height, baseFontSize * 1.2));
   const lineHeight = Number(values.lineHeight);
   const color = resolveOutlineFillColor({
     values,

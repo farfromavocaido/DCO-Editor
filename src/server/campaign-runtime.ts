@@ -20,7 +20,7 @@ ${options.layoutRules?.length ? `<script type="application/json" id="dco-layout-
   var engine = ${textFitEngineSource()}(window);
   ${options.layoutRules?.length ? `var responsiveLayout=${responsiveLayoutSource()}(window);var layoutRules=JSON.parse(document.getElementById('dco-layout-rules').textContent);window.updateSseDcoLayoutRules=function(next){layoutRules=next;};` : ''}
   window.updateSseDcoFitRules = function(next){rules=next;};
-  function fit(){if(root){${options.layoutRules?.length ? 'responsiveLayout.reset();' : ''}engine.applyRules(root,rules);${options.layoutRules?.length ? 'responsiveLayout.run(root,layoutRules);' : ''}}}
+  function fit(){if(root){${options.layoutRules?.length ? 'responsiveLayout.reset();' : ''}engine.applyRules(root,rules);${options.layoutRules?.length ? 'responsiveLayout.run(root,layoutRules,function(){engine.applyRules(root,rules);});' : ''}}}
   function apply(row){
     root = document.getElementById('page-content'); if(!root) return;
     currentRow = resolveCampaignState(stateModel,row || {}); window.__SSE_DCO_APPLIED_ROW__ = currentRow;

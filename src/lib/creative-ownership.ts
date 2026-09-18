@@ -152,7 +152,7 @@ export const activeNamedOwnership = (document: any, size: string, targetId: stri
   return activeOwnershipRules(compiled.sizes?.[size]?.variantRules || [], targetIdentity(compiled, size, targetId), scopes).filter((rule) => rule.ownershipGenerated);
 };
 const INK_SCOPE_TOKENS = new Set(['white-headlines', 'navy-headlines']);
-const INK_INDEPENDENT_TARGETS = new Set(['terms-prices', 'terms-solo']);
+const INK_INDEPENDENT_TARGETS = new Set(['terms-prices', 'terms-solo', 'roundel-frame', 'roundel-copy', 'roundel-value']);
 
 /** T&Cs stay the same across offers-0 ink; never author white/navy locals for that line. */
 export const scopesWithoutInk = (targetId, scopes = []) => {

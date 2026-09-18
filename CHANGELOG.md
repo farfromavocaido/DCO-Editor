@@ -17,7 +17,7 @@
 
 ### Changed
 
-- **offers-0 T&Cs ignore ink** — T&Cs locals no longer include `white-headlines` / `navy-headlines`. The navy-authored line (type, fit, box, colour) now applies to both inks. Editor writes to `terms-prices` / `terms-solo` omit ink tokens so the split cannot come back.
+- **offers-0 T&Cs and roundels ignore ink** — T&Cs and roundel locals no longer include `white-headlines` / `navy-headlines`. Navy-authored type, fit, box, and colour apply to both inks. Editor writes to `terms-prices` / `terms-solo` / `roundel-frame` / `roundel-copy` / `roundel-value` omit ink tokens so the split cannot come back.
 - **T&C copy is Museo 300** — every DCO size now authors `terms-prices`, `unit-rate-prices`, and `terms-solo` at weight 300 (same slab family as headlines at 700).
 - **300×600 offers-0 logo** — as the bluewave opens to Act 4, the white logo eases to a centred 140px-wide box, then fades out quickly as the wave returns to stage1.
 - **SSE DCO root CSS is plumbing only** — brand type (Museo / 700 / navy) lives on classRules and T&C layer bases; `%` start size is with the offer-value symbol sheet; `roundel-frame-off` hiding Act 3 is a variant. Banner Act 4 extras (`#headline-act4` white/top on 320×50, top on 728×90) moved to unscoped variants. `manualCss` is empty so the GWD leftover sheet no longer sits under every size.

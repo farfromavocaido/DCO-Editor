@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-18T14:54:39.167Z",
-  "zip": "downloads/SSE_Statics_20260918-155439.zip",
-  "dcoZip": "downloads/SSE_DCO_ROI_canonical_agency_20260918-155439.zip",
+  "generatedAt": "2026-09-18T14:57:49.227Z",
+  "zip": "downloads/SSE_Statics_20260918-155749.zip",
+  "dcoZip": "downloads/SSE_DCO_ROI_canonical_agency_20260918-155749.zip",
   "dcoZips": {
-    "roi": "downloads/SSE_DCO_ROI_canonical_agency_20260918-155439.zip",
-    "ni": "downloads/SSE_DCO_NIR_canonical_agency_20260918-155439.zip"
+    "roi": "downloads/SSE_DCO_ROI_canonical_agency_20260918-155749.zip",
+    "ni": "downloads/SSE_DCO_NIR_canonical_agency_20260918-155749.zip"
   },
   "campaigns": [
     {
@@ -67,14 +67,14 @@
       "label": "ROI",
       "profileId": 10964545,
       "profileElement": "SSE_DCO_ROI_Delivery",
-      "zip": "downloads/SSE_DCO_ROI_canonical_agency_20260918-155439.zip"
+      "zip": "downloads/SSE_DCO_ROI_canonical_agency_20260918-155749.zip"
     },
     {
       "id": "ni",
       "label": "NI",
       "profileId": 10962603,
       "profileElement": "SSE_DCO_NIR_Delivery",
-      "zip": "downloads/SSE_DCO_NIR_canonical_agency_20260918-155439.zip"
+      "zip": "downloads/SSE_DCO_NIR_canonical_agency_20260918-155749.zip"
     }
   ]
 }

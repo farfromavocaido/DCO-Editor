@@ -3053,7 +3053,7 @@
         },
         {
           "targetId": "roundel-frame",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
             "left": 175,
             "top": -12,
@@ -3067,7 +3067,7 @@
         },
         {
           "targetId": "roundel-copy",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
             "left": 176,
             "top": 4,
@@ -3106,7 +3106,7 @@
         },
         {
           "targetId": "roundel-value",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
             "left": 130,
             "top": 25,
@@ -3142,7 +3142,7 @@
         },
         {
           "targetId": "roundel-frame",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {
             "left": 175,
             "top": -12,
@@ -3156,7 +3156,7 @@
         },
         {
           "targetId": "roundel-copy",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {
             "left": 181,
             "top": 7,
@@ -3195,7 +3195,7 @@
         },
         {
           "targetId": "roundel-value",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {
             "left": 175,
             "top": 19,
@@ -5696,7 +5696,7 @@
         },
         {
           "targetId": "roundel-frame",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {
             "width": 135,
             "height": 135
@@ -8232,7 +8232,7 @@
         },
         {
           "targetId": "roundel-copy",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
             "fontSize": 24
           },
@@ -10678,7 +10678,7 @@
         },
         {
           "targetId": "roundel-frame",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
             "left": 23,
             "top": 230,
@@ -10692,7 +10692,7 @@
         },
         {
           "targetId": "roundel-copy",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
             "left": 31,
             "top": 260,
@@ -10731,7 +10731,7 @@
         },
         {
           "targetId": "roundel-value",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
             "left": 13,
             "top": 281,
@@ -10767,7 +10767,7 @@
         },
         {
           "targetId": "roundel-frame",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {
             "left": 23,
             "top": 230,
@@ -10781,7 +10781,7 @@
         },
         {
           "targetId": "roundel-copy",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {
             "left": 30,
             "top": 250,
@@ -10820,7 +10820,7 @@
         },
         {
           "targetId": "roundel-value",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {
             "left": 20,
             "top": 276,
@@ -15635,7 +15635,7 @@
         },
         {
           "targetId": "roundel-frame",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
             "left": 510,
             "top": 32,
@@ -15649,7 +15649,7 @@
         },
         {
           "targetId": "roundel-copy",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
             "left": 528,
             "top": 85,
@@ -15688,7 +15688,7 @@
         },
         {
           "targetId": "roundel-value",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
             "left": 352,
             "top": 119,
@@ -15724,7 +15724,7 @@
         },
         {
           "targetId": "roundel-frame",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {
             "left": 510,
             "top": 29,
@@ -15738,7 +15738,7 @@
         },
         {
           "targetId": "roundel-copy",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {
             "left": 518,
             "top": 66,
@@ -15777,7 +15777,7 @@
         },
         {
           "targetId": "roundel-value",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {
             "left": 516,
             "top": 98,

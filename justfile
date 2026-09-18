@@ -29,3 +29,11 @@ preview port="4173":
 # Capture DCO canonical-agency stress matrix (Playwright → qa-output/YYYYMMDD-HHMMSS/)
 qa-dco *args:
     npm run qa:dco -- {{args}}
+
+# Regenerate tracked ZIPs from saved campaign files (no editor server needed)
+sync-zips:
+    npx tsx --tsconfig tsconfig.json scripts/sync-zips.ts
+
+# Test, sync ZIPs, check Pages export, gitup, and watch this commit's deployment
+publish:
+    npx tsx --tsconfig tsconfig.json scripts/publish-preview.ts

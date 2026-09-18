@@ -665,7 +665,6 @@ export function PreviewPane() {
     <section className="preview-pane">
       <div className="preview-toolbar">
         <div className="preview-toolbar-left">
-          <PlayheadReadout seconds={seconds} percent={percent} />
           <select title="Dynamic text refits when copy changes. Fixed text as outlines bakes the current copy into SVG shapes." aria-label="Preview rendition" value={previewRenderMode} onChange={event => setPreviewRenderMode(event.target.value)}>
             <option value="font">Dynamic text</option>
             <option value="outline">Fixed text as outlines</option>
@@ -696,6 +695,7 @@ export function PreviewPane() {
         <AlignControls
           disabled={!selectedTarget}
           canDistribute={canDistribute}
+          relative={selectedTarget?.kind==='multi'}
           onAlign={handleAlign}
           onDistribute={handleDistribute}
         />

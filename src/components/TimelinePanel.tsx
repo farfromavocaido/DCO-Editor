@@ -1,8 +1,9 @@
 // @ts-nocheck
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 
+import {editableKeyframes,retimeClip} from '@/lib/keyframe-editing';
 import { EditorIcon } from '@/components/EditorIcon';
 import { animationFamilyForLayer, timelineSpanForClip } from '@/lib/animation-intents';
 import { compileAnimationClips } from '@/lib/creative-compiler';
@@ -32,10 +33,10 @@ const percentFromClientX = (trackEl, clientX) => {
   return roundTimelinePercent(Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100)));
 };
 
-const keyframeKind = (keyframe) => {
-  if (keyframe.scale !== undefined) return 'scale';
-  if (keyframe.translate) return 'transform';
-  if (keyframe.opacity !== undefined) return 'opacity';
+const keyframeKind = (frame,previous={scale:1,translate:[0,0],opacity:1}) => {
+  if(frame.scale!==undefined&&JSON.stringify(frame.scale)!==JSON.stringify(previous.scale))return 'scale';
+  if(frame.translate&&JSON.stringify(frame.translate)!==JSON.stringify(previous.translate)||['left','top','width','height'].some(k=>frame[k]!==previous[k]))return 'transform';
+  if(frame.opacity!==undefined&&frame.opacity!==previous.opacity)return 'opacity';
   return 'hold';
 };
 
@@ -46,6 +47,7 @@ const keyframeLabel = (keyframe, boundary = '') => {
   if (keyframe.translate) parts.push(`move ${keyframe.translate[0]}, ${keyframe.translate[1]}`);
   if (keyframe.scale !== undefined) parts.push(`scale ${keyframe.scale}`);
   if (keyframe.opacity !== undefined) parts.push(`opacity ${keyframe.opacity}`);
+  for(const key of ['left','top','width','height'])if(keyframe[key]!==undefined)parts.push(`${key}: ${keyframe[key]}`);
   return parts.join(' · ');
 };
 
@@ -59,7 +61,7 @@ function TimelineClipBar({
   onUpdateClipValue,
   dimmed = false,
 }) {
-  const document = useEditorStore(s => s.document);
+  const document = useEditorStore(s => s.creativeDocument);
   const size = useEditorStore(s => s.size);
   const canvas = document?.sizes?.[size]?.canvas;
   const context = { canvas, parent: canvas, durationS: document?.clock?.durationS };
@@ -67,16 +69,20 @@ function TimelineClipBar({
   const start = span.start;
   const end = span.end;
   const duration = Math.max(1, end - start);
-  const keyframes = compileAnimationClips([clip], beats, context).filter((keyframe) => (
+  const keyframes = editableKeyframes(clip, beats, context).map(k=>({...k.frame,at:k.at,editorIndex:k.index})).filter((keyframe) => (
     keyframe.at >= start - 0.05 && keyframe.at <= end + 0.05
   ));
+  const selectedFrame=useEditorStore(s=>s.selectedKeyframe);
+  const dragged=useRef(false);
+  const [dragPreview,setDragPreview]=useState(null);
+  const [clipPreview,setClipPreview]=useState(null);
+  const chooseFrame=frame=>useEditorStore.getState().selectKeyframe(layer.id,clip.id,frame.editorIndex,frame.at);
   const family = animationFamilyForLayer(layer);
   const selectClip = () => onSelectClip(layer.id, clip.id);
   const updateBoundary = (field, nextValue) => {
-    const bounded = field === 'start'
-      ? Math.min(end - 0.5, Math.max(0, nextValue))
-      : Math.max(start + 0.5, Math.min(100, nextValue));
-    onUpdateClipValue(layer.id, clip.id, field, roundTimelinePercent(bounded));
+    const bounded=field==='start'?Math.min(end-.5,Math.max(0,nextValue)):Math.max(start+.5,Math.min(100,nextValue));
+    const raw=layer.clips.find(c=>c.id===clip.id)||clip;
+    try{useEditorStore.getState().replaceEditorClip(layer.id,clip.id,retimeClip(raw,field==='start'?bounded:start,field==='end'?bounded:end,beats,context));}catch(error){useEditorStore.getState().setStatus(error.message,'error');}
   };
 
   const onBoundaryPointerDown = (field, event) => {
@@ -108,29 +114,26 @@ function TimelineClipBar({
   };
 
   const onKeyframePointerDown = (keyframe, boundary, event) => {
-    if (event.button !== 0) return;
-    event.preventDefault();
-    event.stopPropagation();
-    selectClip();
-    const trackEl = event.currentTarget.closest('.timeline-track');
-    let nextValue = roundTimelinePercent(keyframe.at);
-    setPercent(nextValue);
+    if(event.button!==0)return;event.preventDefault();event.stopPropagation();chooseFrame(keyframe);dragged.current=false;
+    const trackEl=event.currentTarget.closest('.timeline-track'),startX=event.clientX;
+    const all=editableKeyframes(clip,beats,context),position=all.findIndex(f=>f.index===keyframe.editorIndex);
+    const lower=position>0?all[position-1].at+.01:0,upper=position<all.length-1?all[position+1].at-.01:100;
+    let next=keyframe.at;
+    const move=e=>{if(!trackEl)return;if(Math.abs(e.clientX-startX)>2)dragged.current=true;next=Math.max(lower,Math.min(upper,percentFromClientX(trackEl,e.clientX)));setDragPreview({index:keyframe.editorIndex,at:next});setPercent(next);};
+    const cleanup=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',cancel);};
+    const up=()=>{cleanup();setDragPreview(null);if(dragged.current)try{useEditorStore.getState().editSelectedKeyframe({at:next});}catch(error){useEditorStore.getState().setStatus(error.message,'error');}};
+    const cancel=()=>{cleanup();setDragPreview(null);setPercent(keyframe.at);};
+    window.addEventListener('pointermove',move);window.addEventListener('pointerup',up,{once:true});window.addEventListener('pointercancel',cancel,{once:true});
+  };
 
-    const onMove = (moveEvent) => {
-      if (!trackEl) return;
-      nextValue = percentFromClientX(trackEl, moveEvent.clientX);
-      setPercent(nextValue);
-    };
-    const onUp = () => {
-      if (boundary === 'start') updateBoundary('start', nextValue);
-      if (boundary === 'end') updateBoundary('end', nextValue);
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onUp);
-      window.removeEventListener('pointercancel', onUp);
-    };
-    window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp, { once: true });
-    window.addEventListener('pointercancel', onUp, { once: true });
+  const moveClip=event=>{
+    if(event.button!==0||event.target.closest('button'))return;event.preventDefault();event.stopPropagation();selectClip();
+    const track=event.currentTarget.closest('.timeline-track');if(!track)return;
+    const startX=event.clientX,width=track.getBoundingClientRect().width,span=end-start;let next=start,moved=false;
+    const move=e=>{if(Math.abs(e.clientX-startX)>2)moved=true;next=Math.max(0,Math.min(100-span,start+(e.clientX-startX)/width*100));setClipPreview({start:next,end:next+span});setPercent(next);};
+    const cleanup=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',cancel);setClipPreview(null);};
+    const up=()=>{cleanup();if(moved)try{const raw=layer.clips.find(c=>c.id===clip.id)||clip;useEditorStore.getState().replaceEditorClip(layer.id,clip.id,retimeClip(raw,next,next+span,beats,context));}catch(error){useEditorStore.getState().setStatus(error.message,'error');}};
+    const cancel=()=>{cleanup();setPercent(start);};window.addEventListener('pointermove',move);window.addEventListener('pointerup',up,{once:true});window.addEventListener('pointercancel',cancel,{once:true});
   };
 
   return (
@@ -146,11 +149,12 @@ function TimelineClipBar({
         dimmed ? 'is-dimmed' : '',
       ].filter(Boolean).join(' ')}
       style={{
-        left: `${start}%`,
+        left: `${clipPreview?.start??start}%`,
         width: `${Math.max(2, end - start)}%`,
       }}
-      data-tip={`${clip.label || clip.id}: ${span.label}, ${start}%–${end}%`}
+      title={`${clip.label || clip.id}: ${span.label}, ${start}%–${end}%`}
       aria-label={`${layer.label || layer.id} ${clip.label || clip.id}`}
+      onPointerDown={moveClip}
       onClick={(event) => {
         event.stopPropagation();
         selectClip();
@@ -175,24 +179,26 @@ function TimelineClipBar({
           : Math.abs(keyframe.at - end) < 0.05
             ? 'end'
             : '';
-        const kind = keyframeKind(keyframe);
+        const kind = keyframeKind(keyframe,keyframes[index-1]);
         return (
           <button
             type="button"
           key={`${clip.id}-${keyframe.at}-${index}`}
             className={[
               'keyframe-dot',
+              selectedFrame?.layerId===layer.id&&selectedFrame?.clipId===clip.id&&selectedFrame?.index===keyframe.editorIndex?'is-selected':'',
               `keyframe-${kind}`,
               boundary ? `keyframe-${boundary}` : '',
             ].filter(Boolean).join(' ')}
-            style={{ left: `${Math.min(100, Math.max(0, ((keyframe.at - start) / duration) * 100))}%` }}
-            data-tip={keyframeLabel(keyframe, boundary)}
+            style={{ left: `${Math.min(100, Math.max(0, (((dragPreview?.index===keyframe.editorIndex?dragPreview.at:keyframe.at) - start) / duration) * 100))}%` }}
+            title={keyframeLabel(keyframe, boundary)}
             aria-label={keyframeLabel(keyframe, boundary)}
             onClick={(event) => {
               event.stopPropagation();
-              selectClip();
-              setPercent(roundTimelinePercent(keyframe.at));
+              if(dragged.current){dragged.current=false;return;}chooseFrame(keyframe);
             }}
+            aria-pressed={selectedFrame?.layerId===layer.id&&selectedFrame?.clipId===clip.id&&selectedFrame?.index===keyframe.editorIndex}
+            onKeyDown={event=>{if(['Delete','Backspace'].includes(event.key)){event.preventDefault();event.stopPropagation();chooseFrame(keyframe);try{useEditorStore.getState().removeSelectedKeyframe();}catch(error){useEditorStore.getState().setStatus(error.message,'error');}return;}if(!['ArrowLeft','ArrowRight'].includes(event.key))return;event.preventDefault();event.stopPropagation();chooseFrame(keyframe);try{useEditorStore.getState().editSelectedKeyframe({at:keyframe.at+(event.key==='ArrowRight'?1:-1)*(event.shiftKey?1:.1)});}catch(error){useEditorStore.getState().setStatus(error.message,'error');}}}
             onPointerDown={(event) => onKeyframePointerDown(keyframe, boundary, event)}
           />
         );
@@ -479,15 +485,6 @@ export function TimelinePanel() {
           <span className="panel-kicker">Timeline</span>
           <PlayheadReadout seconds={seconds} percent={percent} />
         </div>
-        <input
-          type="range"
-          min={0}
-          max={100}
-          step={0.1}
-          value={percent}
-          aria-label="Timeline scrubber"
-          onChange={(event) => setPercent(Number(event.target.value))}
-        />
         <div className="timeline-legend" aria-label="Timeline mark legend">
           <span><i className="legend-mark legend-edge" /> Edge</span>
           <span><i className="legend-mark legend-transform" /> Move</span>
@@ -495,7 +492,8 @@ export function TimelinePanel() {
           <span><i className="legend-mark legend-scale" /> Scale</span>
         </div>
       </div>
-      <div className="timeline-body">
+      <div className="timeline-body"><div className="timeline-content">
+        <div className="tl-grid-row timeline-scrub-row"><span className="timeline-row-label">Scrub</span><div className="timeline-tracks-column"><div className="timeline-scrubber" role="slider" tabIndex={0} aria-label="Timeline scrubber" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent} onPointerDown={onTrackScrubPointerDown} onKeyDown={event=>{let at=percent;if(event.key==='Home')at=0;else if(event.key==='End')at=100;else if(event.key==='ArrowLeft')at-=event.shiftKey?5:1;else if(event.key==='ArrowRight')at+=event.shiftKey?5:1;else return;event.preventDefault();setPercent(Math.max(0,Math.min(100,at)));}}><span style={{left:`${percent}%`}}/></div></div></div>
         <div className="tl-grid-row timeline-ruler-row">
           <div className="timeline-row-label timeline-ruler-spacer">Timeline</div>
           <div className="timeline-tracks-column">
@@ -633,7 +631,7 @@ export function TimelinePanel() {
             />
           );
         })}
-      </div>
+      </div></div>
     </section>
   );
 }

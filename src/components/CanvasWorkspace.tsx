@@ -407,24 +407,26 @@ const DISTRIBUTE_BUTTONS = [
 export function AlignControls({
   disabled,
   canDistribute = false,
+  relative = false,
   onAlign,
   onDistribute,
 }: {
   disabled?: boolean;
   canDistribute?: boolean;
+  relative?: boolean;
   onAlign: (mode: string) => void;
   onDistribute?: (axis: 'h' | 'v') => void;
 }) {
   return (
     <div className="align-controls" role="group" aria-label="Align and distribute selection">
-      <span className="align-controls-heading">Align</span>
+      <span className="align-controls-heading" title={relative?"Align each item within the selection bounds":"Align to canvas or parent"}>{relative?"Align items":"Align"}</span>
       {ALIGN_BUTTONS.map((button) => (
         <button
           key={button.mode}
           type="button"
           className="align-button"
-          data-tip={button.tip}
-          aria-label={button.tip}
+          data-tip={relative?button.tip.replace(/canvas/g,"selection"):button.tip}
+          aria-label={relative?button.tip.replace(/canvas/g,"selection"):button.tip}
           disabled={disabled}
           onClick={() => onAlign(button.mode)}
         >

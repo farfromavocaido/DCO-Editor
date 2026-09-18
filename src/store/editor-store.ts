@@ -1,5 +1,6 @@
 // @ts-nocheck
 'use client';
+import {editKeyframe,editableKeyframes,keyframeClip} from '@/lib/keyframe-editing';
 import {editComponentSourceField} from '@/lib/creative-components';
 
 import {renderedGeometry} from '@/lib/text-anchor';
@@ -62,7 +63,7 @@ import {
 import { activeOfferMemberIds, isOfferLayerId, offerInteractionTree } from '@/lib/offer-interaction-model';
 import { isOfferTimelineLayer } from '@/lib/timeline-rows';
 import { clipsForProfile } from '@/lib/headline-motion';
-import { activeFrameScope, beatsForFrameScope } from '@/lib/timing-profiles';
+import { activeFrameScope, beatsForFrameScope, beatsForScopes } from '@/lib/timing-profiles';
 import {
   addAnimationIntentToLayer,
   copyClipToAnimationFamily,
@@ -435,6 +436,7 @@ export const useEditorStore = create<any>((set, get) => ({
     });
     set({
       ...next,
+      selectedKeyframe: null,
       selectedLayoutRuleId: null,
       lastSelectionClickKey: '',
     });
@@ -714,8 +716,41 @@ export const useEditorStore = create<any>((set, get) => ({
     get().selectLayer(layerId);
   },
 
+  selectedKeyframe: null,
+  selectKeyframe: (layerId,clipId,index,percent) => {
+    get().selectClip(layerId,clipId);
+    set({selectedKeyframe:{layerId,clipId,index},isPlaying:false});get().setPercent(percent);
+  },
+  editSelectedKeyframe: (patch) => {
+    const s=get(),selection=s.selectedKeyframe;if(!selection)return;
+    const clip=findCreativeLayer(s.creativeDocument,s.size,selection.layerId)?.clips.find(c=>c.id===selection.clipId);if(!clip)return;
+    const context={canvas:s.creativeDocument.sizes[s.size].canvas,parent:s.creativeDocument.sizes[s.size].canvas,durationS:s.creativeDocument.clock.durationS};
+    const beats=beatsForScopes(s.creativeDocument,s.activeScopes());let source=clip;
+    for(const field of ['left','top','width','height'])if(patch[field]!==undefined&&!(source.keyframes||[]).some(f=>f[field]!==undefined)){
+      source=keyframeClip(source,beats,context);const value=findCreativeTarget(s.creativeDocument,s.size,selection.layerId,s.activeScopes())?.values[field];
+      if(Number.isFinite(Number(value)))source.keyframes=source.keyframes.map(f=>({...f,[field]:Number(value)}));
+    }
+    const next=editKeyframe(source,selection.index,patch,beats,context);
+    get().replaceEditorClip(selection.layerId,selection.clipId,next);
+    const at=editableKeyframes(next,beatsForScopes(s.creativeDocument,s.activeScopes()),context).find(f=>f.index===selection.index)?.at;
+    if(at!==undefined)get().setPercent(at);
+  },
+  removeSelectedKeyframe: () => {
+    const s=get(),selection=s.selectedKeyframe;if(!selection)return;
+    const clip=findCreativeLayer(s.creativeDocument,s.size,selection.layerId)?.clips.find(c=>c.id===selection.clipId);if(!clip)return;
+    if(clip.geometryEdits?.length)throw new Error('This animation has indexed position offsets; edit existing keyframes instead');
+    const next=keyframeClip(clip,beatsForScopes(s.creativeDocument,s.activeScopes()),{canvas:s.creativeDocument.sizes[s.size].canvas,parent:s.creativeDocument.sizes[s.size].canvas,durationS:s.creativeDocument.clock.durationS});
+    if(next.keyframes.length<=2)throw new Error('Keep at least a start and end keyframe');
+    next.keyframes.splice(selection.index,1);get().replaceEditorClip(selection.layerId,selection.clipId,next);set({selectedKeyframe:null});
+  },
+  replaceEditorClip: (layerId,clipId,clip) => {
+    const before=get().creativeDocument,next=structuredClone(before),layer=findCreativeLayer(next,get().size,layerId);
+    if(!layer)return;layer.clips=layer.clips.map(c=>c.id===clipId?clip:c);
+    set({creativeDocument:next,creativeDirty:true});get().pushHistory([{kind:'creativeDocument',before,after:next}]);
+  },
   selectClip: (layerId, clipId) => {
     set({
+      selectedKeyframe:null,
       selectedLayerId: layerId,
       selectedTargetId: layerId,
       selectedTargetIds: [layerId],
@@ -728,6 +763,7 @@ export const useEditorStore = create<any>((set, get) => ({
 
   clearCanvasSelection: () => {
     set({
+      selectedKeyframe:null,
       selectedLayoutRuleId: null,
       selectedLayerId: '',
       selectedTargetId: '',
@@ -1301,6 +1337,19 @@ export const useEditorStore = create<any>((set, get) => ({
       state.offerCount,
       activeScopes,
     );
+    if(selected?.kind==='multi'){
+      const items=targetIds.map(id=>({id,bounds:getTargetCanvasBounds(state.creativeDocument,state.size,id,activeScopes),target:findCreativeTarget(state.creativeDocument,state.size,id,activeScopes)})).filter(item=>item.bounds&&item.target);
+      const reference=getGroupCanvasBounds(state.creativeDocument,state.size,targetIds,activeScopes);if(!reference)return null;
+      const field=['left','center-h','right'].includes(mode)?'left':'top';
+      if(get().layoutRuleBlocksEdit(targetIds,[field]))return null;
+      const before=state.creativeDocument;let next=before;
+      for(const item of items){const dimension=field==='left'?'width':'height',fraction=mode.startsWith('center')?.5:['right','bottom'].includes(mode)?1:0,aligned=reference[field]+(reference[dimension]-item.bounds[dimension])*fraction,delta=aligned-item.bounds[field];if(!delta)continue;
+        const value=Number(motionGeometry(next,state.size,item.id,activeScopes,state.percent)?.values[field]??item.target.values[field]??0)+delta;
+        next=editMotionGeometry(next,state.size,item.id,activeScopes,state.percent,field,value,state.motionEditMode||'path')||setCreativeOwnershipField(next,state.size,item.id,activeScopes,'values',field,value,'local');
+      }
+      if(next!==before){set({creativeDocument:next,creativeDirty:true});get().pushHistory([{kind:'creativeDocument',before,after:next}]);}
+      get().setStatus('Aligned items within selection');return alignmentGuidesForMode(mode,reference);
+    }
     const isGroupSelection = selected?.kind === 'component' || selected?.kind === 'group'
       || selected?.kind === 'multi'
       || targetIds.length > 1;
@@ -1635,6 +1684,7 @@ export const useEditorStore = create<any>((set, get) => ({
   loadSize: async (size) => {
     get().syncControlsFromFeedRow(selectSelectedFeedRow(get()));
     set({
+      selectedKeyframe:null,
       size,
       history: [],
       historyIndex: -1,

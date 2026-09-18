@@ -1,6 +1,7 @@
 // @ts-nocheck
 'use client';
 
+import {KeyframeMotionEditor} from './KeyframeMotionEditor';
 import {motionGeometry,editMotionGeometry} from '@/lib/motion-geometry';
 import {TextAnchorControls} from './TextAnchorControls';
 import {captureTextAnchor,renderedGeometry} from '@/lib/text-anchor';
@@ -10,14 +11,11 @@ import {LayoutRuleSourceBadge} from './LayoutRulesPanel';
 import { editOwnershipVersion } from '@/lib/ownership-ui';
 import { effectiveTextFitForTarget } from '@/lib/text-fit-rules';
 import { TextFitPolicyControls } from './TextFitPolicyControls';
-import { MotionTimingControls } from './MotionTimingControls';
-import { MotionDistanceControls, isMotionDistanceField } from './MotionDistanceControls';
 import { OfferArrangementControls } from './OfferArrangementControls';
 import { CreativeOwnershipControls } from './CreativeOwnershipControls';
 import { useEffect, useMemo, useState } from 'react';
 
-import { animationFamilyForLayer, animationIntentDefinitions, timelineSpanForClip } from '@/lib/animation-intents';
-import { compileAnimationClips,resolveTimeRef } from '@/lib/creative-compiler';
+import { resolveTimeRef } from '@/lib/creative-compiler';
 import { componentLinkForTarget } from '@/lib/creative-components';
 import { ComponentLinkControls } from './ComponentLinkControls';
 import { currentSizeCreative, isHeadlineLayer, findCreativeTarget } from '@/lib/creative-model';
@@ -53,28 +51,6 @@ const reusableStyleFields = [
   'justifyContent',
   'alignItems',
 ];
-const presetLabels = {
-  fade: 'Fade clip',
-  slideInRight: 'Slide right',
-  fadeUp: 'Fade up',
-  popPulse: 'Pop pulse',
-};
-
-const keyframeTone = (keyframe) => {
-  if (keyframe.scale !== undefined) return 'scale';
-  if (keyframe.translate) return 'transform';
-  if (keyframe.opacity !== undefined) return 'opacity';
-  return 'hold';
-};
-
-const keyframeText = (keyframe) => {
-  const parts = [`${keyframe.at}%`];
-  if (keyframe.translate) parts.push(`move ${keyframe.translate[0]}, ${keyframe.translate[1]}`);
-  if (keyframe.scale !== undefined) parts.push(`scale ${keyframe.scale}`);
-  if (keyframe.opacity !== undefined) parts.push(`fade ${keyframe.opacity}`);
-  return parts.join(' · ');
-};
-
 function FieldControl({ label, value, onChange, type = 'number', disabled = false }) {
   return (
     <label className={`inspector-field ${disabled ? 'is-disabled' : ''}`}>
@@ -147,7 +123,6 @@ export function CreativeInspector() {
   const document = useEditorStore((s) => s.creativeDocument);
   const previewRow = useEditorStore(selectPreviewFeedRow);
   const size = useEditorStore((s) => s.size);
-  const percent = useEditorStore((s) => s.percent);
   const selectedLayerId = useEditorStore((s) => s.selectedLayerId);
   const selectedTargetId = useEditorStore((s) => s.selectedTargetId);
   const selectedTargetIds = useEditorStore((s) => s.selectedTargetIds);
@@ -155,6 +130,8 @@ export function CreativeInspector() {
   const fitResults = useEditorStore((s) => s.fitResults);
   const motionEditMode=useEditorStore(s=>s.motionEditMode||'path');
   const playhead=useEditorStore(s=>s.percent);
+  const selectedKeyframe=useEditorStore(s=>s.selectedKeyframe);
+  useEffect(()=>{if(selectedKeyframe)setOpenSections(previous=>new Set([...previous,'animation']));},[selectedKeyframe]);
   const layoutDiagnostics=useEditorStore(s=>s.layoutDiagnostics);
   const selectLayoutRule=useEditorStore(s=>s.selectLayoutRule);
   const fitDiagnostics = useEditorStore((s) => s.fitDiagnostics);
@@ -178,11 +155,6 @@ export function CreativeInspector() {
   const updateGroupedTargetFit = useEditorStore((s) => s.updateCreativeTargetFitValue);
   const setResizeMode = useEditorStore((s) => s.setResizeMode);
   const replaceSelectedLayerFromCode = useEditorStore((s) => s.replaceSelectedLayerFromCode);
-  const updateClip = useEditorStore((s) => s.updateCreativeLayerClipValue);
-  const addClip = useEditorStore((s) => s.addCreativeClip);
-  const addAnimationIntent = useEditorStore((s) => s.addAnimationIntent);
-  const copySelectedClipToAnimationFamily = useEditorStore((s) => s.copySelectedClipToAnimationFamily);
-  const selectClip = useEditorStore((s) => s.selectClip);
 
   const sizeCreative = currentSizeCreative(document, size);
   const activeScopes = useMemo(() => campaignScopes(document, previewRow), [document, previewRow]);
@@ -213,18 +185,7 @@ export function CreativeInspector() {
       ))
     : [];
   const activeBeats = useMemo(() => beatsForScopes(document, activeScopes), [activeScopes, document]);
-  const keyframes = selectedClip
-    ? compileAnimationClips([selectedClip], activeBeats, { canvas: sizeCreative.canvas, parent: sizeCreative.canvas, durationS: document.clock.durationS })
-    : [];
-  const family = animationFamilyForLayer(selectedLayer || {});
-  const familyMembers = (sizeCreative?.layers || []).filter((layer) => animationFamilyForLayer(layer).id === family.id);
-  const selectedClipSpan = selectedClip ? timelineSpanForClip(selectedClip, activeBeats, document.clock.durationS) : null;
   const durationS = document?.clock?.durationS || 15;
-  const playheadSeconds = ((percent / 100) * durationS).toFixed(2);
-  const playheadLabel = `${playheadSeconds}s / ${Number.isInteger(percent) ? percent : percent.toFixed(1)}%`;
-  const spanSeconds = selectedClipSpan
-    ? `${((selectedClipSpan.start / 100) * durationS).toFixed(2)}s - ${((selectedClipSpan.end / 100) * durationS).toFixed(2)}s`
-    : '';
 
   useEffect(() => {
     if (!selectedLayer) {
@@ -665,88 +626,8 @@ export function CreativeInspector() {
           {selectedTarget.kind === 'nested' ? (
             <p className="inspector-note">Nested offer items inherit animation from {selectedLayer.label || selectedLayer.id}. Select the parent slot to edit motion directly.</p>
           ) : null}
-          <div className="motion-family-card">
-            <div>
-              <span className="panel-kicker">Motion family</span>
-              <strong>{family.label}</strong>
-              <p>{familyMembers.length > 1 ? `${familyMembers.length} related layers can receive an independent copy of this clip.` : 'This layer uses its own motion.'}</p>
-            </div>
-            {selectedClip ? (
-              <button type="button" disabled={familyMembers.length < 2} onClick={() => copySelectedClipToAnimationFamily()}>
-                Copy once to family
-              </button>
-            ) : null}
-          </div>
-          <div className="motion-action-grid" aria-label="Add motion at current timeline point">
-            {['fadeIn', 'fadeOut', 'slideInRight', 'fadeUp'].map((intentId) => (
-              <button
-                key={intentId}
-                type="button"
-                className={`motion-action intent-${intentId}`}
-                data-tip={`Add ${animationIntentDefinitions[intentId].label.toLowerCase()} at ${playheadLabel}`}
-                onClick={() => addAnimationIntent(selectedLayer.id, intentId)}
-              >
-                <span>{animationIntentDefinitions[intentId].label}</span>
-                <small>{animationIntentDefinitions[intentId].anchor === 'end' ? 'End' : 'Start'} at {playheadLabel}</small>
-              </button>
-            ))}
-          </div>
-          <div className="clip-toolbar">
-            <select
-              value={selectedClip?.id || ''}
-              onChange={(event) => selectClip(selectedLayer.id, event.target.value)}
-            >
-              {(selectedLayer.clips || []).map((clip) => (
-                <option key={clip.id} value={clip.id}>{clip.label || clip.id}</option>
-              ))}
-            </select>
-            <button type="button" data-tip={`Add a fade clip from ${playheadLabel}`} onClick={() => addClip(selectedLayer.id, 'fade')}>Add fade clip</button>
-          </div>
-          {selectedClip ? (
-            <>
-              <div className={`motion-summary intent-${selectedClipSpan?.intentId || selectedClip.preset}`}>
-                <strong>{selectedClipSpan?.label || selectedClip.preset}</strong>
-                <span>{spanSeconds}</span>
-                <em>Independent clip</em>
-              </div>
-              <div className="inspector-grid">
-                <FieldControl
-                  label="Preset"
-                  type="text"
-                  value={selectedClip.preset}
-                  onChange={(value) => updateClip(selectedLayer.id, selectedClip.id, 'preset', value)}
-                />
+          {isGroupedSelection?<p className="inspector-note">Select a layer or timeline clip to edit its keyframes.</p>:<KeyframeMotionEditor layer={selectedLayer} clip={selectedClip} beats={activeBeats} canvas={sizeCreative.canvas} durationS={durationS}/>}
 
-              </div>
-              <MotionTimingControls clip={selectedClip} durationS={durationS} beats={activeBeats} onChange={(field,value,target) => updateClip(selectedLayer.id,selectedClip.id,field,value,target)} />
-              <MotionDistanceControls clip={selectedClip} onChange={(field, value, target) => updateClip(selectedLayer.id, selectedClip.id, field, value, target)} />
-              <div className="param-grid">
-                {Object.entries(selectedClip.params || {}).filter(([field, value]) => !isMotionDistanceField(field) && !["enter_duration","enter_duration_pct","fade_duration","fade_pct"].includes(field) && typeof value !== "object").map(([field, value]) => (
-                  <FieldControl
-                    key={field}
-                    label={field}
-                    type="text"
-                    value={value}
-                    onChange={(next) => updateClip(selectedLayer.id, selectedClip.id, field, next, 'params')}
-                  />
-                ))}
-              </div>
-              <div className="preset-row">
-                {['fade', 'slideInRight', 'fadeUp', 'popPulse'].map((preset) => (
-                  <button key={preset} type="button" data-tip={`Add ${presetLabels[preset]} at ${playheadLabel}`} onClick={() => addClip(selectedLayer.id, preset)}>
-                    {presetLabels[preset]}
-                  </button>
-                ))}
-              </div>
-              <div className="keyframe-list" aria-label="Selected clip keyframes">
-                {keyframes.map((keyframe, index) => (
-                  <span className={`keyframe-chip keyframe-chip-${keyframeTone(keyframe)}`} key={`${keyframe.at}-${index}`}>
-                    {keyframeText(keyframe)}
-                  </span>
-                ))}
-              </div>
-            </>
-          ) : null}
         </InspectorSection>
         ) : null}
 

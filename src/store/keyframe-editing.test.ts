@@ -22,3 +22,18 @@ test('centre alignment retains half-pixel precision for odd-sized elements',()=>
  useEditorStore.getState().setCanvasSelection('a',['a','b']);useEditorStore.getState().alignSelectedTarget('center-h');const next=useEditorStore.getState().creativeDocument;
  for(const id of ['a','b']){const v=findCreativeTarget(next,'200x100',id,[]).values;expect(v.left+v.width/2).toBe(89.5);}
 });
+test('editing linked motion commits one undoable change and preserves member identities',()=>{
+ const d=setup(),copy={...structuredClone(d.sizes['200x100'].layers[0].clips[0]),id:'copy',copiedFrom:{layerId:'a',clipId:'move'},linked:true};
+ d.sizes['200x100'].layers[1].clips=[copy];useEditorStore.setState({creativeDocument:d,motionEditScope:'linked'});
+ const next=structuredClone(d.sizes['200x100'].layers[0].clips[0]);next.keyframes[1].translate=[25,0];
+ useEditorStore.getState().replaceEditorClip('a','move',next);
+ expect(useEditorStore.getState().creativeDocument.sizes['200x100'].layers[1].clips[0].id).toBe('copy');
+ expect(useEditorStore.getState().creativeDocument.sizes['200x100'].layers[1].clips[0].keyframes[1].translate).toEqual([25,0]);
+ expect(useEditorStore.getState().history).toHaveLength(1);useEditorStore.getState().undo();expect(useEditorStore.getState().creativeDocument).toEqual(d);
+ useEditorStore.setState({motionEditScope:'single'});
+});
+test('solo is preview-only and restores the previous hidden set',()=>{
+ const d=setup();useEditorStore.setState({hiddenLayerIds:new Set(['a']),soloLayerIds:new Set(),soloPreviousHidden:null});
+ useEditorStore.getState().togglePreviewSolo(['a']);expect([...useEditorStore.getState().hiddenLayerIds]).toEqual(['b']);
+ useEditorStore.getState().togglePreviewSolo(['a']);expect([...useEditorStore.getState().hiddenLayerIds]).toEqual(['a']);expect(useEditorStore.getState().creativeDocument).toEqual(d);
+});

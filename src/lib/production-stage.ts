@@ -73,6 +73,7 @@ export function beginProductionStage(size: string) { pendingSize = size; current
 export function publishProductionStage(stage: HTMLElement, source?: ProductionStageSource) { currentStage = stage; currentSource = source; stageError = null; }
 export function failProductionStage(error: Error) { currentStage = null; currentSource = undefined; stageError = error; }
 export function getProductionStage() { return currentStage; }
+export function getProductionStageSource() { return currentSource; }
 export async function waitForProductionStage(size: string, timeoutMs = 20000, renderMode?: 'font' | 'outline', expectedSource?: ProductionStageSource): Promise<HTMLElement> {
   const started = Date.now();
   while (Date.now() - started < timeoutMs) {

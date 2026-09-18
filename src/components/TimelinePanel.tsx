@@ -3,6 +3,10 @@
 
 import { useEffect, useMemo, useState, useRef } from 'react';
 
+import {useTimelinePresence} from './useTimelinePresence';
+import {TimelineVisibility,PresenceTrack,TimelineFolder,NewTimelineFolder} from './TimelineOrganisation';
+import {TimelineBeatMarkers} from './TimelineBeatMarkers';
+import {clipBeatReferences,timelineFolders} from '@/lib/timeline-relationships';
 import {TimelineTransition} from './TimelineTransition';
 import {TimelineBeats} from './TimelineBeats';
 import {motionTransitions} from '@/lib/motion-transitions';
@@ -223,6 +227,7 @@ function TimelineClipBar({
 
 function TimelineLayerRow({
   layer,
+  presence = {},
   offerCount,
   beats,
   frameScope,
@@ -243,6 +248,7 @@ function TimelineLayerRow({
   dropTargetLayerId = '',
   activeOfferIds = null,
 }) {
+  const hidden=useEditorStore(s=>s.hiddenLayerIds);
   const layerId = layer.id;
   const variantState = offerLayerVariantState(layerId, offerCount, activeOfferIds);
   const dimmed = variantState === 'inactive';
@@ -268,7 +274,7 @@ function TimelineLayerRow({
         dropTargetLayerId === layerId ? 'is-drop-target' : '',
       ].filter(Boolean).join(' ')}
       data-layer-id={layerId}
-      onClick={() => onSelectLayer(layerId)}
+      onClick={event => onSelectLayer(layerId,event)}
     >
       <div className="timeline-row-label">
         {!dimmed ? (
@@ -283,7 +289,7 @@ function TimelineLayerRow({
             <EditorIcon name="drag" size={12} />
           </button>
         ) : null}
-        <span className="timeline-row-name">{label}</span>
+        <span className="timeline-row-name">{label}</span><TimelineVisibility ids={[layer.id]} label={label}/>
         {!dimmed ? (
           <span className="timeline-sort-controls" aria-label={`${label} z-order controls`}>
             <button
@@ -312,7 +318,8 @@ function TimelineLayerRow({
         ) : null}
       </div>
       {!dimmed ? (
-        <div className="timeline-track">
+        <div className={`timeline-track ${hidden.has(layer.id)?'preview-hidden':''}`}>
+          <PresenceTrack spans={hidden.has(layer.id)?[]:presence[layer.id]||[]}/>
           {visibleClips.map((clip) => (
             <TimelineClipBar
               key={clip.id}
@@ -357,8 +364,10 @@ export function TimelinePanel() {
   const selectClip = useEditorStore((s) => s.selectClip);
   const updateClipValue = useEditorStore((s) => s.updateCreativeLayerClipValue);
   const moveLayerZ = useEditorStore((s) => s.moveLayerZ);
-  const [showBeats,setShowBeats]=useState(false),[manageBeats,setManageBeats]=useState(false);
-  const motionView=useEditorStore(s=>s.motionView);
+  const [showBeats,setShowBeats]=useState(true),[manageBeats,setManageBeats]=useState(false),[allBeats,setAllBeats]=useState(false);
+  const presence=useTimelinePresence(document,previewRow,size);
+  const motionView=useEditorStore(s=>s.motionView),selectedBeat=useEditorStore(s=>s.selectedBeatId);
+  useEffect(()=>{if(selectedBeat){setManageBeats(true);setShowBeats(true);}},[selectedBeat]);
   const [draggingLayerId, setDraggingLayerId] = useState('');
   const [dropTargetLayerId, setDropTargetLayerId] = useState('');
 
@@ -392,12 +401,15 @@ export function TimelinePanel() {
   const timelineActiveOfferIds = activeOfferIds.length ? activeOfferIds : null;
   const zOrderedLayers = [...(sizeCreative?.layers || [])].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
   const zOrderedLayerIds = zOrderedLayers.map((layer) => layer.id);
-  const entries = buildTimelineEntries(zOrderedLayers, Number(offerCount), {
+  const entries = timelineFolders(buildTimelineEntries(zOrderedLayers, Number(offerCount), {
     activeOfferMemberIds: timelineActiveOfferIds,
-  });
+  }),sizeCreative);
   const offersGroupSelected = selectedTargetId === OFFERS_BLOCK_ID && isolatedGroupId !== OFFERS_BLOCK_ID;
 
-  const onSelectLayer = (layerId) => selectTimelineLayer(layerId);
+  const onSelectLayer = (layerId,event) => {
+    if(event?.metaKey||event?.ctrlKey||event?.shiftKey){const ids=new Set(selectedTargetIds);if(ids.has(layerId))ids.delete(layerId);else ids.add(layerId);useEditorStore.getState().setCanvasSelection([...ids].at(-1)||'', [...ids]);}
+    else selectTimelineLayer(layerId);
+  };
   const onSelectClip = (layerId, clipId) => selectClip(layerId, clipId);
   const onMoveLayerZ = (layerId, direction) => moveLayerZ(layerId, direction);
   const finishLayerDrag = () => {
@@ -478,6 +490,8 @@ export function TimelinePanel() {
     window.addEventListener('pointerup', onUp, { once: true });
   };
 
+  const renderLayer=(layer,nested=false)=><TimelineLayerRow key={layer.id} layer={layer} presence={presence.spans} offerCount={Number(offerCount)} activeOfferIds={timelineActiveOfferIds} beats={beats} frameScope={frameScope} activeScopes={activeScopes} selectedLayerId={selectedLayerId} selectedTargetId={selectedTargetId} selectedTargetIds={selectedTargetIds} selectedClipId={selectedClipId} isolatedGroupId={isolatedGroupId} nested={nested} setPercent={setPercent} onSelectLayer={onSelectLayer} onSelectClip={onSelectClip} onUpdateClipValue={updateClipValue} onMoveLayerZ={onMoveLayerZ} onMoveLayerPointerDragStart={onMoveLayerPointerDragStart} draggingLayerId={draggingLayerId} dropTargetLayerId={dropTargetLayerId}/>;
+
   return (
     <section className="timeline-panel" aria-label="Timeline">
       <div className="timeline-head">
@@ -491,13 +505,13 @@ export function TimelinePanel() {
           >
             <EditorIcon name={isPlaying ? 'pause' : 'play'} size={14} />
           </button>
-          <span className="panel-kicker">Timeline</span>
+          <span className="panel-kicker" title={presence.status}>Timeline{presence.status.startsWith('Measuring')?' ···':''}</span>
           <PlayheadReadout seconds={seconds} percent={percent} />
         </div>
         <div className="timeline-controls">
           <button aria-pressed={motionView==='keyframes'} onClick={()=>useEditorStore.setState({motionView:motionView==='keyframes'?'transitions':'keyframes'})} title="Switch between transition ranges and individual keyframes">Keyframes</button>
-          <button aria-pressed={showBeats} onClick={()=>setShowBeats(!showBeats)}>Beats</button>
-          <button onClick={()=>setManageBeats(!manageBeats)} title="Rename beats or add one at the playhead">Edit beats…</button>
+          <NewTimelineFolder/><button aria-pressed={showBeats} onClick={()=>setShowBeats(!showBeats)}>Beats</button>
+          <button aria-pressed={allBeats} onClick={()=>{setAllBeats(!allBeats);setShowBeats(true);}} title="Include internal timing references">All markers</button><button onClick={()=>setManageBeats(!manageBeats)} title="Rename beats or add one at the playhead">Edit beats…</button>
         </div>
         <div className="timeline-legend" hidden aria-label="Timeline mark legend">
           <span><i className="legend-mark legend-edge" /> Edge</span>
@@ -514,7 +528,7 @@ export function TimelinePanel() {
             {Array.from({length:21},(_,i)=>i*5).map(tick=><i key={`p${tick}`} className={`ruler-tick ruler-percent ${tick%25===0?'is-major':''}`} style={{left:`${tick}%`}}><b>{tick}%</b></i>)}
             <span className="scrub-thumb" style={{left:`${percent}%`}}/>
           </div>
-          {showBeats&&<div className="timeline-beat-track">{Object.entries(beats).filter(([,at])=>Number.isFinite(at)&&at>=0&&at<=100).map(([id,at])=><button key={id} className="timeline-beat-marker" style={{left:`${at}%`}} title={`${beatLabel(document,id)} · ${(at*durationS/100).toFixed(2)}s`} aria-label={`Seek to beat ${beatLabel(document,id)}`} onClick={()=>setPercent(at)}>▾</button>)}</div>}
+          {showBeats&&document&&<TimelineBeatMarkers document={document} beats={beats} layers={zOrderedLayers.map(layer=>({...layer,clips:clipsForProfile(layer.clips||[],frameScope,activeScopes)}))} all={allBeats} onSelect={id=>{useEditorStore.setState({selectedBeatId:id});setPercent(beats[id]);setManageBeats(true);}}/>}
         </div></div>
         <div className="timeline-playhead-layer tl-grid-row" aria-hidden="true">
           <div />
@@ -525,116 +539,15 @@ export function TimelinePanel() {
         {(document?.layoutRules||[]).filter(rule=>rule.type==='distribute'&&rule.enabled&&(rule.transition||rule.layoutAnimations?.length)&&rule.targets.some(t=>t.size===size)&&(rule.when||[]).every(s=>activeScopes.includes(s))).map(rule=>{
           let events=[],error='';try{
             if(rule.layoutAnimations!==undefined)events=layoutSequenceCases(document,size,rule).find(t=>t.scopes.every(s=>activeScopes.includes(s)))?.events||[];
-            else {const t=transitionCases(document,size,rule).find(t=>t.scopes.every(s=>activeScopes.includes(s)));if(t){events=[{id:'exit',kind:'exit',start:t.start,end:t.end}];if(t.returnMode!=='none')events.push({id:'return',kind:'return',hidden:t.returnMode==='hidden',start:t.returnStart,end:t.returnEnd});}}
+            else {const t=transitionCases(document,size,rule).find(t=>t.scopes.every(s=>activeScopes.includes(s)));if(t){events=[{...rule.transition,id:'exit',kind:'exit',start:t.start,end:t.end}];if(t.returnMode!=='none')events.push({id:'return',kind:'return',hidden:t.returnMode==='hidden',start:t.returnStart,end:t.returnEnd});}}
           }catch(cause){error=cause.message;}
           if(!events.length&&!error)return null;
           const open=(at)=>{const target=rule.targets.find(t=>t.size===size);useEditorStore.getState().setCanvasSelection(target.targetId,[target.targetId]);useEditorStore.setState({layoutRulesOpen:true,selectedLayoutRuleId:rule.id});setPercent(at);};
           return <div key={rule.id} className="timeline-row layout-motion-row"><div className="timeline-row-label"><span className="timeline-row-name">↳ {rule.name}</span></div><div className="timeline-track">
-            {error?<button className="timeline-layout-motion is-error" style={{left:0,width:'100%'}} title={error} onClick={()=>open(percent)}>Check layout timing</button>:events.map(e=><button key={e.id} className="timeline-layout-motion" style={{left:`${Math.min(99.6,e.start)}%`,width:`${Math.max(.4,e.end-e.start)}%`}} title={`${e.kind==='enter'?'Make room':e.kind==='exit'?'Rearrange':e.hidden?'Reset':'Return'} ${(e.start*durationS/100).toFixed(2)}–${(e.end*durationS/100).toFixed(2)}s`} onClick={()=>open((e.start+e.end)/2)}>{e.kind==='enter'?'Enter':e.kind==='exit'?'Exit':e.hidden?'Reset':'Return'}</button>)}
+            {error?<button className="timeline-layout-motion is-error" style={{left:0,width:'100%'}} title={error} onClick={()=>open(percent)}>Check layout timing</button>:events.map(e=><button key={e.id} className={`timeline-layout-motion ${(selectedBeat&&clipBeatReferences(zOrderedLayers.find(l=>l.id===e.subjectId)?.clips?.find(c=>c.id===e.clipId)||{},beats).includes(selectedBeat))||(!selectedBeat&&selectedLayerId===e.subjectId&&selectedClipId===e.clipId)?'is-timing-related':''}`} style={{left:`${Math.min(99.6,e.start)}%`,width:`${Math.max(.4,e.end-e.start)}%`}} title={`${e.kind==='enter'?'Make room':e.kind==='exit'?'Rearrange':e.hidden?'Reset':'Return'} ${(e.start*durationS/100).toFixed(2)}–${(e.end*durationS/100).toFixed(2)}s`} onClick={()=>open((e.start+e.end)/2)}>{e.kind==='enter'?'Enter':e.kind==='exit'?'Exit':e.hidden?'Reset':'Return'}</button>)}
           </div></div>;
         })}
-        {entries.map((entry) => {
-          if (entry.kind === 'offers-group') {
-            return (
-              <div key={entry.id} className="timeline-group">
-                <div
-                  className={[
-                    'timeline-row',
-                    'timeline-row-group',
-                    offersGroupSelected ? 'is-selected' : '',
-                  ].filter(Boolean).join(' ')}
-                  onClick={() => selectOffersBlock()}
-                >
-                  <div className="timeline-row-label">{entry.label}</div>
-                  <div className="timeline-track timeline-track-group" aria-hidden="true" />
-                </div>
-                <div className="timeline-group-children">
-                  {entry.layers.map((layer) => (
-                    <TimelineLayerRow
-                      key={layer.id}
-                      layer={layer}
-                      offerCount={Number(offerCount)}
-                      activeOfferIds={timelineActiveOfferIds}
-                      beats={beats}
-                      frameScope={frameScope}
-                      activeScopes={activeScopes}
-                      selectedLayerId={selectedLayerId}
-                      selectedTargetId={selectedTargetId}
-                      selectedTargetIds={selectedTargetIds}
-                      selectedClipId={selectedClipId}
-                      isolatedGroupId={isolatedGroupId}
-                      nested
-                      setPercent={setPercent}
-                      onSelectLayer={onSelectLayer}
-                      onSelectClip={onSelectClip}
-                      onUpdateClipValue={updateClipValue}
-                      onMoveLayerZ={onMoveLayerZ}
-                      onMoveLayerPointerDragStart={onMoveLayerPointerDragStart}
-                      draggingLayerId={draggingLayerId}
-                      dropTargetLayerId={dropTargetLayerId}
-                    />
-                  ))}
-                </div>
-                {entry.hiddenLayers?.length ? (
-                  <details className="timeline-group-inactive">
-                    <summary>Alt / hidden</summary>
-                    {entry.hiddenLayers.map((layer) => (
-                        <TimelineLayerRow
-                          key={layer.id}
-                          layer={layer}
-                          offerCount={Number(offerCount)}
-                          activeOfferIds={timelineActiveOfferIds}
-                          beats={beats}
-                          frameScope={frameScope}
-                          activeScopes={activeScopes}
-                          selectedLayerId={selectedLayerId}
-                          selectedTargetId={selectedTargetId}
-                          selectedTargetIds={selectedTargetIds}
-                         selectedClipId={selectedClipId}
-                          isolatedGroupId={isolatedGroupId}
-                          nested
-                          setPercent={setPercent}
-                          onSelectLayer={onSelectLayer}
-                          onSelectClip={onSelectClip}
-                          onUpdateClipValue={updateClipValue}
-                          onMoveLayerZ={onMoveLayerZ}
-                          onMoveLayerPointerDragStart={onMoveLayerPointerDragStart}
-                          draggingLayerId={draggingLayerId}
-                          dropTargetLayerId={dropTargetLayerId}
-                        />
-                      ))}
-                  </details>
-                ) : null}
-              </div>
-            );
-          }
-
-          const layer = entry.layer;
-          return (
-            <TimelineLayerRow
-              key={layer.id}
-              layer={layer}
-              offerCount={Number(offerCount)}
-              activeOfferIds={timelineActiveOfferIds}
-              beats={beats}
-              frameScope={frameScope}
-              activeScopes={activeScopes}
-              selectedLayerId={selectedLayerId}
-              selectedTargetId={selectedTargetId}
-              selectedTargetIds={selectedTargetIds}
-              selectedClipId={selectedClipId}
-              isolatedGroupId={isolatedGroupId}
-              setPercent={setPercent}
-              onSelectLayer={onSelectLayer}
-              onSelectClip={onSelectClip}
-              onUpdateClipValue={updateClipValue}
-              onMoveLayerZ={onMoveLayerZ}
-              onMoveLayerPointerDragStart={onMoveLayerPointerDragStart}
-              draggingLayerId={draggingLayerId}
-              dropTargetLayerId={dropTargetLayerId}
-            />
-          );
-        })}
+        {entries.map(entry=>entry.layer?renderLayer(entry.layer):<TimelineFolder key={entry.id} entry={entry} spans={presence.spans} motionSpans={entry.layers.flatMap(layer=>clipsForProfile(layer.clips||[],frameScope,activeScopes).flatMap(clip=>motionTransitions(clip,beats,{canvas:sizeCreative.canvas,parent:sizeCreative.canvas,durationS})))}>{entry.layers.map(layer=>renderLayer(layer,true))}{(entry.hiddenLayers||[]).map(layer=>renderLayer(layer,true))}</TimelineFolder>)}
       </div></div>
     </section>
   );

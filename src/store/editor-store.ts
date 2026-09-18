@@ -1,5 +1,7 @@
 // @ts-nocheck
 'use client';
+import {replaceLinkedMotion} from '@/lib/timeline-relationships';
+
 import {editKeyframe,editableKeyframes,keyframeClip} from '@/lib/keyframe-editing';
 import {editComponentSourceField} from '@/lib/creative-components';
 
@@ -436,7 +438,7 @@ export const useEditorStore = create<any>((set, get) => ({
     });
     set({
       ...next,
-      selectedKeyframe: null,selectedTransition:null,
+      selectedKeyframe: null,selectedTransition:null,motionEditScope:'single',selectedBeatId:'',
       selectedLayoutRuleId: null,
       lastSelectionClickKey: '',
     });
@@ -716,6 +718,16 @@ export const useEditorStore = create<any>((set, get) => ({
     get().selectLayer(layerId);
   },
 
+  selectedBeatId: '',
+  motionEditScope: 'single',
+  soloLayerIds: new Set(),
+  soloPreviousHidden: null,
+  togglePreviewSolo: (ids) => {
+    const s=get(),same=ids.length===s.soloLayerIds.size&&ids.every(id=>s.soloLayerIds.has(id));
+    if(same){set({hiddenLayerIds:s.soloPreviousHidden||new Set(),soloPreviousHidden:null,soloLayerIds:new Set()});return;}
+    const all=s.creativeDocument.sizes[s.size].layers.map(l=>l.id);
+    set({soloPreviousHidden:s.soloPreviousHidden||s.hiddenLayerIds,soloLayerIds:new Set(ids),hiddenLayerIds:new Set(all.filter(id=>!ids.includes(id)))});
+  },
   motionView: 'transitions',
   selectedTransition: null,
   selectedKeyframe: null,
@@ -750,12 +762,19 @@ export const useEditorStore = create<any>((set, get) => ({
     next.keyframes.splice(selection.index,1);get().replaceEditorClip(selection.layerId,selection.clipId,next);set({selectedKeyframe:null});
   },
   replaceEditorClip: (layerId,clipId,clip) => {
-    const before=get().creativeDocument,next=structuredClone(before),layer=findCreativeLayer(next,get().size,layerId);
+    const state=get(),before=state.creativeDocument;
+    if(state.motionEditScope==='linked'&&state.selectedLayerId===layerId&&state.selectedClipId===clipId){
+      const canvas=before.sizes[state.size].canvas;const next=replaceLinkedMotion(before,state.size,layerId,clipId,clip,beatsForScopes(before,state.activeScopes()),{canvas,parent:canvas,durationS:before.clock.durationS});
+      set({creativeDocument:next,creativeDirty:true});get().pushHistory([{kind:'creativeDocument',before,after:next}]);return;
+    }
+    const next=structuredClone(before),layer=findCreativeLayer(next,get().size,layerId);
     if(!layer)return;layer.clips=layer.clips.map(c=>c.id===clipId?clip:c);
     set({creativeDocument:next,creativeDirty:true});get().pushHistory([{kind:'creativeDocument',before,after:next}]);
   },
   selectClip: (layerId, clipId) => {
     set({
+      selectedBeatId:'',
+      motionEditScope:get().selectedLayerId===layerId&&get().selectedClipId===clipId?get().motionEditScope:'single',
       selectedKeyframe:null,selectedTransition:null,
       selectedLayerId: layerId,
       selectedTargetId: layerId,
@@ -769,7 +788,7 @@ export const useEditorStore = create<any>((set, get) => ({
 
   clearCanvasSelection: () => {
     set({
-      selectedKeyframe:null,selectedTransition:null,
+      selectedKeyframe:null,selectedTransition:null,motionEditScope:'single',selectedBeatId:'',
       selectedLayoutRuleId: null,
       selectedLayerId: '',
       selectedTargetId: '',
@@ -793,7 +812,8 @@ export const useEditorStore = create<any>((set, get) => ({
   toggleLayerVisibility: (layerId = '') => {
     const targetId = layerId || get().selectedLayerId;
     if (!targetId) return;
-    const hiddenLayerIds = new Set(get().hiddenLayerIds);
+    const hiddenLayerIds = new Set(get().soloPreviousHidden||get().hiddenLayerIds);
+    set({soloLayerIds:new Set(),soloPreviousHidden:null});
     if (hiddenLayerIds.has(targetId)) hiddenLayerIds.delete(targetId);
     else hiddenLayerIds.add(targetId);
     set({ hiddenLayerIds });
@@ -1688,6 +1708,7 @@ export const useEditorStore = create<any>((set, get) => ({
   },
 
   loadSize: async (size) => {
+    if(get().soloPreviousHidden)set({hiddenLayerIds:get().soloPreviousHidden,soloPreviousHidden:null,soloLayerIds:new Set()});
     get().syncControlsFromFeedRow(selectSelectedFeedRow(get()));
     set({
       selectedKeyframe:null,selectedTransition:null,

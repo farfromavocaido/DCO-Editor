@@ -254,8 +254,8 @@ export const textFitRulesForSize = (sizeCreative, generic = false) => {
 };
 
 /** Engine-effective policy; authored fields/provenance remain on the target. */
-export const effectiveTextFitForTarget = (document, size, targetId, activeScopes = []) => {
-  const creative = materializeCreativeOwnership(document)?.sizes?.[size];
+export const effectiveTextFitForTarget = (document, size, targetId, activeScopes = [], alreadyMaterialized = false) => {
+  const creative = (alreadyMaterialized?document:materializeCreativeOwnership(document))?.sizes?.[size];
   if (!creative) return {};
   const [layerId, childClass] = String(targetId).split('::');
   const layer = (creative.layers || []).find(item => item.id === layerId);

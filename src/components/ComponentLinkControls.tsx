@@ -1,14 +1,15 @@
 // @ts-nocheck
 'use client';
 import { useState } from 'react';
-import { componentLinkForTarget, unlinkComponent } from '@/lib/creative-components';
+import { componentLinkForTarget, componentSourceLinks, unlinkComponent } from '@/lib/creative-components';
 import { campaignRowForScopes, campaignScopes } from '@/lib/campaign-variants';
 import { selectPreviewFeedRow, useEditorStore } from '@/store/editor-store';
 
 export function ComponentLinkControls({ document, size, targetId, scopes }) {
   const [error, setError] = useState('');
   const link = componentLinkForTarget(document, size, targetId, scopes);
-  if (!link) return null;
+  const sources=componentSourceLinks(document,size,targetId,scopes);
+  if (!link) return sources.length?<section className="inspector-section ownership-controls"><h3>Shared component source</h3>{sources.map(source=><div key={source.id}><strong>{source.name}</strong><p className="inspector-note">Edits to proportions and fitting update {source.destinations.length} linked versions. Colours, positions and overall sizes stay local.</p></div>)}</section>:null;
   const sourceScopes = link.source.scope.split('.').filter(Boolean);
   const editSource = async () => {
     try {
@@ -35,7 +36,7 @@ export function ComponentLinkControls({ document, size, targetId, scopes }) {
     } catch (cause) { setError(cause.message); }
   };
   return <section className="inspector-section ownership-controls"><h3>Linked component</h3><div className="ownership-body">
-    <strong>{link.name}</strong><p className="inspector-note">Design comes from {link.source.size.replace('x', ' × ')}. Position and size stay local.</p>
+    <strong>{link.name}</strong><p className="inspector-note">{link.geometryOnly?'Proportions and fitting':'Design'} come from {link.source.size.replace('x', ' × ')}. {link.geometryOnly?'Colour, position and size stay local.':'Position and size stay local.'}</p>
     <div className="inspector-actions"><button onClick={editSource}>Edit source</button><button onClick={unlink}>Unlink — keep appearance</button></div>
     {error && <p role="alert">{error}</p>}
   </div></section>;

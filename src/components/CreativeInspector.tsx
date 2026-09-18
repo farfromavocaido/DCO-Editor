@@ -313,7 +313,7 @@ export function CreativeInspector() {
     && selectedTargetIsText
     && selectedLayer.kind !== 'image'
     && (selectedLayer.kind !== 'group' || isNestedTextTarget)
-    && selectedLayer.id !== 'cta';
+;
   const activeFit = selectedTarget.fit || {};
   const effectiveFitRule = effectiveTextFitForTarget(document, size, selectedTarget.id, activeScopes);
   const heightManaged=canTextFit&&!motionOwner?.fields.includes('height')&&(effectiveFitRule.frame==='auto'||!effectiveFitRule.frame&&effectiveFitRule.wrap&&Number(effectiveFitRule.maxLines)>0&&actualGeometry&&actualGeometry.height<Number(selectedTarget.values.height)-.5);
@@ -398,6 +398,7 @@ export function CreativeInspector() {
         </InspectorSection>
 
         {motionOwner?.fields.some(field=>!layoutOwner(field))&&<div className="motion-position-source"><span title={motionOwner.clips.map(c=>c.label||c.id).join(', ')}>{motionOwner.fields.filter(field=>!layoutOwner(field)).map(field=>({left:'X',top:'Y',width:'Width',height:'Height'})[field]).join(' / ')} controlled by animation</span><select aria-label="Position editing mode" value={motionEditMode} onChange={e=>useEditorStore.setState({motionEditMode:e.target.value})}><option value="path">Move whole path · this version</option><option value="keyframe">Edit selected position keyframe</option></select></div>}
+        {!isGroupedSelection&&<ComponentLinkControls document={document} size={size} targetId={selectedTarget.id} scopes={activeScopes}/> }
         {!isGroupedSelection ? <CreativeOwnershipControls key={`${size}/${selectedTarget.id}/${activeScopes.join(".")}`} document={document} size={size} target={selectedTarget} scopes={activeScopes} /> : null}
 
         <SelectedLayoutRules key={selectedTarget.id} document={document} size={size} targetId={selectedTarget.id} targetIds={isGroupedSelection?selectedTarget.members:[selectedTarget.id]} scopes={activeScopes}/>
@@ -549,7 +550,7 @@ export function CreativeInspector() {
             {canTextFit ? <TextFitPolicyControls fit={activeFit} effectiveRule={effectiveFitRule} onChange={applyFitUpdate} /> : null}
             {canTextFit ? (
               <div className="inspector-grid">
-                {!activeFit.frame ? <SelectControl
+                {!effectiveFitRule.frame ? <SelectControl
                   label={`Fit mode · ${selectedTarget.fitProvenance?.mode?.scope || selectedTarget.fitProvenance?.mode?.kind || "default"}`}
                   value={fitMode}
                   onChange={(value) => applyFitUpdate('mode', value)}

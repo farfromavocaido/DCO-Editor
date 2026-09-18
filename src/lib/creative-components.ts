@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { effectiveTextFitForTarget } from './text-fit-rules';
-import { findCreativeTarget } from './creative-model';
+import {materializeCreativeOwnership} from './creative-ownership';
+import { findCreativeTarget,findMaterializedCreativeTarget } from './creative-model';
 import { getTargetCanvasBounds } from './canvas-alignment';
 import { campaignVariantModel, campaignConditionIsValid } from './campaign-variants';
 
@@ -64,7 +65,7 @@ const localWrite = (document,size,targetId,scopes,values,fit) => {
 };
 
 /** Copy every declared internal arrangement into selected destination versions. */
-export const transferCreativeComponent = (document,{componentId,sourceSize,sourceScopes=[],destinations=[],sizing='destination',placements={},preserveLinks=false}) => {
+export const transferCreativeComponent = (document,{componentId,sourceSize,sourceScopes=[],destinations=[],sizing='destination',placements={},preserveLinks=false,geometryOnly=false}) => {
   const source=findCreativeComponent(document,sourceSize,componentId);
   if (!source) throw new Error('Unknown source component');
   if (!['destination','source'].includes(sizing)) throw new Error('Invalid component sizing');
@@ -75,6 +76,10 @@ export const transferCreativeComponent = (document,{componentId,sourceSize,sourc
   let states=[[]];
   for(const dimension of dimensions) states=states.flatMap(state=>dimension.options.map(option=>[...state,option.scope]));
   const next=structuredClone(document);
+  const fast=geometryOnly&&source.frameTargetId&&source.parts.every(p=>!p.targetId.includes('::'))&&destinations.every(m=>source.parts.every(p=>document.sizes[m.size]?.layers.some(l=>l.id===p.targetId)));
+  const compiled=fast?materializeCreativeOwnership(document):null;
+  const read=(size,id,scopes)=>fast?findMaterializedCreativeTarget(compiled,size,id,scopes):findCreativeTarget(document,size,id,scopes);
+  const bounds=(size,id,scopes)=>fast?getTargetCanvasBounds(compiled,size,id,scopes,findMaterializedCreativeTarget):getTargetCanvasBounds(document,size,id,scopes);
   if(!preserveLinks)replaceComponentDestinations(next,componentId,destinations);
   for(const destination of destinations) {
     if(!next.sizes[destination.size]) throw new Error(`Unknown destination size ${destination.size}`);
@@ -99,8 +104,8 @@ export const transferCreativeComponent = (document,{componentId,sourceSize,sourc
       const to=[...tokens(destination.scope).filter(scope=>!stateTokens.has(scope)),...state];
       if(!campaignConditionIsValid(document,from)||!campaignConditionIsValid(document,to))continue;
       if(sourceSize===destination.size && from.slice().sort().join('.')===to.slice().sort().join('.') && !placements[`${destination.size}/${destination.scope}`])continue;
-      const sourceBox=componentBounds(document,sourceSize,componentId,from);
-      const destinationBox=existing.length?(componentBounds(document,destination.size,componentId,to)||componentBounds(next,destination.size,componentId,to)):sourceBox;
+      const sourceBox=fast?bounds(sourceSize,source.frameTargetId,from):componentBounds(document,sourceSize,componentId,from);
+      const destinationBox=fast?bounds(destination.size,target.frameTargetId,to):existing.length?(componentBounds(document,destination.size,componentId,to)||componentBounds(next,destination.size,componentId,to)):sourceBox;
       const supplied=placements[`${destination.size}/${destination.scope}`];
       const frame=supplied||destinationBox;
       if(!sourceBox||!frame||!(frame.width>0&&frame.height>0))throw new Error('Component needs valid frame bounds');
@@ -111,11 +116,12 @@ export const transferCreativeComponent = (document,{componentId,sourceSize,sourc
       for(const part of [...source.parts].sort((a,b)=>a.targetId.split('::').length-b.targetId.split('::').length)) {
         const destinationPart=target.parts.find(item=>item.role===part.role);
         if(!destinationPart)throw new Error(`Missing component role ${part.role}`);
-        const original=findCreativeTarget(document,sourceSize,part.targetId,from);
-        const box=getTargetCanvasBounds(document,sourceSize,part.targetId,from);
-        const destinationTarget=findCreativeTarget(next,destination.size,destinationPart.targetId,to);
-        const destinationBounds=getTargetCanvasBounds(next,destination.size,destinationPart.targetId,to);
+        const original=read(sourceSize,part.targetId,from);
+        const box=bounds(sourceSize,part.targetId,from);
+        const destinationTarget=fast?read(destination.size,destinationPart.targetId,to):findCreativeTarget(next,destination.size,destinationPart.targetId,to);
+        const destinationBounds=fast?bounds(destination.size,destinationPart.targetId,to):getTargetCanvasBounds(next,destination.size,destinationPart.targetId,to);
         const values=cleanValues(original.values);
+        if(geometryOnly)for(const key of Object.keys(values))if(!['left','top','width','height','fontSize','fontFamily','fontWeight','fontStyle','textTransform','lineHeight','letterSpacing','textAlign','alignItems','justifyContent','display','whiteSpace',...pixelFields].includes(key))delete values[key];
         if(destinationTarget.values?.display==='none')delete values.display;
         if(!existing.length || destinationTarget.layer?.insertedComponentId===componentId) {
           values.display=original.values.display||'block';
@@ -130,7 +136,7 @@ export const transferCreativeComponent = (document,{componentId,sourceSize,sourc
         values.top=top+(box.top-sourceBox.top)*sy-originY + ((Number(original.values.top)||0)-(box.localTop??box.top))*sy;
         values.width=box.width*sx;
         values.height=original.values.height!==undefined&&original.values.height!==''&&original.values.height!==null&&original.values.height!=='auto'?box.height*sy:'auto';
-        const effective=effectiveTextFitForTarget(document,sourceSize,part.targetId,from);
+        const effective=effectiveTextFitForTarget(compiled||document,sourceSize,part.targetId,from,Boolean(compiled));
         const fit={...structuredClone(original.fit||{}),
           disabled:effective.disabled===true || !Object.keys(effective).length,
           mode:original.fit?.mode || (effective.static || (effective.allowShrink===false?'wrap':'shrink')),
@@ -210,7 +216,7 @@ export const materializeComponentLinks = document => {
   if(cached?.signature===signature)return cached.value;
   validateComponentLinks(document);
   let next={...document,componentLinks:[]};
-  for(const link of document.componentLinks)next=transferCreativeComponent(next,{componentId:link.componentId,sourceSize:link.source.size,sourceScopes:tokens(link.source.scope),destinations:link.destinations,sizing:link.sizing,placements:link.placements||{}});
+  for(const link of document.componentLinks)next=transferCreativeComponent(next,{componentId:link.componentId,sourceSize:link.source.size,sourceScopes:tokens(link.source.scope),destinations:link.destinations,sizing:link.sizing,placements:link.placements||{},geometryOnly:link.geometryOnly===true});
   componentMaterializations.set(document,{signature,value:next});
   return next;
 };
@@ -220,7 +226,7 @@ export const createComponentLink = (document,link) => {
   if(link.placements)normalized.placements=Object.fromEntries(link.destinations.flatMap((member,index)=>link.placements[`${member.size}/${member.scope}`]?[[`${normalized.destinations[index].size}/${normalized.destinations[index].scope}`,link.placements[`${member.size}/${member.scope}`]]]:[]));
   if(link.sizing==='source' || (link.placements && Object.keys(link.placements).length) || link.destinations.some(member=>!findCreativeComponent({...next,componentLinks:[]},member.size,link.componentId))) {
     const previousLinks=next.componentLinks;
-    next=transferCreativeComponent({...next,componentLinks:[]},{componentId:link.componentId,sourceSize:link.source.size,sourceScopes:tokens(link.source.scope),destinations:link.destinations,sizing:link.sizing,placements:link.placements});
+    next=transferCreativeComponent({...next,componentLinks:[]},{componentId:link.componentId,sourceSize:link.source.size,sourceScopes:tokens(link.source.scope),destinations:link.destinations,sizing:link.sizing,placements:link.placements,geometryOnly:link.geometryOnly===true});
     next.componentLinks=previousLinks;
   }
   // Source size is an initial placement choice; linked destination bounds remain editable.
@@ -238,7 +244,7 @@ export const unlinkComponent = (document,linkId,destination) => {
   const selected=link.destinations.filter(member=>!normalized||(member.size===normalized.size&&member.scope===normalized.scope));
   if(!selected.length)throw new Error('Unknown component link destination');
   const stripped={...document,componentLinks:[]};
-  const next=transferCreativeComponent(stripped,{componentId:link.componentId,sourceSize:link.source.size,sourceScopes:tokens(link.source.scope),destinations:selected,sizing:link.sizing,placements:link.placements||{}});
+  const next=transferCreativeComponent(stripped,{componentId:link.componentId,sourceSize:link.source.size,sourceScopes:tokens(link.source.scope),destinations:selected,sizing:link.sizing,placements:link.placements||{},geometryOnly:link.geometryOnly===true});
   next.componentLinks=document.componentLinks.flatMap(item=>item.id!==linkId?[structuredClone(item)]:item.destinations.length===selected.length?[]:[{...structuredClone(item),destinations:item.destinations.filter(member=>!selected.includes(member))}]);
   return next;
 };
@@ -249,3 +255,20 @@ export const updateComponentBounds = (document,size,componentId,scopes,bounds) =
   return transferCreativeComponent(document,{componentId,sourceSize:size,sourceScopes:scopes,destinations:[{size,scope}],sizing:'destination',preserveLinks:true,placements:{[`${size}/${scope}`]:bounds}});
 };
 export const moveCreativeComponent = updateComponentBounds;
+
+/** Source edits belong to the shared design's scope, not an incidental feed row. */
+export function componentSourceLinks(document,size,targetId,scopes=[]){
+ if(!document?.componentLinks?.length)return [];
+ const component=componentForTarget({...document,componentLinks:[]},size,targetId);
+ return component?document.componentLinks.filter(link=>link.componentId===component.id&&memberMatches(link.source,size,scopes)):[];
+}
+export function editComponentSourceField(document,size,targetId,scopes,domain,field,value){
+ const link=componentSourceLinks(document,size,targetId,scopes).find(l=>l.geometryOnly);if(!link)return null;
+ if(domain==='values'&&!['left','top','width','height','fontSize','fontFamily','fontWeight','fontStyle','textTransform','lineHeight','letterSpacing','textAlign','alignItems','justifyContent','display','whiteSpace',...pixelFields].includes(field))return null;
+ const component=findCreativeComponent({...document,componentLinks:[]},size,link.componentId),stateTokens=new Set(campaignVariantModel(document).dimensions.filter(d=>component.stateDimensions?.includes(d.id)).flatMap(d=>d.options.map(o=>o.scope)));
+ const scope=[...new Set([...tokens(link.source.scope),...scopes.filter(s=>stateTokens.has(s))])].sort().join('.');
+ const next=structuredClone(document),locals=next.sizes[size].localOverrides||=[];
+ let entry=locals.find(l=>l.componentSource===link.id&&l.targetId===targetId&&l.scope===scope);
+ if(!entry){entry={targetId,scope,detached:true,componentSource:link.id,values:{},fit:{}};locals.unshift(entry);}
+ entry[domain][field]=value;return next;
+}

@@ -423,6 +423,7 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
       var overflow = rule.overflow || (rule.static === 'truncate' ? 'ellipsis' : 'clip');
       element.style.overflow = overflow === 'visible' ? 'visible' : 'hidden';
       element.style.textOverflow = overflow === 'ellipsis' ? 'ellipsis' : 'clip';
+      if(rule.frame==='auto'&&overflow!=='visible'&&Number(rule.maxLines)>0)element.style.maxHeight=(lineHeightPx(computedOf(element),size)*Number(rule.maxLines))+'px';
       var failed = measurement.reasons.length > 0;
       element.setAttribute('data-fit-status', failed ? 'failed' : 'fitted');
       element.setAttribute('data-fit-requested-size', String(fit.base));
@@ -565,6 +566,7 @@ const TEXT_FIT_ENGINE_SOURCE = `(function createTextFitEngine(win) {
         var element = member.element;
         var renderedSize = renderedSizes[index];
         element.style.fontSize = renderedSize + 'px';
+        if(member.rule.frame==='auto'&&member.rule.overflow!=='visible'&&Number(member.rule.maxLines)>0)element.style.maxHeight=(lineHeightPx(computedOf(element),renderedSize)*Number(member.rule.maxLines))+'px';
         var measurement = measurePolicy(element, member.rule, renderedSize, member.minimum);
         if (conflict) measurement.reasons.push('shared-size-conflict');
         member.diagnostic.renderedSize = renderedSize;

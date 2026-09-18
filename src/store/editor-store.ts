@@ -1,5 +1,6 @@
 // @ts-nocheck
 'use client';
+import {editComponentSourceField} from '@/lib/creative-components';
 
 import {renderedGeometry} from '@/lib/text-anchor';
 import {motionGeometry,editMotionGeometry} from '@/lib/motion-geometry';
@@ -1075,6 +1076,7 @@ export const useEditorStore = create<any>((set, get) => ({
   applyCreativeTargetFitValue: (size, targetId, activeScopes, field, value) => {
     const state = get();
     if (!state.creativeDocument) return;
+    const sharedSource=editComponentSourceField(state.creativeDocument,size,targetId,activeScopes,'fit',field,value);if(sharedSource){set({creativeDocument:sharedSource,creativeDirty:true});get().setStatus('Updated shared component fitting','warn');return;}
     const next = isGenericCampaign(state.creativeDocument)
       ? setCreativeOwnershipField(state.creativeDocument,size,targetId,activeScopes,'fit',field,value,'local')
       : updateCreativeTargetFitDocument(
@@ -1133,6 +1135,7 @@ export const useEditorStore = create<any>((set, get) => ({
   applyCreativeTargetValue: (size, targetId, activeScopes, field, value, options={}) => {
     const state = get();
     if (!state.creativeDocument) return;
+    const sharedSource=editComponentSourceField(state.creativeDocument,size,targetId,activeScopes,'values',field,value);if(sharedSource){set({creativeDocument:sharedSource,creativeDirty:true});get().setStatus('Updated shared component design','warn');return;}
     let motion;try{motion=editMotionGeometry(state.creativeDocument,size,targetId,activeScopes,state.percent,field,value,state.motionEditMode||'path');}catch(error){get().setStatus(error.message,'warn');return;}
     if(motion){set({creativeDocument:motion,creativeDirty:true});return;}
     const selectedGroup = findCanvasGroup(state.creativeDocument, size, state.selectedTargetId);

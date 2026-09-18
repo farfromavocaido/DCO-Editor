@@ -7,6 +7,8 @@ rules from the creative JSON for both consumers. There is deliberately no
 second implementation anywhere — if the preview fits text one way, the served
 ad fits it the same way.
 
+The four SSE campaigns were explicitly converted to frame policies; see [migration review](TEXT_FIT_MIGRATION_REVIEW.md). Legacy behaviour below is retained only for older documents and compatibility fixtures.
+
 ## Explicit frame policies and effective controls
 
 Existing campaigns retain their compatibility fitting until **Text frame** is

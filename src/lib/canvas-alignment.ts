@@ -31,12 +31,13 @@ export const getTargetCanvasBounds = (
   size: string,
   targetId: string,
   activeScopes: string[] = [],
+  resolveTarget = findCreativeTarget,
 ) => {
-  const target = findCreativeTarget(document, size, targetId, activeScopes);
+  const target = resolveTarget(document, size, targetId, activeScopes);
   if (!target) return null;
 
   const parentTarget = target.kind === 'nested'
-    ? findCreativeTarget(document, size, target.parentLayerId, activeScopes)
+    ? resolveTarget(document, size, target.parentLayerId, activeScopes)
     : null;
   const wrapper = target.wrapperBounds || null;
   const parentWidth = numberValue(

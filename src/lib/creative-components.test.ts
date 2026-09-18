@@ -1,6 +1,6 @@
 import { describe,it,expect } from 'vitest';
 import fs from 'node:fs';
-import { componentBounds,materializeComponentLinks,updateComponentBounds,creativeComponents,transferCreativeComponent,createComponentLink,unlinkComponent,validateCreativeComponents } from './creative-components';
+import { componentBounds,materializeComponentLinks,updateComponentBounds,creativeComponents,transferCreativeComponent,createComponentLink,unlinkComponent,validateCreativeComponents,editComponentSourceField } from './creative-components';
 import { effectiveTextFitForTarget } from './text-fit-rules';
 import { findCreativeTarget } from './creative-model';
 const fixture=()=>({variantModel:{dimensions:[{id:'version',options:[{scope:'a'},{scope:'b'}]},{id:'arrangement',options:[{scope:'split'},{scope:'copy'}]}]},componentDefinitions:[{id:'component:badge',name:'Badge',frameTargetId:'disc',resize:'proportional',stateDimensions:['arrangement'],parts:[{role:'frame',targetId:'disc'},{role:'copy',targetId:'label'}]}],sizes:Object.fromEntries(['300x250','300x600'].map((size,index)=>[size,{canvas:{width:300,height:index?600:250},layers:[{id:'disc',kind:'shape',base:{left:index?50:10,top:index?100:20,width:index?200:100,height:index?200:100},clips:[]},{id:'label',kind:'text',base:{left:20,top:40,width:80,height:20,fontSize:16,lineHeight:1.2,padding:4,borderRadius:'50%'},fit:{mode:'shrink',minFontSize:8,maxLines:2},binding:{field:'copy'},clips:[]}],variantRules:[{id:'copylabel',layerId:'label',scope:'copy',props:{top:60,height:50},fit:{maxLines:4}}]}]))});
@@ -147,4 +147,19 @@ describe('reusable components',()=>{
     expect(findCreativeTarget(next,'300x600','roundel-copy',['offers-2','roundel-frame-on',state])).toEqual(findCreativeTarget(doc,'300x600','roundel-copy',['offers-2','roundel-frame-on',state]));
   }
  });
+});
+it('proportion-only links keep destination colours and exterior placement while sharing fit and relative geometry',()=>{
+ const d:any=fixture();d.sizes['300x250'].layers[0].base.backgroundColor='red';d.sizes['300x600'].layers[0].base.backgroundColor='blue';d.sizes['300x250'].layers[1].base.color='white';d.sizes['300x600'].layers[1].base.color='navy';
+ const linked=createComponentLink(d,{id:'geometry',name:'Proportions',componentId:'component:badge',source:{size:'300x250',scope:'a'},destinations:[{size:'300x600',scope:'b'}],sizing:'destination',geometryOnly:true});
+ const frame=findCreativeTarget(linked,'300x600','disc',['b','split']),label=findCreativeTarget(linked,'300x600','label',['b','split']);
+ expect(frame.values).toMatchObject({left:50,top:100,width:200,height:200,backgroundColor:'blue'});expect(label.values).toMatchObject({left:70,top:140,fontSize:32,color:'navy'});
+ const detached=unlinkComponent(linked,'geometry');expect(findCreativeTarget(detached,'300x600','label',['b','split']).values).toEqual(label.values);
+});
+
+it('source fitting edits propagate despite incidental feed conditions',()=>{
+ const d:any=fixture();const linked=createComponentLink(d,{id:'geometry',name:'Proportions',componentId:'component:badge',source:{size:'300x250',scope:'a'},destinations:[{size:'300x600',scope:'b'}],sizing:'destination',geometryOnly:true});
+ const next=editComponentSourceField(linked,'300x250','label',['a','split','incidental'],'fit','maxLines',5);
+ expect(effectiveTextFitForTarget(next,'300x600','label',['b','split']).maxLines).toBe(5);
+ expect(effectiveTextFitForTarget(next,'300x250','label',['a','split','incidental']).maxLines).toBe(5);
+ expect(effectiveTextFitForTarget(next,'300x600','label',['b','copy']).maxLines).toBe(4);
 });

@@ -191,3 +191,10 @@ test('fixed font sizing ignores dormant shrink minimum settings', async () => {
   expect(result.after[0].size).toBe(6);
   expect(result.results[0].diagnostics[0].reasons).toEqual([]);
 });
+
+test('content-height clipping limits visible lines without silently shrinking fixed text',async()=>{
+ const result=await fit('<p class="target">one<br>two<br>three<br>four</p>',{frame:'auto',wrap:true,allowShrink:false,maxLines:2,overflow:'clip'});
+ expect(result.after[0].size).toBe(20);expect(result.after[0].height).toBe(48);expect(result.after[0].reason).toContain('max-lines');
+ const visible=await fit('<p class="target">one<br>two<br>three<br>four</p>',{frame:'auto',wrap:true,allowShrink:false,maxLines:2,overflow:'visible'});
+ expect(visible.after[0].height).toBe(96);expect(visible.after[0].size).toBe(20);
+});

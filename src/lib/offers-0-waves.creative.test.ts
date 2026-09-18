@@ -182,9 +182,26 @@ test('offers-0 white logo from start; blue logo hidden with no multi fade', () =
     const multiWhite = clipsForProfile(whiteLogo.clips, 'frames-3', MULTI);
     assert.equal(zeroWhite.length, 1, `${size} offers-0 white clip`);
     assert.equal(multiWhite.length, 1, `${size} multi white clip`);
-    assert.equal(zeroWhite[0].preset, 'fade', `${size} white fade clip`);
-    assert.equal(zeroWhite[0].start, 'start+5', `${size} white starts mid bluewave`);
-    assert.equal(zeroWhite[0].params?.enter_duration_pct, 5, `${size} white enter 5%`);
+    if (size === '300x600') {
+      assert.equal(zeroWhite[0].preset, 'custom', `${size} white custom clip`);
+      const rest = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|logo-act3')?.props;
+      const kfs = zeroWhite[0].keyframes || [];
+      const startKf = kfs.find((kf) => kf.at === 'start');
+      const act4Kf = kfs.find((kf) => kf.at === 'act4_in');
+      const fadeKf = kfs.find((kf) => kf.at === 'end-2');
+      assert.equal(startKf?.left, rest.left, `${size} logo starts at rest left`);
+      assert.equal(startKf?.width, rest.width, `${size} logo starts at rest width`);
+      assert.equal(startKf?.opacity, 0, `${size} logo hidden at start`);
+      assert.equal(act4Kf?.left, 80, `${size} logo centred at act4`);
+      assert.equal(act4Kf?.width, 140, `${size} logo 140 wide at act4`);
+      assert.equal(act4Kf?.height, 44, `${size} logo proportional height at act4`);
+      assert.equal(act4Kf?.opacity, 1, `${size} logo opaque at act4`);
+      assert.equal(fadeKf?.opacity, 0, `${size} logo faded as wave returns`);
+    } else {
+      assert.equal(zeroWhite[0].preset, 'fade', `${size} white fade clip`);
+      assert.equal(zeroWhite[0].start, 'start+5', `${size} white starts mid bluewave`);
+      assert.equal(zeroWhite[0].params?.enter_duration_pct, 5, `${size} white enter 5%`);
+    }
 
     const hideBlue = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|logo-act1|visibility');
     if (size === '320x50') {

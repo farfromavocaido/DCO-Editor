@@ -48,7 +48,7 @@ test('seeds an offers-0 headline scrim gradient on every size', async () => {
   }
 });
 
-test('uses Museo 300 for every offers-0 terms line', async () => {
+test('uses Museo 300 for every terms line', async () => {
   const document = await readCreativeDocument();
   assert.deepEqual(document.fonts, [
     {
@@ -69,6 +69,11 @@ test('uses Museo 300 for every offers-0 terms line', async () => {
     },
   ]);
   for (const [size, sizeCreative] of Object.entries(document.sizes)) {
+    for (const layerId of ['terms-prices', 'unit-rate-prices', 'terms-solo']) {
+      const layer = sizeCreative.layers.find((item) => item.id === layerId);
+      assert.ok(layer, `${size} ${layerId}`);
+      assert.equal(layer.base.fontWeight, 300, `${size} ${layerId} base`);
+    }
     for (const layerId of ['terms-prices', 'terms-solo']) {
       const rule = sizeCreative.variantRules.find((item) => item.id === `offers-0|${layerId}|color`);
       assert.ok(rule, `${size} ${layerId}`);

@@ -125,16 +125,18 @@ The editor preview still refits on `fonts.ready`; `layoutOffers` clears offer
 slot motion transforms for that measure pass so scrub pose matches export rest.
 Fits are idempotent — every pass resets its inline styles first.
 
-**The brand font is Museo — `Museo700-Regular.otf`, the slab family — NOT
-Museo Sans.** They are different typefaces with different widths; substituting
-one for the other both renders the wrong brand font and invalidates every
-measurement. The canonical live URL is the Studio CDN asset in
-`src/lib/brand-font.ts` (`MUSEO_CDN_URL`). The editor layout, `/api/creative/{size}/view`,
-CDN base zips, and the GitHub Pages preview site all load that same file
-(`local("☺")` + `font-weight: 700`). Pages preview inlines campaign SVGs (like
+**The brand font is Museo — the slab family — NOT Museo Sans.** They are
+different typefaces with different widths; substituting one for the other both
+renders the wrong brand font and invalidates every measurement. Headlines,
+offers, and CTAs use `Museo700-Regular.otf` (`font-weight: 700`). T&C lines use
+`Museo300-Regular.otf` (`font-weight: 300`). The canonical 700 live URL is the
+Studio CDN asset in `src/lib/brand-font.ts` (`MUSEO_CDN_URL`); 300 is the matching
+Studio CDN face registered on the DCO document. The editor layout,
+`/api/creative/{size}/view`, CDN base zips, and the GitHub Pages preview site
+all load those same files. Pages preview inlines campaign SVGs (like
 Canonical Agency Zip) and cache-busts iframe ad URLs with `?v=<gitSha>` (also shown
 as `version: <gitSha>` beside Preview in the ad card bar). Downloadable
-client ZIPs stay packaged/self-contained with the OTF under `campaign/assets/fonts`. Never map
+client ZIPs stay packaged/self-contained with the OTFs under `campaign/assets/fonts`. Never map
 the Museo family to `MuseoSans_700.otf`. Ad stacks are
 `Museo, Arial, sans-serif`.
 

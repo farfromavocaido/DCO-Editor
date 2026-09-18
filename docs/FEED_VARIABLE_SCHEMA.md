@@ -57,7 +57,7 @@ When a field is missing or empty at render time, behaviour depends on context:
 
 | Context | Defaults |
 |---|---|
-| **Production export** | `firstDynamicRow()` uses `window.dynamicContent`; empty/missing keys become `''` via `normalizeProfileRow()`. No hard-coded copy defaults in production HTML. |
+| **Production export** | `firstDynamicRow()` uses `window.dynamicContent` and skips `_`-prefixed metadata keys (e.g. `_profileid`); empty/missing copy keys become `''` via `normalizeProfileRow()`. `_00_Exit_URL` is carried through raw (`{Url}` object or string) and re-read at click. No hard-coded copy defaults in production HTML. |
 | **Client preview / WIP** | `clientInitialRow()` seeds demo copy, then merges `feed.sampleRows[0]`. Key literals: H1–H4 energy / best plan / switch and save / energy; offers `15%` / `30%` / `€125`; `roundel_text_text` → `'Save up to'`, `roundel_value_text` → `'€1,080'`, `include_roundel_frame_bool` → `true`, `offer_count_num` → `1`, `cta_type_enum` → `'roundel'`, `cta_text` → `'Switch today'`, `tc_type_enum` → `'tcs_units'`. |
 | **Variant row matching** | `rowForClientVariant()` merges sample rows by offer count / T&C / CTA shape, with the same string fallbacks as client preview for CTA, T&C, roundel, and background fields. |
 | **Background image** | Empty per-size `background_image_url_{size}` → packaged size background from creative JSON (`previewBackgroundSrc()` / no `applyBackgroundImage()` call). |

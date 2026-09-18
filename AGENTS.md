@@ -45,7 +45,7 @@ Local Next.js tool for editing campaign creative JSON documents and exporting St
 - Preview assets: `/assets/foo` → `campaign/assets/foo`.
 - Creative/feed/export APIs take `?campaign=<id>` (default `sse-dco`).
 - Exports: `output/{exportSlug}_{size}.html` (e.g. `SSE_DCO_300x250.html`, `SSE_Hiker_Welcome_300x250.html`).
-- Brand font: Museo (`Museo700-Regular.otf`, the slab family) — never Museo Sans, never aliased. See `docs/TEXT_FITTING.md`.
+- Brand font: Museo slab family — never Museo Sans, never aliased. Headlines/offers/CTAs are `Museo700-Regular.otf`; DCO T&C lines are `Museo300-Regular.otf`. See `docs/TEXT_FITTING.md`.
 - Outline export is fixed-copy only (bakes the active sample row); omit OTF from those packages. Prefer editor `presentationSnapshots`.
 - Non-DCO static HTML uses per-campaign product `clickTag`s from the registry; SSE DCO falls back to `https://www.sseairtricity.com/uk`.
 - App docs: `docs/` in this folder (ignore `docs/superpowers/` design/plan archives unless implementing from them).

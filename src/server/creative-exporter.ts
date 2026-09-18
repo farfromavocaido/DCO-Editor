@@ -1230,6 +1230,9 @@ const runtimeScript = (
           ${JSON.stringify(CREATIVE_AD_SIZES)}.forEach(function(size) {
             out[backgroundFieldNameForSize(size)] = imageFieldValue(row[backgroundFieldNameForSize(size)]);
           });
+          // Exit URL is not a text/image field — carry the raw value through so
+          // wireExit can read it (Studio exit fields arrive as {Url: "..."}).
+          out._00_Exit_URL = row._00_Exit_URL;
           return out;
         }
 
@@ -1344,16 +1347,34 @@ const runtimeScript = (
           return String(data._00_Exit_URL);
         }
 
+        // Last URL seen from a bound row. Updated on every feed swap.
+        var __currentExitUrl = '';
+
+        // Resolve the exit URL at click time, newest source first:
+        //   1. the URL captured when the current row was bound
+        //   2. a live re-read of the serve-time row (survives any normalisation
+        //      step dropping the field)
+        function resolveExitUrl() {
+          if (__currentExitUrl) return __currentExitUrl;
+          try {
+            return exitUrlFromRow(firstDynamicRow());
+          } catch (e) {
+            return '';
+          }
+        }
+
         function wireExit(data) {
-          var exitUrl = exitUrlFromRow(data);
+          var fromRow = exitUrlFromRow(data);
+          if (fromRow) __currentExitUrl = fromRow;
           var clickbox = document.getElementById('clickbox') || root;
           if (!clickbox || clickbox.dataset.exitWired === '1') return;
           clickbox.dataset.exitWired = '1';
           clickbox.addEventListener('click', function(event) {
             event.preventDefault();
             if (typeof Enabler === 'undefined') return;
-            if (exitUrl && Enabler.exitOverride) {
-              Enabler.exitOverride('Main Exit', exitUrl);
+            var url = resolveExitUrl();
+            if (url && Enabler.exitOverride) {
+              Enabler.exitOverride('Main Exit', url);
             } else if (Enabler.exit) {
               Enabler.exit('Main Exit');
             }
@@ -1429,9 +1450,13 @@ const runtimeScript = (
 
         function firstDynamicRow() {
           // Studio / DV360 inject profile rows at serve time via window.dynamicContent.
+          // Keys prefixed with "_" are metadata (e.g. _profileid) and must be skipped,
+          // otherwise key order decides which object we bind against.
 ${previewRowFallback}
           if (window.dynamicContent) {
             for (var key in window.dynamicContent) {
+              if (!Object.prototype.hasOwnProperty.call(window.dynamicContent, key)) continue;
+              if (key.charAt(0) === '_') continue;
               var value = window.dynamicContent[key];
               if (Array.isArray(value) && value[0]) return value[0];
               if (value && typeof value === 'object') return value;

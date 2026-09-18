@@ -17,6 +17,8 @@
 
 ### Changed
 
+- **T&C copy is Museo 300** — every DCO size now authors `terms-prices`, `unit-rate-prices`, and `terms-solo` at weight 300 (same slab family as headlines at 700).
+- **300×600 offers-0 logo** — as the bluewave opens to Act 4, the white logo eases to a centred 140px-wide box, then fades out quickly as the wave returns to stage1.
 - **SSE DCO root CSS is plumbing only** — brand type (Museo / 700 / navy) lives on classRules and T&C layer bases; `%` start size is with the offer-value symbol sheet; `roundel-frame-off` hiding Act 3 is a variant. Banner Act 4 extras (`#headline-act4` white/top on 320×50, top on 728×90) moved to unscoped variants. `manualCss` is empty so the GWD leftover sheet no longer sits under every size.
 - **Editor dev server uses webpack** — Turbopack’s server HMR iterator can leak until `Map maximum size exceeded` and kill `just editor`. Webpack watch also ignores `campaign/` / `output/` / `outputs/` so JSON saves do not rebuild the app.
 - **Offers-0 roundel is independent of offers 1–3** — frame, copy, and value (split + copy-only) own `offers-0` / `offers-0.roundel-*` rules, same principle as the brand CTA (separate stack). Seeded from the current boxes so layout does not jump.
@@ -34,6 +36,7 @@
 
 ### Fixed
 
+- **DCO click destination** — Studio font runtime now carries `_00_Exit_URL` through `normalizeProfileRow`, updates the bound URL on every feed swap, and re-reads the live row at click time. `firstDynamicRow()` skips `_`-prefixed Studio metadata so key order cannot bind the wrong object. Outline/static click wiring is unchanged.
 - **Offers-0 ink height leak** — colour-only white/navy headline rules no longer emit class `height`/`top` from fit-budget. That override was clipping Act 2 (and other photo headlines) to the 31px multi-offer box after geometry moved onto `offers-0|sse-headline`.
 - **Offers-0 banner frames-4 T&Cs** — on **320×50** / **728×90**, offers-0 terms fade out at `roundel_in` (gone as the roundel starts) instead of holding until `green_in`.
 - **Offers-0 320×50 no-roundel H4 gap** — Act 4 now enters on `act4_in` (after the green fade) instead of the banner `bn_cta_in` alias, so photo headlines hand off without a dead beat.

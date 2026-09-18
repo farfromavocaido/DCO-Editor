@@ -148,6 +148,10 @@ test('exports click handling without the legacy dynamic URL field', async () => 
   assert.match(html, /Enabler\.exitOverride\('Main Exit'/);
   assert.match(html, /Enabler\.exit\('Main Exit'\)/);
   assert.match(html, /_00_Exit_URL/);
+  assert.match(html, /out\._00_Exit_URL = row\._00_Exit_URL/);
+  assert.match(html, /function resolveExitUrl/);
+  assert.match(html, /__currentExitUrl/);
+  assert.match(html, /key\.charAt\(0\) === '_'/);
   assert.doesNotMatch(html, /data-dco-field="[^"]*Exit_URL"/);
   assert.doesNotMatch(html, /exitUrlFromProfile/);
   assert.doesNotMatch(html, /window\.open\(exitUrl/);

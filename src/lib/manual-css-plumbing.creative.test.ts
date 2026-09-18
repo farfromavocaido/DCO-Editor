@@ -33,7 +33,7 @@ test('SSE DCO sizes keep type on owners and empty manualCss', () => {
       const layer = sizeCreative.layers.find((item) => item.id === layerId);
       assert.ok(layer, `${size} ${layerId}`);
       assert.equal(layer.base.fontFamily, MUSEO, `${size} ${layerId} family`);
-      assert.equal(layer.base.fontWeight, 700, `${size} ${layerId} weight`);
+      assert.equal(layer.base.fontWeight, 300, `${size} ${layerId} weight`);
       assert.equal(layer.base.color, NAVY, `${size} ${layerId} color`);
       assert.equal(layer.base.lineHeight, 1.3, `${size} ${layerId} line-height`);
     }
@@ -58,7 +58,7 @@ test('banner Act 4 extras from the old root sheet stay as unscoped variants', ()
     (rule) => rule.id === 'headline-act4|endframe-top',
   );
   assert.deepEqual(banner.props, { color: 'rgb(255, 255, 255)', top: 9 });
-  assert.deepEqual(leader.props, { top: 17 });
+  assert.deepEqual(leader.props, { top: 14 });
   assert.match(structuredRuleCss(creative.sizes['320x50']), /#headline-act4 \{\n      color: rgb\(255, 255, 255\);\n      top: 9px;/);
 });
 

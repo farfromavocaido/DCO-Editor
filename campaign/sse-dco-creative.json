@@ -10337,7 +10337,7 @@
           "targetId": "roundel-frame",
           "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
-            "left": 24,
+            "left": 23,
             "top": 230,
             "width": 115,
             "height": 115,
@@ -10352,7 +10352,7 @@
           "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
             "left": 31,
-            "top": 249,
+            "top": 260,
             "width": 100,
             "height": 80,
             "fontFamily": "Museo, Arial, sans-serif",
@@ -10368,7 +10368,7 @@
           },
           "fit": {
             "mode": "shrink",
-            "minFontSize": 18,
+            "minFontSize": 16,
             "maxLines": 3,
             "disabled": false,
             "wrap": true,
@@ -10426,8 +10426,8 @@
           "targetId": "roundel-frame",
           "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {
-            "left": 21,
-            "top": 232,
+            "left": 24,
+            "top": 230,
             "width": 115,
             "height": 115,
             "backgroundColor": "rgb(0, 229, 165)",
@@ -10440,8 +10440,8 @@
           "targetId": "roundel-copy",
           "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {
-            "left": 28,
-            "top": 252,
+            "left": 31,
+            "top": 250,
             "width": 100,
             "height": 24,
             "fontFamily": "Museo, Arial, sans-serif",
@@ -10479,8 +10479,8 @@
           "targetId": "roundel-value",
           "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {
-            "left": 18,
-            "top": 278,
+            "left": 21,
+            "top": 276,
             "width": 118,
             "height": 59,
             "fontFamily": "Museo, Arial, sans-serif",

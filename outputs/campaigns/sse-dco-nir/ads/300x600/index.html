@@ -4797,87 +4797,30 @@
     visible.forEach(function(x){var key=rule.axis==='x'?'left':'top';write(x.el,key,(x.item.before[key]+cursor-edge(x.paint,'start',rule.axis))+'px');if(rule.crossAlign&&rule.crossAlign!=='keep'){var cross=rule.axis==='x'?'y':'x',crossKey=cross==='x'?'left':'top',crossStart=cross==='x'?origin.left+rule.area.left:origin.top+rule.area.top,crossLength=cross==='x'?rule.area.width:rule.area.height,fraction=rule.crossAlign==='end'?1:rule.crossAlign==='center'?.5:0;write(x.el,crossKey,(x.item.before[crossKey]+crossStart+crossLength*fraction-edge(x.paint,rule.crossAlign,cross))+'px');}x.item.after=authored(x.el);x.item.targetInk=local(ink(x.el),root);cursor+=(rule.axis==='x'?x.paint.width:x.paint.height)+gap;});
     if(!rule.sequenceCases&&subject&&timing)survivors.forEach(function(x){var field=rule.axis==='x'?'left':'top',delta=solo.get(x.item.targetId)-x.item.after[field];if(Math.abs(delta)<.001)return;var translated=rule.axis==='x'?delta+'px 0px':'0px '+delta+'px';var keyframes=[{offset:0,translate:'0px 0px'},{offset:timing.start/100,translate:'0px 0px',easing:'ease-in-out'},{offset:timing.end/100,translate:translated}];if(timing.returnMode!=='none'){keyframes.push({offset:timing.returnStart/100,translate:translated,easing:timing.returnMode==='hidden'?'steps(1,end)':'ease-in-out'});keyframes.push({offset:timing.returnEnd/100,translate:'0px 0px'});}keyframes.push({offset:1,translate:timing.returnMode==='none'?translated:'0px 0px'});motionPlans.push({id:rule.id,targetId:x.item.targetId,keyframes,durationMs:timing.durationMs,loop:timing.loop});x.item.transition={start:timing.start,end:timing.end,returnStart:timing.returnStart,returnEnd:timing.returnEnd};});
     var sequence=(rule.sequenceCases||[]).find(t=>t.scopes.every(scope=>root.classList.contains(scope)));
-    if(sequence){var areaStart=rule.axis==='x'?origin.left+rule.area.left:origin.top+rule.area.top;var members=visible.map(x=>({id:x.item.targetId,extent:rule.axis==='x'?x.paint.width:x.paint.height,fullStart:edge(x.paint,'start',rule.axis)+(x.item.after[rule.axis==='x'?'left':'top']-x.item.before[rule.axis==='x'?'left':'top'])-areaStart}));motionPlans.push.apply(motionPlans,(function layoutSequencePlans(rule, timing, members) {
-    const length = rule.axis === 'x' ? rule.area.width : rule.area.height;
-    const positions = (absent, previous)=>{
-        const present = members.filter((m)=>!absent.has(m.id)), extent = present.reduce((n, m)=>n + m.extent, 0);
-        let gap = present.length > 1 ? (length - extent) / (present.length - 1) : 0;
-        if (extent > length || present.length > 1 && gap < rule.minGap) {
-            if (rule.overflow === 'authored') throw new Error('Not enough room for a layout animation');
-            gap = rule.minGap;
-        }
-        let cursor = present.length === 1 ? (length - extent) * (rule.single === 'end' ? 1 : rule.single === 'center' ? .5 : 0) : 0;
-        const result = {
-            ...previous
-        };
-        present.forEach((m)=>{
-            result[m.id] = cursor - m.fullStart;
-            cursor += m.extent + gap;
-        });
-        return result;
-    };
-    const absent = new Set(timing.initialAbsent), zero = Object.fromEntries(members.map((m)=>[
-            m.id,
-            0
-        ]));
-    const initial = positions(absent, zero);
-    let current = {
-        ...initial
-    };
-    const frames = Object.fromEntries(members.map((m)=>[
-            m.id,
-            [
-                {
-                    offset: 0,
-                    value: initial[m.id]
-                }
-            ]
-        ]));
-    for (const e of timing.events){
-        if (e.kind !== 'return' && !members.some((m)=>m.id === e.subjectId)) continue;
-        if (e.kind === 'return') {
-            absent.clear();
-            timing.initialAbsent.forEach((id)=>absent.add(id));
-        } else if (e.kind === 'enter') absent.delete(e.subjectId);
-        else absent.add(e.subjectId);
-        const next = e.kind === 'return' ? {
-            ...initial
-        } : positions(absent, current);
-        members.forEach((m)=>{
-            frames[m.id].push({
-                offset: e.start / 100,
-                value: current[m.id],
-                easing: e.hidden ? 'steps(1,end)' : e.easingCss || 'ease-in-out'
-            }, {
-                offset: e.end / 100,
-                value: next[m.id]
-            });
-        });
-        current = next;
-    }
-    return members.flatMap((m)=>{
-        const values = frames[m.id];
-        values.push({
-            offset: 1,
-            value: current[m.id]
-        });
-        if (values.every((f)=>Math.abs(f.value) < .001)) return [];
-        return [
-            {
-                id: rule.id,
-                targetId: m.id,
-                durationMs: timing.durationMs,
-                loop: timing.loop,
-                keyframes: values.map((f)=>({
-                        offset: f.offset,
-                        translate: rule.axis === 'x' ? f.value + 'px 0px' : '0px ' + f.value + 'px',
-                        ...f.easing ? {
-                            easing: f.easing
-                        } : {}
-                    }))
-            }
-        ];
-    });
+    if(sequence){var areaStart=rule.axis==='x'?origin.left+rule.area.left:origin.top+rule.area.top;var members=visible.map(x=>({id:x.item.targetId,extent:rule.axis==='x'?x.paint.width:x.paint.height,fullStart:edge(x.paint,'start',rule.axis)+(x.item.after[rule.axis==='x'?'left':'top']-x.item.before[rule.axis==='x'?'left':'top'])-areaStart}));motionPlans.push.apply(motionPlans,(function layoutSequencePlans(rule, timing, members){
+ const length=rule.axis==='x'?rule.area.width:rule.area.height;
+ const positions=(absent,previous)=>{
+  const present=members.filter(m=>!absent.has(m.id)),extent=present.reduce((n,m)=>n+m.extent,0);
+  let gap=present.length>1?(length-extent)/(present.length-1):0;
+  if(extent>length||present.length>1&&gap<rule.minGap){if(rule.overflow==='authored')throw new Error('Not enough room for a layout animation');gap=rule.minGap;}
+  let cursor=present.length===1?(length-extent)*(rule.single==='end'?1:rule.single==='center'?.5:0):0;
+  const result={...previous};present.forEach(m=>{result[m.id]=cursor-m.fullStart;cursor+=m.extent+gap;});return result;
+ };
+ const absent=new Set(timing.initialAbsent),zero=Object.fromEntries(members.map(m=>[m.id,0]));
+ const initial=positions(absent,zero);let current={...initial};
+ const frames=Object.fromEntries(members.map(m=>[m.id,[{offset:0,value:initial[m.id]}]]));
+ for(const e of timing.events){
+  if(e.kind!=='return'&&!members.some(m=>m.id===e.subjectId))continue;
+  if(e.kind==='return'){absent.clear();timing.initialAbsent.forEach(id=>absent.add(id));}
+  else if(e.kind==='enter')absent.delete(e.subjectId);else absent.add(e.subjectId);
+  const next=e.kind==='return'?{...initial}:positions(absent,current);
+  members.forEach(m=>{frames[m.id].push({offset:e.start/100,value:current[m.id],easing:e.hidden?'steps(1,end)':e.easingCss||'ease-in-out'},{offset:e.end/100,value:next[m.id]});});current=next;
+ }
+ return members.flatMap(m=>{
+  const values=frames[m.id];values.push({offset:1,value:current[m.id]});
+  if(values.every(f=>Math.abs(f.value)<.001))return [];
+  return [{id:rule.id,targetId:m.id,durationMs:timing.durationMs,loop:timing.loop,keyframes:values.map(f=>({offset:f.offset,translate:rule.axis==='x'?f.value+'px 0px':'0px '+f.value+'px',...(f.easing?{easing:f.easing}:{})}))}];
+ });
 })(rule,sequence,members));}
    }else{
     var target=element(rule.targetId),item=diagnostic(rule,rule.targetId,'active');item.before=target?authored(target):null;

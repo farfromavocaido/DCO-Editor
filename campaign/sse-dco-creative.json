@@ -15277,7 +15277,7 @@
           "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
             "left": 528,
-            "top": 80,
+            "top": 85,
             "width": 138,
             "height": 79,
             "fontFamily": "Museo, Arial, sans-serif",
@@ -15449,6 +15449,16 @@
             "left": 387
           },
           "fit": {}
+        },
+        {
+          "targetId": "terms-prices",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "values": {
+            "fontSize": 10
+          },
+          "fit": {
+            "minFontSize": 10
+          }
         }
       ]
     }

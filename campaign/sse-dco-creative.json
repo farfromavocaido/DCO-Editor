@@ -509,7 +509,7 @@
         "tc_units_text": "",
         "cta_type_enum": "rectangle",
         "cta_text": "Find out more",
-        "include_roundel_frame_bool": true,
+        "include_roundel_frame_bool": false,
         "roundel_text_text": "Book your consultation today",
         "roundel_value_text": "",
         "background_image_url_160x600": {
@@ -5915,6 +5915,21 @@
             "frame": "",
             "overflow": "clip"
           }
+        },
+        {
+          "targetId": "terms-prices",
+          "scope": "cta-rect.frames-3.navy-headlines.offers-0.roundel-copy-only.roundel-frame-off.tc-solo",
+          "values": {
+            "fontSize": 8
+          },
+          "fit": {
+            "maxLines": 1,
+            "anchor": {
+              "edge": "end",
+              "position": 84.94023513793945,
+              "referenceHeight": 90
+            }
+          }
         }
       ]
     },
@@ -8492,6 +8507,13 @@
                     "top": 1
                   },
                   "frames": {}
+                },
+                {
+                  "scope": "cta-rect.frames-3.navy-headlines.offers-0.roundel-copy-only.roundel-frame-off.tc-solo",
+                  "offset": {
+                    "top": 1
+                  },
+                  "frames": {}
                 }
               ]
             }
@@ -10139,7 +10161,7 @@
           },
           "props": {
             "left": 9,
-            "top": 597,
+            "top": 580,
             "width": 146,
             "height": 26,
             "fontSize": 5,
@@ -10834,6 +10856,16 @@
             "frame": "",
             "overflow": "clip"
           }
+        }
+      ],
+      "canvasGroups": [
+        {
+          "id": "canvas-group:d7d4563e-82bd-4046-9894-de28bbca716c",
+          "name": "Canvas group",
+          "members": [
+            "logo-act3",
+            "terms-prices"
+          ]
         }
       ]
     },
@@ -13267,6 +13299,19 @@
             "anchor": {
               "edge": "end",
               "position": 590.361438205719,
+              "referenceHeight": 600
+            }
+          }
+        },
+        {
+          "targetId": "terms-prices",
+          "scope": "cta-rect.frames-3.navy-headlines.offers-0.roundel-copy-only.roundel-frame-off.tc-solo",
+          "values": {},
+          "fit": {
+            "maxLines": 10,
+            "anchor": {
+              "edge": "end",
+              "position": 590.3553444557192,
               "referenceHeight": 600
             }
           }
@@ -16401,6 +16446,14 @@
             "frame": "",
             "overflow": "clip"
           }
+        },
+        {
+          "targetId": "terms-prices",
+          "scope": "cta-rect.frames-3.navy-headlines.offers-0.roundel-copy-only.roundel-frame-off.tc-solo",
+          "values": {
+            "fontSize": 10
+          },
+          "fit": {}
         }
       ]
     }

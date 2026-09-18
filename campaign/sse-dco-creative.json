@@ -379,7 +379,7 @@
         "cta_text": "Switch today",
         "include_roundel_frame_bool": true,
         "roundel_text_text": "Saving you up to",
-        "roundel_value_text": "999",
+        "roundel_value_text": "",
         "background_image_url_160x600": {
           "Url": ""
         },
@@ -510,8 +510,8 @@
         "cta_type_enum": "rectangle",
         "cta_text": "Find out more",
         "include_roundel_frame_bool": true,
-        "roundel_text_text": "Book now",
-        "roundel_value_text": "999",
+        "roundel_text_text": "Book your consultation today",
+        "roundel_value_text": "",
         "background_image_url_160x600": {
           "Url": ""
         },
@@ -7737,9 +7737,9 @@
           },
           "props": {
             "color": "rgb(0, 41, 117)",
-            "left": 43,
+            "left": 38,
             "top": 113,
-            "width": 90,
+            "width": 102,
             "height": 55,
             "fontSize": 14,
             "lineHeight": 1.05,
@@ -8031,7 +8031,9 @@
           "values": {
             "fontSize": 24
           },
-          "fit": {}
+          "fit": {
+            "minFontSize": 14
+          }
         }
       ]
     },
@@ -12924,6 +12926,19 @@
           "values": {},
           "fit": {
             "maxLines": 10
+          }
+        },
+        {
+          "targetId": "terms-prices",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "values": {},
+          "fit": {
+            "maxLines": 10,
+            "anchor": {
+              "edge": "end",
+              "position": 590.361438205719,
+              "referenceHeight": 600
+            }
           }
         }
       ]

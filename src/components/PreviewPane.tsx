@@ -257,7 +257,9 @@ export function PreviewPane() {
     const snapOthers = collectSnapBounds(document, size, activeScopes, dragTargetIds);
     let lastPositions = dragTargets.map((item) => ({ targetId: item.targetId, left: item.startLeft, top: item.startTop }));
 
-    const onMove = (moveEvent: PointerEvent) => {
+    let pendingMove: PointerEvent | null = null;
+    let moveFrame = 0;
+    const applyMove = (moveEvent: PointerEvent) => {
       const dx = (moveEvent.clientX - startX) / scale;
       const dy = (moveEvent.clientY - startY) / scale;
       let deltaLeft = Math.round(dx);
@@ -305,13 +307,21 @@ export function PreviewPane() {
       lastPositions = dragTargets.map((item) => {
         const left = Math.round(item.startLeft + deltaLeft);
         const top = Math.round(item.startTop + deltaTop);
-        updateTargetValue(item.targetId, 'left', left, { record: false });
-        updateTargetValue(item.targetId, 'top', top, { record: false });
+        const previous=lastPositions.find(p=>p.targetId===item.targetId);
+        if(previous?.left!==left)updateTargetValue(item.targetId, 'left', left, { record: false });
+        if(previous?.top!==top)updateTargetValue(item.targetId, 'top', top, { record: false });
         return { targetId: item.targetId, left, top };
       });
     };
 
+    const onMove = (event: PointerEvent) => {
+      pendingMove=event;
+      if(!moveFrame)moveFrame=requestAnimationFrame(()=>{moveFrame=0;const latest=pendingMove;pendingMove=null;if(latest)applyMove(latest);});
+    };
     const onUp = () => {
+      if(moveFrame)cancelAnimationFrame(moveFrame);
+      if(pendingMove)applyMove(pendingMove);
+      pendingMove=null;moveFrame=0;
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
       setSnapGuides({ vertical: [], horizontal: [] });

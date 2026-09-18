@@ -81,8 +81,13 @@ export const sharedCreativeFieldReach = (document, source) => {
   return { members, localExceptions };
 };
 
+const ownershipMaterializations = new WeakMap();
+
 /** Pure, idempotent compatibility compiler. Authored definitions are never rewritten. */
 export const materializeCreativeOwnership = (document: any): any => {
+  if(!document||typeof document!=='object')return document;
+  const original=document,signature=JSON.stringify(document),cached=ownershipMaterializations.get(document);
+  if(cached?.signature===signature)return cached.value;
   document = materializeComponentLinks(document);
   if (!getLayoutRules(document).length && !document?.sharedDefinitions?.length && !Object.values(document?.sizes || {}).some((size) => size.localOverrides?.length || size.variantRules?.some((rule) => rule.ownershipGenerated))) return document;
   const next = clone(document);
@@ -138,6 +143,7 @@ export const materializeCreativeOwnership = (document: any): any => {
       });
     }
   }
+  ownershipMaterializations.set(original,{signature,value:next});
   return next;
 };
 

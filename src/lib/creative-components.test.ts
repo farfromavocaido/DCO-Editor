@@ -163,3 +163,11 @@ it('source fitting edits propagate despite incidental feed conditions',()=>{
  expect(effectiveTextFitForTarget(next,'300x250','label',['a','split','incidental']).maxLines).toBe(5);
  expect(effectiveTextFitForTarget(next,'300x600','label',['b','copy']).maxLines).toBe(4);
 });
+it('cached proportional links preserve unrelated edits and invalidate for design changes',()=>{
+ const d:any=fixture();const linked=createComponentLink(d,{id:'geometry-cache',name:'Proportions',componentId:'component:badge',source:{size:'300x250',scope:'a'},destinations:[{size:'300x600',scope:'b'}],sizing:'destination',geometryOnly:true});
+ const first=materializeComponentLinks(linked);const next=structuredClone(linked);next.campaign={name:'Unrelated metadata edit'};
+ expect(materializeComponentLinks(next).campaign.name).toBe('Unrelated metadata edit');
+ expect(findCreativeTarget(next,'300x600','label',['b','split']).values).toEqual(findCreativeTarget(first,'300x600','label',['b','split']).values);
+ next.sizes['300x250'].layers[1].base.fontSize=23;
+ expect(findCreativeTarget(next,'300x600','label',['b','split']).values.fontSize).toBe(46);
+});

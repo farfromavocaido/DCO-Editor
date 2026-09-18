@@ -5,10 +5,10 @@ import {migrateTextFitting} from '../src/lib/text-fit-migration';
 import {createComponentLink,transferCreativeComponent} from '../src/lib/creative-components';
 import {findCreativeTarget} from '../src/lib/creative-model';
 import {validateCreativeDocument} from '../src/server/creative-document';
-const apply=process.argv.includes('--apply');const reports=[];const sourceDir=process.argv.find(arg=>arg.startsWith('--source-dir='))?.slice('--source-dir='.length)||'campaign';
+const apply=process.argv.includes('--apply');const allText=process.argv.includes('--all-text');const reports=[];const sourceDir=process.argv.find(arg=>arg.startsWith('--source-dir='))?.slice('--source-dir='.length)||'campaign';
 for(const c of CAMPAIGNS.filter(c=>c.id!=='product-demo')){
- const path='campaign/'+c.file,original=JSON.parse(fs.readFileSync(sourceDir+'/'+c.file,'utf8'));if(original.campaign.textFitVersion===2){console.log(c.id,'already migrated');continue;}
- const result=migrateTextFitting(original);let d=result.document;
+ const path='campaign/'+c.file,original=JSON.parse(fs.readFileSync(sourceDir+'/'+c.file,'utf8'));if((allText?original.campaign.textFitVersion:original.campaign.roundelFitVersion)===2){console.log(c.id,'already migrated');continue;}
+ const result=migrateTextFitting(original,{targetIds:allText?null:['roundel-copy','roundel-value']});let d=result.document;
  // Explicit campaign authoring, not runtime item-specific policy.
  // All roundels start from MPU offer-1 internal geometry, with separate source
  // versions for awareness and offer campaigns. Exterior styles remain local.

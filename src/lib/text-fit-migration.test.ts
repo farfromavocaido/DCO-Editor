@@ -12,3 +12,10 @@ test('conversion is explicit, scoped, preserves artwork and corrects reversed bo
  expect(effectiveTextFitForTarget(next,'small','heading',['b'])).toMatchObject({frame:'fixed',allowShrink:false,maxLines:3});
  expect(findCreativeTarget(next,'small','heading',['b']).values.fontSize).toBe(25);
 });
+test('roundel-only conversion leaves other text and its fitting untouched',()=>{
+ const d:any=fixture();d.sizes.small.layers.push({id:'roundel-copy',kind:'text',base:{width:60,height:40,fontSize:18},fit:{mode:'shrink',minFontSize:10},clips:[]});
+ const next=migrateTextFitting(d,{targetIds:['roundel-copy','roundel-value']}).document;
+ expect(next.sizes.small.layers[0]).toEqual(d.sizes.small.layers[0]);expect(next.sizes.small.variantRules).toEqual(d.sizes.small.variantRules);
+ expect(next.sizes.small.localOverrides.every(o=>o.targetId==='roundel-copy')).toBe(true);
+ expect(next.campaign.textFitVersion).toBeUndefined();expect(next.campaign.roundelFitVersion).toBe(2);
+});

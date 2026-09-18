@@ -3,7 +3,7 @@
 Checkpoint: `checkpoint/before-text-fit-migration-20260917` (`f4225eb`).
 Independent file backup: `/Users/aidancoughlan/.codex/backups/text-fit-migration-20260917-203710/campaign`.
 
-The four SSE campaigns were explicitly converted. Nothing is migrated on load or save; the product demo already used explicit frame settings. Existing exported packages were not regenerated or published.
+**Current scope: promotional roundels only.** Offers, headlines, legal text and CTAs have been restored to the pre-migration checkpoint. The broader conversion below is retained as a future review plan, not the current state. The four SSE campaigns’ roundels were explicitly converted. Nothing is migrated on load or save; the product demo already used explicit frame settings. Existing exported packages were not regenerated or published.
 
 ## Roundels: edit the source first
 
@@ -22,7 +22,7 @@ Text-only roundels use a safe frame inset 15% from each side of the circle as th
 
 Review the four source arrangements per campaign first. Then check the six format sizes, especially narrow banners where the local outer roundel size can make the scaled minimum too small. Detach an exception if the common proportions do not work for it.
 
-## Other text: six-format checklist per campaign
+## Deferred — other text (restored; no conversion currently applied)
 
 | Text | Conversion | Review |
 |---|---|---|
@@ -38,6 +38,6 @@ Content-height text now clips to its line budget when **Clip** is chosen. **Visi
 
 ## Rollback and application
 
-Review using the editor, then Save normally. Do not restore the whole checkpoint over subsequent work: use the checkpoint/backup to compare or selectively restore the campaign files if abandoning this experiment. `scripts/migrate-text-fitting.ts` writes a dry run to `output/text-fit-migration/` by default; `--apply` is the explicit write step, and already-converted campaigns are skipped.
+Review using the editor, then Save normally. Do not restore the whole checkpoint over subsequent work: use the checkpoint/backup to compare or selectively restore the campaign files if abandoning this experiment. `scripts/migrate-text-fitting.ts` writes a dry run to `output/text-fit-migration/` by default; `--apply` explicitly writes roundel-only conversion; already-converted roundels are skipped. `--all-text` is a separate explicit opt-in for a future full conversion.
 
 The old fitting runtime remains a compatibility reader for unmigrated documents and fixed test fixtures. The converted campaign controls offer Fixed frame and Content height; they cannot be switched back to legacy via the selector.

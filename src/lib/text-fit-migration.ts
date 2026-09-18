@@ -7,7 +7,7 @@ import {resolveTextFitRule} from './text-fit';
 import {campaignVariantModel,campaignScopes,campaignConditionIsValid} from './campaign-variants';
 
 /** Explicit one-time migration, never called during validation/load/save. */
-export function migrateTextFitting(document){
+export function migrateTextFitting(document,{targetIds=null}={}){
  const next=structuredClone(document),source=materializeCreativeOwnership(document),model=campaignVariantModel(document),report=[];
  const dims=model.dimensions.filter(d=>!d.derived||d.id==='roundelMode');let rows=[{}];for(const dim of dims)rows=rows.flatMap(row=>dim.options.map(o=>({...row,[dim.field]:o.value})));
  const states=[...new Map(rows.map(row=>{const s=campaignScopes(document,row).sort();return [s.join('.'),s];})).values()].filter(s=>campaignConditionIsValid(document,s));
@@ -17,8 +17,8 @@ export function migrateTextFitting(document){
   const output=next.sizes[size];
   // Snapshot effective settings first; explicit rules below replace all old fit
   // sources, while leaving geometry, copy, timing and property ownership intact.
-  for(const collection of ['layers','classRules','variantRules','localOverrides'])for(const item of output[collection]||[])delete item.fit;
-  for(const id of targets){const groups=new Map();
+  for(const collection of ['layers','classRules','variantRules','localOverrides'])for(const item of output[collection]||[])if(!targetIds||targetIds.includes(item.targetId||item.layerId||item.cssClass||item.id))delete item.fit;
+  for(const id of targets.filter(id=>!targetIds||targetIds.includes(id))){const groups=new Map();
    for(const scopes of states){
     const target=findMaterializedCreativeTarget(source,size,id,scopes);if(!target)continue;
     const specific=rules.find(r=>r.targetId===id),base=rules.find(r=>!r.targetId&&r.cssClass===target.cssClass);
@@ -49,6 +49,6 @@ export function migrateTextFitting(document){
    }
   }
  }
- for(const definition of next.sharedDefinitions||[]){delete definition.fit;for(const v of Object.values(definition.perSize||{}))delete v.fit;}
- next.campaign={...next.campaign,textFitVersion:2};return {document:next,report};
+ for(const definition of targetIds?[]:next.sharedDefinitions||[]){delete definition.fit;for(const v of Object.values(definition.perSize||{}))delete v.fit;}
+ next.campaign={...next.campaign,...(targetIds?{roundelFitVersion:2}:{textFitVersion:2})};return {document:next,report};
 }

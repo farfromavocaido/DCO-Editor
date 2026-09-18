@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { effectiveTextFitForTarget } from './text-fit-rules';
 import {materializeCreativeOwnership} from './creative-ownership';
-import { findCreativeTarget,findMaterializedCreativeTarget } from './creative-model';
+import { findCreativeTarget,findMaterializedCreativeTarget,editableTargetsForLayer } from './creative-model';
 import { getTargetCanvasBounds } from './canvas-alignment';
 import { campaignVariantModel, campaignConditionIsValid } from './campaign-variants';
 
@@ -16,7 +16,8 @@ const legacyDefinitions: CreativeComponent[] = [
   {id:'component:cta',name:'CTA',parts:[{role:'button',targetId:'cta'}],frameTargetId:'cta',resize:'frame',stateDimensions:[]},
 ];
 const definitions = document => document?.componentDefinitions ?? (document?.variantModel ? [] : legacyDefinitions);
-export const creativeComponents = (document,size):CreativeComponent[] => definitions(document).map(def=>({...def,...def.perSize?.[size]})).filter(def=>def.parts.some(part=>findCreativeTarget(document,size,part.targetId)));
+const hasComponentTarget=(document,size,id)=>{const [parent,child]=id.split('::'),layer=document?.sizes?.[size]?.layers?.find(l=>l.id===parent);return !!layer&&(!child||editableTargetsForLayer(layer).some(t=>t.id===id));};
+export const creativeComponents = (document,size):CreativeComponent[] => definitions(document).map(def=>({...def,...def.perSize?.[size]})).filter(def=>def.parts.some(part=>hasComponentTarget(document,size,part.targetId)));
 export const findCreativeComponent = (document,size,id) => creativeComponents(document,size).find(component=>component.id===id) || null;
 export const componentForTarget = (document,size,targetId) => creativeComponents(document,size).find(component=>component.id===targetId || component.parts.some(part=>(part.targetId===targetId || String(targetId).startsWith(`${part.targetId}::`)))) || null;
 export const componentBounds = (document,size,componentId,scopes:string[]=[]) => {
@@ -45,7 +46,7 @@ export const validateCreativeComponents = document => {
         roles.add(part.role);targets.add(part.targetId);
       }
       if (resolved.frameTargetId&&!targets.has(resolved.frameTargetId)) throw new Error('Component frame must be a part');
-      const found=resolved.parts.filter(part=>findCreativeTarget(document,size,part.targetId));
+      const found=resolved.parts.filter(part=>hasComponentTarget(document,size,part.targetId));
       if(found.length && found.length!==resolved.parts.length) throw new Error(`Incomplete component ${component.id} in ${size}`);
     }
   }
@@ -209,6 +210,18 @@ export const componentLinkForTarget = (document,size,targetId,scopes=[]) => {
   return component && (document.componentLinks||[]).find(link=>link.componentId===component.id && link.destinations.some(member=>memberMatches(member,size,scopes))) || null;
 };
 const componentMaterializations = new WeakMap();
+const geometryProjections = new Map();
+function geometryProjectionKey(document,link){
+ const defs=definitions(document),def=defs.find(d=>d.id===link.componentId);if(!link.geometryOnly||!def)return null;
+ const ids=new Set([...def.parts,...Object.values(def.perSize||{}).flatMap(v=>v.parts||[])].map(p=>p.targetId));
+ if([...ids].some(id=>id.includes('::')))return null;
+ const css=new Set([...ids]);for(const s of Object.values(document.sizes))for(const l of s.layers)if(ids.has(l.id)&&l.base?.cssClass)css.add(l.base.cssClass);
+ const relevant=r=>ids.has(r.targetId)||ids.has(r.layerId)||css.has(r.cssClass);
+ const sizes=Object.fromEntries(Object.entries(document.sizes).map(([size,s])=>[size,{canvas:s.canvas,layers:s.layers.filter(l=>ids.has(l.id)),classRules:(s.classRules||[]).filter(relevant),variantRules:(s.variantRules||[]).filter(relevant),localOverrides:(s.localOverrides||[]).filter(relevant)}]));
+ if(Object.values(sizes).some(s=>[...ids].some(id=>!s.layers.some(l=>l.id===id))))return null;
+ const signature=JSON.stringify({link,defs,variantModel:document.variantModel,campaignState:document.campaignState,sizes,sharedDefinitions:(document.sharedDefinitions||[]).filter(d=>d.members.some(m=>ids.has(m.targetId))),layoutRules:(document.layoutRules||[]).filter(r=>r.targets.some(m=>ids.has(m.targetId)))});
+ return {signature,ids};
+}
 export const materializeComponentLinks = document => {
   if(!document?.componentLinks?.length)return document;
   const signature=JSON.stringify(document);
@@ -216,7 +229,13 @@ export const materializeComponentLinks = document => {
   if(cached?.signature===signature)return cached.value;
   validateComponentLinks(document);
   let next={...document,componentLinks:[]};
-  for(const link of document.componentLinks)next=transferCreativeComponent(next,{componentId:link.componentId,sourceSize:link.source.size,sourceScopes:tokens(link.source.scope),destinations:link.destinations,sizing:link.sizing,placements:link.placements||{},geometryOnly:link.geometryOnly===true});
+  for(const link of document.componentLinks){
+    const key=geometryProjectionKey(next,link),projection=key&&geometryProjections.get(key.signature);
+    if(projection){next={...next,sizes:Object.fromEntries(Object.entries(next.sizes).map(([size,s])=>[size,{...s,localOverrides:[...(s.localOverrides||[]).filter(l=>!key.ids.has(l.targetId)),...structuredClone(projection[size])]}]))};}
+    else {next=transferCreativeComponent(next,{componentId:link.componentId,sourceSize:link.source.size,sourceScopes:tokens(link.source.scope),destinations:link.destinations,sizing:link.sizing,placements:link.placements||{},geometryOnly:link.geometryOnly===true});
+      if(key){if(geometryProjections.size>=32)geometryProjections.delete(geometryProjections.keys().next().value);geometryProjections.set(key.signature,Object.fromEntries(Object.entries(next.sizes).map(([size,s])=>[size,structuredClone((s.localOverrides||[]).filter(l=>key.ids.has(l.targetId)))])));}
+    }
+  }
   componentMaterializations.set(document,{signature,value:next});
   return next;
 };
@@ -252,7 +271,7 @@ export const unlinkComponent = (document,linkId,destination) => {
 /** Transform the semantic unit, including every hidden internal arrangement. */
 export const updateComponentBounds = (document,size,componentId,scopes,bounds) => {
   const scope=[...new Set(scopes)].sort().join('.');
-  return transferCreativeComponent(document,{componentId,sourceSize:size,sourceScopes:scopes,destinations:[{size,scope}],sizing:'destination',preserveLinks:true,placements:{[`${size}/${scope}`]:bounds}});
+  return transferCreativeComponent(document,{componentId,sourceSize:size,sourceScopes:scopes,destinations:[{size,scope}],sizing:'destination',preserveLinks:true,geometryOnly:(document.componentLinks||[]).some(l=>l.componentId===componentId&&l.geometryOnly),placements:{[`${size}/${scope}`]:bounds}});
 };
 export const moveCreativeComponent = updateComponentBounds;
 

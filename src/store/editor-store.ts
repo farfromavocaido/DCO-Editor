@@ -436,7 +436,7 @@ export const useEditorStore = create<any>((set, get) => ({
     });
     set({
       ...next,
-      selectedKeyframe: null,
+      selectedKeyframe: null,selectedTransition:null,
       selectedLayoutRuleId: null,
       lastSelectionClickKey: '',
     });
@@ -716,10 +716,16 @@ export const useEditorStore = create<any>((set, get) => ({
     get().selectLayer(layerId);
   },
 
+  motionView: 'transitions',
+  selectedTransition: null,
   selectedKeyframe: null,
+  selectTransition: (layerId,clipId,id,percent) => {
+    get().selectClip(layerId,clipId);
+    set({selectedTransition:{layerId,clipId,id},isPlaying:false,motionView:'transitions'});get().setPercent(percent);
+  },
   selectKeyframe: (layerId,clipId,index,percent) => {
     get().selectClip(layerId,clipId);
-    set({selectedKeyframe:{layerId,clipId,index},isPlaying:false});get().setPercent(percent);
+    set({selectedKeyframe:{layerId,clipId,index},selectedTransition:null,isPlaying:false,motionView:'keyframes'});get().setPercent(percent);
   },
   editSelectedKeyframe: (patch) => {
     const s=get(),selection=s.selectedKeyframe;if(!selection)return;
@@ -750,7 +756,7 @@ export const useEditorStore = create<any>((set, get) => ({
   },
   selectClip: (layerId, clipId) => {
     set({
-      selectedKeyframe:null,
+      selectedKeyframe:null,selectedTransition:null,
       selectedLayerId: layerId,
       selectedTargetId: layerId,
       selectedTargetIds: [layerId],
@@ -763,7 +769,7 @@ export const useEditorStore = create<any>((set, get) => ({
 
   clearCanvasSelection: () => {
     set({
-      selectedKeyframe:null,
+      selectedKeyframe:null,selectedTransition:null,
       selectedLayoutRuleId: null,
       selectedLayerId: '',
       selectedTargetId: '',
@@ -1684,7 +1690,7 @@ export const useEditorStore = create<any>((set, get) => ({
   loadSize: async (size) => {
     get().syncControlsFromFeedRow(selectSelectedFeedRow(get()));
     set({
-      selectedKeyframe:null,
+      selectedKeyframe:null,selectedTransition:null,
       size,
       history: [],
       historyIndex: -1,

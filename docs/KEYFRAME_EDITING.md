@@ -1,5 +1,11 @@
 # Editing motion in the timeline
 
+The default **Transitions** view shows changing spans as ranges (Move, Fade in, Fade out, Resize), leaving holds quiet. Click a range for **Starts at**, **Duration**, **From / To** and **Easing**. Drag its body to move it or its endpoints to change its interval. Edits use the existing keyframes and refuse to cross neighbouring frames. Adjacent transitions share their boundary keyframe; editing that value also changes the adjoining transition's endpoint. Use **Keyframes** for detailed or complex sequences.
+
+The sticky scrub ruler has second and 5% ticks, with five-second and quarter-ad labels emphasised. Minor labels hide on narrow tracks. **Beats** shows/hides timing markers; click a marker to seek. **Edit beats…** renames a beat or adds one at a chosen time (initially the playhead). Names are display labels over stable IDs, preserving all animation and layout references. New beats are campaign-wide timing references and appear in the keyframe **Timing reference** picker. Save the campaign to retain beat edits; Undo restores them.
+
+**Animation sequence** selects one clip on the layer, which may contain several transitions. Its overall start and duration apply to the whole sequence. **Sequence settings & sharing** includes its editable name. Offset X/Y are movement from layout position; their **Units** selector controls pixels/ad%/parent%. Unanimated absolute layout fields show **Use layout**, not a fabricated zero. The final keyframe has no outgoing easing control.
+
 Click a timeline diamond to select its keyframe. The Motion section opens and shows that frame's time, offsets, opacity, scale and easing together. Clips which animate absolute layout also expose X/Y/width/height. Use the keyframe buttons in the inspector to jump between frames.
 
 - Drag a diamond to retime it between its neighbours. Its marker previews the new time during the drag; releasing commits one undoable change. Arrow keys nudge its time; Shift uses a larger nudge.

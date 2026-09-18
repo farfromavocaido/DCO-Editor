@@ -30,9 +30,8 @@ export function FontManager({ document, campaignId, onChange }: Props) {
     } catch (error) { setMessage(error instanceof Error ? error.message : String(error)); } finally { setBusy(false); }
   };
   const fieldStyle = { width: '100%', minHeight: 30, marginTop: 4 };
-  return <section aria-label="Campaign fonts" style={{ padding: 12, fontSize: 12 }}>
-    <h3 style={{ margin: '0 0 10px' }}>Fonts</h3>
-    <p>Choose a local font for preview and outlines, and the identical hosted file for CDN delivery.</p>
+  return <section className="font-manager" aria-label="Campaign fonts" style={{ padding: 12, fontSize: 12 }}>
+    <span className="font-help" title="Use identical local and hosted font files for preview, outlines and CDN delivery." aria-label="Font file guidance">Font files ⓘ</span>
     {faces.map(face => <button type="button" key={face.id} style={{ display: 'block', width: '100%', textAlign: 'left', padding: 8, marginBottom: 6 }} onClick={() => { setDraft({ ...face }); setMessage(''); }}>{face.family} · {face.weight} · {face.style}</button>)}
     <button type="button" onClick={() => { setDraft({ id: `font-${crypto.randomUUID()}`, family: '', weight: 400, style: 'normal', asset: '' }); setMessage(''); }}>Add font face</button>
     {draft && <div style={{ display: 'grid', gap: 10, marginTop: 12 }}>

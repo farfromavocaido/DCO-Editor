@@ -3,6 +3,10 @@
 
 import { useEffect, useMemo, useState, useRef } from 'react';
 
+import {TimelineTransition} from './TimelineTransition';
+import {TimelineBeats} from './TimelineBeats';
+import {motionTransitions} from '@/lib/motion-transitions';
+import {beatLabel} from '@/lib/timeline-beats';
 import {editableKeyframes,retimeClip} from '@/lib/keyframe-editing';
 import { EditorIcon } from '@/components/EditorIcon';
 import { animationFamilyForLayer, timelineSpanForClip } from '@/lib/animation-intents';
@@ -64,15 +68,17 @@ function TimelineClipBar({
   const document = useEditorStore(s => s.creativeDocument);
   const size = useEditorStore(s => s.size);
   const canvas = document?.sizes?.[size]?.canvas;
-  const context = { canvas, parent: canvas, durationS: document?.clock?.durationS };
+  const context = useMemo(()=>({ canvas, parent: canvas, durationS: document?.clock?.durationS }),[canvas,document?.clock?.durationS]);
+  const transitions = useMemo(()=>motionTransitions(clip,beats,context),[clip,beats,context]);
   const span = timelineSpanForClip(clip, beats, context.durationS);
   const start = span.start;
   const end = span.end;
   const duration = Math.max(1, end - start);
-  const keyframes = editableKeyframes(clip, beats, context).map(k=>({...k.frame,at:k.at,editorIndex:k.index})).filter((keyframe) => (
+  const keyframes = useMemo(()=>editableKeyframes(clip, beats, context).map(k=>({...k.frame,at:k.at,editorIndex:k.index})).filter((keyframe) => (
     keyframe.at >= start - 0.05 && keyframe.at <= end + 0.05
-  ));
+  )),[clip,beats,context,start,end]);
   const selectedFrame=useEditorStore(s=>s.selectedKeyframe);
+  const view=useEditorStore(s=>s.motionView);
   const dragged=useRef(false);
   const [dragPreview,setDragPreview]=useState(null);
   const [clipPreview,setClipPreview]=useState(null);
@@ -136,6 +142,7 @@ function TimelineClipBar({
     const cancel=()=>{cleanup();setPercent(start);};window.addEventListener('pointermove',move);window.addEventListener('pointerup',up,{once:true});window.addEventListener('pointercancel',cancel,{once:true});
   };
 
+  if(view!=='keyframes')return <>{transitions.map(t=><TimelineTransition key={`${clip.id}:${t.id}`} layer={layer} clip={clip} transition={t} beats={beats} context={context}/>)}</>;
   return (
     <div
       key={clip.id}
@@ -350,12 +357,14 @@ export function TimelinePanel() {
   const selectClip = useEditorStore((s) => s.selectClip);
   const updateClipValue = useEditorStore((s) => s.updateCreativeLayerClipValue);
   const moveLayerZ = useEditorStore((s) => s.moveLayerZ);
+  const [showBeats,setShowBeats]=useState(false),[manageBeats,setManageBeats]=useState(false);
+  const motionView=useEditorStore(s=>s.motionView);
   const [draggingLayerId, setDraggingLayerId] = useState('');
   const [dropTargetLayerId, setDropTargetLayerId] = useState('');
 
   const sizeCreative = currentSizeCreative(document, size);
   const activeScopes = useMemo(() => campaignScopes(document, previewRow), [document, previewRow]);
-  const beats = beatsForScopes(document, activeScopes);
+  const beats = useMemo(()=>beatsForScopes(document, activeScopes),[document,activeScopes]);
   const frameScope = activeFrameScope(activeScopes);
   const durationS = Number(document?.clock?.durationS) || 15;
   const seconds = (percent / 100) * durationS;
@@ -485,33 +494,28 @@ export function TimelinePanel() {
           <span className="panel-kicker">Timeline</span>
           <PlayheadReadout seconds={seconds} percent={percent} />
         </div>
-        <div className="timeline-legend" aria-label="Timeline mark legend">
+        <div className="timeline-controls">
+          <button aria-pressed={motionView==='keyframes'} onClick={()=>useEditorStore.setState({motionView:motionView==='keyframes'?'transitions':'keyframes'})} title="Switch between transition ranges and individual keyframes">Keyframes</button>
+          <button aria-pressed={showBeats} onClick={()=>setShowBeats(!showBeats)}>Beats</button>
+          <button onClick={()=>setManageBeats(!manageBeats)} title="Rename beats or add one at the playhead">Edit beats…</button>
+        </div>
+        <div className="timeline-legend" hidden aria-label="Timeline mark legend">
           <span><i className="legend-mark legend-edge" /> Edge</span>
           <span><i className="legend-mark legend-transform" /> Move</span>
           <span><i className="legend-mark legend-opacity" /> Fade</span>
           <span><i className="legend-mark legend-scale" /> Scale</span>
         </div>
       </div>
+      {manageBeats&&document?.clock&&<TimelineBeats document={document} beats={beats} percent={percent} onClose={()=>setManageBeats(false)}/>}
       <div className="timeline-body"><div className="timeline-content">
-        <div className="tl-grid-row timeline-scrub-row"><span className="timeline-row-label">Scrub</span><div className="timeline-tracks-column"><div className="timeline-scrubber" role="slider" tabIndex={0} aria-label="Timeline scrubber" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent} onPointerDown={onTrackScrubPointerDown} onKeyDown={event=>{let at=percent;if(event.key==='Home')at=0;else if(event.key==='End')at=100;else if(event.key==='ArrowLeft')at-=event.shiftKey?5:1;else if(event.key==='ArrowRight')at+=event.shiftKey?5:1;else return;event.preventDefault();setPercent(Math.max(0,Math.min(100,at)));}}><span style={{left:`${percent}%`}}/></div></div></div>
-        <div className="tl-grid-row timeline-ruler-row">
-          <div className="timeline-row-label timeline-ruler-spacer">Timeline</div>
-          <div className="timeline-tracks-column">
-            <div
-              className="timeline-ruler"
-              onPointerDown={onTrackScrubPointerDown}
-              role="slider"
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={percent}
-              aria-label="Timeline ruler"
-            >
-              {[0, 25, 50, 75, 100].map((tick) => (
-                <span key={tick} style={{ left: `${tick}%` }}>{tick}%</span>
-              ))}
-            </div>
+        <div className="tl-grid-row timeline-scrub-row"><span className="timeline-row-label timeline-ruler-labels"><span>Seconds</span><span>Percent</span></span><div className="timeline-tracks-column">
+          <div className="timeline-scrubber timeline-dual-ruler" role="slider" tabIndex={0} aria-label="Timeline scrubber" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent} onPointerDown={onTrackScrubPointerDown} onKeyDown={event=>{let at=percent;if(event.key==='Home')at=0;else if(event.key==='End')at=100;else if(event.key==='ArrowLeft')at-=event.shiftKey?5:1;else if(event.key==='ArrowRight')at+=event.shiftKey?5:1;else return;event.preventDefault();setPercent(Math.max(0,Math.min(100,at)));}}>
+            {Array.from({length:Math.floor(durationS)+1},(_,i)=>i).map(second=><i key={`s${second}`} className={`ruler-tick ruler-second ${second%5===0?'is-major':''}`} style={{left:`${second/durationS*100}%`}}><b>{second}s</b></i>)}
+            {Array.from({length:21},(_,i)=>i*5).map(tick=><i key={`p${tick}`} className={`ruler-tick ruler-percent ${tick%25===0?'is-major':''}`} style={{left:`${tick}%`}}><b>{tick}%</b></i>)}
+            <span className="scrub-thumb" style={{left:`${percent}%`}}/>
           </div>
-        </div>
+          {showBeats&&<div className="timeline-beat-track">{Object.entries(beats).filter(([,at])=>Number.isFinite(at)&&at>=0&&at<=100).map(([id,at])=><button key={id} className="timeline-beat-marker" style={{left:`${at}%`}} title={`${beatLabel(document,id)} · ${(at*durationS/100).toFixed(2)}s`} aria-label={`Seek to beat ${beatLabel(document,id)}`} onClick={()=>setPercent(at)}>▾</button>)}</div>}
+        </div></div>
         <div className="timeline-playhead-layer tl-grid-row" aria-hidden="true">
           <div />
           <div className="timeline-tracks-column">

@@ -130,7 +130,7 @@ export function CreativeInspector() {
   const fitResults = useEditorStore((s) => s.fitResults);
   const motionEditMode=useEditorStore(s=>s.motionEditMode||'path');
   const playhead=useEditorStore(s=>s.percent);
-  const selectedKeyframe=useEditorStore(s=>s.selectedKeyframe);
+  const selectedKeyframe=useEditorStore(s=>s.selectedKeyframe || s.selectedTransition);
   useEffect(()=>{if(selectedKeyframe)setOpenSections(previous=>new Set([...previous,'animation']));},[selectedKeyframe]);
   const layoutDiagnostics=useEditorStore(s=>s.layoutDiagnostics);
   const selectLayoutRule=useEditorStore(s=>s.selectLayoutRule);

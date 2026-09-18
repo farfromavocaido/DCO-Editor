@@ -2,8 +2,7 @@
   "version": 1,
   "campaign": {
     "id": "sse-dco",
-    "name": "SSE DCO",
-    "roundelFitVersion": 2
+    "name": "SSE DCO"
   },
   "fonts": [
     {
@@ -371,7 +370,7 @@
         "offer1_sub_text": "OFF ELECTRICITY*",
         "offer2_value_text": "30%",
         "offer2_sub_text": "OFF GAS*",
-        "offer3_value_text": "\u20ac125",
+        "offer3_value_text": "€125",
         "offer3_sub_text": "OFF YOUR FIRST BILL*",
         "tc_type_enum": "tcs_units",
         "tc_terms_text": "*T&Cs apply",
@@ -936,7 +935,12 @@
                 "fade_pct": 2
               }
             }
-          ]
+          ],
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 6,
+            "maxLines": 1
+          }
         },
         {
           "id": "roundel-value",
@@ -974,7 +978,11 @@
                 "fade_pct": 2
               }
             }
-          ]
+          ],
+          "fit": {
+            "minFontSize": 16,
+            "maxLines": 1
+          }
         },
         {
           "id": "headline-act2",
@@ -2155,7 +2163,12 @@
             "display": "flex",
             "alignItems": "center"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
         },
         {
           "id": "roundel-split|roundel-copy",
@@ -2741,7 +2754,12 @@
             "display": "flex",
             "alignItems": "center"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
         },
         {
           "id": "offers-0.roundel-copy-only|roundel-value",
@@ -2887,7 +2905,8 @@
             "top": -15,
             "width": 85,
             "height": 85
-          }
+          },
+          "fit": {}
         },
         {
           "targetId": "roundel-copy",
@@ -2899,6 +2918,11 @@
             "height": 11,
             "fontSize": 12,
             "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 6,
+            "maxLines": 1
           }
         },
         {
@@ -2911,6 +2935,11 @@
             "height": 48,
             "fontSize": 10,
             "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
           }
         },
         {
@@ -2923,6 +2952,10 @@
             "height": 30,
             "fontSize": 28,
             "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 16,
+            "maxLines": 1
           }
         },
         {
@@ -2935,6 +2968,10 @@
             "height": 18,
             "fontSize": 15,
             "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 16,
+            "maxLines": 1
           }
         },
         {
@@ -2945,7 +2982,8 @@
             "top": -15,
             "width": 85,
             "height": 85
-          }
+          },
+          "fit": {}
         },
         {
           "targetId": "roundel-copy",
@@ -2957,6 +2995,11 @@
             "height": 11,
             "fontSize": 12,
             "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 6,
+            "maxLines": 1
           }
         },
         {
@@ -2969,6 +3012,11 @@
             "height": 48,
             "fontSize": 10,
             "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
           }
         },
         {
@@ -2981,6 +3029,10 @@
             "height": 30,
             "fontSize": 28,
             "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 16,
+            "maxLines": 1
           }
         },
         {
@@ -2993,6 +3045,10 @@
             "height": 18,
             "fontSize": 15,
             "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 16,
+            "maxLines": 1
           }
         },
         {
@@ -3006,7 +3062,8 @@
             "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
             "overflow": "hidden"
-          }
+          },
+          "fit": {}
         },
         {
           "targetId": "roundel-copy",
@@ -3026,6 +3083,25 @@
             "justifyContent": "center",
             "display": "flex",
             "alignItems": "center"
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3,
+            "disabled": false,
+            "wrap": true,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
           }
         },
         {
@@ -3043,6 +3119,25 @@
             "color": "rgb(255, 255, 255)",
             "textAlign": "center",
             "whiteSpace": "nowrap"
+          },
+          "fit": {
+            "minFontSize": 16,
+            "maxLines": 1,
+            "disabled": false,
+            "mode": "shrink",
+            "wrap": false,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
           }
         },
         {
@@ -3056,7 +3151,8 @@
             "backgroundColor": "rgb(0, 41, 117)",
             "borderRadius": "50%",
             "overflow": "hidden"
-          }
+          },
+          "fit": {}
         },
         {
           "targetId": "roundel-copy",
@@ -3076,6 +3172,25 @@
             "justifyContent": "center",
             "display": "flex",
             "alignItems": "flex-end"
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 6,
+            "maxLines": 1,
+            "disabled": false,
+            "wrap": false,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
           }
         },
         {
@@ -3096,255 +3211,25 @@
             "display": "flex",
             "alignItems": "flex-start",
             "justifyContent": "center"
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-frame-off",
-          "values": {
-            "fontSize": 18
           },
           "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 10,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-copy-only.white-headlines",
-          "values": {
-            "fontSize": 18
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 10,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-copy-only.tc-prices",
-          "values": {
-            "fontSize": 18
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 10,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-1.roundel-copy-only",
-          "values": {
-            "fontSize": 18
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 10,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-2.roundel-copy-only",
-          "values": {
-            "fontSize": 18
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 10,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-3.roundel-copy-only",
-          "values": {
-            "fontSize": 18
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 10,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "navy-headlines.roundel-copy-only.roundel-frame-on.tc-solo",
-          "values": {
-            "fontSize": 18
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 12,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-split",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 6,
-            "minFontSizeRatio": 0,
-            "maxLines": 1,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "roundel-frame-off",
-          "values": {
-            "fontSize": 16
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": false,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 15,
-            "minFontSizeRatio": 0,
-            "maxLines": 1,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "roundel-copy-only",
-          "values": {
-            "fontSize": 16
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": false,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 15,
-            "minFontSizeRatio": 0,
-            "maxLines": 1,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "roundel-split",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": false,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
             "minFontSize": 16,
-            "minFontSizeRatio": 0,
             "maxLines": 1,
+            "disabled": false,
+            "mode": "shrink",
+            "wrap": false,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
             "tracking": {
               "minEm": 0
             },
             "align": "normal",
-            "disabled": false
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
           }
         }
       ]
@@ -3561,7 +3446,7 @@
             },
             {
               "id": "bluewave-entry-offers-0",
-              "label": "Bluewave stage1\u2194stage2 (offers-0)",
+              "label": "Bluewave stage1↔stage2 (offers-0)",
               "preset": "custom",
               "scopes": [
                 "offers-0"
@@ -3741,7 +3626,12 @@
                 "fade_pct": 2
               }
             }
-          ]
+          ],
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 10,
+            "maxLines": 1
+          }
         },
         {
           "id": "roundel-value",
@@ -3779,7 +3669,11 @@
                 "fade_pct": 2
               }
             }
-          ]
+          ],
+          "fit": {
+            "minFontSize": 24,
+            "maxLines": 1
+          }
         },
         {
           "id": "headline-act2",
@@ -4925,7 +4819,12 @@
             "display": "flex",
             "alignItems": "center"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
         },
         {
           "id": "roundel-split|roundel-copy",
@@ -5470,7 +5369,12 @@
             "display": "flex",
             "alignItems": "center"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
         },
         {
           "id": "offers-0.roundel-copy-only|roundel-value",
@@ -5622,6 +5526,160 @@
       "manualCss": "",
       "localOverrides": [
         {
+          "targetId": "roundel-frame",
+          "scope": "offers-2",
+          "values": {
+            "left": 300,
+            "top": -16,
+            "width": 130,
+            "height": 130
+          },
+          "fit": {}
+        },
+        {
+          "targetId": "roundel-copy",
+          "scope": "offers-2.roundel-split",
+          "values": {
+            "left": 310,
+            "top": 18,
+            "width": 109,
+            "height": 16,
+            "fontSize": 15,
+            "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 10,
+            "maxLines": 1
+          }
+        },
+        {
+          "targetId": "roundel-copy",
+          "scope": "offers-2.roundel-copy-only",
+          "values": {
+            "left": 306,
+            "top": 17,
+            "width": 120,
+            "height": 64,
+            "fontSize": 24,
+            "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
+        },
+        {
+          "targetId": "roundel-value",
+          "scope": "offers-2.roundel-split",
+          "values": {
+            "left": 313,
+            "top": 37,
+            "width": 105,
+            "height": 48,
+            "fontSize": 46,
+            "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 24,
+            "maxLines": 1
+          }
+        },
+        {
+          "targetId": "roundel-value",
+          "scope": "offers-2.roundel-copy-only",
+          "values": {
+            "left": 298,
+            "top": 40,
+            "width": 90,
+            "height": 34,
+            "fontSize": 28,
+            "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 24,
+            "maxLines": 1
+          }
+        },
+        {
+          "targetId": "roundel-frame",
+          "scope": "offers-3",
+          "values": {
+            "left": 300,
+            "top": -16,
+            "width": 130,
+            "height": 130
+          },
+          "fit": {}
+        },
+        {
+          "targetId": "roundel-copy",
+          "scope": "offers-3.roundel-split",
+          "values": {
+            "left": 310,
+            "top": 18,
+            "width": 109,
+            "height": 16,
+            "fontSize": 15,
+            "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 10,
+            "maxLines": 1
+          }
+        },
+        {
+          "targetId": "roundel-copy",
+          "scope": "offers-3.roundel-copy-only",
+          "values": {
+            "left": 306,
+            "top": 17,
+            "width": 120,
+            "height": 64,
+            "fontSize": 24,
+            "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
+        },
+        {
+          "targetId": "roundel-value",
+          "scope": "offers-3.roundel-split",
+          "values": {
+            "left": 313,
+            "top": 37,
+            "width": 105,
+            "height": 48,
+            "fontSize": 46,
+            "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 24,
+            "maxLines": 1
+          }
+        },
+        {
+          "targetId": "roundel-value",
+          "scope": "offers-3.roundel-copy-only",
+          "values": {
+            "left": 298,
+            "top": 40,
+            "width": 90,
+            "height": 34,
+            "fontSize": 28,
+            "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 24,
+            "maxLines": 1
+          }
+        },
+        {
           "targetId": "terms-prices",
           "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {
@@ -5635,6 +5693,15 @@
               "referenceHeight": 90
             }
           }
+        },
+        {
+          "targetId": "roundel-frame",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "values": {
+            "width": 135,
+            "height": 135
+          },
+          "fit": {}
         },
         {
           "targetId": "terms-prices",
@@ -5652,219 +5719,12 @@
           }
         },
         {
-          "targetId": "roundel-frame",
-          "scope": "offers-2",
-          "values": {
-            "left": 300,
-            "top": -16,
-            "width": 130,
-            "height": 130
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-2.roundel-split",
-          "values": {
-            "left": 310,
-            "top": 18,
-            "width": 109,
-            "height": 16,
-            "fontSize": 15,
-            "lineHeight": 1.05
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-2.roundel-copy-only",
-          "values": {
-            "left": 306,
-            "top": 17,
-            "width": 120,
-            "height": 64,
-            "fontSize": 24,
-            "lineHeight": 1.05
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "offers-2.roundel-split",
-          "values": {
-            "left": 313,
-            "top": 37,
-            "width": 105,
-            "height": 48,
-            "fontSize": 46,
-            "lineHeight": 1
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "offers-2.roundel-copy-only",
-          "values": {
-            "left": 298,
-            "top": 40,
-            "width": 90,
-            "height": 34,
-            "fontSize": 28,
-            "lineHeight": 1
-          }
-        },
-        {
-          "targetId": "roundel-frame",
-          "scope": "offers-3",
-          "values": {
-            "left": 300,
-            "top": -16,
-            "width": 130,
-            "height": 130
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-3.roundel-split",
-          "values": {
-            "left": 310,
-            "top": 18,
-            "width": 109,
-            "height": 16,
-            "fontSize": 15,
-            "lineHeight": 1.05
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-3.roundel-copy-only",
-          "values": {
-            "left": 306,
-            "top": 17,
-            "width": 120,
-            "height": 64,
-            "fontSize": 24,
-            "lineHeight": 1.05
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "offers-3.roundel-split",
-          "values": {
-            "left": 313,
-            "top": 37,
-            "width": 105,
-            "height": 48,
-            "fontSize": 46,
-            "lineHeight": 1
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "offers-3.roundel-copy-only",
-          "values": {
-            "left": 298,
-            "top": 40,
-            "width": 90,
-            "height": 34,
-            "fontSize": 28,
-            "lineHeight": 1
-          }
-        },
-        {
-          "targetId": "roundel-frame",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
-          "values": {
-            "width": 135,
-            "height": 135
-          }
-        },
-        {
           "targetId": "roundel-copy",
           "scope": "cta-rect.frames-4.offers-3.roundel-copy-only.roundel-frame-on.tc-prices",
           "values": {
             "top": 12
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-frame-off",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 18,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-copy-only",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 18,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-split",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 10,
-            "minFontSizeRatio": 0,
-            "maxLines": 1,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": false,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 24,
-            "minFontSizeRatio": 0,
-            "maxLines": 1,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
+          },
+          "fit": {}
         }
       ]
     },
@@ -6079,7 +5939,7 @@
             },
             {
               "id": "bluewave-entry-offers-0",
-              "label": "Bluewave stage1\u2194stage2 (offers-0)",
+              "label": "Bluewave stage1↔stage2 (offers-0)",
               "preset": "custom",
               "scopes": [
                 "offers-0"
@@ -6262,7 +6122,12 @@
                 "fade_pct": 2
               }
             }
-          ]
+          ],
+          "fit": {
+            "mode": "wrap",
+            "minFontSize": 1,
+            "maxLines": 3
+          }
         },
         {
           "id": "roundel-value",
@@ -6300,7 +6165,11 @@
                 "fade_pct": 2
               }
             }
-          ]
+          ],
+          "fit": {
+            "minFontSize": 32,
+            "maxLines": 1
+          }
         },
         {
           "id": "headline-act2",
@@ -7346,7 +7215,12 @@
             "display": "flex",
             "alignItems": "center"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
         },
         {
           "id": "roundel-split|roundel-copy",
@@ -7367,7 +7241,11 @@
             "display": "flex",
             "alignItems": "flex-end"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "maxLines": 1,
+            "mode": "shrink"
+          }
         },
         {
           "id": "roundel-split|roundel-value",
@@ -7871,7 +7749,12 @@
             "display": "flex",
             "alignItems": "center"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
         },
         {
           "id": "offers-0.roundel-copy-only|roundel-value",
@@ -7996,7 +7879,8 @@
             "top": 80,
             "width": 125,
             "height": 125
-          }
+          },
+          "fit": {}
         },
         {
           "targetId": "roundel-copy",
@@ -8008,6 +7892,11 @@
             "height": 18,
             "fontSize": 16,
             "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 1,
+            "maxLines": 1
           }
         },
         {
@@ -8020,6 +7909,11 @@
             "height": 51,
             "fontSize": 14,
             "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
           }
         },
         {
@@ -8032,6 +7926,10 @@
             "height": 48,
             "fontSize": 58,
             "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 32,
+            "maxLines": 1
           }
         },
         {
@@ -8044,6 +7942,10 @@
             "height": 63,
             "fontSize": 42,
             "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 32,
+            "maxLines": 1
           }
         },
         {
@@ -8054,7 +7956,8 @@
             "top": 80,
             "width": 125,
             "height": 125
-          }
+          },
+          "fit": {}
         },
         {
           "targetId": "roundel-copy",
@@ -8066,6 +7969,11 @@
             "height": 18,
             "fontSize": 16,
             "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 1,
+            "maxLines": 1
           }
         },
         {
@@ -8078,6 +7986,11 @@
             "height": 51,
             "fontSize": 14,
             "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
           }
         },
         {
@@ -8090,6 +8003,10 @@
             "height": 48,
             "fontSize": 58,
             "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 32,
+            "maxLines": 1
           }
         },
         {
@@ -8102,6 +8019,10 @@
             "height": 63,
             "fontSize": 42,
             "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 32,
+            "maxLines": 1
           }
         },
         {
@@ -8109,423 +8030,8 @@
           "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
             "fontSize": 24
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-frame-off",
-          "values": {
-            "fontSize": 18
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 14,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-copy-only.white-headlines",
-          "values": {
-            "fontSize": 18
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 14,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-copy-only.tc-prices",
-          "values": {
-            "fontSize": 18
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 14,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-1.roundel-copy-only",
-          "values": {
-            "fontSize": 18
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 14,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-2.roundel-copy-only",
-          "values": {
-            "fontSize": 18
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 14,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-3.roundel-copy-only",
-          "values": {
-            "fontSize": 18
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 14,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "navy-headlines.roundel-copy-only.roundel-frame-on.tc-solo",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 18,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-split",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 1,
-            "minFontSizeRatio": 0,
-            "maxLines": 1,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": false,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 32,
-            "minFontSizeRatio": 0,
-            "maxLines": 1,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-1.roundel-copy-only",
-          "values": {
-            "left": 44.75,
-            "top": 98.75,
-            "width": 87.5,
-            "height": 87.5,
-            "textAlign": "center",
-            "display": "flex",
-            "alignItems": "center",
-            "justifyContent": "center"
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "maxLines": 3,
-            "shared": false
-          }
-        },
-        {
-          "targetId": "roundel-frame",
-          "scope": "offers-0.roundel-copy-only",
-          "values": {
-            "left": 29,
-            "top": 80,
-            "width": 121,
-            "height": 121,
-            "borderRadius": "50%"
           },
           "fit": {}
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-0.roundel-copy-only",
-          "values": {
-            "left": 47.15,
-            "top": 98.15,
-            "width": 84.7,
-            "height": 84.7,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": 17.424,
-            "lineHeight": 1.05,
-            "textAlign": "center",
-            "whiteSpace": "normal",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "center"
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 13.552,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false,
-            "mode": "shrink",
-            "static": false,
-            "maxFontSize": 0
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "offers-0.roundel-copy-only",
-          "values": {
-            "left": 28.032,
-            "top": 137.112,
-            "width": 126.80799999999999,
-            "height": 60.983999999999995,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": 40.656,
-            "lineHeight": 1,
-            "textAlign": "center",
-            "whiteSpace": "nowrap"
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": false,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 30.976,
-            "minFontSizeRatio": 0,
-            "maxLines": 1,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false,
-            "mode": "shrink",
-            "static": false,
-            "maxFontSize": 0
-          }
-        },
-        {
-          "targetId": "roundel-frame",
-          "scope": "offers-0.roundel-split",
-          "values": {
-            "left": 29,
-            "top": 80,
-            "width": 121,
-            "height": 121,
-            "borderRadius": "50%"
-          },
-          "fit": {}
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-0.roundel-split",
-          "values": {
-            "left": 42.552,
-            "top": 101.29599999999999,
-            "width": 93.896,
-            "height": 17.424,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": 15.488,
-            "lineHeight": 1.05,
-            "textAlign": "center",
-            "whiteSpace": "nowrap",
-            "justifyContent": "center",
-            "display": "flex",
-            "alignItems": "flex-end"
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 0.968,
-            "minFontSizeRatio": 0,
-            "maxLines": 1,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false,
-            "mode": "shrink",
-            "static": false,
-            "maxFontSize": 0
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "offers-0.roundel-split",
-          "values": {
-            "left": 41.584,
-            "top": 120.656,
-            "width": 97.768,
-            "height": 46.464,
-            "fontFamily": "Museo, Arial, sans-serif",
-            "fontWeight": 700,
-            "fontSize": 56.144,
-            "lineHeight": 1,
-            "textAlign": "center",
-            "whiteSpace": "nowrap",
-            "display": "flex",
-            "alignItems": "flex-start",
-            "justifyContent": "center"
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": false,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 30.976,
-            "minFontSizeRatio": 0,
-            "maxLines": 1,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false,
-            "mode": "shrink",
-            "static": false,
-            "maxFontSize": 0
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-0.roundel-copy-only",
-          "values": {
-            "left": 47.15,
-            "top": 98.15,
-            "width": 84.69999999999999,
-            "height": 84.69999999999999,
-            "textAlign": "center",
-            "display": "flex",
-            "alignItems": "center",
-            "justifyContent": "center"
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "maxLines": 3,
-            "shared": false
-          }
         }
       ]
     },
@@ -8897,7 +8403,12 @@
                 "fade_pct": 2
               }
             }
-          ]
+          ],
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 12,
+            "maxLines": 3
+          }
         },
         {
           "id": "roundel-value",
@@ -8935,7 +8446,11 @@
                 "fade_pct": 2
               }
             }
-          ]
+          ],
+          "fit": {
+            "minFontSize": 18,
+            "maxLines": 1
+          }
         },
         {
           "id": "headline-act2",
@@ -10014,7 +9529,12 @@
             "display": "flex",
             "alignItems": "center"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
         },
         {
           "id": "roundel-split|roundel-copy",
@@ -10035,7 +9555,11 @@
             "display": "flex",
             "alignItems": "flex-end"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "maxLines": 1,
+            "mode": "shrink"
+          }
         },
         {
           "id": "roundel-split|roundel-value",
@@ -10505,7 +10029,12 @@
             "display": "flex",
             "alignItems": "center"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
         },
         {
           "id": "offers-0.roundel-copy-only|roundel-value",
@@ -10637,6 +10166,160 @@
       "manualCss": "",
       "localOverrides": [
         {
+          "targetId": "roundel-frame",
+          "scope": "offers-2",
+          "values": {
+            "left": 15,
+            "top": 224,
+            "width": 130,
+            "height": 130
+          },
+          "fit": {}
+        },
+        {
+          "targetId": "roundel-copy",
+          "scope": "offers-2.roundel-split",
+          "values": {
+            "left": 28,
+            "top": 251,
+            "width": 104,
+            "height": 24,
+            "fontSize": 16,
+            "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 12,
+            "maxLines": 1
+          }
+        },
+        {
+          "targetId": "roundel-copy",
+          "scope": "offers-2.roundel-copy-only",
+          "values": {
+            "left": 26,
+            "top": 262,
+            "width": 108,
+            "height": 57,
+            "fontSize": 16,
+            "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
+        },
+        {
+          "targetId": "roundel-value",
+          "scope": "offers-2.roundel-split",
+          "values": {
+            "left": 25,
+            "top": 278,
+            "width": 110,
+            "height": 59,
+            "fontSize": 48,
+            "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 18,
+            "maxLines": 1
+          }
+        },
+        {
+          "targetId": "roundel-value",
+          "scope": "offers-2.roundel-copy-only",
+          "values": {
+            "left": 12,
+            "top": 282,
+            "width": 136,
+            "height": 60,
+            "fontSize": 38,
+            "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 18,
+            "maxLines": 1
+          }
+        },
+        {
+          "targetId": "roundel-frame",
+          "scope": "offers-3",
+          "values": {
+            "left": 15,
+            "top": 224,
+            "width": 130,
+            "height": 130
+          },
+          "fit": {}
+        },
+        {
+          "targetId": "roundel-copy",
+          "scope": "offers-3.roundel-split",
+          "values": {
+            "left": 28,
+            "top": 251,
+            "width": 104,
+            "height": 24,
+            "fontSize": 16,
+            "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 12,
+            "maxLines": 1
+          }
+        },
+        {
+          "targetId": "roundel-copy",
+          "scope": "offers-3.roundel-copy-only",
+          "values": {
+            "left": 26,
+            "top": 262,
+            "width": 108,
+            "height": 57,
+            "fontSize": 16,
+            "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
+        },
+        {
+          "targetId": "roundel-value",
+          "scope": "offers-3.roundel-split",
+          "values": {
+            "left": 25,
+            "top": 278,
+            "width": 110,
+            "height": 59,
+            "fontSize": 48,
+            "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 18,
+            "maxLines": 1
+          }
+        },
+        {
+          "targetId": "roundel-value",
+          "scope": "offers-3.roundel-copy-only",
+          "values": {
+            "left": 12,
+            "top": 282,
+            "width": 136,
+            "height": 60,
+            "fontSize": 38,
+            "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 18,
+            "maxLines": 1
+          }
+        },
+        {
           "targetId": "terms-prices",
           "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {
@@ -10650,122 +10333,6 @@
         },
         {
           "targetId": "roundel-frame",
-          "scope": "offers-2",
-          "values": {
-            "left": 15,
-            "top": 224,
-            "width": 130,
-            "height": 130
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-2.roundel-split",
-          "values": {
-            "left": 28,
-            "top": 251,
-            "width": 104,
-            "height": 24,
-            "fontSize": 16,
-            "lineHeight": 1.05
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-2.roundel-copy-only",
-          "values": {
-            "left": 26,
-            "top": 262,
-            "width": 108,
-            "height": 57,
-            "fontSize": 16,
-            "lineHeight": 1.05
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "offers-2.roundel-split",
-          "values": {
-            "left": 25,
-            "top": 278,
-            "width": 110,
-            "height": 59,
-            "fontSize": 48,
-            "lineHeight": 1
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "offers-2.roundel-copy-only",
-          "values": {
-            "left": 12,
-            "top": 282,
-            "width": 136,
-            "height": 60,
-            "fontSize": 38,
-            "lineHeight": 1
-          }
-        },
-        {
-          "targetId": "roundel-frame",
-          "scope": "offers-3",
-          "values": {
-            "left": 15,
-            "top": 224,
-            "width": 130,
-            "height": 130
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-3.roundel-split",
-          "values": {
-            "left": 28,
-            "top": 251,
-            "width": 104,
-            "height": 24,
-            "fontSize": 16,
-            "lineHeight": 1.05
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-3.roundel-copy-only",
-          "values": {
-            "left": 26,
-            "top": 262,
-            "width": 108,
-            "height": 57,
-            "fontSize": 16,
-            "lineHeight": 1.05
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "offers-3.roundel-split",
-          "values": {
-            "left": 25,
-            "top": 278,
-            "width": 110,
-            "height": 59,
-            "fontSize": 48,
-            "lineHeight": 1
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "offers-3.roundel-copy-only",
-          "values": {
-            "left": 12,
-            "top": 282,
-            "width": 136,
-            "height": 60,
-            "fontSize": 38,
-            "lineHeight": 1
-          }
-        },
-        {
-          "targetId": "roundel-frame",
           "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
             "left": 24,
@@ -10775,7 +10342,8 @@
             "backgroundColor": "rgb(0, 229, 165)",
             "borderRadius": "50%",
             "overflow": "hidden"
-          }
+          },
+          "fit": {}
         },
         {
           "targetId": "roundel-copy",
@@ -10795,6 +10363,25 @@
             "justifyContent": "center",
             "display": "flex",
             "alignItems": "center"
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3,
+            "disabled": false,
+            "wrap": true,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
           }
         },
         {
@@ -10812,6 +10399,25 @@
             "color": "rgb(0, 41, 117)",
             "textAlign": "center",
             "whiteSpace": "nowrap"
+          },
+          "fit": {
+            "minFontSize": 18,
+            "maxLines": 1,
+            "disabled": false,
+            "mode": "shrink",
+            "wrap": false,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
           }
         },
         {
@@ -10825,7 +10431,8 @@
             "backgroundColor": "rgb(0, 229, 165)",
             "borderRadius": "50%",
             "overflow": "hidden"
-          }
+          },
+          "fit": {}
         },
         {
           "targetId": "roundel-copy",
@@ -10845,6 +10452,25 @@
             "justifyContent": "center",
             "display": "flex",
             "alignItems": "flex-end"
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 12,
+            "maxLines": 1,
+            "disabled": false,
+            "wrap": false,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
           }
         },
         {
@@ -10865,207 +10491,25 @@
             "display": "flex",
             "alignItems": "flex-start",
             "justifyContent": "center"
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-frame-off",
-          "values": {
-            "fontSize": 18
           },
           "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 16,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-copy-only.white-headlines",
-          "values": {
-            "fontSize": 18
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 16,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-copy-only.tc-prices",
-          "values": {
-            "fontSize": 18
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 16,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-1.roundel-copy-only",
-          "values": {
-            "fontSize": 18
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 16,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-2.roundel-copy-only",
-          "values": {
-            "fontSize": 18
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 16,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "offers-3.roundel-copy-only",
-          "values": {
-            "fontSize": 18
-          },
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 16,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "navy-headlines.roundel-copy-only.roundel-frame-on.tc-solo",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
             "minFontSize": 18,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-split",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 12,
-            "minFontSizeRatio": 0,
             "maxLines": 1,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
+            "disabled": false,
+            "mode": "shrink",
             "wrap": false,
             "allowShrink": true,
-            "overflow": "clip",
             "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 18,
+            "static": false,
+            "maxFontSize": 0,
             "minFontSizeRatio": 0,
-            "maxLines": 1,
             "tracking": {
               "minEm": 0
             },
             "align": "normal",
-            "disabled": false
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
           }
         }
       ]
@@ -11285,7 +10729,7 @@
             },
             {
               "id": "bluewave-entry-offers-0",
-              "label": "Bluewave stage1\u2194stage2 (offers-0)",
+              "label": "Bluewave stage1↔stage2 (offers-0)",
               "preset": "custom",
               "scopes": [
                 "offers-0"
@@ -11466,7 +10910,12 @@
                 "fade_pct": 2
               }
             }
-          ]
+          ],
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 14,
+            "maxLines": 1
+          }
         },
         {
           "id": "roundel-value",
@@ -11504,7 +10953,10 @@
                 "fade_pct": 2
               }
             }
-          ]
+          ],
+          "fit": {
+            "minFontSize": 38
+          }
         },
         {
           "id": "headline-act2",
@@ -12587,7 +12039,12 @@
             "display": "flex",
             "alignItems": "center"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
         },
         {
           "id": "roundel-split|roundel-copy",
@@ -13071,7 +12528,12 @@
             "display": "flex",
             "alignItems": "center"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
         },
         {
           "id": "offers-0.roundel-copy-only|roundel-value",
@@ -13204,14 +12666,6 @@
       "manualCss": "",
       "localOverrides": [
         {
-          "targetId": "terms-prices",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
-          "values": {},
-          "fit": {
-            "maxLines": 10
-          }
-        },
-        {
           "targetId": "roundel-frame",
           "scope": "offers-2",
           "values": {
@@ -13219,7 +12673,8 @@
             "top": 176,
             "width": 188,
             "height": 188
-          }
+          },
+          "fit": {}
         },
         {
           "targetId": "roundel-copy",
@@ -13231,6 +12686,11 @@
             "height": 25,
             "fontSize": 22,
             "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 14,
+            "maxLines": 1
           }
         },
         {
@@ -13243,6 +12703,11 @@
             "height": 94,
             "fontSize": 28,
             "lineHeight": 1
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
           }
         },
         {
@@ -13255,6 +12720,9 @@
             "height": 70,
             "fontSize": 64,
             "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 38
           }
         },
         {
@@ -13267,6 +12735,9 @@
             "height": 68,
             "fontSize": 52,
             "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 38
           }
         },
         {
@@ -13277,7 +12748,8 @@
             "top": 176,
             "width": 188,
             "height": 188
-          }
+          },
+          "fit": {}
         },
         {
           "targetId": "roundel-copy",
@@ -13289,6 +12761,11 @@
             "height": 25,
             "fontSize": 22,
             "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 14,
+            "maxLines": 1
           }
         },
         {
@@ -13301,6 +12778,11 @@
             "height": 94,
             "fontSize": 28,
             "lineHeight": 1
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
           }
         },
         {
@@ -13313,6 +12795,9 @@
             "height": 70,
             "fontSize": 64,
             "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 38
           }
         },
         {
@@ -13325,90 +12810,17 @@
             "height": 68,
             "fontSize": 52,
             "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 38
           }
         },
         {
-          "targetId": "roundel-copy",
-          "scope": "roundel-frame-off",
+          "targetId": "terms-prices",
+          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {},
           "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 18,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-copy-only",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 18,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-split",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 14,
-            "minFontSizeRatio": 0,
-            "maxLines": 1,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": false,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 38,
-            "minFontSizeRatio": 0,
-            "maxLines": 1,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
+            "maxLines": 10
           }
         }
       ]
@@ -13625,7 +13037,7 @@
             },
             {
               "id": "bluewave-entry-offers-0",
-              "label": "Bluewave stage1\u2194stage2 (offers-0)",
+              "label": "Bluewave stage1↔stage2 (offers-0)",
               "preset": "custom",
               "scopes": [
                 "offers-0"
@@ -13805,7 +13217,12 @@
                 "fade_pct": 2
               }
             }
-          ]
+          ],
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 1
+          }
         },
         {
           "id": "roundel-value",
@@ -13843,7 +13260,12 @@
                 "fade_pct": 2
               }
             }
-          ]
+          ],
+          "fit": {
+            "minFontSize": 42,
+            "maxLines": 1,
+            "mode": "shrink"
+          }
         },
         {
           "id": "headline-act2",
@@ -14925,7 +14347,12 @@
             "display": "flex",
             "alignItems": "center"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
         },
         {
           "id": "roundel-split|roundel-copy",
@@ -15419,7 +14846,12 @@
             "display": "flex",
             "alignItems": "center"
           },
-          "editable": true
+          "editable": true,
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
+          }
         },
         {
           "id": "offers-0.roundel-copy-only|roundel-value",
@@ -15558,7 +14990,8 @@
             "top": 31,
             "width": 186,
             "height": 186
-          }
+          },
+          "fit": {}
         },
         {
           "targetId": "roundel-copy",
@@ -15570,6 +15003,11 @@
             "height": 29,
             "fontSize": 24,
             "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 1
           }
         },
         {
@@ -15582,6 +15020,11 @@
             "height": 79,
             "fontSize": 28,
             "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
           }
         },
         {
@@ -15594,6 +15037,11 @@
             "height": 68,
             "fontSize": 64,
             "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 42,
+            "maxLines": 1,
+            "mode": "shrink"
           }
         },
         {
@@ -15606,6 +15054,11 @@
             "height": 76,
             "fontSize": 62,
             "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 42,
+            "maxLines": 1,
+            "mode": "shrink"
           }
         },
         {
@@ -15616,7 +15069,8 @@
             "top": 31,
             "width": 186,
             "height": 186
-          }
+          },
+          "fit": {}
         },
         {
           "targetId": "roundel-copy",
@@ -15628,6 +15082,11 @@
             "height": 29,
             "fontSize": 24,
             "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 1
           }
         },
         {
@@ -15640,6 +15099,11 @@
             "height": 79,
             "fontSize": 28,
             "lineHeight": 1.05
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3
           }
         },
         {
@@ -15652,6 +15116,11 @@
             "height": 68,
             "fontSize": 64,
             "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 42,
+            "maxLines": 1,
+            "mode": "shrink"
           }
         },
         {
@@ -15664,6 +15133,11 @@
             "height": 76,
             "fontSize": 62,
             "lineHeight": 1
+          },
+          "fit": {
+            "minFontSize": 42,
+            "maxLines": 1,
+            "mode": "shrink"
           }
         },
         {
@@ -15677,7 +15151,8 @@
             "backgroundColor": "rgb(0, 229, 165)",
             "borderRadius": "50%",
             "overflow": "hidden"
-          }
+          },
+          "fit": {}
         },
         {
           "targetId": "roundel-copy",
@@ -15697,6 +15172,25 @@
             "justifyContent": "center",
             "display": "flex",
             "alignItems": "center"
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 3,
+            "disabled": false,
+            "wrap": true,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
           }
         },
         {
@@ -15714,6 +15208,25 @@
             "color": "rgb(0, 41, 117)",
             "textAlign": "center",
             "whiteSpace": "nowrap"
+          },
+          "fit": {
+            "minFontSize": 42,
+            "maxLines": 1,
+            "mode": "shrink",
+            "disabled": false,
+            "wrap": false,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
           }
         },
         {
@@ -15727,7 +15240,8 @@
             "backgroundColor": "rgb(0, 229, 165)",
             "borderRadius": "50%",
             "overflow": "hidden"
-          }
+          },
+          "fit": {}
         },
         {
           "targetId": "roundel-copy",
@@ -15747,6 +15261,25 @@
             "justifyContent": "center",
             "display": "flex",
             "alignItems": "flex-end"
+          },
+          "fit": {
+            "mode": "shrink",
+            "minFontSize": 18,
+            "maxLines": 1,
+            "disabled": false,
+            "wrap": false,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
           }
         },
         {
@@ -15767,6 +15300,25 @@
             "display": "flex",
             "alignItems": "flex-start",
             "justifyContent": "center"
+          },
+          "fit": {
+            "minFontSize": 42,
+            "maxLines": 1,
+            "mode": "shrink",
+            "disabled": false,
+            "wrap": false,
+            "allowShrink": true,
+            "shared": false,
+            "static": false,
+            "maxFontSize": 0,
+            "minFontSizeRatio": 0,
+            "tracking": {
+              "minEm": 0
+            },
+            "align": "normal",
+            "sharedGroup": "",
+            "frame": "",
+            "overflow": "clip"
           }
         },
         {
@@ -15777,91 +15329,8 @@
             "width": 146,
             "height": 29,
             "left": 387
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-frame-off",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 18,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-copy-only",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 18,
-            "minFontSizeRatio": 0,
-            "maxLines": 3,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-copy",
-          "scope": "roundel-split",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": true,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 18,
-            "minFontSizeRatio": 0,
-            "maxLines": 1,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
-        },
-        {
-          "targetId": "roundel-value",
-          "scope": "",
-          "values": {},
-          "fit": {
-            "frame": "fixed",
-            "wrap": false,
-            "allowShrink": true,
-            "overflow": "clip",
-            "shared": false,
-            "sharedGroup": "",
-            "minFontSize": 42,
-            "minFontSizeRatio": 0,
-            "maxLines": 1,
-            "tracking": {
-              "minEm": 0
-            },
-            "align": "normal",
-            "disabled": false
-          }
+          },
+          "fit": {}
         }
       ]
     }
@@ -15930,210 +15399,6 @@
         }
       ],
       "startingArrangement": "present"
-    },
-    {
-      "id": "roundel-copy-centre-x",
-      "name": "Text-only roundel horizontal centre",
-      "type": "spacing",
-      "enabled": true,
-      "targets": [
-        {
-          "size": "320x50",
-          "targetId": "roundel-copy"
-        },
-        {
-          "size": "728x90",
-          "targetId": "roundel-copy"
-        },
-        {
-          "size": "300x250",
-          "targetId": "roundel-copy"
-        },
-        {
-          "size": "160x600",
-          "targetId": "roundel-copy"
-        },
-        {
-          "size": "300x600",
-          "targetId": "roundel-copy"
-        },
-        {
-          "size": "970x250",
-          "targetId": "roundel-copy"
-        }
-      ],
-      "when": [
-        "roundel-copy-only"
-      ],
-      "axis": "x",
-      "targetEdge": "center",
-      "reference": {
-        "targetId": "roundel-frame",
-        "edge": "center"
-      },
-      "gap": 0,
-      "gapUnit": "px",
-      "onMissing": "authored"
-    },
-    {
-      "id": "roundel-copy-centre-y",
-      "name": "Text-only roundel vertical centre",
-      "type": "spacing",
-      "enabled": true,
-      "targets": [
-        {
-          "size": "320x50",
-          "targetId": "roundel-copy"
-        },
-        {
-          "size": "728x90",
-          "targetId": "roundel-copy"
-        },
-        {
-          "size": "300x250",
-          "targetId": "roundel-copy"
-        },
-        {
-          "size": "160x600",
-          "targetId": "roundel-copy"
-        },
-        {
-          "size": "300x600",
-          "targetId": "roundel-copy"
-        },
-        {
-          "size": "970x250",
-          "targetId": "roundel-copy"
-        }
-      ],
-      "when": [
-        "roundel-copy-only"
-      ],
-      "axis": "y",
-      "targetEdge": "center",
-      "reference": {
-        "targetId": "roundel-frame",
-        "edge": "center"
-      },
-      "gap": 0,
-      "gapUnit": "px",
-      "onMissing": "authored"
-    }
-  ],
-  "componentLinks": [
-    {
-      "id": "roundel-proportions-offers",
-      "name": "Offer roundel proportions",
-      "componentId": "component:roundel",
-      "source": {
-        "size": "300x250",
-        "scope": "offers-1"
-      },
-      "destinations": [
-        {
-          "size": "320x50",
-          "scope": "offers-1"
-        },
-        {
-          "size": "320x50",
-          "scope": "offers-2"
-        },
-        {
-          "size": "320x50",
-          "scope": "offers-3"
-        },
-        {
-          "size": "728x90",
-          "scope": "offers-1"
-        },
-        {
-          "size": "728x90",
-          "scope": "offers-2"
-        },
-        {
-          "size": "728x90",
-          "scope": "offers-3"
-        },
-        {
-          "size": "300x250",
-          "scope": "offers-2"
-        },
-        {
-          "size": "300x250",
-          "scope": "offers-3"
-        },
-        {
-          "size": "160x600",
-          "scope": "offers-1"
-        },
-        {
-          "size": "160x600",
-          "scope": "offers-2"
-        },
-        {
-          "size": "160x600",
-          "scope": "offers-3"
-        },
-        {
-          "size": "300x600",
-          "scope": "offers-1"
-        },
-        {
-          "size": "300x600",
-          "scope": "offers-2"
-        },
-        {
-          "size": "300x600",
-          "scope": "offers-3"
-        },
-        {
-          "size": "970x250",
-          "scope": "offers-1"
-        },
-        {
-          "size": "970x250",
-          "scope": "offers-2"
-        },
-        {
-          "size": "970x250",
-          "scope": "offers-3"
-        }
-      ],
-      "sizing": "destination",
-      "geometryOnly": true
-    },
-    {
-      "id": "roundel-proportions-awareness",
-      "name": "Awareness roundel proportions",
-      "componentId": "component:roundel",
-      "source": {
-        "size": "300x250",
-        "scope": "offers-0"
-      },
-      "destinations": [
-        {
-          "size": "320x50",
-          "scope": "offers-0"
-        },
-        {
-          "size": "728x90",
-          "scope": "offers-0"
-        },
-        {
-          "size": "160x600",
-          "scope": "offers-0"
-        },
-        {
-          "size": "300x600",
-          "scope": "offers-0"
-        },
-        {
-          "size": "970x250",
-          "scope": "offers-0"
-        }
-      ],
-      "sizing": "destination",
-      "geometryOnly": true
     }
   ]
 }

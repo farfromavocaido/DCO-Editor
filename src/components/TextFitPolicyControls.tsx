@@ -14,7 +14,7 @@ export function TextFitPolicyControls({ fit = {}, effectiveRule, onChange }: Pro
   return <div className="inspector-grid" aria-label="Text frame policy">
     <label className="inspector-field"><span>Text frame</span>
       <select value={String(normalized.frame || '')} onChange={event => onChange('frame', event.target.value)}>
-        {!normalized.frame&&<option value="" disabled>Not converted</option>}<option value="fixed">Fixed frame</option><option value="auto">Content height</option>
+        {!normalized.frame&&<option value="" disabled>Legacy fitting</option>}<option value="fixed">Fixed frame</option><option value="auto">Content height</option>
       </select>
     </label>
     {normalized.frame ? <>

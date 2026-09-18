@@ -7,7 +7,7 @@ rules from the creative JSON for both consumers. There is deliberately no
 second implementation anywhere — if the preview fits text one way, the served
 ad fits it the same way.
 
-Only the four SSE campaigns’ promotional roundels were converted to frame policies; other text retains its pre-migration settings. see [migration review](TEXT_FIT_MIGRATION_REVIEW.md). Legacy behaviour below is retained only for older documents and compatibility fixtures.
+The explicit-fitting migration experiment has been rolled back for all four SSE campaigns, including roundels. Their saved fitting settings match the pre-migration checkpoint. See [migration review](TEXT_FIT_MIGRATION_REVIEW.md) for the archived proposal. The explicit frame controls remain available for deliberate future edits.
 
 ## Explicit frame policies and effective controls
 

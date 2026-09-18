@@ -3,7 +3,9 @@
 Checkpoint: `checkpoint/before-text-fit-migration-20260917` (`f4225eb`).
 Independent file backup: `/Users/aidancoughlan/.codex/backups/text-fit-migration-20260917-203710/campaign`.
 
-**Current scope: promotional roundels only.** Offers, headlines, legal text and CTAs have been restored to the pre-migration checkpoint. The broader conversion below is retained as a future review plan, not the current state. The four SSE campaigns’ roundels were explicitly converted. Nothing is migrated on load or save; the product demo already used explicit frame settings. Existing exported packages were not regenerated or published.
+**Experiment rolled back in full.** All four SSE campaign documents, including roundels, have been restored byte-for-byte to the pre-migration checkpoint. The proportional links and text-only centring rules introduced by this experiment are removed. Dragging performance improvements remain. Nothing was synced or published as part of the rollback.
+
+The sections below are an archived proposal for a possible future migration, not the current campaign state.
 
 ## Roundels: edit the source first
 

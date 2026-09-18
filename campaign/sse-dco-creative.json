@@ -5681,7 +5681,7 @@
         },
         {
           "targetId": "terms-prices",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {
             "fontSize": 8
           },
@@ -5705,7 +5705,7 @@
         },
         {
           "targetId": "terms-prices",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
             "fontSize": 8
           },
@@ -5918,7 +5918,7 @@
         },
         {
           "targetId": "terms-prices",
-          "scope": "cta-rect.frames-3.navy-headlines.offers-0.roundel-copy-only.roundel-frame-off.tc-solo",
+          "scope": "cta-rect.frames-3.offers-0.roundel-copy-only.roundel-frame-off.tc-solo",
           "values": {
             "fontSize": 8
           },
@@ -10603,7 +10603,7 @@
         },
         {
           "targetId": "terms-prices",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {
             "fontSize": 6,
             "width": 140
@@ -13284,7 +13284,7 @@
         },
         {
           "targetId": "terms-prices",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-frame-on.roundel-split.tc-solo",
           "values": {},
           "fit": {
             "maxLines": 10
@@ -13292,7 +13292,7 @@
         },
         {
           "targetId": "terms-prices",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {},
           "fit": {
             "maxLines": 10,
@@ -13305,7 +13305,7 @@
         },
         {
           "targetId": "terms-prices",
-          "scope": "cta-rect.frames-3.navy-headlines.offers-0.roundel-copy-only.roundel-frame-off.tc-solo",
+          "scope": "cta-rect.frames-3.offers-0.roundel-copy-only.roundel-frame-off.tc-solo",
           "values": {},
           "fit": {
             "maxLines": 10,
@@ -15816,7 +15816,7 @@
         },
         {
           "targetId": "terms-prices",
-          "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "scope": "cta-rect.frames-4.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
             "fontSize": 10
           },
@@ -16449,7 +16449,7 @@
         },
         {
           "targetId": "terms-prices",
-          "scope": "cta-rect.frames-3.navy-headlines.offers-0.roundel-copy-only.roundel-frame-off.tc-solo",
+          "scope": "cta-rect.frames-3.offers-0.roundel-copy-only.roundel-frame-off.tc-solo",
           "values": {
             "fontSize": 10
           },

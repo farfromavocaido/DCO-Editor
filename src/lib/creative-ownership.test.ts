@@ -226,3 +226,28 @@ it('shared provenance and edit reach distinguish format overrides from definitio
  expect(findCreativeTarget(rootEdit,'728x90','terms',['offers-0','cta-rect']).values.fontSize).toBe(9);
  expect(findCreativeTarget(rootEdit,'728x90','terms',['offers-1']).values.fontSize).toBe(6);
 });
+
+it('T&Cs local writes omit ink so white and navy share the same override', () => {
+ const doc = {
+  version: 1,
+  campaign: { id: 'sse-dco' },
+  clock: { durationS: 15, beats: {} },
+  feed: { profileName: 'test', sampleRows: [] },
+  sizes: {
+   '300x250': {
+    canvas: { width: 300, height: 250 },
+    layers: [{ id: 'terms-prices', kind: 'text', base: { cssClass: 'terms-prices', fontSize: 6 }, clips: [] }],
+    localOverrides: [],
+    variantRules: [],
+   },
+  },
+ };
+ const navyScopes = ['offers-0', 'navy-headlines', 'tc-solo', 'cta-rect'];
+ const whiteScopes = ['offers-0', 'white-headlines', 'tc-solo', 'cta-rect'];
+ const next = setCreativeOwnershipField(doc, '300x250', 'terms-prices', navyScopes, 'values', 'fontSize', 8, 'local');
+ expect(next.sizes['300x250'].localOverrides).toEqual([
+  { targetId: 'terms-prices', scope: 'cta-rect.offers-0.tc-solo', values: { fontSize: 8 }, fit: {} },
+ ]);
+ expect(findCreativeTarget(next, '300x250', 'terms-prices', navyScopes).values.fontSize).toBe(8);
+ expect(findCreativeTarget(next, '300x250', 'terms-prices', whiteScopes).values.fontSize).toBe(8);
+});

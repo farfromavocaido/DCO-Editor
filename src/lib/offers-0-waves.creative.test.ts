@@ -261,6 +261,22 @@ test('offers-0 headlines restore shared geometry; Act 4 ink; T&Cs always white',
       !sizeCreative.variantRules.some((rule) => rule.id === 'white-headlines|terms-prices'),
       `${size} no white-headlines T&C colour rule`,
     );
+    for (const layerId of ['terms-prices', 'terms-solo']) {
+      for (const local of sizeCreative.localOverrides || []) {
+        if (local.targetId !== layerId) continue;
+        assert.ok(
+          !/\b(?:navy|white)-headlines\b/.test(local.scope || ''),
+          `${size} ${layerId} local must not include ink: ${local.scope}`,
+        );
+      }
+      for (const rule of sizeCreative.variantRules || []) {
+        if (rule.layerId !== layerId && rule.cssClass !== layerId && rule.targetId !== layerId) continue;
+        assert.ok(
+          !/\b(?:navy|white)-headlines\b/.test(rule.scope || ''),
+          `${size} ${layerId} rule ${rule.id} must not include ink: ${rule.scope}`,
+        );
+      }
+    }
     const roundelFrame = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|roundel-frame');
     const roundelCopy = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|roundel-copy');
     const roundelValue = sizeCreative.variantRules.find((rule) => rule.id === 'offers-0|roundel-value');

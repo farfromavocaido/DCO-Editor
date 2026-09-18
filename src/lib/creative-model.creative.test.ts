@@ -163,6 +163,27 @@ test('offers-0 ink scopes are colour-only; white/navy share offers-0 geometry', 
   }
 });
 
+test('offers-0 T&Cs resolve identically for white and navy ink', () => {
+  const doc = loadPersistedCreative();
+  const variants = [
+    ['offers-0', 'tc-solo', 'cta-rect', 'frames-4', 'roundel-frame-on', 'roundel-split'],
+    ['offers-0', 'tc-solo', 'cta-rect', 'frames-4', 'roundel-frame-on', 'roundel-copy-only'],
+    ['offers-0', 'tc-solo', 'cta-rect', 'frames-3', 'roundel-frame-off', 'roundel-copy-only'],
+    ['offers-0', 'tc-solo', 'cta-roundel', 'frames-3', 'roundel-frame-off', 'roundel-copy-only'],
+    ['offers-0', 'tc-prices', 'cta-rect', 'frames-4', 'roundel-frame-on', 'roundel-split'],
+    ['offers-0', 'tc-prices', 'cta-rect', 'frames-3', 'roundel-frame-off', 'roundel-copy-only'],
+  ];
+  for (const size of Object.keys(doc.sizes)) {
+    for (const variant of variants) {
+      const white = findCreativeTarget(doc, size, 'terms-prices', [...variant, 'white-headlines']);
+      const navy = findCreativeTarget(doc, size, 'terms-prices', [...variant, 'navy-headlines']);
+      assert.ok(white && navy, `${size} ${variant.join('.')}`);
+      assert.deepEqual(white.values, navy.values, `${size} ${variant.join('.')} values`);
+      assert.deepEqual(white.fit, navy.fit, `${size} ${variant.join('.')} fit`);
+    }
+  }
+});
+
 test('every size exposes offers-2 and offers-3 headline variant rules', () => {
   const doc = loadPersistedCreative();
 

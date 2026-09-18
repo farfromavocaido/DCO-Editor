@@ -151,8 +151,19 @@ export const activeNamedOwnership = (document: any, size: string, targetId: stri
   const compiled = materializeCreativeOwnership(document);
   return activeOwnershipRules(compiled.sizes?.[size]?.variantRules || [], targetIdentity(compiled, size, targetId), scopes).filter((rule) => rule.ownershipGenerated);
 };
+const INK_SCOPE_TOKENS = new Set(['white-headlines', 'navy-headlines']);
+const INK_INDEPENDENT_TARGETS = new Set(['terms-prices', 'terms-solo']);
+
+/** T&Cs stay the same across offers-0 ink; never author white/navy locals for that line. */
+export const scopesWithoutInk = (targetId, scopes = []) => {
+  const layerId = String(targetId).split('::')[0];
+  return INK_INDEPENDENT_TARGETS.has(layerId)
+    ? scopes.filter((token) => !INK_SCOPE_TOKENS.has(token))
+    : scopes;
+};
+
 const localFor = (next, size, targetId, scopes) => {
-  const scope = [...new Set(scopes)].sort().join('.');
+  const scope = [...new Set(scopesWithoutInk(targetId, scopes))].sort().join('.');
   const creative = next.sizes[size];
   creative.localOverrides ||= [];
   let local = creative.localOverrides.find((item) => !item.detached && item.scopeSpecificity === undefined && item.targetId === targetId && (item.scope || '') === scope);

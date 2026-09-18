@@ -1,5 +1,5 @@
 // @ts-nocheck
-import {layoutAnimationSource,layoutSequencePlans} from './layout-transitions';
+import {layoutAnimationSource,layoutSequencePlansSource} from './layout-transitions';
 /** One runtime body for previews, QA and delivery. Measures ink, never line-box spacing. */
 const SOURCE=String.raw`(function(win){
  var doc=win.document,writes=new Map(),imageCache=new WeakMap(),ctx=doc.createElement('canvas').getContext('2d'),diagnostics=[];
@@ -143,5 +143,5 @@ const SOURCE=String.raw`(function(win){
  }
  return {reset:reset,run:run,anchorText:anchorText,ink:ink,facts:facts,element:element,getDiagnostics:function(){return diagnostics;}};
 })`;
-export const responsiveLayoutSource=()=>SOURCE.replace('INSTALL_MOTION',layoutAnimationSource()).replace('SEQUENCE_PLANS','('+layoutSequencePlans.toString()+')');
+export const responsiveLayoutSource=()=>SOURCE.replace('INSTALL_MOTION',layoutAnimationSource()).replace('SEQUENCE_PLANS',layoutSequencePlansSource());
 export const createResponsiveLayoutRuntime=new Function(`return ${responsiveLayoutSource()}`)();

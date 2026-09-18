@@ -97,7 +97,9 @@ function validateLayoutSequence(document,rule){
 }
 
 /** Pure ink-based sequence; serialized into the shared production runtime. */
-export function layoutSequencePlans(rule, timing, members){
+// Keep the delivered body independent of compiler-injected closure helpers.
+// Both the editor function and generated ads execute this exact source.
+const SEQUENCE_SOURCE = String.raw`(function layoutSequencePlans(rule, timing, members){
  const length=rule.axis==='x'?rule.area.width:rule.area.height;
  const positions=(absent,previous)=>{
   const present=members.filter(m=>!absent.has(m.id)),extent=present.reduce((n,m)=>n+m.extent,0);
@@ -121,4 +123,6 @@ export function layoutSequencePlans(rule, timing, members){
   if(values.every(f=>Math.abs(f.value)<.001))return [];
   return [{id:rule.id,targetId:m.id,durationMs:timing.durationMs,loop:timing.loop,keyframes:values.map(f=>({offset:f.offset,translate:rule.axis==='x'?f.value+'px 0px':'0px '+f.value+'px',...(f.easing?{easing:f.easing}:{})}))}];
  });
-}
+})`;
+export const layoutSequencePlansSource = () => SEQUENCE_SOURCE;
+export const layoutSequencePlans = new Function('return '+SEQUENCE_SOURCE)();

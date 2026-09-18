@@ -8,6 +8,7 @@ import {projectRoot} from '../paths';
 import {waitForProductionDocument,seekProductionAnimations} from '@/lib/production-stage';
 import {createResponsiveLayoutRuntime,responsiveLayoutSource} from '@/lib/responsive-layout';
 import {motionGeometry,editMotionGeometry} from '@/lib/motion-geometry';
+import {layoutAnimations} from '@/lib/layout-transitions';
 import {campaignScopes} from '@/lib/campaign-variants';
 import {validateLayoutRules} from '@/lib/layout-rules';
 import {campaignFontFaces} from '@/lib/campaign-fonts';
@@ -33,7 +34,7 @@ test('bottom ink anchor stays fixed across max-line, copy and frame-policy chang
  }
 },30000);
 test('exit-linked layout motion reserves entrance space, seeks deterministically, returns cleanly and matches outlines',async()=>{
- const d=fixture();d.layoutRules=[area()];validateLayoutRules(d);const html=renderWipHtml(await renderStudioReadyHtml(d,'300x250',fontOptions),d.feed.sampleRows[0]),p=await pageFor(html);
+ const d=fixture();const rule=area();rule.layoutAnimations=layoutAnimations(rule);delete rule.transition;d.layoutRules=[rule];validateLayoutRules(d);const html=renderWipHtml(await renderStudioReadyHtml(d,'300x250',fontOptions),d.feed.sampleRows[0]),p=await pageFor(html);
  const seek=async(page,at)=>{await page.evaluate(`(${seekProductionAnimations.toString()})(document,${at},10)`);return page.locator('#mark').evaluate(e=>e.getBoundingClientRect().top);};
  for(const [at,y]of [[0,40],[5,40],[35,40],[50,40],[55,80],[65,120],[95,80],[100,40],[65,120],[35,40]])expect(await seek(p,at),`at ${at}`).toBeCloseTo(y,1);
  const snapshot=await captureProductionPresentation(html,'300x250');expect(snapshot.layoutTransitions).toHaveLength(1);const outlined=await pageFor(await renderStudioReadyHtml(d,'300x250',{...fontOptions,renderMode:'outline',presentationSnapshot:snapshot}));

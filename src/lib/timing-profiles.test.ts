@@ -7,6 +7,7 @@ import {
   FOUR_ACT_BEATS,
   frames3Act4In,
   OFFERS_0_BEAT_OVERLAY,
+  offers0Act2In,
 } from './timing-profiles';
 
 const document = {
@@ -57,6 +58,8 @@ test('applies offers-0 beat overlay without changing offers-1 beats', () => {
   assert.equal(zero.cta_in, baseline.cta_in);
   assert.equal(zero.swap, baseline.swap);
   assert.equal(zero.green_in, Number((baseline.act4_in - 3.3).toFixed(3)));
+  assert.equal(zero.offers0_act2_in, offers0Act2In(zero));
+  assert.equal(baseline.offers0_act2_in, undefined);
   // Blue-wave / logo beats stay on the multi-offer timeline (sweep at wave2_in).
   assert.equal(zero.wave2_in, baseline.wave2_in);
   assert.equal(zero.bn_blue_in, baseline.bn_blue_in);

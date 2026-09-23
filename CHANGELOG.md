@@ -17,6 +17,9 @@
 
 ### Changed
 
+- **160×600 offers-0 logo and blue wave** — the terms-driven logo shift now runs for every 0-offer variant. Ink no longer gates it. Blue-wave position offsets tied to ink, CTA, roundel, or T&Cs are removed; wave timing still follows the roundel (frames-4) clock.
+- **320×50 offers-0 logo** — the navy logo now holds and fades out at `end` (same as the white logo on other sizes), on every 0-offer ink, CTA, and roundel combination. It was inheriting the multi-offer exit and leaving around the blue wave.
+- **offers-0 T&Cs enter with Act 2** — `terms-prices` and `terms-solo` now start at `offers0_act2_in` (the equal-split second photo headline). Fade-out is unchanged (`green_in`, or `roundel_in` on 320×50 / 728×90 frames-4).
 - **offers-0 T&Cs and roundels ignore ink** — T&Cs and roundel locals no longer include `white-headlines` / `navy-headlines`. Navy-authored type, fit, box, and colour apply to both inks. Editor writes to `terms-prices` / `terms-solo` / `roundel-frame` / `roundel-copy` / `roundel-value` omit ink tokens so the split cannot come back.
 - **T&C copy is Museo 300** — every DCO size now authors `terms-prices`, `unit-rate-prices`, and `terms-solo` at weight 300 (same slab family as headlines at 700).
 - **300×600 offers-0 logo** — as the bluewave opens to Act 4, the white logo eases to a centred 140px-wide box, then fades out quickly as the wave returns to stage1.

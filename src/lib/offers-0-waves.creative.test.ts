@@ -136,15 +136,24 @@ test('offers-0 T&C fades out just before greenwave', () => {
     const zero = clipsForProfile(terms.clips, 'frames-3', ['offers-0']);
     assert.equal(multi.length, 1, `${size} multi terms`);
     assert.equal(zero.length, 1, `${size} offers-0 terms`);
+    assert.equal(zero[0].start, 'offers0_act2_in', `${size} terms enter with Act 2`);
     assert.equal(zero[0].end, 'green_in', `${size} terms end at green_in`);
+    assert.equal(multi[0].start, 'terms_in', `${size} multi terms enter unchanged`);
     assert.equal(multi[0].end, 'act1_out', `${size} multi terms unchanged`);
+    const solo = sizeCreative.layers.find((layer) => layer.id === 'terms-solo');
+    const zeroSolo = clipsForProfile(solo.clips, 'frames-3', ['offers-0', 'navy-headlines', 'cta-roundel', 'roundel-copy-only']);
+    assert.equal(zeroSolo[0].start, 'offers0_act2_in', `${size} solo terms enter with Act 2`);
+    assert.equal(zeroSolo[0].end, zero[0].end, `${size} solo terms fade with prices terms`);
 
     const beats = beatsForScopes(creative, ['offers-0', 'frames-3']);
     const frames = compileAnimationClips(zero, beats);
     const greenIn = Number(beats.green_in);
-    const midPhoto = frameAtPercent(frames, Math.max(25, greenIn / 2));
+    const act2 = Number(beats.offers0_act2_in);
+    const before = frameAtPercent(frames, Math.max(0, act2 - 1));
+    const settled = frameAtPercent(frames, act2 + 3);
     const atGreen = frameAtPercent(frames, greenIn);
-    assert.ok(midPhoto.opacity > 0.9, `${size} terms visible mid-photo`);
+    assert.ok(before.opacity < 0.05, `${size} terms hidden before Act 2`);
+    assert.ok(settled.opacity > 0.9, `${size} terms visible in Act 2`);
     assert.ok(atGreen.opacity < 0.05, `${size} terms gone at green_in`);
   }
 });
@@ -156,14 +165,18 @@ test('offers-0 banner frames-4 T&Cs fade out just before the roundel', () => {
     assert.ok(terms, size);
     const zero = clipsForProfile(terms.clips, 'frames-4', ['offers-0']);
     assert.equal(zero.length, 1, `${size} frames-4 offers-0 terms`);
+    assert.equal(zero[0].start, 'offers0_act2_in', `${size} terms enter with Act 2`);
     assert.equal(zero[0].end, 'roundel_in', `${size} terms end at roundel_in`);
 
-    const beats = beatsForScopes(creative, ['offers-0', 'frames-4']);
+    const beats = beatsForScopes(creative, ['offers-0', 'frames-4', 'roundel-frame-on', 'cta-rect']);
     const frames = compileAnimationClips(zero, beats);
     const roundelIn = Number(beats.roundel_in);
-    const mid = frameAtPercent(frames, Math.max(25, roundelIn / 2));
+    const act2 = Number(beats.offers0_act2_in);
+    const before = frameAtPercent(frames, Math.max(0, act2 - 1));
+    const settled = frameAtPercent(frames, act2 + 3);
     const atRoundel = frameAtPercent(frames, roundelIn);
-    assert.ok(mid.opacity > 0.9, `${size} terms visible before roundel`);
+    assert.ok(before.opacity < 0.05, `${size} terms hidden before Act 2`);
+    assert.ok(settled.opacity > 0.9, `${size} terms visible before roundel`);
     assert.ok(atRoundel.opacity < 0.05, `${size} terms gone when roundel starts`);
   }
 });
@@ -175,7 +188,12 @@ test('offers-0 white logo from start; blue logo hidden with no multi fade', () =
     const whiteLogo = sizeCreative.layers.find((layer) => layer.id === 'logo-act3');
     assert.ok(blueLogo && whiteLogo, size);
 
-    assert.equal(clipsForProfile(blueLogo.clips, 'frames-3', ['offers-0']).length, 0, `${size} no blue logo motion`);
+    const zeroBlueCount = size === '320x50' ? 1 : 0;
+    assert.equal(
+      clipsForProfile(blueLogo.clips, 'frames-3', ['offers-0']).length,
+      zeroBlueCount,
+      `${size} blue logo motion`,
+    );
     assert.equal(clipsForProfile(blueLogo.clips, 'frames-3', MULTI).length, 1, `${size} multi blue logo fade`);
 
     const zeroWhite = clipsForProfile(whiteLogo.clips, 'frames-3', ['offers-0']);
@@ -188,7 +206,7 @@ test('offers-0 white logo from start; blue logo hidden with no multi fade', () =
       const kfs = zeroWhite[0].keyframes || [];
       const startKf = kfs.find((kf) => kf.at === 'start');
       const act4Kf = kfs.find((kf) => kf.at === 'act4_in');
-      const fadeKf = kfs.find((kf) => kf.at === 'end-2');
+      const fadeKf = kfs.find((kf) => kf.at === 'act3_exit-1');
       assert.equal(startKf?.left, rest.left, `${size} logo starts at rest left`);
       assert.equal(startKf?.width, rest.width, `${size} logo starts at rest width`);
       assert.equal(startKf?.opacity, 0, `${size} logo hidden at start`);
@@ -211,6 +229,23 @@ test('offers-0 white logo from start; blue logo hidden with no multi fade', () =
         'hidden',
         `${size} white logo hidden`,
       );
+      const variantScopes = [
+        ['offers-0', 'white-headlines', 'cta-rect', 'frames-3', 'roundel-frame-off', 'roundel-copy-only'],
+        ['offers-0', 'navy-headlines', 'cta-roundel', 'frames-3', 'roundel-frame-off', 'roundel-copy-only'],
+        ['offers-0', 'white-headlines', 'cta-rect', 'frames-4', 'roundel-frame-on', 'roundel-split'],
+        ['offers-0', 'navy-headlines', 'cta-roundel', 'frames-4', 'roundel-frame-on', 'roundel-copy-only'],
+      ];
+      for (const scopes of variantScopes) {
+        const profile = scopes.includes('frames-4') ? 'frames-4' : 'frames-3';
+        const clip = clipsForProfile(blueLogo.clips, profile, scopes)[0];
+        assert.equal(clip?.end, 'end', `${scopes.join(' ')} navy logo holds to end`);
+        assert.equal(clip?.start, 'start+5', `${scopes.join(' ')} navy logo enter`);
+        assert.equal(clip?.params?.fade_pct, 4, `${scopes.join(' ')} navy logo end fade`);
+        const logoBeats = beatsForScopes(creative, scopes);
+        const logoFrames = compileAnimationClips([clip], logoBeats);
+        assert.ok(frameAtPercent(logoFrames, 70).opacity > 0.9, `${scopes.join(' ')} still up after the old exit`);
+        assert.ok(frameAtPercent(logoFrames, 100).opacity < 0.05, `${scopes.join(' ')} faded at end`);
+      }
     } else {
       assert.equal(hideBlue?.props?.visibility, 'hidden', `${size} blue logo hidden`);
     }

@@ -377,7 +377,7 @@
         "tc_units_text": "Electricity unit rate: 32.64 Inc. Vat 31.09 Ex. Vat",
         "cta_type_enum": "rectangle",
         "cta_text": "Switch today",
-        "include_roundel_frame_bool": true,
+        "include_roundel_frame_bool": false,
         "roundel_text_text": "Saving you up to",
         "roundel_value_text": "999",
         "background_image_url_160x600": {
@@ -509,7 +509,7 @@
         "tc_units_text": "",
         "cta_type_enum": "rectangle",
         "cta_text": "Find out more",
-        "include_roundel_frame_bool": false,
+        "include_roundel_frame_bool": true,
         "roundel_text_text": "Book your consultation today",
         "roundel_value_text": "",
         "background_image_url_160x600": {
@@ -1139,6 +1139,20 @@
                 "offers-2",
                 "offers-3"
               ]
+            },
+            {
+              "id": "logo-act1-hold-offers-0",
+              "label": "Logo Act1 fade (offers-0, hold to end)",
+              "preset": "fade",
+              "start": "start+5",
+              "end": "end",
+              "scopes": [
+                "offers-0"
+              ],
+              "params": {
+                "enter_duration_pct": 5,
+                "fade_pct": 4
+              }
             }
           ]
         },
@@ -1383,7 +1397,7 @@
               "id": "terms-prices-fade-offers-0-frames-3",
               "label": "terms-prices fade (offers-0 until green) (frames-3)",
               "preset": "fade",
-              "start": "terms_in",
+              "start": "offers0_act2_in",
               "end": "green_in",
               "scopes": [
                 "offers-0"
@@ -1401,7 +1415,7 @@
               "id": "terms-prices-fade-offers-0-frames-4",
               "label": "terms-prices fade (offers-0 until roundel) (frames-4)",
               "preset": "fade",
-              "start": "terms_in",
+              "start": "offers0_act2_in",
               "end": "roundel_in",
               "scopes": [
                 "offers-0"
@@ -1556,7 +1570,7 @@
               "id": "terms-solo-fade-offers-0-frames-3",
               "label": "terms-solo fade (offers-0 until green) (frames-3)",
               "preset": "fade",
-              "start": "terms_in",
+              "start": "offers0_act2_in",
               "end": "green_in",
               "scopes": [
                 "offers-0"
@@ -1574,7 +1588,7 @@
               "id": "terms-solo-fade-offers-0-frames-4",
               "label": "terms-solo fade (offers-0 until roundel) (frames-4)",
               "preset": "fade",
-              "start": "terms_in",
+              "start": "offers0_act2_in",
               "end": "roundel_in",
               "scopes": [
                 "offers-0"
@@ -3070,12 +3084,12 @@
           "scope": "cta-rect.frames-4.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
           "values": {
             "left": 176,
-            "top": 4,
+            "top": 9,
             "width": 73,
             "height": 48,
             "fontFamily": "Museo, Arial, sans-serif",
             "fontWeight": 700,
-            "fontSize": 12,
+            "fontSize": 10,
             "lineHeight": 1.05,
             "color": "rgb(255, 255, 255)",
             "textAlign": "center",
@@ -3086,7 +3100,7 @@
           },
           "fit": {
             "mode": "shrink",
-            "minFontSize": 18,
+            "minFontSize": 8,
             "maxLines": 3,
             "disabled": false,
             "wrap": true,
@@ -4070,7 +4084,7 @@
               "id": "terms-prices-fade-offers-0-frames-3",
               "label": "terms-prices fade (offers-0 until green) (frames-3)",
               "preset": "fade",
-              "start": "terms_in",
+              "start": "offers0_act2_in",
               "end": "green_in",
               "scopes": [
                 "offers-0"
@@ -4088,7 +4102,7 @@
               "id": "terms-prices-fade-offers-0-frames-4",
               "label": "terms-prices fade (offers-0 until roundel) (frames-4)",
               "preset": "fade",
-              "start": "terms_in",
+              "start": "offers0_act2_in",
               "end": "roundel_in",
               "scopes": [
                 "offers-0"
@@ -4240,7 +4254,7 @@
               "id": "terms-solo-fade-offers-0-frames-3",
               "label": "terms-solo fade (offers-0 until green) (frames-3)",
               "preset": "fade",
-              "start": "terms_in",
+              "start": "offers0_act2_in",
               "end": "green_in",
               "scopes": [
                 "offers-0"
@@ -4258,7 +4272,7 @@
               "id": "terms-solo-fade-offers-0-frames-4",
               "label": "terms-solo fade (offers-0 until roundel) (frames-4)",
               "preset": "fade",
-              "start": "terms_in",
+              "start": "offers0_act2_in",
               "end": "roundel_in",
               "scopes": [
                 "offers-0"
@@ -6778,7 +6792,7 @@
               "id": "terms-prices-fade-offers-0",
               "label": "terms-prices fade (offers-0 until green)",
               "preset": "fade",
-              "start": "terms_in",
+              "start": "offers0_act2_in",
               "end": "green_in",
               "scopes": [
                 "offers-0"
@@ -6907,7 +6921,7 @@
               "id": "terms-solo-fade-offers-0",
               "label": "terms-solo fade (offers-0 until green)",
               "preset": "fade",
-              "start": "terms_in",
+              "start": "offers0_act2_in",
               "end": "green_in",
               "scopes": [
                 "offers-0"
@@ -8489,32 +8503,6 @@
                   "scale": 1,
                   "opacity": 1
                 }
-              ],
-              "geometryEdits": [
-                {
-                  "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-frame-on.roundel-split.tc-solo",
-                  "offset": {
-                    "top": -11,
-                    "left": -7,
-                    "width": 10,
-                    "height": 12
-                  },
-                  "frames": {}
-                },
-                {
-                  "scope": "cta-rect.frames-4.navy-headlines.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
-                  "offset": {
-                    "top": 1
-                  },
-                  "frames": {}
-                },
-                {
-                  "scope": "cta-rect.frames-3.navy-headlines.offers-0.roundel-copy-only.roundel-frame-off.tc-solo",
-                  "offset": {
-                    "top": 1
-                  },
-                  "frames": {}
-                }
               ]
             }
           ]
@@ -9074,7 +9062,7 @@
               "id": "terms-prices-fade-offers-0",
               "label": "terms-prices fade (offers-0 until green)",
               "preset": "fade",
-              "start": "terms_in",
+              "start": "offers0_act2_in",
               "end": "green_in",
               "scopes": [
                 "offers-0"
@@ -9203,7 +9191,7 @@
               "id": "terms-solo-fade-offers-0",
               "label": "terms-solo fade (offers-0 until green)",
               "preset": "fade",
-              "start": "terms_in",
+              "start": "offers0_act2_in",
               "end": "green_in",
               "scopes": [
                 "offers-0"
@@ -10082,7 +10070,7 @@
           },
           "props": {
             "left": 30,
-            "top": 538,
+            "top": 528,
             "width": 100,
             "height": 36
           },
@@ -10856,6 +10844,38 @@
             "frame": "",
             "overflow": "clip"
           }
+        },
+        {
+          "targetId": "logo-act3",
+          "scope": "cta-rect.frames-3.offers-0.roundel-copy-only.roundel-frame-off.tc-solo",
+          "values": {
+            "top": 532
+          },
+          "fit": {}
+        },
+        {
+          "targetId": "terms-prices",
+          "scope": "cta-rect.frames-3.offers-0.roundel-copy-only.roundel-frame-off.tc-solo",
+          "values": {
+            "top": 580
+          },
+          "fit": {}
+        },
+        {
+          "targetId": "logo-act3",
+          "scope": "cta-rect.frames-4.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "values": {
+            "top": 529
+          },
+          "fit": {}
+        },
+        {
+          "targetId": "terms-prices",
+          "scope": "cta-rect.frames-4.offers-0.roundel-copy-only.roundel-frame-on.tc-solo",
+          "values": {
+            "top": 583
+          },
+          "fit": {}
         }
       ],
       "canvasGroups": [
@@ -11822,7 +11842,7 @@
               "id": "terms-prices-fade-offers-0",
               "label": "terms-prices fade (offers-0 until green)",
               "preset": "fade",
-              "start": "terms_in",
+              "start": "offers0_act2_in",
               "end": "green_in",
               "scopes": [
                 "offers-0"
@@ -11951,7 +11971,7 @@
               "id": "terms-solo-fade-offers-0",
               "label": "terms-solo fade (offers-0 until green)",
               "preset": "fade",
-              "start": "terms_in",
+              "start": "offers0_act2_in",
               "end": "green_in",
               "scopes": [
                 "offers-0"
@@ -14155,7 +14175,7 @@
               "id": "terms-prices-fade-offers-0",
               "label": "terms-prices fade (offers-0 until green)",
               "preset": "fade",
-              "start": "terms_in",
+              "start": "offers0_act2_in",
               "end": "green_in",
               "scopes": [
                 "offers-0"
@@ -14279,7 +14299,7 @@
               "id": "terms-solo-fade-offers-0",
               "label": "terms-solo fade (offers-0 until green)",
               "preset": "fade",
-              "start": "terms_in",
+              "start": "offers0_act2_in",
               "end": "green_in",
               "scopes": [
                 "offers-0"
@@ -16476,10 +16496,10 @@
       ],
       "areas": {
         "160x600": {
-          "left": 9.700468748807907,
-          "top": 536.662109375,
-          "width": 140.62445190548897,
-          "height": 57.12421894073486
+          "left": 9.843046873807907,
+          "top": 533.666015625,
+          "width": 139.26312378048897,
+          "height": 62.69453144073486
         }
       },
       "axis": "y",
@@ -16488,11 +16508,7 @@
       "minGap": 0,
       "overflow": "authored",
       "when": [
-        "offers-0",
-        "tc-solo",
-        "cta-rect",
-        "roundel-frame-on",
-        "navy-headlines"
+        "offers-0"
       ],
       "layoutAnimations": [
         {

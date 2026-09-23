@@ -72,6 +72,19 @@ export const OFFERS_0_BEAT_OVERLAY = {
 /** Greenwave fade-in window before Act 4 (~0.5s of a 15s timeline). */
 export const OFFERS_0_GREEN_FADE_PCT = 3.3;
 
+/**
+ * Offers-0 photo headlines equal-split [act1_in, green_in). T&Cs enter with
+ * the second of those acts: two acts when the roundel is off, three when it
+ * is on. This is the authored storyboard (every eligible photo act has copy).
+ */
+export const offers0Act2In = (beats: Record<string, number> = {}) => {
+  const act1 = Number(beats.act1_in ?? 0);
+  const greenIn = Number(beats.green_in ?? act1);
+  const slots = beats.act3_in != null || beats.act3_out != null ? 3 : 2;
+  const span = Math.max(0.01, greenIn - act1);
+  return Number((act1 + span / slots).toFixed(4));
+};
+
 export const applyOffers0BeatOverlay = (beats: Record<string, number> = {}) => {
   const next = {
     ...beats,
@@ -80,6 +93,7 @@ export const applyOffers0BeatOverlay = (beats: Record<string, number> = {}) => {
   const act4 = Number(next.act4_in ?? next.bn_cta_in ?? next.cta_in ?? 100);
   const greenIn = Math.round((act4 - OFFERS_0_GREEN_FADE_PCT) * 1000) / 1000;
   next.green_in = Math.max(0, Math.min(100, greenIn));
+  next.offers0_act2_in = offers0Act2In(next);
   return next;
 };
 export const beatsForScopes = (

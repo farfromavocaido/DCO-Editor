@@ -24,7 +24,7 @@ test('failed linked edits do not partially modify any member',()=>{
 test('timing references are explicit and key beats are a curated subset',()=>{
  const d=setup();d.sizes.square.layers[0].clips=[{id:'a',label:'enter',preset:'fade',start:'enter + 2',end:'exit'}];
  expect(clipBeatReferences(d.sizes.square.layers[0].clips[0],d.clock.beats)).toEqual(['enter','exit']);
- expect(keyTimelineBeats(d,d.clock.beats)).toEqual(['enter','exit']);
+ expect(keyTimelineBeats(d,d.clock.beats)).toEqual([]);d.clock.timelineBeats=['enter','exit'];
  const selected=setKeyTimelineBeat(d,'exit',false,d.clock.beats);expect(keyTimelineBeats(selected,d.clock.beats)).toEqual(['enter']);
  const moved=moveTimelineBeat(d,'enter',2,['frames-3']);expect(moved.clock.profiles['frames-3'].enter).toBe(20);expect(d.clock.beats.enter).toBe(10);
  const source=d.sizes.square.layers[0].clips[0],detached=detachClipTiming(source,d.clock.beats,10);

@@ -1,5 +1,7 @@
 // @ts-nocheck
 'use client';
+import {validateLayerStacks,moveLayerIntoStack} from '@/lib/layer-stacks';
+import {timelineMotionClips} from '@/lib/motion-overrides';
 import {replaceLinkedMotion} from '@/lib/timeline-relationships';
 
 import {editKeyframe,editableKeyframes,keyframeClip} from '@/lib/keyframe-editing';
@@ -499,7 +501,7 @@ export const useEditorStore = create<any>((set, get) => ({
     if (!layer) return null;
     const scopes = state.activeScopes();
     const profile = activeFrameScope(scopes);
-    const clips = clipsForProfile(layer.clips || [], profile, scopes);
+    const clips = timelineMotionClips(layer, scopes);
     return clips.find((clip) => clip.id === state.selectedClipId) || clips[0] || null;
   },
 
@@ -741,7 +743,7 @@ export const useEditorStore = create<any>((set, get) => ({
   },
   editSelectedKeyframe: (patch) => {
     const s=get(),selection=s.selectedKeyframe;if(!selection)return;
-    const clip=findCreativeLayer(s.creativeDocument,s.size,selection.layerId)?.clips.find(c=>c.id===selection.clipId);if(!clip)return;
+    const sourceLayer=findCreativeLayer(s.creativeDocument,s.size,selection.layerId);const clip=[...(sourceLayer?.clips||[]),...(sourceLayer?.motionOverrides||[])].find(c=>c.id===selection.clipId);if(!clip)return;
     const context={canvas:s.creativeDocument.sizes[s.size].canvas,parent:s.creativeDocument.sizes[s.size].canvas,durationS:s.creativeDocument.clock.durationS};
     const beats=beatsForScopes(s.creativeDocument,s.activeScopes());let source=clip;
     for(const field of ['left','top','width','height'])if(patch[field]!==undefined&&!(source.keyframes||[]).some(f=>f[field]!==undefined)){
@@ -755,7 +757,7 @@ export const useEditorStore = create<any>((set, get) => ({
   },
   removeSelectedKeyframe: () => {
     const s=get(),selection=s.selectedKeyframe;if(!selection)return;
-    const clip=findCreativeLayer(s.creativeDocument,s.size,selection.layerId)?.clips.find(c=>c.id===selection.clipId);if(!clip)return;
+    const sourceLayer=findCreativeLayer(s.creativeDocument,s.size,selection.layerId);const clip=[...(sourceLayer?.clips||[]),...(sourceLayer?.motionOverrides||[])].find(c=>c.id===selection.clipId);if(!clip)return;
     if(clip.geometryEdits?.length)throw new Error('This animation has indexed position offsets; edit existing keyframes instead');
     const next=keyframeClip(clip,beatsForScopes(s.creativeDocument,s.activeScopes()),{canvas:s.creativeDocument.sizes[s.size].canvas,parent:s.creativeDocument.sizes[s.size].canvas,durationS:s.creativeDocument.clock.durationS});
     if(next.keyframes.length<=2)throw new Error('Keep at least a start and end keyframe');
@@ -763,6 +765,8 @@ export const useEditorStore = create<any>((set, get) => ({
   },
   replaceEditorClip: (layerId,clipId,clip) => {
     const state=get(),before=state.creativeDocument;
+    const overrideLayer=findCreativeLayer(before,state.size,layerId);
+    if(overrideLayer?.motionOverrides?.some(o=>o.id===clipId)){const next=structuredClone(before),target=findCreativeLayer(next,state.size,layerId);target.motionOverrides=target.motionOverrides.map(o=>o.id===clipId?{...clip,when:o.when}:o);set({creativeDocument:next,creativeDirty:true});get().pushHistory([{kind:'creativeDocument',before,after:next}]);return;}
     if(state.motionEditScope==='linked'&&state.selectedLayerId===layerId&&state.selectedClipId===clipId){
       const canvas=before.sizes[state.size].canvas;const next=replaceLinkedMotion(before,state.size,layerId,clipId,clip,beatsForScopes(before,state.activeScopes()),{canvas,parent:canvas,durationS:before.clock.durationS});
       set({creativeDocument:next,creativeDirty:true});get().pushHistory([{kind:'creativeDocument',before,after:next}]);return;
@@ -823,9 +827,11 @@ export const useEditorStore = create<any>((set, get) => ({
     const state = get();
     const targetId = layerId || state.selectedLayerId;
     if (!targetId || !state.creativeDocument) return;
-    const next = duplicateCreativeLayer(state.creativeDocument, state.size, targetId);
+    let next = duplicateCreativeLayer(state.creativeDocument, state.size, targetId);
     const layers = currentSizeCreative(next, state.size)?.layers || [];
     const copy = layers[layers.length - 1];
+    if(copy?.motionOverrides)copy.motionOverrides=copy.motionOverrides.map(o=>({...o,id:`${copy.id}-${o.id}`}));
+    const stack=state.creativeDocument.sizes[state.size].timelineFolders?.find(g=>g.members.includes(targetId));if(stack&&copy)next=moveLayerIntoStack(next,state.size,copy.id,stack.id);
     set({
       creativeDocument: next,
       creativeDirty: true,
@@ -848,6 +854,7 @@ export const useEditorStore = create<any>((set, get) => ({
       return;
     }
     const next = deleteCreativeLayer(state.creativeDocument, state.size, targetId);
+    for(const stack of next.sizes[state.size].timelineFolders||[])stack.members=stack.members.filter(id=>id!==targetId);
     const lockedLayerIds = new Set(state.lockedLayerIds);
     const hiddenLayerIds = new Set(state.hiddenLayerIds);
     lockedLayerIds.delete(targetId);
@@ -891,6 +898,7 @@ export const useEditorStore = create<any>((set, get) => ({
     const targetId = layerId || state.selectedLayerId;
     if (!targetId || !direction || !state.creativeDocument) return;
     const next = reorderCreativeLayerZ(state.creativeDocument, state.size, targetId, direction);
+    try{validateLayerStacks(next);}catch(e){get().setStatus(e.message,'error');return;}
     set({ creativeDocument: next, creativeDirty: true });
     get().setStatus(direction > 0 ? 'Moved layer forward' : 'Moved layer backward', 'warn');
   },
@@ -900,6 +908,7 @@ export const useEditorStore = create<any>((set, get) => ({
     const targetId = layerId || state.selectedLayerId;
     if (!targetId || !state.creativeDocument) return;
     const next = moveCreativeLayerToZIndex(state.creativeDocument, state.size, targetId, targetIndex);
+    try{validateLayerStacks(next);}catch(e){get().setStatus(e.message,'error');return;}
     set({
       creativeDocument: next,
       creativeDirty: true,

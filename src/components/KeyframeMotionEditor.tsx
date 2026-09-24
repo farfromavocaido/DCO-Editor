@@ -1,5 +1,6 @@
 // @ts-nocheck
 'use client';
+import {timelineMotionClips,activeMotionOverride} from '@/lib/motion-overrides';
 import {MotionRelationships} from './MotionRelationships';
 import {MotionTimingControls} from './MotionTimingControls';
 import {MotionDistanceControls} from './MotionDistanceControls';
@@ -27,8 +28,8 @@ function TimingReference({value,onCommit}){
 export function KeyframeMotionEditor({layer,clip:resolvedClip,beats,canvas,durationS}){
  const scopes=useEditorStore.getState().activeScopes();
  const document=useEditorStore(s=>s.creativeDocument),view=useEditorStore(s=>s.motionView),transitionSelection=useEditorStore(s=>s.selectedTransition);
- const available=clipsForProfile(layer.clips||[],activeFrameScope(scopes),scopes);
- const clip=layer.clips?.find(c=>c.id===resolvedClip?.id)||resolvedClip;
+ const available=timelineMotionClips(layer,scopes);
+ const clip=layer.motionOverrides?.find(c=>c.id===resolvedClip?.id)||layer.clips?.find(c=>c.id===resolvedClip?.id)||resolvedClip;
  const selection=useEditorStore(s=>s.selectedKeyframe),percent=useEditorStore(s=>s.percent),[error,setError]=useState('');
  const context={canvas,parent:canvas,durationS},frames=clip?editableKeyframes(clip,beats,context):[];
  const transitions=clip?motionTransitions(clip,beats,context):[];
@@ -47,6 +48,7 @@ export function KeyframeMotionEditor({layer,clip:resolvedClip,beats,canvas,durat
  return <div className="keyframe-motion-editor">
  <label className="inspector-field"><span title="One animation sequence on this layer; it can contain several transitions.">Animation sequence</span><select aria-label="Selected animation" value={clip?.id||''} onChange={e=>useEditorStore.getState().selectClip(layer.id,e.target.value)}>{!clip&&<option value="">No animation</option>}{available.map(c=><option key={c.id} value={c.id}>{animationLabel(c)}</option>)}</select></label>
  {clip&&<>
+ {activeMotionOverride(layer,scopes)&&<button title="Remove this version’s independent motion and return to the campaign’s timing rules" onClick={()=>{const next=structuredClone(document),target=next.sizes[useEditorStore.getState().size].layers.find(l=>l.id===layer.id);target.motionOverrides=target.motionOverrides.filter(o=>o.id!==clip.id);useEditorStore.getState().applyCreativeOwnershipDocument(next,'Restored campaign timing');}}>Use campaign timing</button>}
  <MotionRelationships layer={layer} clip={clip} beats={beats}/>
  <div className="inspector-grid">{number('Animation starts (s)',start*durationS/100,v=>attempt(()=>replace(retimeClip(clip,v/durationS*100,v/durationS*100+(end-start),beats,context))))}{number('Animation duration (s)',(end-start)*durationS/100,v=>attempt(()=>replace(retimeClip(clip,start,start+v/durationS*100,beats,context))),{min:.01})}</div>
  <div className="motion-view-toggle" role="group" aria-label="Motion detail"><button aria-pressed={view!=='keyframes'} onClick={()=>useEditorStore.setState({motionView:'transitions'})}>Transitions</button><button aria-pressed={view==='keyframes'} onClick={()=>useEditorStore.setState({motionView:'keyframes'})}>Keyframes</button></div>

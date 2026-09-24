@@ -86,9 +86,13 @@ export async function captureProductionPresentation(html: string, size: string):
     // Pausing at t=0 alone leaves enter scales/translations on the elements.
     const result = await page.evaluate((captureSize) => {
       const stage = document.querySelector<HTMLElement>('.stage')!;
-      for (const animation of document.getAnimations()) animation.cancel();
+      for (const animation of document.getAnimations()) {
+        const target=(animation.effect as KeyframeEffect | null)?.target as HTMLElement | null;
+        if(target?.style){target.style.setProperty('animation','none','important');target.style.setProperty('transform',target.style.getPropertyValue('transform')||'none','important');}
+        animation.cancel();
+      }
       const style = document.createElement('style');
-      style.textContent = '.stage *, .stage { animation: none !important; }';
+      style.textContent = '.stage *, .stage { animation: none !important; } [data-stack-root] { transform: none !important; opacity: 1 !important; }';
       document.head.appendChild(style);
       return (window as unknown as { __captureProductionPresentation: (stage: HTMLElement, size: string) => SizePresentationSnapshot }).__captureProductionPresentation(stage, captureSize);
     }, size);

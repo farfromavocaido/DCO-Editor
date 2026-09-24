@@ -1,4 +1,6 @@
 // @ts-nocheck
+import {resolveClipGeometry} from '@/lib/clip-geometry';
+import {wrapStackHtml} from '@/lib/layer-stacks';
 import {validatePositionControls} from '@/lib/position-validation';
 import {layoutRulesForSize} from '@/lib/layout-rules';
 import {layoutAnimationSource} from '@/lib/layout-transitions';
@@ -627,6 +629,7 @@ ${[
         keyframe.width !== undefined ? `        width: ${px(keyframe.width)};` : '',
         keyframe.height !== undefined ? `        height: ${px(keyframe.height)};` : '',
         keyframe.opacity !== undefined ? `        opacity: ${keyframe.opacity};` : '',
+        keyframe.color ? `        color: ${String(keyframe.color).replace(/[;{}<>]/g,'')};` : '',
         keyframe.easing ? `        animation-timing-function: ${keyframe.easing};` : '',
       ].filter(Boolean).join('\n')}
       }`;
@@ -1519,6 +1522,15 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
   // groups their selection. Selection groups never redefine motion units.
   const motionContext: MotionContext = { canvas: sizeCreative.canvas, parent: sizeCreative.canvas, durationS: duration };
   const defaultBeats = beatsForFrameScope(document, 'frames-3');
+  const independentMotionCss=sizeCreative.layers.flatMap(layer=>(layer.motionOverrides||[]).map(override=>{
+    const selectorId=layer.id==='terms-solo'?'TC_Solo':layer.id.replace(/^offer-slot-(\d+)$/,'offer$1');
+    const name=override.id;
+    const idSelector='#'+Array.from(String(selectorId)).map(char=>'\\'+char.codePointAt(0).toString(16)+' ').join('');
+    const scopes=override.when||[];
+    const frames=compileAnimationClips([resolveClipGeometry(override,scopes)],beatsForScopes(document,scopes),motionContext);
+    const css=renderKeyframes(name,frames);
+    return `${css}\n.stage${scopes.map(s=>'.'+s).join('')} ${idSelector} { animation: ${layerAnimationShorthand(duration,name,{loop,important:true})}; }`;
+  })).join('\n');
   const layerCss = sizeCreative.layers.map((layer) => staticRuleForLayer(layer, defaultBeats, { motionContext, generic: isGenericCampaign(document) })).join('\n\n');
   const defaultAnimationCss = sizeCreative.layers
     .map((layer) => animationCssForLayer(layer, defaultBeats, duration, { loop, motionContext }))
@@ -1680,6 +1692,7 @@ ${offers0AnimationCss}
 ${geometryMotionCss}
 
 ${fixedHeadlineMotionCss}
+${independentMotionCss}
 `;
 };
 
@@ -1810,7 +1823,7 @@ export const renderStudioReadyHtml = async (
       durationS: document.clock.durationS,
       loop: clockLoops(document.clock),
     });
-  const body = await renderBody(document, size, resolvedOptions);
+  const body = wrapStackHtml(await renderBody(document, size, resolvedOptions), sizeCreative);
   const title = `${escapeHtml(document.campaign?.name || 'SSE DCO')} ${escapeHtml(size)}`;
   const isStatic = isStaticDelivery(resolvedOptions);
   const environmentMeta = isStatic ? '' : '    <meta name="environment" content="dv360">\n';

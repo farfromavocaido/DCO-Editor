@@ -5,7 +5,7 @@ import { CDN_FONT_URLS } from '@/lib/brand-font';
 import { readCreativeDocumentForCampaign } from '@/server/creative-document';
 import { renderStudioReadyHtml, renderWipHtml } from '@/server/creative-exporter';
 
-const previewFonts=(document:any)=>document.fonts===undefined?CDN_FONT_URLS:Object.fromEntries(campaignFontFaces(document).map(face=>[path.basename(face.asset),face.cdnUrl]));
+const previewFonts=(document:any)=>document.fonts===undefined?CDN_FONT_URLS:Object.fromEntries(campaignFontFaces(document).flatMap(face=>face.cdnUrl?[[path.basename(face.asset),face.cdnUrl]]:[]));
 
 type PreviewOptions = {
   renderMode?: 'font' | 'outline';

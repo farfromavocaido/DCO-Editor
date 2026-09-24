@@ -3,6 +3,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import {sharedLayerTree} from '@/lib/layer-stacks';
+import {beginLayerTreeDrag} from '@/lib/editor-layer-drag';
+import {TimelineFolder,NewTimelineFolder} from './TimelineOrganisation';
 import {feedFieldForEditableTarget} from '@/lib/preview-utils';
 import { EditorIcon } from '@/components/EditorIcon';
 import {CreativeContextMenu} from './CreativeContextMenu';
@@ -97,7 +100,7 @@ export function LayerTree() {
   }, [focusFeedFieldRequest, ensureSampleOpen]);
 
   const sizeCreative = currentSizeCreative(document, size);
-  const zOrderedLayers = [...(sizeCreative?.layers || [])].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+  const zOrderedLayers = [...(sizeCreative?.layers || [])].sort((a, b) => (b.zIndex || 0) - (a.zIndex || 0));
   const zOrderedLayerIds = zOrderedLayers.map((layer) => layer.id);
   const components = creativeComponents(document, size);
   const componentLayerIds = new Set(components.flatMap((component) => component.parts.map((part) => part.targetId).filter((id) => !id.includes('::'))));
@@ -131,47 +134,7 @@ export function LayerTree() {
     return nextIndex;
   };
 
-  const startLayerPointerDrag = (event, layerId) => {
-    if (event.button !== 0) return;
-    event.preventDefault();
-    event.stopPropagation();
-    setDraggingLayerId(layerId);
-    setDropTargetLayerId('');
-    let latestTargetId = '';
-    let latestTargetRect = null;
-    let latestClientY = event.clientY;
-
-    const onMove = (moveEvent) => {
-      latestClientY = moveEvent.clientY;
-      const row = window.document.elementFromPoint(moveEvent.clientX, moveEvent.clientY)
-        ?.closest('.layer-row[data-layer-id], .timeline-row[data-layer-id]');
-      const targetLayerId = row?.getAttribute('data-layer-id') || '';
-      if (!targetLayerId || targetLayerId === layerId || !zOrderedLayerIds.includes(targetLayerId)) {
-        latestTargetId = '';
-        latestTargetRect = null;
-        setDropTargetLayerId('');
-        return;
-      }
-      latestTargetId = targetLayerId;
-      latestTargetRect = row.getBoundingClientRect();
-      setDropTargetLayerId(targetLayerId);
-    };
-
-    const onUp = () => {
-      if (latestTargetId && latestTargetRect) {
-        const nextIndex = targetIndexFromRect(latestClientY, layerId, latestTargetId, latestTargetRect);
-        if (nextIndex >= 0) moveLayerToZIndex(layerId, nextIndex);
-      }
-      finishLayerDrag();
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onUp);
-      window.removeEventListener('pointercancel', onUp);
-    };
-
-    window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp, { once: true });
-    window.addEventListener('pointercancel', onUp, { once: true });
-  };
+  const startLayerPointerDrag=beginLayerTreeDrag;
 
   const layerDragClass = (layerId) => [
     draggingLayerId === layerId ? 'is-dragging-layer' : '',
@@ -589,50 +552,9 @@ export function LayerTree() {
         {layersOpen ? (
           <div className="sidebar-section-body layer-section-body">
             <div className="layer-group-list">
-              {components.map((component) => (
-                <section className="layer-group" key={component.id}>
-                  <div className={`layer-row ${activeTargetId === component.id || selectedTargetIds.includes(component.id) ? 'is-selected' : ''}`}>
-                    <button type="button" className="layer-row-main" aria-label={`${component.name} component`}
-                      onClick={(event) => handleTreeTargetClick(event, component.id, () => setCanvasSelection(component.id, [component.id]))}
-                      onDoubleClick={() => setCanvasSelection(component.parts[0].targetId, [component.parts[0].targetId], [component.id])}>
-                      <EditorIcon name="group" /><span className="layer-name">{component.name}</span>
-                    </button>
-                  </div>
-                  <div className="layer-child-list">
-                    {component.parts.map((part) => {
-                      const layer = layerById.get(part.targetId);
-                      return layer ? renderLayerItem(layer) : (
-                        <button key={part.targetId} type="button" className="layer-row-main"
-                          onClick={(event) => handleTreeTargetClick(event, part.targetId, () => setCanvasSelection(part.targetId, [part.targetId], [component.id]))}>
-                          {findCreativeTarget(document, size, part.targetId, activeScopes)?.label || part.role}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </section>
-              ))}
-              <section className="layer-group">
-                <h3>Canvas groups</h3>
-                <label>Group name<input value={canvasGroupName} onChange={(event) => setCanvasGroupName(event.target.value)} /></label>
-                <button type="button" disabled={selectedTargetIds.length < 2} onClick={() => { try { groupTargets(canvasGroupName); setGroupError(''); } catch (error) { setGroupError(error.message); } }}>Group selected items</button>
-                <button type="button" disabled={!selectedTargetIds.some((id) => String(id).startsWith('canvas-group:'))} onClick={ungroupTargets}>Ungroup selected groups</button>
-                {groupError ? <p role="alert">{groupError}</p> : null}
-                {(sizeCreative?.canvasGroups || []).map((group) => <div key={group.id} onContextMenu={event=>openTargetMenu(event,group.id,group.name)}>
-                  <button type="button" className={`layer-row-main ${(selectedTargetId === group.id || selectedTargetIds.includes(group.id)) ? 'is-selected' : ''}`} onClick={(event) => handleTreeTargetClick(event,group.id,() => setCanvasSelection(group.id,[group.id]))}><EditorIcon name="group" /> {group.name} · {group.members.length} items</button>
-                  <div className="layer-child-list">{group.members.map((member) => <button key={member} type="button" className="layer-row-main" onClick={(event) => handleTreeTargetClick(event,member,() => setCanvasSelection(member,[member],[group.id]))}>{findCreativeTarget(document,size,member,activeScopes)?.label || member}</button>)}</div>
-                </div>)}
-              </section>
-              {groups.map((group) => (
-                <section className="layer-group" key={group.label}>
-                  <h3>{group.label}</h3>
-                  <div className="layer-list">
-                    {offerCount >= 2 && group.layers.some((layer) => isOfferLayerId(layer.id)) ? renderOfferBlockItem(group.layers) : null}
-                    {group.layers
-                      .filter((layer) => offerCount < 2 || !isOfferLayerId(layer.id))
-                      .map((layer) => renderLayerItem(layer))}
-                  </div>
-                </section>
-              ))}
+              <div className="layer-tree-tools"><NewTimelineFolder/><small>Front → back · shared with timeline</small></div>
+              {sharedLayerTree(document,size).map(entry=>entry.layer?renderLayerItem(entry.layer):<TimelineFolder key={entry.id} entry={entry} sidebar>{entry.layers.map(renderLayerItem)}</TimelineFolder>)}
+              <div className="stack-drop-zone" data-stack-drop="">Drop here to move out of a stack</div>
             </div>
           </div>
         ) : null}

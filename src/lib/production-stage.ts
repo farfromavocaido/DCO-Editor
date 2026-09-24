@@ -122,17 +122,24 @@ export function withProductionRestPose<T>(stage: HTMLElement, capture: () => T):
     playState: animation.playState,
   }));
   doc.getAnimations().filter(animation=>String(animation.id||'').startsWith('dco-layout-')).forEach(animation=>{animation.pause();animation.currentTime=0;});
+  // Inline !important also overrides scoped independent motion and runtime
+  // headline rules, whose ID specificity beats the neutral stylesheet below.
+  const animationStyles = [...new Set(doc.getAnimations().map(animation => (animation.effect as KeyframeEffect | null)?.target))]
+    .filter((target): target is HTMLElement => Boolean(target && 'style' in target))
+    .map(target => ({ target, cssText: target.style.cssText, transform: target.style.getPropertyValue('transform') }));
+  animationStyles.forEach(({target,transform}) => { target.style.setProperty('animation', 'none', 'important'); target.style.setProperty('transform',transform || 'none','important'); });
   const hiddenStyle = doc.querySelector<HTMLStyleElement>('style[data-editor-hidden-layers]');
   const hiddenRules = hiddenStyle?.textContent || '';
   if (hiddenStyle) hiddenStyle.textContent = '';
   const style = doc.createElement('style');
-  style.textContent = '.stage, .stage *, .stage *::before, .stage *::after { animation: none !important; }';
+  style.textContent = '.stage, .stage *, .stage *::before, .stage *::after { animation: none !important; } [data-stack-root] { transform: none !important; opacity: 1 !important; }';
   doc.head.append(style);
   try {
     stage.getBoundingClientRect();
     return capture();
   } finally {
     style.remove();
+    animationStyles.forEach(({target,cssText}) => { target.style.cssText=cssText; });
     if (hiddenStyle) hiddenStyle.textContent = hiddenRules;
     for (const animation of doc.getAnimations()) {
       const previous = times.find(item => item.target === (animation.effect as KeyframeEffect | null)?.target

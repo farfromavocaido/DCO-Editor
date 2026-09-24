@@ -13,6 +13,7 @@ export function motionTransitions(clip, beats, context) {
     const next = frames[i + 1];
     if (next.at <= frame.at) return [];
     const from = frameAtPercent(compiled, frame.at), to = frameAtPercent(compiled, next.at);
+    if(from.opacity===0&&to.opacity===0)return [];
     const changed = channels.filter(key => !equal(from[key], to[key]));
     if (!changed.length) return [];
     const labels = [];
@@ -22,6 +23,7 @@ export function motionTransitions(clip, beats, context) {
     if (changed.includes('color')) labels.push('Colour');
     return [{ id: `${frame.index}:${next.index}`, fromIndex: frame.index, toIndex: next.index,
       start: frame.at, end: next.at, from, to, channels: changed,
+      anchor:clip.transitionAnchors?.[`${frame.index}:${next.index}`]||(clip.preset==='custom'?'both':i===frames.length-2?'end':'start'),
       label: labels.join(' + '), easing: frame.frame.easing || 'linear' }];
   });
 }
@@ -36,6 +38,7 @@ export function retimeTransition(clip, transition, start, end, beats, context) {
   const upper = i + 2 < frames.length ? frames[i + 2].at : 100.001;
   if (![start, end].every(Number.isFinite) || start < 0 || end > 100 || start >= end || start <= lower || end >= upper)
     throw new Error('Keep this transition inside the ad and between its neighbouring keyframes');
+  next.transitionAnchors={...next.transitionAnchors,[transition.id]:transition.anchor||'both'};
   next.keyframes[transition.fromIndex].at = start;
   next.keyframes[transition.toIndex].at = end;
   return next;

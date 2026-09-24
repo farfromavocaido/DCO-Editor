@@ -1,6 +1,7 @@
 // @ts-nocheck
 'use client';
 
+import {ResolvedMotionEditor} from './ResolvedMotionEditor';
 import {KeyframeMotionEditor} from './KeyframeMotionEditor';
 import {motionGeometry,editMotionGeometry} from '@/lib/motion-geometry';
 import {TextAnchorControls} from './TextAnchorControls';
@@ -143,6 +144,7 @@ export function CreativeInspector() {
   const includeRoundelFrame = useEditorStore((s) => s.includeRoundelFrame);
   const frameCount = useEditorStore((s) => s.frameCount);
   const roundelMode = useEditorStore((s) => s.roundelMode);
+  const timelineResolvedMotion=useEditorStore(s=>s.timelineResolvedMotion);
   const selectedLayer = useEditorStore((s) => s.selectedLayer());
   const selectedClip = useEditorStore((s) => s.selectedClip());
   const updateGroupedTargetValue = useEditorStore((s) => s.updateCreativeTargetValue);
@@ -626,7 +628,7 @@ export function CreativeInspector() {
           {selectedTarget.kind === 'nested' ? (
             <p className="inspector-note">Nested offer items inherit animation from {selectedLayer.label || selectedLayer.id}. Select the parent slot to edit motion directly.</p>
           ) : null}
-          {isGroupedSelection?<p className="inspector-note">Select a layer or timeline clip to edit its keyframes.</p>:<KeyframeMotionEditor layer={selectedLayer} clip={selectedClip} beats={activeBeats} canvas={sizeCreative.canvas} durationS={durationS}/>}
+          {isGroupedSelection?<p className="inspector-note">Select a layer or timeline clip to edit its keyframes.</p>:timelineResolvedMotion?.layers?.[selectedLayer.id]?.motion?<ResolvedMotionEditor layer={selectedLayer} report={timelineResolvedMotion.layers[selectedLayer.id].motion} beats={activeBeats} canvas={sizeCreative.canvas} durationS={durationS}/>:<KeyframeMotionEditor layer={selectedLayer} clip={selectedClip} beats={activeBeats} canvas={sizeCreative.canvas} durationS={durationS}/>}
 
         </InspectorSection>
         ) : null}

@@ -71,7 +71,7 @@ const SOURCE=String.raw`(function(win){
  function edge(r,e,axis){return axis==='x'?(e==='start'?r.left:e==='end'?r.right:r.left+r.width/2):(e==='start'?r.top:e==='end'?r.bottom:r.top+r.height/2);}
  function local(r,root){if(!r)return null;var b=root.getBoundingClientRect();return box({left:r.left-b.left,top:r.top-b.top,width:r.width,height:r.height});}
  function anchorText(root,rules,resolve){
-  var neutral=doc.createElement('style');neutral.textContent='.stage,.stage *{animation:none!important}';doc.head.append(neutral);var diagnostics=[];
+  var neutral=doc.createElement('style');neutral.textContent='.stage,.stage *{animation:none!important}[data-stack-root]{transform:none!important;opacity:1!important}';doc.head.append(neutral);var diagnostics=[];
   try{rules.forEach(function(raw){var rule=resolve(raw,root);if(!rule||rule.disabled||!rule.anchor)return;
    root.querySelectorAll(rule.selector||'.'+rule.cssClass).forEach(function(el){
     if((rule.excludeTargets||[]).some(function(t){return el.matches(t.selector)&&t.scopes.some(scope=>!scope||scope.split('.').every(s=>root.classList.contains(s)));}))return;
@@ -88,7 +88,7 @@ const SOURCE=String.raw`(function(win){
  function matches(c,f){return c.test==='has-text'?f.hasText:c.test==='empty'?!f.hasText:c.test==='shown'?f.shown:c.test==='hidden'?!f.shown:c.test==='lines-at-least'?f.lines>=c.value:c.test==='lines-at-most'?f.lines<=c.value:c.test==='lines-equal'?f.lines===c.value:f.height>=c.value;}
  var conditionalStyle=null;
  function run(root,rules,refit){
-  diagnostics=[];var motionPlans=[];var neutral=doc.createElement('style');neutral.textContent='.stage,.stage *,.stage *::before,.stage *::after{animation:none!important;transition:none!important}';doc.head.append(neutral);
+  diagnostics=[];var motionPlans=[];var neutral=doc.createElement('style');neutral.textContent='.stage,.stage *,.stage *::before,.stage *::after{animation:none!important;transition:none!important}[data-stack-root]{transform:none!important;opacity:1!important}';doc.head.append(neutral);
   var css=[],records=[...rules].sort((a,b)=>Number(b.type==='conditional')-Number(a.type==='conditional')).map(function(rule,index){var ids=rule.members||[rule.targetId];return {rule:rule,index:index,ids:ids,done:false,visiting:false};});
   function diagnostic(rule,id,status){var item={id:rule.id,name:rule.name,targetId:id,size:rule.size,status:status};diagnostics.push(item);return item;}
   function process(record){

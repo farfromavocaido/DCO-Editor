@@ -1,4 +1,6 @@
 // @ts-nocheck
+import {validateLayerStacks} from '@/lib/layer-stacks';
+import {validateMotionOverrides} from '@/lib/motion-overrides';
 import {validatePositionControls} from '@/lib/position-validation';
 import {validateLayoutRules} from '@/lib/layout-rules';
 import {validateCampaignFonts} from '@/lib/campaign-fonts';
@@ -51,6 +53,8 @@ export const validateCreativeDocument = (document: CreativeDocument) => {
   }
   validateCampaignVariantModel(document);
   validatePositionControls(document);
+  validateMotionOverrides(document);
+  validateLayerStacks(document);
   validateLayoutRules(document);
   validateCampaignFonts(document);
   materializeCreativeOwnership(document);

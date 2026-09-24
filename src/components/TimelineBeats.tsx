@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useEditorStore } from '@/store/editor-store';
 import { beatLabel, addTimelineBeat, renameTimelineBeat, keyTimelineBeats, setKeyTimelineBeat, moveTimelineBeat } from '@/lib/timeline-beats';
+import {timelineMotionClips} from '@/lib/motion-overrides';
 import {clipBeatReferences} from '@/lib/timeline-relationships';
 import {clipsForProfile} from '@/lib/headline-motion';
 import {activeFrameScope} from '@/lib/timing-profiles';
@@ -12,7 +13,7 @@ export function TimelineBeats({ document, beats, percent, onClose }) {
   const [error,setError]=useState('');
   const scopes=useEditorStore.getState().activeScopes(),size=useEditorStore.getState().size;
   useEffect(()=>{setName(selected?beatLabel(document,selected):'');setTime(String(Number(((selected?beats[selected]:percent)*document.clock.durationS/100).toFixed(3))));setError('');},[selected,document.clock]);
-  const refs=(document.sizes[size]?.layers||[]).flatMap(layer=>clipsForProfile(layer.clips||[],activeFrameScope(scopes),scopes).filter(clip=>clipBeatReferences(clip,beats).includes(selected)).map(clip=>({layer,clip})));
+  const refs=(document.sizes[size]?.layers||[]).flatMap(layer=>timelineMotionClips(layer,scopes).filter(clip=>clipBeatReferences(clip,beats).includes(selected)).map(clip=>({layer,clip})));
   const publish=next=>useEditorStore.getState().applyCreativeOwnershipDocument({...document,clock:next.clock},'Updated timeline beat');
   const apply=()=>{try{
     if(!time.trim())throw new Error('Enter a time for the beat');

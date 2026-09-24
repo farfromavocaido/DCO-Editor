@@ -8,6 +8,7 @@ export const browserTests = [
  'src/server/__tests__/campaign-runtime.test.ts',
  'src/server/__tests__/creative-exporter.test.ts',
  'src/server/__tests__/motion-layout.test.ts',
+ 'src/server/__tests__/timeline-output.test.ts',
  'src/server/__tests__/outline-headline-motion.test.ts',
  'src/server/__tests__/production-snapshot.test.ts',
  'src/server/__tests__/render-creative-preview.test.ts',

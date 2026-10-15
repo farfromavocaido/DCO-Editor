@@ -222,6 +222,22 @@ test('preserves explicit offer count 0 and derives offers-0 scope', () => {
     navyHeadlines: false,
   });
 
+  assert.equal(controlsFromFeedRow({
+    offer_count_num: 0,
+    navy_headlines_bool: true,
+    navy_headlines_bool_160x600: false,
+  }, '300x250').navyHeadlines, true);
+  assert.equal(controlsFromFeedRow({
+    offer_count_num: 0,
+    navy_headlines_bool: true,
+    navy_headlines_bool_160x600: false,
+  }, '160x600').navyHeadlines, false);
+  assert.equal(controlsFromFeedRow({
+    offer_count_num: 0,
+    navy_headlines_bool: true,
+    navy_headlines_bool_160x600: '',
+  }, '160x600').navyHeadlines, true);
+
   assert.deepEqual(activeScopesFromControls({
     offerCount: 0,
     tcMode: 'tcs_units',

@@ -4,7 +4,7 @@ Profile: **`SSE_DCO_Offers`** (Studio dynamic content profile for the DCO HTML5 
 
 This document lists **every creative feed field** used by the ad, with **name**, **type**, and **description**. It includes **per-size text overrides** so headlines and unit-rate copy can differ by format (line breaks, wording, etc.).
 
-**Implementation status:** wired to Studio profile **`10964545`** / **`SSE_DCO_ROI_Delivery`**, with a parallel NIR agency package (`10962603` / `SSE_DCO_NIR_Delivery`) from `src/lib/dco-markets.ts`. Size-override names match the live profile (no remap). Studio `<br>` line breaks normalize to `\n` on read. `include_heading4_enum` gates Act 4 visibility when copy is set. `navy_headlines_bool` is editor-ready (offers-0 ink); add the column in Studio when Brian can.
+**Implementation status:** wired to Studio profile **`10964545`** / **`SSE_DCO_ROI_Delivery`**, with a parallel NIR agency package (`10962603` / `SSE_DCO_NIR_Delivery`) from `src/lib/dco-markets.ts`. Size-override names match the live profile (no remap). Studio `<br>` line breaks normalize to `\n` on read. `include_heading4_enum` gates Act 4 visibility when copy is set. `navy_headlines_bool` is the MPU (300×250) default offers-0 ink; optional `navy_headlines_bool_{size}` columns inherit when blank. Not yet on live Studio profiles — add when Brian can.
 
 **Status key**
 
@@ -129,7 +129,14 @@ Blank override → use the matching base field above.
 | `cta_type_enum` | enum (`roundel` \| `rectangle`) | CTA button shape (circle / round vs rectangle). Rectangular CTA is forced when the offer roundel frame is on. | Current |
 | `include_roundel_frame_bool` | boolean | Whether the optional Act 3 offer roundel frame is shown (enables four-act timing). | Current |
 | `include_heading4_enum` | boolean | Studio Heading 4 flag (named `*_enum`, served as boolean). Gates Act 4 / endframe headline when `heading4_text` is set. | Current |
-| `navy_headlines_bool` | boolean | Offers-0 only: navy (`true`) or white (`false`, default) ink on photo-act headlines. Not yet on live Studio profiles. | Current (local) |
+| `navy_headlines_bool` | boolean | Offers-0 only: **300×250 (MPU) default** navy (`true`) or white (`false`) ink on photo-act headlines. Other sizes inherit unless overridden. Not yet on live Studio profiles. | Current (local) |
+| `navy_headlines_bool_160x600` | tri-state bool | Optional offers-0 ink for 160×600. Blank → MPU default. Explicit `true`/`false` overrides. | Proposed (local) |
+| `navy_headlines_bool_300x600` | tri-state bool | Optional offers-0 ink for 300×600. Blank → MPU default. | Proposed (local) |
+| `navy_headlines_bool_320x50` | tri-state bool | Optional offers-0 ink for 320×50. Blank → MPU default. | Proposed (local) |
+| `navy_headlines_bool_728x90` | tri-state bool | Optional offers-0 ink for 728×90. Blank → MPU default. | Proposed (local) |
+| `navy_headlines_bool_970x250` | tri-state bool | Optional offers-0 ink for 970×250. Blank → MPU default. | Proposed (local) |
+
+There is no `navy_headlines_bool_300x250` column — the MPU value *is* `navy_headlines_bool`.
 
 ---
 

@@ -22,6 +22,7 @@ Local Next.js tool for editing campaign creative JSON documents and exporting St
 | `src/server/feed-schema.ts` | Feed field schema + row validation (incl. size-text overrides) |
 | `campaign/feed-field-map.json` | Sidecar: Studio→canonical field remap + size-overridable field list |
 | `src/lib/feed-size-text.ts` | Per-size text override helpers (`textFieldForSize`, blank → base) |
+| `src/lib/feed-size-ink.ts` | Per-size offers-0 ink (`navyHeadlinesForSize`; MPU `navy_headlines_bool` default; blank size cell → inherit) |
 | `src/server/creative-exporter.ts` | HTML and ZIP export (`renderMode: font \| outline`, `delivery`, base/client packages, Sync Zips) |
 | `src/server/text-outline.ts` | Museo → SVG path outlining for outline export |
 | `src/server/outline-bake.ts` | Server-side outline metrics when no editor `presentationSnapshots` |

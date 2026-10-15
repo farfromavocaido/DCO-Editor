@@ -24,6 +24,13 @@ import {
   selectFeedDraftVariant,
   updateFeedDraftField,
 } from '@/lib/feed-model';
+import {
+  INK_DEFAULT_SIZE,
+  coerceNavyHeadlinesDefault,
+  isSizeInkOverrideField,
+  navyHeadlinesForSize,
+  sizeInkFieldName,
+} from '@/lib/feed-size-ink';
 import { layoutOffers } from '@/lib/offer-layout';
 import { captureProductionOfferArrangement, setOfferArrangementMode } from '@/lib/offer-arrangement';
 import {
@@ -346,7 +353,10 @@ export const useEditorStore = create<any>((set, get) => ({
       set({offerCount:0, tcMode:'tcs_only', ctaShape:'rectangle', includeRoundelFrame:false, frameCount:0, roundelMode:'copy-only', navyHeadlines:false});
       return;
     }
-    const controls = controlsFromFeedRow(resolveCampaignRow(get().creativeDocument,row || selectSelectedFeedRow(get())));
+    const controls = controlsFromFeedRow(
+      resolveCampaignRow(get().creativeDocument, row || selectSelectedFeedRow(get())),
+      get().size,
+    );
     set({
       offerCount: controls.offerCount,
       tcMode: controls.tcMode,
@@ -2305,6 +2315,10 @@ export const useEditorStore = create<any>((set, get) => ({
       if (!field) throw new Error(`Unknown feed field: ${fieldName}`);
       let parsed = value;
       if(field.type === 'boolean') parsed = value === true || value === 'true';
+      else if(field.type === 'tri-state-bool') {
+        if (value === '' || value === 'default' || value == null) parsed = '';
+        else parsed = value === true || value === 'true' || value === 'navy';
+      }
       else if(field.type === 'integer') {parsed = Number(value); if(!Number.isInteger(parsed)) throw new Error('Enter a whole number');}
       else if(field.type === 'enum') {parsed = field.options.find(option => String(option) === String(value)); if(parsed === undefined) throw new Error('Choose a listed value');}
       else if(field.type === 'image' || field.type === 'url') parsed = {Url:String(value?.Url ?? value ?? '')};
@@ -2313,6 +2327,22 @@ export const useEditorStore = create<any>((set, get) => ({
       const rows = [...state.feedDraft.rows]; rows[state.feedDraft.selectedIndex] = row;
       set({feedDraft:{...state.feedDraft,rows,dirty:true},saveFeedDisabled:false});
       get().setStatus('Unsaved sample values','warn'); return;
+    }
+    // Size ink overrides: blank clears the cell so the size inherits MPU ink.
+    if (isSizeInkOverrideField(fieldName)) {
+      const rows = [...(state.feedDraft.rows || [])];
+      const index = Math.min(rows.length - 1, Math.max(0, Number(state.feedDraft.selectedIndex) || 0));
+      const current = { ...(rows[index] || {}) };
+      if (value === '' || value === 'default' || value == null) delete current[fieldName];
+      else current[fieldName] = value === true || value === 'true' || value === 'navy';
+      rows[index] = current;
+      set({
+        feedDraft: { ...state.feedDraft, rows, dirty: true },
+        saveFeedDisabled: false,
+      });
+      get().syncControlsFromFeedRow(current);
+      get().setStatus('Unsaved sample values', 'warn');
+      return;
     }
     const feedDraft = updateFeedDraftField(state.feedDraft, state.feedFields, fieldName, value);
     set({ feedDraft, saveFeedDisabled: false });
@@ -2349,6 +2379,31 @@ export const useEditorStore = create<any>((set, get) => ({
         set({feedDraft:{...state.feedDraft,rows,selectedIndex:rows.length-1,dirty:true},saveFeedDisabled:false});
         get().setStatus('New draft version; sample content copied from the previous version','warn');
       }
+      return;
+    }
+    // Per-size ink: MPU writes the default; other sizes write/clear their override column.
+    if (field === 'navy_headlines_bool') {
+      const navy = value === true || value === 'true' || value === 'navy';
+      const size = state.size;
+      const selected = selectSelectedFeedRow(state);
+      const rows = [...(state.feedDraft.rows || [])];
+      const index = Math.min(rows.length - 1, Math.max(0, Number(state.feedDraft.selectedIndex) || 0));
+      const current = { ...(rows[index] || selected || {}) };
+      if (!size || size === INK_DEFAULT_SIZE) {
+        current.navy_headlines_bool = navy;
+      } else {
+        const overrideField = sizeInkFieldName(size);
+        const mpuNavy = coerceNavyHeadlinesDefault(current.navy_headlines_bool);
+        if (navy === mpuNavy) delete current[overrideField];
+        else current[overrideField] = navy;
+      }
+      rows[index] = current;
+      set({
+        feedDraft: { ...state.feedDraft, rows, dirty: true },
+        saveFeedDisabled: false,
+        navyHeadlines: navyHeadlinesForSize(current, size),
+      });
+      get().setStatus('Unsaved sample values', 'warn');
       return;
     }
     const feedDraft = selectFeedDraftVariant(state.feedDraft, state.feedFields, field, value);

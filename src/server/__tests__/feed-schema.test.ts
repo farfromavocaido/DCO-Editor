@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 import { backgroundImageFieldDefinitions, backgroundImageFieldName, backgroundFieldsFromRow } from '@/lib/feed-background';
+import { sizeInkFieldDefinitions } from '@/lib/feed-size-ink';
 import { sizeTextFieldDefinitions } from '@/lib/feed-size-text';
 import { readCreativeDocument } from '../creative-document';
 import {
@@ -84,11 +85,14 @@ test('defines metadata for every existing Studio profile field', () => {
     'include_heading4_enum',
     'navy_headlines_bool',
     'background_image_label',
+    ...sizeInkFieldDefinitions().map((field) => field.name),
     ...sizeTextFieldDefinitions().map((field) => field.name),
     ...backgroundImageFieldDefinitions().map((field) => field.name),
   ]);
   assert.deepEqual(FEED_SCHEMA_FIELDS.find((field) => field.name === 'tc_type_enum').options, ['tcs_only', 'tcs_units']);
   assert.deepEqual(FEED_SCHEMA_FIELDS.find((field) => field.name === 'cta_type_enum').options, ['roundel', 'rectangle']);
+  assert.equal(FEED_SCHEMA_FIELDS.find((field) => field.name === 'navy_headlines_bool_160x600').type, 'tri-state-bool');
+  assert.equal(FEED_SCHEMA_FIELDS.find((field) => field.name === 'navy_headlines_bool_300x250'), undefined);
 });
 
 test('reads profile name, rows, and exposes the background image field', async () => {
@@ -113,6 +117,24 @@ test('validates enums and coerces offer count into the supported range', () => {
   assert.equal(rows[0].tc_type_enum, 'tcs_units');
   assert.equal(rows[0].cta_type_enum, 'rectangle');
   assert.equal(rows[0].include_roundel_frame_bool, true);
+});
+
+test('size ink overrides keep blank distinct from explicit false', () => {
+  const rows = validateFeedRows([
+    {
+      ...sampleRow,
+      offer_count_num: 0,
+      navy_headlines_bool: true,
+      navy_headlines_bool_160x600: '',
+      navy_headlines_bool_728x90: false,
+      navy_headlines_bool_320x50: 'true',
+    },
+  ]);
+
+  assert.equal(rows[0].navy_headlines_bool, true);
+  assert.equal(rows[0].navy_headlines_bool_160x600, '');
+  assert.equal(rows[0].navy_headlines_bool_728x90, false);
+  assert.equal(rows[0].navy_headlines_bool_320x50, true);
 });
 
 test('normalizes legacy solo/prices tc enum values to canonical feed values', () => {

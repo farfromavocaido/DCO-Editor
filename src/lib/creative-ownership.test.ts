@@ -251,3 +251,28 @@ it('T&Cs local writes omit ink so white and navy share the same override', () =>
  expect(findCreativeTarget(next, '300x250', 'terms-prices', navyScopes).values.fontSize).toBe(8);
  expect(findCreativeTarget(next, '300x250', 'terms-prices', whiteScopes).values.fontSize).toBe(8);
 });
+
+it('headline local writes omit ink so white and navy share the same override', () => {
+ const doc = {
+  version: 1,
+  campaign: { id: 'sse-dco' },
+  clock: { durationS: 15, beats: {} },
+  feed: { profileName: 'test', sampleRows: [] },
+  sizes: {
+   '300x250': {
+    canvas: { width: 300, height: 250 },
+    layers: [{ id: 'headline-act1', kind: 'text', base: { cssClass: 'sse-headline', fontSize: 18 }, clips: [] }],
+    localOverrides: [],
+    variantRules: [],
+   },
+  },
+ };
+ const navyScopes = ['offers-0', 'navy-headlines', 'tc-solo', 'cta-rect'];
+ const whiteScopes = ['offers-0', 'white-headlines', 'tc-solo', 'cta-rect'];
+ const next = setCreativeOwnershipField(doc, '300x250', 'headline-act1', navyScopes, 'values', 'fontSize', 22, 'local');
+ expect(next.sizes['300x250'].localOverrides).toEqual([
+  { targetId: 'headline-act1', scope: 'cta-rect.offers-0.tc-solo', values: { fontSize: 22 }, fit: {} },
+ ]);
+ expect(findCreativeTarget(next, '300x250', 'headline-act1', navyScopes).values.fontSize).toBe(22);
+ expect(findCreativeTarget(next, '300x250', 'headline-act1', whiteScopes).values.fontSize).toBe(22);
+});

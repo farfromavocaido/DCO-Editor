@@ -51,9 +51,9 @@ export const isGenericCampaign = document => Boolean(document?.variantModel);
 export const campaignVariantModel = document => document?.variantModel || (document?.campaignState ? {...legacy,...document.campaignState,dimensions:legacy.dimensions.map(d=>({...d,...document.campaignState.dimensions?.find(config=>config.id===d.id)}))} : legacy);
 export const resolveCampaignRow = (document, row = {}) => isGenericCampaign(document) ? resolveCampaignState(campaignVariantModel(document),row) : document?.campaignState ? {...Object.fromEntries(campaignVariantModel(document).dimensions.filter(d=>!d.derived).map(d=>[d.field,d.defaultValue])),...row} : row;
 export const campaignConditionFamilies = document => campaignVariantModel(document).dimensions.map(d=>d.options.map(o=>o.scope));
-export const campaignScopes = (document, row = {}) => isGenericCampaign(document)
+export const campaignScopes = (document, row = {}, size = null) => isGenericCampaign(document)
   ? (()=>{const model=campaignVariantModel(document), resolved=resolveCampaignState(model,row);return model.dimensions.filter(d=>evaluateConditions(resolved,d.enabledWhen)).map(d=>(d.options.find(o=>o.value === resolved[d.field]) || d.options.find(o=>o.value === d.defaultValue)).scope);})()
-  : activeScopesFromControls(controlsFromFeedRow(resolveCampaignRow(document,row)));
+  : activeScopesFromControls(controlsFromFeedRow(resolveCampaignRow(document,row), size));
 export const campaignVersionLabel = (document, row = {}) => {
   const scopes = campaignScopes(document,row);
   return campaignVariantModel(document).dimensions.filter(d=>!d.derived && d.header !== false).map(d=>d.options.find(o=>scopes.includes(o.scope))?.label).filter(Boolean).join(' · ');
@@ -129,7 +129,7 @@ export const campaignHeaderDimensions = (document, row = {}) => {
   const model = campaignVariantModel(document);
   const presentation = document?.variantPresentation || {};
   const order = campaignHeaderOrder(document);
-  const tips = {navyHeadlines:['White photo-act headlines (default); T&Cs stay white','Navy photo-act headlines; T&Cs stay white'],offerCount:['No offers (brand / awareness)','Single offer','Dual offers','Triple offers'],tcMode:['T&Cs only','T&Cs with unit rates'],ctaShape:['Round CTA button','Rectangular CTA button'],includeRoundelFrame:['No offer roundel (headlines 1, 2, and 4)','Four headline acts with offer roundel frame']};
+  const tips = {navyHeadlines:['White photo-act headlines; T&Cs stay white. MPU (300×250) is the default; other sizes inherit unless overridden.','Navy photo-act headlines; T&Cs stay white. MPU (300×250) is the default; other sizes inherit unless overridden.'],offerCount:['No offers (brand / awareness)','Single offer','Dual offers','Triple offers'],tcMode:['T&Cs only','T&Cs with unit rates'],ctaShape:['Round CTA button','Rectangular CTA button'],includeRoundelFrame:['No offer roundel (headlines 1, 2, and 4)','Four headline acts with offer roundel frame']};
   return [...new Set(order)].map(id=>model.dimensions.find(d=>d.id===id)).filter(d=>d && !d.derived && evaluateCampaignConditions(document,row,d.enabledWhen) && (Object.hasOwn(presentation, 'hidden') ? !presentation.hidden.includes(d.id) : d.header!==false) && (isGenericCampaign(document)||d.id!=='navyHeadlines'||controlsFromFeedRow(row).offerCount===0)).map(d=>isGenericCampaign(document)?d:{...d,options:d.options.map((o,i)=>({...o,tip:tips[d.id]?.[i]})).filter(o=>d.id!=='offerCount'||o.value!==0||!document?.campaign?.id||document.campaign.id==='sse-dco')});
 };
 export const campaignConditionIsValid = (document, scopes) => {

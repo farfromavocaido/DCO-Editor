@@ -9,6 +9,11 @@ import {
   SIZE_OVERRIDABLE_TEXT_FIELDS,
   sizeOverrideFieldNamesForSize,
 } from '@/lib/feed-size-text';
+import {
+  coerceTriStateBool,
+  isSizeInkOverrideField,
+  sizeInkOverrideFieldNameForSize,
+} from '@/lib/feed-size-ink';
 import { selectSelectedFeedRow, useEditorStore } from '@/store/editor-store';
 
 type SampleFeedPanelProps = {
@@ -55,7 +60,8 @@ const STRUCTURED_FIELD_NAMES = new Set([
 
 /** `{base}_{WxH}` size-override columns — edited in the Size overrides section. */
 const isSizeOverrideFieldName = (name: string) => (
-  SIZE_OVERRIDABLE_TEXT_FIELDS.some((base) => (
+  isSizeInkOverrideField(name)
+  || SIZE_OVERRIDABLE_TEXT_FIELDS.some((base) => (
     name.startsWith(`${base}_`) && /\d+x\d+$/.test(name.slice(base.length + 1))
   ))
 );
@@ -226,7 +232,7 @@ export function SampleFeedPanel({ ensureOpen }: SampleFeedPanelProps) {
     const navy = Boolean(row?.navy_headlines_bool);
     return (
       <label key="navy_headlines_bool" className="sample-field">
-        <span>Ink (headlines)</span>
+        <span>Ink default (MPU)</span>
         <select
           data-feed-field="navy_headlines_bool"
           value={navy ? 'navy' : 'white'}
@@ -412,8 +418,28 @@ export function SampleFeedPanel({ ensureOpen }: SampleFeedPanelProps) {
         {sizeOverridesOpen ? (
           <div className="sample-overall-body">
             <p style={{ margin: '0 0 8px', opacity: 0.7, fontSize: 12, lineHeight: 1.35 }}>
-              Blank = use the base headline / unit-rate field. Only the active size is shown.
+              Blank = use the base headline / unit-rate / MPU ink. Only the active size is shown.
             </p>
+            {(() => {
+              const inkFieldName = sizeInkOverrideFieldNameForSize(size || '');
+              if (!inkFieldName || Number(row?.offer_count_num ?? 1) !== 0) return null;
+              const tri = coerceTriStateBool(row?.[inkFieldName]);
+              const selectValue = tri === '' ? 'default' : tri ? 'navy' : 'white';
+              return (
+                <label key={inkFieldName} className="sample-field">
+                  <span>Ink (headlines)</span>
+                  <select
+                    data-feed-field={inkFieldName}
+                    value={selectValue}
+                    onChange={(event) => writeField(inkFieldName, event.target.value)}
+                  >
+                    <option value="default">Default (MPU)</option>
+                    <option value="white">White</option>
+                    <option value="navy">Navy</option>
+                  </select>
+                </label>
+              );
+            })()}
             {sizeOverrideFieldNamesForSize(size || '').map((fieldName) => {
               const field = fields.map.get(fieldName) || {
                 name: fieldName,
@@ -432,7 +458,7 @@ export function SampleFeedPanel({ ensureOpen }: SampleFeedPanelProps) {
 
       {/* Keep unknown/extra Creative State·Offers·Copy fields reachable if schema grows. */}
       {feedFields
-        .filter((field) => ['Creative State', 'Offers', 'Copy'].includes(field.group)
+        .filter((field) => ['Creative State', 'Offers', 'Copy', 'Creative State Overrides'].includes(field.group)
           && !STRUCTURED_FIELD_NAMES.has(field.name)
           && !isSizeOverrideFieldName(field.name))
         .map((field) => renderControl(field))}

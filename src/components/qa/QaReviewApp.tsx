@@ -12,6 +12,11 @@ import { waitForProductionDocument } from '@/lib/production-stage';
 import type { QaShellInfo } from '@/server/qa-agency-shell';
 import { seekAgencyTimeline } from '@/lib/agency-timeline-seek';
 import { backgroundImageFieldName, CREATIVE_AD_SIZES } from '@/lib/feed-background';
+import {
+  INK_DEFAULT_SIZE,
+  navyHeadlinesForSize,
+  sizeInkFieldName,
+} from '@/lib/feed-size-ink';
 import type { HoldSample } from '@/lib/hold-samples';
 
 type MatrixPayload = {
@@ -184,7 +189,35 @@ export function QaReviewApp() {
 
   // Roundel-on forces rectangular CTA at runtime (same as agency HTML).
   const effectiveCtaShape: CtaShape = includeRoundelFrame ? 'rectangle' : ctaShape;
-  const [navyHeadlines, setNavyHeadlines] = useState(false);
+  /** MPU (300×250) default ink; other sizes may override via inkOverrideBySize. */
+  const [navyHeadlinesDefault, setNavyHeadlinesDefault] = useState(false);
+  const [inkOverrideBySize, setInkOverrideBySize] = useState<Record<string, boolean>>({});
+
+  const resolvedNavyHeadlines = useMemo(() => {
+    if (offerCount !== 0) return false;
+    const row: Record<string, unknown> = { navy_headlines_bool: navyHeadlinesDefault };
+    for (const [size, navy] of Object.entries(inkOverrideBySize)) {
+      row[sizeInkFieldName(size)] = navy;
+    }
+    return navyHeadlinesForSize(row, viewSize || INK_DEFAULT_SIZE);
+  }, [offerCount, navyHeadlinesDefault, inkOverrideBySize, viewSize]);
+
+  const setResolvedNavyHeadlines = useCallback((navy: boolean) => {
+    if (!viewSize || viewSize === INK_DEFAULT_SIZE) {
+      setNavyHeadlinesDefault(navy);
+      return;
+    }
+    if (navy === navyHeadlinesDefault) {
+      setInkOverrideBySize((prev) => {
+        if (!(viewSize in prev)) return prev;
+        const next = { ...prev };
+        delete next[viewSize];
+        return next;
+      });
+      return;
+    }
+    setInkOverrideBySize((prev) => ({ ...prev, [viewSize]: navy }));
+  }, [viewSize, navyHeadlinesDefault]);
 
   const sessionKey = useMemo(() => (
     [
@@ -193,9 +226,9 @@ export function QaReviewApp() {
       includeRoundelFrame ? 'roundel' : '3acts',
       tcMode,
       effectiveCtaShape,
-      offerCount === 0 ? (navyHeadlines ? 'navy' : 'white') : '',
+      offerCount === 0 ? (resolvedNavyHeadlines ? 'navy' : 'white') : '',
     ].filter(Boolean).join('__')
-  ), [viewSize, offerCount, includeRoundelFrame, tcMode, effectiveCtaShape, navyHeadlines]);
+  ), [viewSize, offerCount, includeRoundelFrame, tcMode, effectiveCtaShape, resolvedNavyHeadlines]);
 
   const samples = viewSize ? (holdsBySize[viewSize]?.samples || []) : [];
   const hold = samples[Math.min(holdIndex, Math.max(0, samples.length - 1))] || null;
@@ -216,10 +249,15 @@ export function QaReviewApp() {
       tc_type_enum: tcMode,
       cta_type_enum: effectiveCtaShape,
       cta_text: copyFields.cta_text || ctaFallback,
-      navy_headlines_bool: offerCount === 0 ? navyHeadlines : false,
+      navy_headlines_bool: offerCount === 0 ? navyHeadlinesDefault : false,
       include_heading4_enum: true,
       ...copyFields,
     };
+    if (offerCount === 0) {
+      for (const [size, navy] of Object.entries(inkOverrideBySize)) {
+        row[sizeInkFieldName(size)] = navy;
+      }
+    }
     for (const size of CREATIVE_AD_SIZES) {
       const relative = matrix.backgroundAssets[size] || '';
       row[backgroundImageFieldName(size)] = {
@@ -235,7 +273,8 @@ export function QaReviewApp() {
     includeRoundelFrame,
     tcMode,
     effectiveCtaShape,
-    navyHeadlines,
+    navyHeadlinesDefault,
+    inkOverrideBySize,
     copyFields,
   ]);
 
@@ -685,13 +724,15 @@ export function QaReviewApp() {
             {offerCount === 0 ? (
               <QaSegmentedControl
                 label="Ink"
-                tip="Headline + T&C colour on photo acts (offers-0 only)"
-                value={navyHeadlines ? 'navy' : 'white'}
+                tip={viewSize === INK_DEFAULT_SIZE || !viewSize
+                  ? 'MPU default photo-act ink (other sizes inherit unless overridden)'
+                  : `Photo-act ink for ${viewSize} (blank override follows MPU)`}
+                value={resolvedNavyHeadlines ? 'navy' : 'white'}
                 options={[
-                  { value: 'white', label: 'White', tip: 'White photo-act headlines (default); T&Cs stay white' },
+                  { value: 'white', label: 'White', tip: 'White photo-act headlines; T&Cs stay white' },
                   { value: 'navy', label: 'Navy', tip: 'Navy photo-act headlines; T&Cs stay white' },
                 ]}
-                onChange={(value) => setNavyHeadlines(value === 'navy')}
+                onChange={(value) => setResolvedNavyHeadlines(value === 'navy')}
               />
             ) : null}
 

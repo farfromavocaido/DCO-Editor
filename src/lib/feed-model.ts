@@ -1,4 +1,6 @@
 // @ts-nocheck
+import { navyHeadlinesForSize } from './feed-size-ink';
+
 const deepClone = (value) => JSON.parse(JSON.stringify(value ?? null));
 
 const fieldFor = (fields, name) => fields.find((field) => field.name === name) || { name, type: 'string' };
@@ -109,7 +111,7 @@ export const clampOfferCount = (value) => {
   return Math.min(3, Math.max(0, parsed));
 };
 
-export const controlsFromFeedRow = (row = {}) => {
+export const controlsFromFeedRow = (row = {}, size = null) => {
   const includeRoundelFrame = coerceBoolean(row.include_roundel_frame_bool);
   const offerCount = clampOfferCount(row.offer_count_num);
   return {
@@ -121,8 +123,8 @@ export const controlsFromFeedRow = (row = {}) => {
     roundelMode: includeRoundelFrame && String(row.roundel_value_text || '').trim()
       ? 'split'
       : 'copy-only',
-    // Offers-0 only: white headlines by default; navy when feed flag is true.
-    navyHeadlines: offerCount === 0 && coerceBoolean(row.navy_headlines_bool),
+    // Offers-0 only: MPU default ink; other sizes inherit unless overridden.
+    navyHeadlines: offerCount === 0 && navyHeadlinesForSize(row, size),
   };
 };
 

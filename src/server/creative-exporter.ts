@@ -54,6 +54,10 @@ import {
   sizeTextFieldDefinitions,
   textFieldForSize,
 } from '@/lib/feed-size-text';
+import {
+  INK_OVERRIDE_SIZES,
+  sizeInkFieldDefinitions,
+} from '@/lib/feed-size-ink';
 import { visibilityForLayer } from '@/lib/offer-interaction-model';
 import { layoutOffersRuntime } from '@/lib/offer-layout';
 import {
@@ -494,7 +498,13 @@ const dynamicFieldMapping = () => [
   ['roundel_text_text', 'text', '', 'Optional roundel frame copy'],
   ['roundel_value_text', 'text', '', 'Optional large roundel value'],
   ['include_heading4_enum', 'boolean', 'true | false', 'Whether Act 4 / endframe headline is shown when heading4_text is set'],
-  ['navy_headlines_bool', 'boolean', 'true | false', 'Offers-0 only: navy (true) or white (false) photo-act headlines; T&Cs stay white'],
+  ['navy_headlines_bool', 'boolean', 'true | false', 'Offers-0 only: 300×250 (MPU) default navy (true) or white (false) photo-act headlines; other sizes inherit unless overridden; T&Cs stay white'],
+  ...sizeInkFieldDefinitions().map((field) => [
+    field.name,
+    'boolean',
+    'true | false | blank',
+    field.description,
+  ] as const),
   ['background_image_label', 'text', '', 'Studio background set label'],
   ...sizeTextFieldDefinitions().map((field) => [
     field.name,
@@ -1119,8 +1129,8 @@ const outlinedTextCss = `
     }
 `;
 
-const stateClasses = (row: Record<string, unknown>) => (
-  activeScopesFromControls(controlsFromFeedRow(row)).join(' ')
+const stateClasses = (row: Record<string, unknown>, size: string | null = null) => (
+  activeScopesFromControls(controlsFromFeedRow(row, size)).join(' ')
 );
 
 const runtimeScript = (
@@ -1223,6 +1233,10 @@ const runtimeScript = (
           ].forEach(function(key) {
             out[key] = fieldValue(row[key]);
           });
+          ${JSON.stringify([...INK_OVERRIDE_SIZES])}.forEach(function(size) {
+            var inkKey = 'navy_headlines_bool_' + size;
+            out[inkKey] = fieldValue(row[inkKey]);
+          });
           ${JSON.stringify([...SIZE_OVERRIDABLE_TEXT_FIELDS])}.forEach(function(base) {
             ${JSON.stringify([...CREATIVE_AD_SIZES])}.forEach(function(size) {
               var key = base + '_' + size;
@@ -1244,6 +1258,29 @@ const runtimeScript = (
             var sized = fieldValue(data[base + '_' + size]);
             if (sized !== '') data[base] = sized;
           });
+          return data;
+        }
+
+        function coerceTriStateInk(value) {
+          if (value === true || value === false) return value;
+          if (value === undefined || value === null) return '';
+          var normalized = String(value).trim().toLowerCase();
+          if (normalized === '') return '';
+          if (normalized === 'true' || normalized === '1' || normalized === 'yes' || normalized === 'on' || normalized === 'navy') return true;
+          if (normalized === 'false' || normalized === '0' || normalized === 'no' || normalized === 'off' || normalized === 'white') return false;
+          return '';
+        }
+
+        function navyHeadlinesForActiveSize(data, size) {
+          var defaultNavy = coerceTriStateInk(data.navy_headlines_bool) === true;
+          if (!size || size === '300x250') return defaultNavy;
+          var override = coerceTriStateInk(data['navy_headlines_bool_' + size]);
+          if (override === '') return defaultNavy;
+          return override === true;
+        }
+
+        function applySizeInkOverride(data, size) {
+          data.navy_headlines_bool = navyHeadlinesForActiveSize(data, size);
           return data;
         }
 
@@ -1405,6 +1442,7 @@ const runtimeScript = (
           var data = normalizeProfileRow(row);
           var size = root.getAttribute('data-size') || '';
           applySizeTextOverrides(data, size);
+          applySizeInkOverride(data, size);
           var includeRoundel = booleanValue(data.include_roundel_frame_bool)
             || booleanValue(data.include_roundel_frame);
           root.classList.remove(
@@ -1539,7 +1577,7 @@ const cssForSize = (document: Record<string, unknown>, size: string, options: Re
   // Static frames-3 bakes skip unused frames-4 profile CSS; frames-4 still needs
   // the default rules plus `.frames-4` overrides.
   const bakedFrameScope = isStaticDelivery(options)
-    ? (stateClasses(sampleRowForDocument(document)).includes('frames-4') ? 'frames-4' : 'frames-3')
+    ? (stateClasses(sampleRowForDocument(document), size).includes('frames-4') ? 'frames-4' : 'frames-3')
     : null;
   const profileScopes = ['frames-4'].filter((scope) => (
     document.clock?.profiles?.[scope]
@@ -1708,10 +1746,10 @@ const renderBody = async (document: Record<string, unknown>, size: string, optio
   }
   const background = options.includePackagedBackground === false ? '' : assetSrc(sizeCreative.assets.background, options);
   const row = sampleRowForDocument(document);
-  const stateClass = options.renderMode === 'outline' ? stateClasses(row) : DEFAULT_STATE;
+  const stateClass = options.renderMode === 'outline' ? stateClasses(row, size) : DEFAULT_STATE;
   const plusLayoutAttr = ` ${OFFER_PLUS_LAYOUT_ATTR}="${escapeAttr(resolveOfferPlusLayout(document))}"`;
   if (options.renderMode === 'outline') {
-    const activeScopes = campaignScopes(document, row);
+    const activeScopes = campaignScopes(document, row, size);
     const presentationSnapshot = outlineSnapshotForDocument(document, options.presentationSnapshot);
     const outlineOptions = { ...options, presentationSnapshot };
     const offerBakes = await bakeOutlinedOfferSlotSvgs({
@@ -1852,12 +1890,13 @@ ${body}
 };
 
 export const renderWipHtml = (html: string, row: Record<string, unknown>) => {
+  const size = html.match(/data-size="([^"]+)"/)?.[1] || null;
   const feedScript = `    <script id="sse-dco-preview-feed">
       window.__SSE_DCO_PREVIEW__ = ${JSON.stringify(row, null, 2).replace(/\n/g, '\n      ')};
     </script>
 `;
   return html
-    .replace(DEFAULT_STATE, stateClasses(row))
+    .replace(DEFAULT_STATE, stateClasses(row, size))
     .replace('    <script src="https://s0.2mdn.net/ads/studio/Enabler.js"></script>', `    <script src="https://s0.2mdn.net/ads/studio/Enabler.js"></script>\n${feedScript}`);
 };
 
@@ -3390,8 +3429,11 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         var persistEnabled = false;
         var ZOOM_LEVELS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
         var backgroundSizes = ${jsString(CREATIVE_AD_SIZES)};
+        var inkOverrideSizes = ${JSON.stringify([...INK_OVERRIDE_SIZES])};
         var backgroundBySize = {};
         var trackedBackgroundSize = defaultSize || '';
+        var inkDefaultNavy = defaults.navy_headlines_bool === true || defaults.navy_headlines_bool === 'true';
+        var inkOverrideBySize = {};
 
         function previewImageFieldUrl(value) {
           if (value && typeof value === 'object' && value.Url !== undefined) {
@@ -3409,7 +3451,38 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           });
         }
 
+        function resetInkMapFromDefaults() {
+          inkDefaultNavy = defaults.navy_headlines_bool === true || defaults.navy_headlines_bool === 'true';
+          inkOverrideBySize = {};
+          inkOverrideSizes.forEach(function(size) {
+            var key = 'navy_headlines_bool_' + size;
+            if (defaults[key] === true || defaults[key] === 'true') inkOverrideBySize[size] = true;
+            else if (defaults[key] === false || defaults[key] === 'false') inkOverrideBySize[size] = false;
+          });
+        }
+
+        function resolvedInkForSize(size) {
+          if (!size || size === '300x250') return inkDefaultNavy;
+          if (Object.prototype.hasOwnProperty.call(inkOverrideBySize, size)) return inkOverrideBySize[size] === true;
+          return inkDefaultNavy;
+        }
+
+        function commitInkControlForSize(size) {
+          var navy = field('navy_headlines_bool') === 'true';
+          if (!size || size === '300x250') {
+            inkDefaultNavy = navy;
+            return;
+          }
+          if (navy === inkDefaultNavy) delete inkOverrideBySize[size];
+          else inkOverrideBySize[size] = navy;
+        }
+
+        function syncInkSelectForSize(size) {
+          setControl('navy_headlines_bool', resolvedInkForSize(size) ? 'true' : 'false');
+        }
+
         resetBackgroundMapFromDefaults();
+        resetInkMapFromDefaults();
 
         function syncBackgroundControl() {
           var input = document.querySelector('[name="background_image_url"]');
@@ -3445,6 +3518,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
 
         function rowFromControls() {
           backgroundBySize[trackedBackgroundSize] = field('background_image_url');
+          commitInkControlForSize(trackedBackgroundSize || field('Ad_Size'));
           var includeRoundelFrame = field('include_roundel_frame_bool') === 'true';
           var ctaType = includeRoundelFrame ? 'rectangle' : field('cta_type_enum');
           if (includeRoundelFrame && controls.elements.cta_type_enum) {
@@ -3460,7 +3534,7 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
               if (!isFinite(parsed)) return 1;
               return Math.min(3, Math.max(0, parsed));
             })(field('offer_count_num')),
-            navy_headlines_bool: field('navy_headlines_bool') === 'true',
+            navy_headlines_bool: inkDefaultNavy,
             include_heading4_enum: true,
             offer1_value_text: field('offer1_value_text'),
             offer1_sub_text: field('offer1_sub_text'),
@@ -3477,6 +3551,11 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
             tc_terms_text: field('tc_terms_text'),
             tc_units_text: field('tc_units_text'),
           };
+          inkOverrideSizes.forEach(function(size) {
+            if (Object.prototype.hasOwnProperty.call(inkOverrideBySize, size)) {
+              row['navy_headlines_bool_' + size] = inkOverrideBySize[size];
+            }
+          });
           backgroundSizes.forEach(function(size) {
             row['background_image_url_' + size] = previewImageFieldUrl(backgroundBySize[size]) || '';
           });
@@ -3541,7 +3620,14 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
           setControl('heading3_text', row.heading3_text);
           setControl('heading4_text', row.heading4_text);
           setControl('offer_count_num', row.offer_count_num);
-          setControl('navy_headlines_bool', row.navy_headlines_bool === true || row.navy_headlines_bool === 'true' ? 'true' : 'false');
+          inkDefaultNavy = row.navy_headlines_bool === true || row.navy_headlines_bool === 'true';
+          inkOverrideBySize = {};
+          inkOverrideSizes.forEach(function(size) {
+            var key = 'navy_headlines_bool_' + size;
+            if (row[key] === true || row[key] === 'true') inkOverrideBySize[size] = true;
+            else if (row[key] === false || row[key] === 'false') inkOverrideBySize[size] = false;
+          });
+          syncInkSelectForSize(nextSize);
           setControl('offer1_value_text', row.offer1_value_text);
           setControl('offer1_sub_text', row.offer1_sub_text);
           setControl('offer2_value_text', row.offer2_value_text);
@@ -3582,12 +3668,15 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
               zoom: previewZoom,
               row: rowFromControls(),
               backgroundBySize: backgroundBySize,
+              inkDefaultNavy: inkDefaultNavy,
+              inkOverrideBySize: inkOverrideBySize,
             }));
           } catch (error) {}
         }
 
         function restoreDefaults() {
           resetBackgroundMapFromDefaults();
+          resetInkMapFromDefaults();
           applyRowToControls(defaults, defaultSize);
           previewZoom = 'fit';
           updateZoomButtons();
@@ -3611,6 +3700,15 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
                 var fieldName = 'background_image_url_' + size;
                 if (stored.row[fieldName] != null) {
                   backgroundBySize[size] = previewImageFieldUrl(stored.row[fieldName]);
+                }
+              });
+            }
+            if (typeof stored.inkDefaultNavy === 'boolean') inkDefaultNavy = stored.inkDefaultNavy;
+            if (stored.inkOverrideBySize && typeof stored.inkOverrideBySize === 'object') {
+              inkOverrideBySize = {};
+              inkOverrideSizes.forEach(function(size) {
+                if (Object.prototype.hasOwnProperty.call(stored.inkOverrideBySize, size)) {
+                  inkOverrideBySize[size] = stored.inkOverrideBySize[size] === true;
                 }
               });
             }
@@ -3732,8 +3830,13 @@ export const renderClientPreviewPage = (document: Record<string, unknown>, optio
         controls.addEventListener('change', function(event) {
           if (event.target && event.target.name === 'Ad_Size') {
             backgroundBySize[trackedBackgroundSize] = field('background_image_url');
+            commitInkControlForSize(trackedBackgroundSize);
             trackedBackgroundSize = field('Ad_Size');
             syncBackgroundControl();
+            syncInkSelectForSize(trackedBackgroundSize);
+          }
+          if (event.target && event.target.name === 'navy_headlines_bool') {
+            commitInkControlForSize(trackedBackgroundSize || field('Ad_Size'));
           }
           if (event.target && event.target.name === 'offer_count_num') {
             applyOfferCountDefaults(field('offer_count_num'));

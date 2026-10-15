@@ -22,7 +22,12 @@ include_roundel_frame_bool	boolean	true | false	Show optional roundel frame; fal
 roundel_text_text	text		Optional roundel frame copy
 roundel_value_text	text		Optional large roundel value
 include_heading4_enum	boolean	true | false	Whether Act 4 / endframe headline is shown when heading4_text is set
-navy_headlines_bool	boolean	true | false	Offers-0 only: navy (true) or white (false) photo-act headlines; T&Cs stay white
+navy_headlines_bool	boolean	true | false	Offers-0 only: 300×250 (MPU) default navy (true) or white (false) photo-act headlines; other sizes inherit unless overridden; T&Cs stay white
+navy_headlines_bool_160x600	boolean	true | false | blank	Optional offers-0 ink for 160x600. Leave blank to use the 300×250 (MPU) navy_headlines_bool.
+navy_headlines_bool_300x600	boolean	true | false | blank	Optional offers-0 ink for 300x600. Leave blank to use the 300×250 (MPU) navy_headlines_bool.
+navy_headlines_bool_320x50	boolean	true | false | blank	Optional offers-0 ink for 320x50. Leave blank to use the 300×250 (MPU) navy_headlines_bool.
+navy_headlines_bool_728x90	boolean	true | false | blank	Optional offers-0 ink for 728x90. Leave blank to use the 300×250 (MPU) navy_headlines_bool.
+navy_headlines_bool_970x250	boolean	true | false | blank	Optional offers-0 ink for 970x250. Leave blank to use the 300×250 (MPU) navy_headlines_bool.
 background_image_label	text		Studio background set label
 heading1_text_160x600	text		Optional heading1_text override for 160x600. Leave blank to use the base field.
 heading1_text_300x250	text		Optional heading1_text override for 300x250. Leave blank to use the base field.

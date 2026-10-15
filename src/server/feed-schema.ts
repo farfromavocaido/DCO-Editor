@@ -3,6 +3,7 @@ import { isGenericCampaign, campaignVariantModel, resolveCampaignRow, assertCamp
 import { backgroundImageFieldDefinitions } from '@/lib/feed-background';
 import { remapStudioRowToCanonical } from '@/lib/feed-field-map';
 import { sizeTextFieldDefinitions } from '@/lib/feed-size-text';
+import { coerceTriStateBool, sizeInkFieldDefinitions } from '@/lib/feed-size-ink';
 import { normalizeFeedLineBreaks } from '@/lib/feed-text';
 import { readCreativeDocument, writeCreativeDocument } from './creative-document';
 import { normalizeTcTypeEnum } from '@/lib/feed-model';
@@ -33,8 +34,9 @@ export const FEED_SCHEMA_FIELDS = [
   { name: 'roundel_text_text', label: 'Roundel text', type: 'string', group: 'Copy', description: 'Text shown inside the optional roundel frame.' },
   { name: 'roundel_value_text', label: 'Roundel value', type: 'string', group: 'Copy', description: 'Optional large value shown inside the roundel frame.' },
   { name: 'include_heading4_enum', label: 'Include heading 4', type: 'boolean', group: 'Creative State', description: 'Whether Act 4 / endframe headline is shown when heading4_text is set.' },
-  { name: 'navy_headlines_bool', label: 'Navy ink', type: 'boolean', group: 'Creative State', description: 'Offers-0 only: navy (true) or white (false, default) ink on photo-act headlines. T&Cs stay white.' },
+  { name: 'navy_headlines_bool', label: 'Navy ink', type: 'boolean', group: 'Creative State', description: 'Offers-0 only: 300×250 (MPU) default navy (true) or white (false) ink on photo-act headlines. Other sizes inherit unless overridden. T&Cs stay white.' },
   { name: 'background_image_label', label: 'Background label', type: 'string', group: 'Assets', description: 'Studio label for the background set (e.g. diy, hiker). Not used for rendering.' },
+  ...sizeInkFieldDefinitions(),
   ...sizeTextFieldDefinitions(),
   ...backgroundImageFieldDefinitions(),
 ] as const;
@@ -68,6 +70,7 @@ const coerceUrl = (value: unknown) => {
 };
 
 const coerceField = (field: FeedField, value: unknown) => {
+  if (field.type === 'tri-state-bool') return coerceTriStateBool(value);
   if (field.type === 'boolean') return coerceBoolean(value);
   if (field.type === 'integer') return coerceInteger(value, field);
   if (field.type === 'image' || field.type === 'url') return coerceUrl(value);

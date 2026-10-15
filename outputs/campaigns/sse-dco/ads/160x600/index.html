@@ -51,6 +51,11 @@
       devDynamicContent.SSE_DCO_ROI_Delivery[0].heading4_text = "BIG DEAL energy";
       devDynamicContent.SSE_DCO_ROI_Delivery[0].include_heading4_enum = true;
       devDynamicContent.SSE_DCO_ROI_Delivery[0].navy_headlines_bool = false;
+      devDynamicContent.SSE_DCO_ROI_Delivery[0].navy_headlines_bool_160x600 = "";
+      devDynamicContent.SSE_DCO_ROI_Delivery[0].navy_headlines_bool_300x600 = "";
+      devDynamicContent.SSE_DCO_ROI_Delivery[0].navy_headlines_bool_320x50 = "";
+      devDynamicContent.SSE_DCO_ROI_Delivery[0].navy_headlines_bool_728x90 = "";
+      devDynamicContent.SSE_DCO_ROI_Delivery[0].navy_headlines_bool_970x250 = "";
       devDynamicContent.SSE_DCO_ROI_Delivery[0].background_image_label = "diy";
       devDynamicContent.SSE_DCO_ROI_Delivery[0].background_image_url_160x600 = {};
       devDynamicContent.SSE_DCO_ROI_Delivery[0].background_image_url_160x600.Url = "https://s0.2mdn.net/creatives/assets/5648161/160x600_diy.jpg";
@@ -4707,6 +4712,7 @@
 
 
 
+
     </style>
 
     <script type="application/json" id="dco-layout-rules">[{"id":"f71df2cb-b4b3-4a1d-b62c-628c3ad43bbe","name":"Layout area 1","type":"distribute","enabled":true,"areas":{"160x600":{"left":9.843046873807907,"top":533.666015625,"width":139.26312378048897,"height":62.69453144073486}},"axis":"y","single":"center","crossAlign":"center","minGap":0,"overflow":"authored","when":["offers-0"],"layoutAnimations":[{"id":"9e61921c-f1d8-41a2-a31b-b07197340051","enabled":true,"kind":"enter","subjectId":"terms-prices","clipId":"terms-prices-fade-offers-0","segmentIndex":0,"start":"with","duration":"follow","durationS":0.5,"startS":13.5,"endS":15,"hidden":false},{"id":"07171864-fb9b-4a6e-a99d-f07cd95b48a9","enabled":true,"kind":"exit","subjectId":"terms-prices","clipId":"terms-prices-fade-offers-0","segmentIndex":0,"start":"with","duration":"follow","durationS":0.5}],"startingArrangement":"present","size":"160x600","transitionCases":[],"sequenceCases":[{"scopes":["offers-0","frames-3"],"events":[{"id":"9e61921c-f1d8-41a2-a31b-b07197340051","enabled":true,"kind":"enter","subjectId":"terms-prices","clipId":"terms-prices-fade-offers-0","segmentIndex":0,"start":34.4,"duration":"follow","durationS":0.5,"startS":13.5,"endS":15,"hidden":false,"easingCss":"ease-in-out","end":36.4},{"id":"07171864-fb9b-4a6e-a99d-f07cd95b48a9","enabled":true,"kind":"exit","subjectId":"terms-prices","clipId":"terms-prices-fade-offers-0","segmentIndex":0,"start":60.8,"duration":"follow","durationS":0.5,"easingCss":"ease-in-out","end":61.8}],"initialAbsent":["terms-prices"],"durationMs":15000,"loop":true},{"scopes":["offers-0","frames-4"],"events":[{"id":"9e61921c-f1d8-41a2-a31b-b07197340051","enabled":true,"kind":"enter","subjectId":"terms-prices","clipId":"terms-prices-fade-offers-0","segmentIndex":0,"start":28.9,"duration":"follow","durationS":0.5,"startS":13.5,"endS":15,"hidden":false,"easingCss":"ease-in-out","end":30.9},{"id":"07171864-fb9b-4a6e-a99d-f07cd95b48a9","enabled":true,"kind":"exit","subjectId":"terms-prices","clipId":"terms-prices-fade-offers-0","segmentIndex":0,"start":71.7,"duration":"follow","durationS":0.5,"easingCss":"ease-in-out","end":72.7}],"initialAbsent":["terms-prices"],"durationMs":15000,"loop":true}],"area":{"left":9.843046873807907,"top":533.666015625,"width":139.26312378048897,"height":62.69453144073486},"members":["logo-act3","terms-prices"],"textMembers":["terms-prices"],"targetId":"logo-act3","scope":""}]</script>
@@ -4785,7 +4791,7 @@
  function edge(r,e,axis){return axis==='x'?(e==='start'?r.left:e==='end'?r.right:r.left+r.width/2):(e==='start'?r.top:e==='end'?r.bottom:r.top+r.height/2);}
  function local(r,root){if(!r)return null;var b=root.getBoundingClientRect();return box({left:r.left-b.left,top:r.top-b.top,width:r.width,height:r.height});}
  function anchorText(root,rules,resolve){
-  var neutral=doc.createElement('style');neutral.textContent='.stage,.stage *{animation:none!important}';doc.head.append(neutral);var diagnostics=[];
+  var neutral=doc.createElement('style');neutral.textContent='.stage,.stage *{animation:none!important}[data-stack-root]{transform:none!important;opacity:1!important}';doc.head.append(neutral);var diagnostics=[];
   try{rules.forEach(function(raw){var rule=resolve(raw,root);if(!rule||rule.disabled||!rule.anchor)return;
    root.querySelectorAll(rule.selector||'.'+rule.cssClass).forEach(function(el){
     if((rule.excludeTargets||[]).some(function(t){return el.matches(t.selector)&&t.scopes.some(scope=>!scope||scope.split('.').every(s=>root.classList.contains(s)));}))return;
@@ -4802,7 +4808,7 @@
  function matches(c,f){return c.test==='has-text'?f.hasText:c.test==='empty'?!f.hasText:c.test==='shown'?f.shown:c.test==='hidden'?!f.shown:c.test==='lines-at-least'?f.lines>=c.value:c.test==='lines-at-most'?f.lines<=c.value:c.test==='lines-equal'?f.lines===c.value:f.height>=c.value;}
  var conditionalStyle=null;
  function run(root,rules,refit){
-  diagnostics=[];var motionPlans=[];var neutral=doc.createElement('style');neutral.textContent='.stage,.stage *,.stage *::before,.stage *::after{animation:none!important;transition:none!important}';doc.head.append(neutral);
+  diagnostics=[];var motionPlans=[];var neutral=doc.createElement('style');neutral.textContent='.stage,.stage *,.stage *::before,.stage *::after{animation:none!important;transition:none!important}[data-stack-root]{transform:none!important;opacity:1!important}';doc.head.append(neutral);
   var css=[],records=[...rules].sort((a,b)=>Number(b.type==='conditional')-Number(a.type==='conditional')).map(function(rule,index){var ids=rule.members||[rule.targetId];return {rule:rule,index:index,ids:ids,done:false,visiting:false};});
   function diagnostic(rule,id,status){var item={id:rule.id,name:rule.name,targetId:id,size:rule.size,status:status};diagnostics.push(item);return item;}
   function process(record){
@@ -4957,6 +4963,10 @@
           ].forEach(function(key) {
             out[key] = fieldValue(row[key]);
           });
+          ["160x600","300x600","320x50","728x90","970x250"].forEach(function(size) {
+            var inkKey = 'navy_headlines_bool_' + size;
+            out[inkKey] = fieldValue(row[inkKey]);
+          });
           ["heading1_text","heading2_text","heading3_text","heading4_text","tc_units_text"].forEach(function(base) {
             ["160x600","300x250","300x600","320x50","728x90","970x250"].forEach(function(size) {
               var key = base + '_' + size;
@@ -4978,6 +4988,29 @@
             var sized = fieldValue(data[base + '_' + size]);
             if (sized !== '') data[base] = sized;
           });
+          return data;
+        }
+
+        function coerceTriStateInk(value) {
+          if (value === true || value === false) return value;
+          if (value === undefined || value === null) return '';
+          var normalized = String(value).trim().toLowerCase();
+          if (normalized === '') return '';
+          if (normalized === 'true' || normalized === '1' || normalized === 'yes' || normalized === 'on' || normalized === 'navy') return true;
+          if (normalized === 'false' || normalized === '0' || normalized === 'no' || normalized === 'off' || normalized === 'white') return false;
+          return '';
+        }
+
+        function navyHeadlinesForActiveSize(data, size) {
+          var defaultNavy = coerceTriStateInk(data.navy_headlines_bool) === true;
+          if (!size || size === '300x250') return defaultNavy;
+          var override = coerceTriStateInk(data['navy_headlines_bool_' + size]);
+          if (override === '') return defaultNavy;
+          return override === true;
+        }
+
+        function applySizeInkOverride(data, size) {
+          data.navy_headlines_bool = navyHeadlinesForActiveSize(data, size);
           return data;
         }
 
@@ -6896,6 +6929,7 @@
           var data = normalizeProfileRow(row);
           var size = root.getAttribute('data-size') || '';
           applySizeTextOverrides(data, size);
+          applySizeInkOverride(data, size);
           var includeRoundel = booleanValue(data.include_roundel_frame_bool)
             || booleanValue(data.include_roundel_frame);
           root.classList.remove(

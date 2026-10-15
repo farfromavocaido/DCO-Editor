@@ -40,7 +40,7 @@ const CDN_SVG_URLS = [
 const truthyFeedBool = (value: unknown) => value === true
   || ['true', '1', 'yes', 'on'].includes(String(value || '').trim().toLowerCase());
 
-const expectedStatePatternForRow = (row: Record<string, unknown>) => {
+const expectedStatePatternForRow = (row: Record<string, unknown>, size = '300x250') => {
   const parsed = Number.parseInt(String(row.offer_count_num ?? ''), 10);
   const offerCount = Number.isFinite(parsed) ? Math.min(3, Math.max(0, parsed)) : 1;
   const tcScope = row.tc_type_enum !== 'tcs_units' ? 'tc-solo' : 'tc-prices';
@@ -52,8 +52,15 @@ const expectedStatePatternForRow = (row: Record<string, unknown>) => {
   const roundelCopyScope = includeRoundel && String(row.roundel_value_text || '').trim()
     ? 'roundel-split'
     : 'roundel-copy-only';
+  const defaultNavy = truthyFeedBool(row.navy_headlines_bool);
+  const overrideKey = `navy_headlines_bool_${size}`;
+  const overrideRaw = row[overrideKey];
+  const hasOverride = overrideRaw !== undefined && overrideRaw !== null && String(overrideRaw).trim() !== '';
+  const navy = size === '300x250' || !hasOverride
+    ? defaultNavy
+    : truthyFeedBool(overrideRaw);
   const headlineInk = offerCount === 0
-    ? (truthyFeedBool(row.navy_headlines_bool) ? ' navy-headlines' : ' white-headlines')
+    ? (navy ? ' navy-headlines' : ' white-headlines')
     : '';
   return new RegExp(`offers-${offerCount} ${tcScope} ${ctaScope} ${frameScope} ${roundelCopyScope}${headlineInk}`);
 };
@@ -135,6 +142,8 @@ test('exports custom Studio-ready HTML without GWD custom elements', async () =>
   assert.match(html, /Enabler\.exit\('Main Exit'/);
   assert.match(html, /function applyRuntimeState/);
   assert.match(html, /function applySizeTextOverrides/);
+  assert.match(html, /function applySizeInkOverride/);
+  assert.match(html, /function navyHeadlinesForActiveSize/);
   assert.match(html, /function remapStudioRowKeys/);
   assert.match(html, /@keyframes logo-act3-logo-act3-fade/);
   assert.doesNotMatch(html, /<gwd-/);
@@ -291,8 +300,23 @@ test('exports WIP HTML with baked preview row and state classes', async () => {
   const wip = renderWipHtml(html, row);
 
   assert.match(wip, /window\.__SSE_DCO_PREVIEW__/);
-  assert.match(wip, expectedStatePatternForRow(row));
+  assert.match(wip, expectedStatePatternForRow(row, '300x250'));
   assert.match(wip, /single_elec15_solo_roundel/);
+});
+
+test('WIP HTML resolves per-size ink overrides for the baked format', async () => {
+  const document = await readCreativeDocument();
+  const html = await renderStudioReadyHtml(document, '160x600');
+  const row = {
+    ...(document.feed.sampleRows.find((sample) => Number(sample.offer_count_num) === 0) || document.feed.sampleRows[0]),
+    offer_count_num: 0,
+    navy_headlines_bool: true,
+    navy_headlines_bool_160x600: false,
+  };
+  const wip = renderWipHtml(html, row);
+  assert.match(wip, expectedStatePatternForRow(row, '160x600'));
+  assert.match(wip, /id="page-content"[^>]*\bwhite-headlines\b/);
+  assert.doesNotMatch(wip, /id="page-content"[^>]*\bnavy-headlines\b/);
 });
 
 test('builds a client preview package with html variants, assets, and self-contained preview page', async () => {

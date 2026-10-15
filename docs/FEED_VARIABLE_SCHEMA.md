@@ -15,7 +15,9 @@ Each field definition is `{ name, label, type, group, description, ...constraint
 
 `CREATIVE_AD_SIZES` (in `feed-background.ts`) is the canonical size list (`160x600`, `300x250`, `300x600`, `320x50`, `728x90`, `970x250`). Generators that need to vary by size key off it.
 
-**Per-size text overrides:** `sizeTextFieldDefinitions()` in `src/lib/feed-size-text.ts` adds optional multiline columns `heading1_text_{size}` … `heading4_text_{size}` and `tc_units_text_{size}`. Empty override → base field. Live Studio profiles: ROI `10964545` / `SSE_DCO_ROI_Delivery` and NIR `10962603` / `SSE_DCO_NIR_Delivery` (see `src/lib/dco-markets.ts`). Studio `<br>` → `\n` via `normalizeFeedLineBreaks()`. `include_heading4_enum` gates Act 4; `navy_headlines_bool` is local/editor-ready. Agency catalogue: [FEED_FIELD_SCHEMA_PROPOSAL.md](./FEED_FIELD_SCHEMA_PROPOSAL.md).
+**Per-size text overrides:** `sizeTextFieldDefinitions()` in `src/lib/feed-size-text.ts` adds optional multiline columns `heading1_text_{size}` … `heading4_text_{size}` and `tc_units_text_{size}`. Empty override → base field. Live Studio profiles: ROI `10964545` / `SSE_DCO_ROI_Delivery` and NIR `10962603` / `SSE_DCO_NIR_Delivery` (see `src/lib/dco-markets.ts`). Studio `<br>` → `\n` via `normalizeFeedLineBreaks()`. `include_heading4_enum` gates Act 4.
+
+**Per-size ink:** `navy_headlines_bool` is the **300×250 (MPU) default** (offers-0 photo-act white/navy). Optional `navy_headlines_bool_{size}` columns for other sizes (`sizeInkFieldDefinitions()` in `src/lib/feed-size-ink.ts`) use blank → inherit MPU; explicit `true`/`false` overrides. Resolver: `navyHeadlinesForSize()`. Not yet on live Studio profiles. Agency catalogue: [FEED_FIELD_SCHEMA_PROPOSAL.md](./FEED_FIELD_SCHEMA_PROPOSAL.md).
 
 ## Profile
 

@@ -266,6 +266,9 @@ export const STUDIO_DEV_DYNAMIC_FIELD_ORDER = [
   'heading4_text',
   'include_heading4_enum',
   'navy_headlines_bool',
+  ...CREATIVE_AD_SIZES
+    .filter((size) => size !== '300x250')
+    .map((size) => `navy_headlines_bool_${size}`),
   'background_image_label',
   ...CREATIVE_AD_SIZES.map((size) => `background_image_url_${size}`),
   ...['heading1_text', 'heading2_text', 'heading3_text', 'heading4_text', 'tc_units_text']
